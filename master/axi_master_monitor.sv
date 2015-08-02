@@ -10,6 +10,9 @@
 //
 //------------------------------------------------------------------------------
 
+import uvm_pkg::*;
+`include "uvm_macros.svh"
+
 class uvc_company_uvc_name_monitor extends uvm_monitor;
 
 	// This property is the virtual interfaced needed for this component to drive

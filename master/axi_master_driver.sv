@@ -9,6 +9,8 @@
 // CLASS: uvc_company_uvc_name_driver
 //
 //------------------------------------------------------------------------------
+`include "uvm_macros.svh";
+
 
 class uvc_company_uvc_name_driver extends uvm_driver #(uvc_company_uvc_name_item);
 
