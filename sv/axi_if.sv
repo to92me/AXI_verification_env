@@ -39,14 +39,14 @@ interface axi_if (input aclk, input aresetn);
 	// wuser
 	logic						wvalid;
 	logic						wready;
-	
+
 	// write response channel signals
 	logic [ID_WIDTH-1 : 0]		bid;
 	logic [1:0]					bresp;
 	// buser
 	logic						bready;
 	logic						bvalid;
-	
+
 	// read address channel signals
 	logic [ID_WIDTH-1 : 0]		arid;
 	logic [ADDR_WIDTH-1 : 0]	araddr;
@@ -61,7 +61,7 @@ interface axi_if (input aclk, input aresetn);
 	// aruser
 	logic						arvalid;
 	logic						arready;
-	
+
 	// read data channel signals
 	logic [ID_WIDTH-1 : 0]		rid;
 	logic [DATA_WIDTH-1 : 0]	rdata;
