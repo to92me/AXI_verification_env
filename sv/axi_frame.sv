@@ -6,32 +6,68 @@
 
 //------------------------------------------------------------------------------
 //
-// CLASS: uvc_company_uvc_name_item
+// CLASS: axi_frame
 //
 //------------------------------------------------------------------------------
 
-class  uvc_company_uvc_name_item extends uvm_sequence_item;
+class axi_frame extends uvm_sequence_item;
+	
+	//Declare fields
+	rand bit [ADDR_WIDTH-1 : 0]		addr;
+	rand bit [DATA_WIDTH-1 : 0]		data;
+	rand int unsigned			delay;
+	rand axi_direction_enum			dir;
+	rand bit [7:0]				len;
+	rand burst_size_enum			size;
+	rand burst_type_enum			burst_type;
+	rand lock_enum				lock;
+	rand bit [ID_WIDTH-1 : 0]		id;
+	rand bit [3:0]				cache;
+	rand bit [2:0]				prot;
+	rand bit [3:0]				qos;
+	rand bit [3:0]				region;
+	// user
 
-	// This bit should be set when you want all the fields to be
-	// constrained to some default values or ranges at randomization
-	rand bit default_values;
-	
-	// TODO: Declare fields here
-	
-	
-	rand int data;
-	
-	// TODO : it is a good practice to define a c_default_values_*
-	// constraint for each field in which you constrain the field to some
-	// default value or range. You can disable these constraints using
-	// set_constraint_mode() before you call the randomize() function
-	constraint c_default_values_data {
-		data inside {[1:10]};
+	// constraints
+	constraint c_delay {
+		delay <= 50;
 	}
-
+	
+	constraint c_dir {
+		dir inside {AXI_READ, AXI_WRITE};
+	}
+	
+	constraint c_lock {
+		lock inside {NORMAL, EXCLUSIVE};
+	}
+	
+	constraint c_burst_type {
+		burst_type inside {FIXED, INCR, WRAP, Reserved}
+	}
+	
+	constraint c_burst_size {
+		size inside {BYTE_1, BYTE_2, BYTE_4, BYTE_8, BYTE_16, BYTE_32, BYTE_64, BYTE_128}
+	}
+	
 	// UVM utility macros
-	`uvm_object_utils_begin(uvc_company_uvc_name_item) 
+	`uvm_object_utils_begin(axi_frame) 
 		`uvm_field_int(data, UVM_DEFAULT)
+		`uvm_field_int(addr, UVM_DEFAULT)
+		`uvm_field_enum(dir, UVM_DEFAULT)
+		`uvm_field_int(len, UVM_DEFAULT)
+		`uvm_field_enum(size, UVM_DEFAULT)
+		`uvm_field_enum(burst_type, UVM_DEFAULT)
+		`uvm_field_enum(lock, UVM_DEFAULT)
+		`uvm_field_int(id, UVM_DEFAULT)
+		`uvm_field_int(cache, UVM_DEFAULT)
+		`uvm_field_int(prot, UVM_DEFAULT)
+		`uvm_field_int(qos, UVM_DEFAULT)
+		`uvm_field_int(region, UVM_DEFAULT)
+		//`uvm_field_int(user, UVM_DEFAULT)
 	`uvm_object_utils_end
+	
+	function new (string name = "axi_frame");
+		super.new(name);
+	endfunction
 
-endclass :  uvc_company_uvc_name_item
+endclass :  axi_frame
