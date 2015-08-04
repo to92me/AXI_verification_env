@@ -1,6 +1,6 @@
 /******************************************************************************
 	* DVT CODE TEMPLATE: monitor
-	* Created by root on Aug 2, 2015
+	* Created by root on Aug 4, 2015
 	* uvc_company = uvc_company, uvc_name = uvc_name
 *******************************************************************************/
 
@@ -10,13 +10,10 @@
 //
 //------------------------------------------------------------------------------
 
-import uvm_pkg::*;
-`include "uvm_macros.svh"
-
 class uvc_company_uvc_name_monitor extends uvm_monitor;
 
 	// This property is the virtual interfaced needed for this component to drive
-	// and view HDL signals.
+	// and view HDL signals. 
 	protected virtual uvc_company_uvc_name_if vif;
 
 	// Configuration object
@@ -30,14 +27,14 @@ class uvc_company_uvc_name_monitor extends uvm_monitor;
 	uvm_analysis_port #(uvc_company_uvc_name_item) item_collected_port;
 
 	// The following property holds the transaction information currently
-	// begin captured (by the collect_address_phase and data_phase methods).
+	// begin captured (by the collect_address_phase and data_phase methods). 
 	protected uvc_company_uvc_name_item trans_collected;
 
 	// Transfer collected covergroup
 	covergroup cov_trans;
 		option.per_instance = 1;
 		// TODO: Fill this place with relevant cover points
-
+		
 	endgroup : cov_trans
 
 	// Provide implementations of virtual methods such as get_type_name and create

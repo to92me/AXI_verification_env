@@ -1,6 +1,6 @@
 /******************************************************************************
 * DVT CODE TEMPLATE: sequence library
-* Created by root on Aug 2, 2015
+* Created by root on Aug 4, 2015
 * uvc_company = uvc_company, uvc_name = uvc_name
 * uvc_trans = uvc_trans 
 *******************************************************************************/

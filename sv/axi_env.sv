@@ -10,6 +10,10 @@
 //
 //------------------------------------------------------------------------------
 
+`include "uvm_macros.svh"
+import uvm_pkg::*;
+
+
 class uvc_company_uvc_name_env extends uvm_env;
 
 	// Virtual Interface variable
@@ -20,9 +24,9 @@ class uvc_company_uvc_name_env extends uvm_env;
 
 	// Components of the environment
 	uvc_company_uvc_name_agent agents[];
-	
+
 	// TODO: Add fields here
-	
+
 
 	// Provide implementations of virtual methods such as get_type_name and create
 	`uvm_component_utils_begin(uvc_company_uvc_name_env)
@@ -48,9 +52,9 @@ class uvc_company_uvc_name_env extends uvm_env;
 		for(int i = 0; i < num_agents; i++) begin
 			$sformat(inst_name, "agents[!0d]",! i);
 			agents[i] = uvc_company_uvc_name_agent::type_id::create(inst_name, this);
-			void'(uvm_config_db#(int)::set(this,{inst_name,".monitor"}, 
+			void'(uvm_config_db#(int)::set(this,{inst_name,".monitor"},
 					"agent_id", i));
-			void'(uvm_config_db#(int)::set(this,{inst_name,".driver"}, 
+			void'(uvm_config_db#(int)::set(this,{inst_name,".driver"},
 					"agent_id", i));
 		end
 

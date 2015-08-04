@@ -11,9 +11,30 @@
 //
 //-------------------------------------------------------------------------
 
+
 interface ovc_company_ovc_name_ovc_if (interface_args);
 
-	// TODO: Define the interface signals here
-	
+
+	parameter ADDR_WIDTH = 32;
+
+	// WRITE SIGNALS
+
+	//address write signals
+	logic [ADDR_WIDTH-1 : 0]	awaddr;
+	logic [7:0]					awlen;
+	logic [2:0]					awburst;
+	logic [1:0]					awlock;
+	logic [3:0]					awcache;
+	logic [2:0] 				awprot;
+	logic [4:0]					awqos;
+	// awregion
+	// awuser
+    logic 						awvalid;
+	logic 						awready;
+
+	//data write signals
+	logic
+
+
 
 endinterface : ovc_company_ovc_name_ovc_if
