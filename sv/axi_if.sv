@@ -15,7 +15,7 @@
 interface ovc_company_ovc_name_ovc_if (interface_args);
 
 
-	parameter ADDR_WIDTH = 32;
+
 
 	// WRITE SIGNALS
 
