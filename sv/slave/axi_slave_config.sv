@@ -9,9 +9,7 @@
 // CLASS: axi_slave_config
 //
 //------------------------------------------------------------------------------
-import uvm_pkg::*;
-`include "uvm_macros.svh"
-`include "sv/axi_types.sv"
+
 
 
 enum {
@@ -57,7 +55,7 @@ class axi_slave_config extends uvm_object;
 		}
 
 		constraint active_cst{
-			active_cst dist{
+			is_active dist{
 				UVM_ACTIVE := 9,
 				UVM_PASSIVE := 1
 			};
@@ -90,9 +88,9 @@ class slave_config_factory extends uvm_object;
 
 	`uvm_object_utils_begin(slave_config_factory)
 	 `uvm_field_int(number_of_slaves, UVM_DEFAULT)
-	 `uvm_field_int(address_points, UVM_DEFAULT)
+	 `uvm_field_array_int(address_points, UVM_ALL_ON)
 	 `uvm_field_object(slave, UVM_DEFAULT)
-	`uvm_object_utils_end
+ `uvm_object_utils_end
 
 	constraint number_of_slaves_csr{
 		address_points.size() inside{[5:20]};
@@ -106,7 +104,7 @@ class slave_config_factory extends uvm_object;
 		super.new(name);
  	endfunction: new
 
- 	extern function void createSlaves(ref axi_slave_config save_list[$], input int numberOfSlaves = number_of_slaves );
+ 	extern function void createSlaves(ref axi_slave_config slave_list[$], input int numberOfSlaves = number_of_slaves );
 
 
 
@@ -124,6 +122,7 @@ endclass : slave_config_factory
 			  slave.start_address = address_points[i];
 			  slave.end_address = address_points[i+1];
 			  slave_list.push_front(slave);
+
 		  end
 
 

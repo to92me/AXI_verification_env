@@ -11,27 +11,30 @@
 //------------------------------------------------------------------------------
 
 
-class uvc_company_uvc_name_monitor extends uvm_monitor;
+class axi_master_write_monitor extends uvm_monitor;
 
 	// This property is the virtual interfaced needed for this component to drive
 	// and view HDL signals.
-	protected virtual uvc_company_uvc_name_if vif;
+	protected virtual axi_if vif;
 
 	// Configuration object
-	uvc_company_uvc_name_config_obj config_obj;
+	axi_master_config config_obj;
 
 	// The following two bits are used to control whether checks and coverage are
 	// done both in the monitor class and the interface.
 	bit checks_enable = 1;
 	bit coverage_enable = 1;
 
-	uvm_analysis_port #(uvc_company_uvc_name_item) item_collected_port;
+	// TODO definisati sta monitor salje
+	//uvm_analysis_port #(uvc_company_uvc_name_item) item_collected_port;
 
 	// The following property holds the transaction information currently
 	// begin captured (by the collect_address_phase and data_phase methods).
-	protected uvc_company_uvc_name_item trans_collected;
+	//	protected  trans_collected;
 
 	// Transfer collected covergroup
+
+
 	covergroup cov_trans;
 		option.per_instance = 1;
 		// TODO: Fill this place with relevant cover points
@@ -39,7 +42,7 @@ class uvc_company_uvc_name_monitor extends uvm_monitor;
 	endgroup : cov_trans
 
 	// Provide implementations of virtual methods such as get_type_name and create
-	`uvm_component_utils_begin(uvc_company_uvc_name_monitor)
+	`uvm_component_utils_begin(axi_master_write_monitor)
 		`uvm_field_int(checks_enable, UVM_DEFAULT)
 		`uvm_field_int(coverage_enable, UVM_DEFAULT)
 	`uvm_component_utils_end
