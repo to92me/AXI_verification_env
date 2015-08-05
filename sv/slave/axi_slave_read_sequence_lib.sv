@@ -1,34 +1,37 @@
 /******************************************************************************
 * DVT CODE TEMPLATE: sequence library
 * Created by root on Aug 4, 2015
-* uvc_company = uvc_company, uvc_name = uvc_name
-* uvc_trans = uvc_trans 
+* uvc_company = uvc_company, axi_slave_read = axi_slave_read
+* uvc_trans = uvc_trans
 *******************************************************************************/
 
 //------------------------------------------------------------------------------
 //
-// CLASS: uvc_company_uvc_name_base_seq
+// CLASS: uvc_company_axi_slave_read_base_seq
 //
 //------------------------------------------------------------------------------
 // This sequence raises/drops objections in the pre/post_body so that root
 // sequences raise objections but subsequences do not.
-virtual class uvc_name_base_sequence extends uvm_sequence #(uvc_trans);
+virtual class axi_slave_read_base_sequence extends uvm_sequence #(axi_frame);
 
-	// TODO: Add fields here
-	
+	axi_frame req;
+	axi_frame util_transfer;
+
+	`uvm_object_utils(axi_slave_read_base_sequence)
+	`uvm_declare_p_sequencer(axi_slave_read_sequncer)
 
 	// new - constructor
-	function new(string name="uvc_name_base_seq");
+	function new(string name="axi_slave_read_base_seq");
 		super.new(name);
 	endfunction
 
 	// Raise in pre_body so the objection is only raised for root sequences.
 	// There is no need to raise for sub-sequences since the root sequence
-	// will encapsulate the sub-sequence. 
+	// will encapsulate the sub-sequence.
 	virtual task pre_body();
 		if (starting_phase!=null) begin
 			`uvm_info(get_type_name(),
-				$sformatf("!s! pre_body() raising !s! objection", 
+				$sformatf("!s! pre_body() raising !s! objection",
 					get_sequence_path(),
 					starting_phase.get_name()), UVM_MEDIUM);
 			starting_phase.raise_objection(this);
@@ -36,39 +39,41 @@ virtual class uvc_name_base_sequence extends uvm_sequence #(uvc_trans);
 	endtask
 
 	// Drop the objection in the post_body so the objection is removed when
-	// the root sequence is complete. 
+	// the root sequence is complete.
 	virtual task post_body();
 		if (starting_phase!=null) begin
 			`uvm_info(get_type_name(),
-				$sformatf("!s! post_body() dropping !s! objection", 
+				$sformatf("!s! post_body() dropping !s! objection",
 					get_sequence_path(),
 					starting_phase.get_name()), UVM_MEDIUM);
 			starting_phase.drop_objection(this);
 		end
 	endtask
 
-endclass : uvc_name_base_sequence
+endclass : axi_slave_read_base_sequence
 
 //------------------------------------------------------------------------------
 //
-// SEQUENCE: uvc_name_transfer_seq
+// SEQUENCE: axi_slave_read_transfer_seq
 //
 //------------------------------------------------------------------------------
-class uvc_name_transfer_seq extends uvc_name_base_sequence;
-	
-	// Add local random fields and constraints here
-		
-	`uvm_object_utils(uvc_name_transfer_seq)
-	
+class axi_slave_read_transfer_seq extends axi_slave_read_base_sequence;
+
+	`uvm_object_utils(axi_slave_read_transfer_seq)
+
 	// new - constructor
-	function new(string name="uvc_name_transfer_seq");
+	function new(string name="axi_slave_read_transfer_seq");
 		super.new(name);
 	endfunction
 
 	virtual task body();
-		`uvm_do_with(req, 
-			{ /* TODO : add constraints here*/ } )
-		get_response(rsp);
+		forever	begin
+			p_sequencer.addr_trans_port.peek(util_transfer);
+			if(p_sequencer.config_obj.check_addr_range(util_transfer.addr)) begin
+				`uvm_do_with(reg, {req.dir == AXI_READ; req.id == util_transfer.id;})
+				get_response(rsp);
+			end
+		end
 	endtask
 
-endclass : uvc_name_transfer_seq
+endclass : axi_slave_read_transfer_seq
