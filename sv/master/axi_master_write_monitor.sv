@@ -26,7 +26,13 @@ class axi_master_write_monitor extends uvm_monitor;
 	bit coverage_enable = 1;
 
 	// TODO definisati sta monitor salje
+	axi_frame frame;
+	axi_single_frame sigle_frame;
+
 	//uvm_analysis_port #(uvc_company_uvc_name_item) item_collected_port;
+
+	uvm_analysis_port#(axi_frame) axi_frame_collected_port;
+	uvm_analysis_port#(axi_single_frame) axi_signle_frame_collected_port;
 
 	// The following property holds the transaction information currently
 	// begin captured (by the collect_address_phase and data_phase methods).
@@ -35,10 +41,11 @@ class axi_master_write_monitor extends uvm_monitor;
 	// Transfer collected covergroup
 
 
-	covergroup cov_trans;
-		option.per_instance = 1;
-		// TODO: Fill this place with relevant cover points
 
+	covergroup cov_trans;
+		FRAME_LOCK : coverpoint frame.lock{
+			bins LOCK =
+		}
 	endgroup : cov_trans
 
 	// Provide implementations of virtual methods such as get_type_name and create
