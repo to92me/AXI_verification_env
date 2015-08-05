@@ -10,32 +10,36 @@
 //
 //------------------------------------------------------------------------------
 
-class uvc_company_uvc_name_monitor extends uvm_monitor;
+class axi_slave_write_monitor extends uvm_monitor;
 
 	// This property is the virtual interfaced needed for this component to drive
-	// and view HDL signals. 
-	protected virtual uvc_company_uvc_name_if vif;
+	// and view HDL signals.
+	protected virtual axi_if vif;
 
 	// Configuration object
-	uvc_company_uvc_name_config_obj config_obj;
+	axi_slave_config config_obj;
 
-	// The following two bits are used to control whether checks and coverage are
-	// done both in the monitor class and the interface.
 	bit checks_enable = 1;
 	bit coverage_enable = 1;
 
-	uvm_analysis_port #(uvc_company_uvc_name_item) item_collected_port;
+	protected axi_frame trans_collected;
 
-	// The following property holds the transaction information currently
-	// begin captured (by the collect_address_phase and data_phase methods). 
-	protected uvc_company_uvc_name_item trans_collected;
+	uvm_analysis_port#(axi_frame) item_collected_port;
+
+	uvm_blocking_peek_imp#(axi_frame, axi_slave_write_monitor) addr_trans_export;
+
+
 
 	// Transfer collected covergroup
+
 	covergroup cov_trans;
 		option.per_instance = 1;
 		// TODO: Fill this place with relevant cover points
-		
+
 	endgroup : cov_trans
+
+
+
 
 	// Provide implementations of virtual methods such as get_type_name and create
 	`uvm_component_utils_begin(uvc_company_uvc_name_monitor)
@@ -55,10 +59,10 @@ class uvc_company_uvc_name_monitor extends uvm_monitor;
 	// build_phase
 	function void build_phase(uvm_phase phase);
 		super.build_phase(phase);
-		if(!uvm_config_db#(virtual uvc_company_uvc_name_if)::get(this, "", "vif", vif))
+		if(!uvm_config_db#(virtual axi_if)::get(this, "", "vif", vif))
 			`uvm_fatal("NOVIF",{"virtual interface must be set for: ",get_full_name(),".vif"});
 		// Propagate the configuration object
-		if(!uvm_config_db#(uvc_company_uvc_name_config_obj)::get(this, "", "config_obj", config_obj))
+		if(!uvm_config_db#(axi_slave_config)::get(this, "", "config_obj", config_obj))
 			`uvm_fatal("NOCONFIG",{"Config object must be set for: ",get_full_name(),".config_obj"})
 	endfunction: build_phase
 

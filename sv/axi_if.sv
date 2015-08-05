@@ -12,7 +12,7 @@
 //-------------------------------------------------------------------------
 
 
-interface axi_if (input aclk, input aresetn);
+interface axi_if (input sig_reset, input sig_clock);
 
 	parameter STRB_WIDTH = DATA_WIDTH / 8;
 
