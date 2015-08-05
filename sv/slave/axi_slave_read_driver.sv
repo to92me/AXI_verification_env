@@ -6,20 +6,20 @@
 
 //------------------------------------------------------------------------------
 //
-// CLASS: uvc_company_uvc_name_driver
+// CLASS: axi_slave_read_driver
 //
 //------------------------------------------------------------------------------
 
-class uvc_company_uvc_name_driver extends uvm_driver #(uvc_company_uvc_name_item);
+class axi_slave_read_driver extends uvm_driver #(axi_frame);
 
 	// The virtual interface used to drive and view HDL signals.
-	protected virtual uvc_company_uvc_name_if vif;
+	protected virtual axi_if vif;
 
 	// Configuration object
-	uvc_company_uvc_name_config_obj config_obj;
+	axi_slave_config config_obj;
 
 	// Provide implmentations of virtual methods such as get_type_name and create
-	`uvm_component_utils(uvc_company_uvc_name_driver)
+	`uvm_component_utils(axi_slave_read_driver)
 
 	// new - constructor
 	function new (string name, uvm_component parent);
@@ -30,10 +30,10 @@ class uvc_company_uvc_name_driver extends uvm_driver #(uvc_company_uvc_name_item
 	function void build_phase(uvm_phase phase);
 		super.build_phase(phase);
 		// Propagate the interface
-		if(!uvm_config_db#(virtual uvc_company_uvc_name_if)::get(this, "", "vif", vif))
+		if(!uvm_config_db#(virtual axi_if)::get(this, "", "vif", vif))
 			`uvm_fatal("NOVIF",{"virtual interface must be set for: ",get_full_name(),".vif"})
 			// Propagate the configuration object
-			if(!uvm_config_db#(uvc_company_uvc_name_config_obj)::get(this, "", "config_obj", config_obj))
+			if(!uvm_config_db#(axi_slave_config)::get(this, "", "config_obj", config_obj))
 				`uvm_fatal("NOCONFIG",{"Config object must be set for: ",get_full_name(),".config_obj"})
 	endfunction: build_phase
 
@@ -48,7 +48,7 @@ class uvc_company_uvc_name_driver extends uvm_driver #(uvc_company_uvc_name_item
 		get_and_drive();
 	endtask : run_phase
 
-	// get_and_drive 
+	// get_and_drive
 	virtual protected task get_and_drive();
 		process main; // used by the reset handling mechanism
 		forever begin
@@ -81,14 +81,24 @@ class uvc_company_uvc_name_driver extends uvm_driver #(uvc_company_uvc_name_item
 			// TODO : If the current transaction was interrupted by a reset you
 			// should also set a field in the rsp item to indicate this to the
 			// sequence
-			
+
 			seq_item_port.put_response(rsp);
 		end
 	endtask : get_and_drive
 
 	// reset_signals
 	virtual protected task reset_signals();
-		// TODO : Reset the signals to their default values
+		forever begin
+			@(negedge vif.sig_reset)
+			`uvm_info(get_type_name(), "Reset signals", UVM_MEDIUM)
+			vif.rid <= {`ID_WIDTH {1'b0}};
+			vif.rdata <= {`DATA_WIDTH {1'bz}};
+			vif.rresp <= 2'b00;
+			vif.rlast <= 1'b0;
+			//vif.ruser
+			vif.rvalid <= 1'b0;
+			vif.arready <= 1'b1;
+		end
 	endtask : reset_signals
 
 	// reset_driver
@@ -97,8 +107,9 @@ class uvc_company_uvc_name_driver extends uvm_driver #(uvc_company_uvc_name_item
 	endtask : reset_driver
 
 	// drive_transfer
-	virtual protected task drive_transfer (uvc_company_uvc_name_item trans);
+	virtual protected task drive_transfer (axi_frame trans);
 		// TODO : Drive the transfer
+		
 	endtask : drive_transfer
 
-endclass : uvc_company_uvc_name_driver
+endclass : axi_slave_read_driver

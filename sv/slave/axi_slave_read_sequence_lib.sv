@@ -70,7 +70,18 @@ class axi_slave_read_transfer_seq extends axi_slave_read_base_sequence;
 		forever	begin
 			p_sequencer.addr_trans_port.peek(util_transfer);
 			if(p_sequencer.config_obj.check_addr_range(util_transfer.addr)) begin
-				`uvm_do_with(reg, {req.dir == AXI_READ; req.id == util_transfer.id;})
+				`uvm_do_with(reg,
+					{ req.addr = util_transfer.addr;
+						req.id == util_transfer.id;
+						req.burst_type == util_transfer.burst_type;
+						req.cache == util_transfer.cache;
+						req.len == util_transfer.len;
+						req.size == util_transfer.size;
+						req.lock == util_transfer.lock;
+						req.qos == util_transfer.qos;
+						req.prot == util_transfer.prot;
+						req.region == util_transfer.region;
+						})
 				get_response(rsp);
 			end
 		end
