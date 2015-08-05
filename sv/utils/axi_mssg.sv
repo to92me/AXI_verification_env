@@ -10,12 +10,17 @@
 //
 //------------------------------------------------------------------------------
 
-class axi_master_write_arbitration;
+class axi_mssg ;
 
-	axi_master_write_arbitration_burst burst_queue[$];
-	axi_master_write_arbitration_burst single_burst;
-	axi_master_write_arbitration_burst next_frame_for_sending;
+	bit[ADDR_WIDTH-1 : 0] data;
+	axi_mssg_enum state;
+
+endclass : axi_mssg
 
 
+class axi_data ;
 
-endclass : axi_master_write_arbitration
+	bit[ADDR_WIDTH-1 : 0] data;
+	bit[2:0] delay;
+
+endclass : axi_data

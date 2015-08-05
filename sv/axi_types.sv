@@ -45,4 +45,9 @@ typedef enum {
 	AXI_WRITE = 1
 } axi_direction_enum;
 
+typedef enum {
+	READY = 0,
+	NOT_READY = 1
+}axi_mssg_enum;
+
 `endif

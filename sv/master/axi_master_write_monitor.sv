@@ -27,7 +27,7 @@ class axi_master_write_monitor extends uvm_monitor;
 
 	// TODO definisati sta monitor salje
 	axi_frame frame;
-	axi_single_frame sigle_frame;
+	axi_single_frame single_frame;
 
 	//uvm_analysis_port #(uvc_company_uvc_name_item) item_collected_port;
 
@@ -44,7 +44,12 @@ class axi_master_write_monitor extends uvm_monitor;
 
 	covergroup cov_trans;
 		FRAME_LOCK : coverpoint frame.lock{
-			bins LOCK =
+			bins NORMAL = {lock_enum::NORMAL};
+			bins EXCLUSIVE = {lock_enum::EXCLUSIVE};
+		}
+
+		FRAME_ADDRESS : coverpoint frame.addr{
+			bins ADDRESS = default;
 		}
 	endgroup : cov_trans
 
@@ -59,17 +64,19 @@ class axi_master_write_monitor extends uvm_monitor;
 		super.new(name, parent);
 		cov_trans = new();
 		cov_trans.set_inst_name({get_full_name(), ".cov_trans"});
-		trans_collected = new();
-		item_collected_port = new("item_collected_port", this);
+		frame = new();
+		single_frame = new();
+		axi_frame_collected_port = new("axi_frame_collected_port", this);
+		axi_signle_frame_collected_port = new("axi_signle_frame_collected_port", this);
 	endfunction : new
 
 	// build_phase
 	function void build_phase(uvm_phase phase);
 		super.build_phase(phase);
-		if(!uvm_config_db#(virtual uvc_company_uvc_name_if)::get(this, "", "vif", vif))
+		if(!uvm_config_db#(virtual axi_if)::get(this, "", "vif", vif))
 			`uvm_fatal("NOVIF",{"virtual interface must be set for: ",get_full_name(),".vif"});
 		// Propagate the configuration object
-		if(!uvm_config_db#(uvc_company_uvc_name_config_obj)::get(this, "", "config_obj", config_obj))
+		if(!uvm_config_db#(axi_config)::get(this, "", "config_obj", config_obj))
 			`uvm_fatal("NOCONFIG",{"Config object must be set for: ",get_full_name(),".config_obj"})
 	endfunction: build_phase
 

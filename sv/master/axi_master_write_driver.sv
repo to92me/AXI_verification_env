@@ -17,7 +17,7 @@ class axi_master_write_driver extends uvm_driver #(axi_frame);
 	protected virtual axi_if vif;
 
 	// Configuration object
-	axi_master_config config_obj;
+	axi_config config_obj;
 
 	// Provide implmentations of virtual methods such as get_type_name and create
 	`uvm_component_utils_begin(axi_master_write_driver)
@@ -36,7 +36,7 @@ class axi_master_write_driver extends uvm_driver #(axi_frame);
 		if(!uvm_config_db#(virtual axi_if)::get(this, "", "vif", vif))
 			`uvm_fatal("NOVIF",{"virtual interface must be set for: ",get_full_name(),".vif"})
 			// Propagate the configuration object
-			if(!uvm_config_db#(axi_master_config)::get(this, "", "master_config_obj", config_obj))
+			if(!uvm_config_db#(axi_config)::get(this, "", "master_config_obj", config_obj))
 				`uvm_fatal("NOCONFIG",{"Config object must be set for: ",get_full_name(),".config_obj"})
 	endfunction: build_phase
 
