@@ -6,23 +6,26 @@
 
 //------------------------------------------------------------------------------
 //
-// CLASS: uvc_company_uvc_name_sequencer
+// CLASS: axi_slave_read_sequencer
 //
 //------------------------------------------------------------------------------
 
-class uvc_company_uvc_name_sequencer extends uvm_sequencer #(uvc_name_transfer);
+class axi_slave_read_sequencer extends uvm_sequencer #(axi_frame);
 
 	// Configuration object
-	uvc_company_uvc_name_config_obj config_obj;
+	axi_slave_config config_obj;
+
+	// peek at monitor
+	uvm_blocking_peek_port#(axi_frame) addr_trans_port;
 
 	// Reset TLM FIFO(since this is a transaction level component the
 	// reset should be fetched via a TLM analysis FIFO)
 	tlm_analysis_fifo#(bit) reset_port;
-	
-	// TODO: The reset event can also be fetched in other ways
-	
 
-	`uvm_component_utils(uvc_name_sequencer)
+	// register
+	`uvm_object_utils_begin(axi_slave_read_sequencer)
+		`uvm_field_object(config_obj, UVM_DEFAULT)
+	`uvm_component_utils_end
 
 	// build_phase
 	function void build_phase(uvm_phase phase);
@@ -64,6 +67,7 @@ class uvc_company_uvc_name_sequencer extends uvm_sequencer #(uvc_name_transfer);
 	// new - constructor
 	function new (string name, uvm_component parent);
 		super.new(name, parent);
+		addr_trans_port = new("addr_trans_port", this);
 	endfunction : new
 
-endclass : uvc_company_uvc_name_sequencer
+endclass : axi_slave_read_sequencer

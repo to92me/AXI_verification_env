@@ -55,6 +55,11 @@ class axi_slave_config extends uvm_object;
 		super.new(name);
 	endfunction: new
 
+	// is the address in the defined range
+	function bit check_addr_range(int unsigned addr);
+		return (!((addr < start_address) || (addr > end_address)));
+	end function
+
 endclass : axi_slave_config
 
 //------------------------------------------------------------------------------
