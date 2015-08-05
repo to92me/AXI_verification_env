@@ -91,8 +91,8 @@ class axi_slave_read_driver extends uvm_driver #(axi_frame);
 		forever begin
 			@(negedge vif.sig_reset)
 			`uvm_info(get_type_name(), "Reset signals", UVM_MEDIUM)
-			vif.rid <= {`ID_WIDTH {1'b0}};
-			vif.rdata <= {`DATA_WIDTH {1'bz}};
+			vif.rid <= {ID_WIDTH {1'b0}};
+			vif.rdata <= {DATA_WIDTH {1'bz}};
 			vif.rresp <= 2'b00;
 			vif.rlast <= 1'b0;
 			//vif.ruser
@@ -109,7 +109,7 @@ class axi_slave_read_driver extends uvm_driver #(axi_frame);
 	// drive_transfer
 	virtual protected task drive_transfer (axi_frame trans);
 		// TODO : Drive the transfer
-		
+
 	endtask : drive_transfer
 
 endclass : axi_slave_read_driver
