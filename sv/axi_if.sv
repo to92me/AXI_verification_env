@@ -12,7 +12,7 @@
 //-------------------------------------------------------------------------
 
 
-interface axi_if (input aclk, input aresetn);
+interface axi_if (input sig_reset, input sig_clock);
 
 	parameter STRB_WIDTH = DATA_WIDTH / 8;
 
@@ -26,7 +26,7 @@ interface axi_if (input aclk, input aresetn);
 	logic [3:0]					awcache;
 	logic [2:0] 				awprot;
 	logic [3:0]					awqos;
-	logic [3:0]					awregion
+	logic [3:0]					awregion;
 	// awuser
     logic 						awvalid;
 	logic 						awready;
@@ -57,7 +57,7 @@ interface axi_if (input aclk, input aresetn);
 	logic [3:0]					arcache;
 	logic [2:0]					arprot;
 	logic [3:0]					arqos;
-	logic [3:0]					arregion
+	logic [3:0]					arregion;
 	// aruser
 	logic						arvalid;
 	logic						arready;

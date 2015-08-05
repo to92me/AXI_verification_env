@@ -11,16 +11,18 @@
 //------------------------------------------------------------------------------
 
 
-class uvc_company_uvc_name_driver extends uvm_driver #(uvc_company_uvc_name_item);
+class axi_master_write_driver extends uvm_driver #(axi_frame);
 
 	// The virtual interface used to drive and view HDL signals.
-	protected virtual uvc_company_uvc_name_if vif;
+	protected virtual axi_if vif;
 
 	// Configuration object
-	uvc_company_uvc_name_config_obj config_obj;
+	axi_master_config config_obj;
 
 	// Provide implmentations of virtual methods such as get_type_name and create
-	`uvm_component_utils(uvc_company_uvc_name_driver)
+	`uvm_component_utils_begin(axi_master_write_driver)
+	 `uvm_field_object(config_obj, UVM_DEFAULT)
+ 	`uvm_component_utils_end
 
 	// new - constructor
 	function new (string name, uvm_component parent);
@@ -31,10 +33,10 @@ class uvc_company_uvc_name_driver extends uvm_driver #(uvc_company_uvc_name_item
 	function void build_phase(uvm_phase phase);
 		super.build_phase(phase);
 		// Propagate the interface
-		if(!uvm_config_db#(virtual uvc_company_uvc_name_if)::get(this, "", "vif", vif))
+		if(!uvm_config_db#(virtual axi_if)::get(this, "", "vif", vif))
 			`uvm_fatal("NOVIF",{"virtual interface must be set for: ",get_full_name(),".vif"})
 			// Propagate the configuration object
-			if(!uvm_config_db#(uvc_company_uvc_name_config_obj)::get(this, "", "config_obj", config_obj))
+			if(!uvm_config_db#(axi_master_config)::get(this, "", "master_config_obj", config_obj))
 				`uvm_fatal("NOCONFIG",{"Config object must be set for: ",get_full_name(),".config_obj"})
 	endfunction: build_phase
 
@@ -90,6 +92,16 @@ class uvc_company_uvc_name_driver extends uvm_driver #(uvc_company_uvc_name_item
 	// reset_signals
 	virtual protected task reset_signals();
 		// TODO : Reset the signals to their default values
+		vif.awaddr = 0;
+		vif.awid = 0;
+		vif.awcache = 0;
+		vif.awburst = 0;
+		vif.awlen = 0;
+		vif.awlock = 0;
+		vif.awprot = 0;
+		vif.awqos = 0;
+		vif.awvalid = 0;
+		vif.wready = 0;
 	endtask : reset_signals
 
 	// reset_driver
@@ -98,8 +110,8 @@ class uvc_company_uvc_name_driver extends uvm_driver #(uvc_company_uvc_name_item
 	endtask : reset_driver
 
 	// drive_transfer
-	virtual protected task drive_transfer (uvc_company_uvc_name_item trans);
-		// TODO : Drive the transfer
+	virtual protected task drive_transfer (axi_frame frame);
+
 	endtask : drive_transfer
 
 endclass : uvc_company_uvc_name_driver
