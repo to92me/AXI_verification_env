@@ -84,7 +84,7 @@ class slave_config_factory extends uvm_object;
 		super.new(name);
  	endfunction: new
 
- 	extern function void createSlaves(ref axi_slave_config save_list[numberOfSlaves], input int numberOfSlaves );
+ 	extern function void createSlaves(ref axi_slave_config save_list[$], input int numberOfSlaves = number_of_slaves );
  	extern function bit[ADDR_WIDTH - 1 : 0] createMaxSlaveAddress(input int numberOfSlaves);
 
 
@@ -112,8 +112,9 @@ endclass : slave_config_factory;
 		    begin
 			    slave = axi_slave_config::type_id::create("slave");
 			    creater.fill_constraints(memory_space_queue, maximal_slave_address, minimal_slave_address);
+			    assert(creater.randomize);
 			    creater.create_unique_slave(slave);
-
+			    slave.do_print();
 			    memory_space_queue.push_front(slave.start_address);
 			    memory_space_queue.push_back(slave.end_address);
 
@@ -140,6 +141,7 @@ endclass : slave_config_factory;
 		rand bit[ADDR_WIDTH-1 : 0] slave_address_space;
 		rand uvm_active_passive_enum is_active_create = UVM_ACTIVE;
 		rand lock_enum lock_create;
+		int i = 0
 
 //		axi_slave_config unique_slave;
 
@@ -157,10 +159,15 @@ endclass : slave_config_factory;
 		constraint address_size { (start_address_create + slave_address_space) inside {[minimal_slave_address_space : maximal_slave_address_space]}; }
 		// start and stop address must be inisde
 		constraint address_position {
-				for(int i = 0; i < memory_space.size()-1 ; i+2) begin
-					start_address_create inside{[memory_space[i] : memory_space[i+1]};
-					start_address_create + slave_address_space < memory_space[i+1];
-					end;
+//				for(int i = 0; i < memory_space.size()-1 ; i+2) begin
+//					start_address_create inside{[memory_space[i] : memory_space[i+1]};
+//					start_address_create + slave_address_space < memory_space[i+1];
+//				end;
+
+				foreach(memory_space[i])
+					begin
+					end
+
 		}
 
 		constraint lock_cst{
