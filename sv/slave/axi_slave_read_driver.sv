@@ -50,7 +50,7 @@ class axi_slave_read_driver extends uvm_driver #(axi_frame);
 
 	// get_and_drive
 	virtual protected task get_and_drive();
-		process main; // used by the reset handling mechanism
+		/*process main; // used by the reset handling mechanism
 		forever begin
 			// Don't continue with the driving if reset is not high
 			do
@@ -83,9 +83,48 @@ class axi_slave_read_driver extends uvm_driver #(axi_frame);
 			// sequence
 
 			seq_item_port.put_response(rsp);
-		end
+		end*/
+		fork
+			get_from_seq();
+			reset();
+			get_next_item();
+			drive_next_item();
+		join
 	endtask : get_and_drive
+	
+	virtual protected task get_from_seq();
+		forever begin
+			seq_item_port.get_next_item(req);
+			$cast(rsp, req.clone());
+			rsp.set_id_info(req);
+			// TODO: send to arbitration
+			seq_item_port.item_done();
+			seq_item_port.put_response(rsp);
+		end
+	end task : get_from_seq
 
+	virtual protected task reset();
+		forever begin
+			@(negedge vif.sig_reset)
+			`uvm_info(get_type_name(), "Reset", UVM_MEDIUM)
+
+			// reset signals
+			vif.rid <= {ID_WIDTH {1'b0}};
+			vif.rdata <= {DATA_WIDTH {1'bz}};
+			vif.rresp <= 2'b00;
+			vif.rlast <= 1'b0;
+			//vif.ruser
+			vif.rvalid <= 1'b0;
+			vif.arready <= 1'b1;
+
+			// TODO: reset queues
+			
+			// TODO: reset sequence
+
+		end
+	endtask : reset
+
+/*
 	// reset_signals
 	virtual protected task reset_signals();
 		forever begin
@@ -111,5 +150,5 @@ class axi_slave_read_driver extends uvm_driver #(axi_frame);
 		// TODO : Drive the transfer
 
 	endtask : drive_transfer
-
+*/
 endclass : axi_slave_read_driver
