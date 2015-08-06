@@ -10,7 +10,7 @@
 //
 //------------------------------------------------------------------------------
 
-class axi_master_write_arbitration_burst;
+class axi_master_write_scheduler_packages;
 
 	axi_data data_queue[$];
 	axi_data one_frame;
@@ -25,11 +25,11 @@ class axi_master_write_arbitration_burst;
 	extern function void axi_decrement_delay();
 
 
-endclass : axi_master_write_arbitration_burst
+endclass : axi_master_write_scheduler_packages
 
 
 
-function axi_mssg axi_master_write_arbitration_burst::getNextSingleFrame();
+function axi_mssg axi_master_write_scheduler_packages::getNextSingleFrame();
 	mssg = new();
 	one_frame = data_queue.pop_front;
 	if (one_frame.delay == 0)
@@ -45,7 +45,7 @@ function axi_mssg axi_master_write_arbitration_burst::getNextSingleFrame();
 endfunction
 
 
-function axi_master_write_arbitration_burst::axi_decrement_delay();
+function axi_master_write_scheduler_packages::axi_decrement_delay();
 	one_frame = data_queue.pop_front;
 	if (one_frame.delay != 0)
 		one_frame.delay--;

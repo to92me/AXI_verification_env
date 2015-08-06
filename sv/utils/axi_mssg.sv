@@ -10,6 +10,7 @@
 //
 //------------------------------------------------------------------------------
 
+// axi mssg is for sending data to scheduler if package is ready or not
 class axi_mssg ;
 
 	bit[ADDR_WIDTH-1 : 0] data;
@@ -18,6 +19,7 @@ class axi_mssg ;
 endclass : axi_mssg
 
 
+// axi data represents one data and his delay that contains axi_scheduler_package
 class axi_data ;
 
 	bit[ADDR_WIDTH-1 : 0] data;
