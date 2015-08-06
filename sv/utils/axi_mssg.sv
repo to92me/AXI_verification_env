@@ -22,5 +22,6 @@ class axi_data ;
 
 	bit[ADDR_WIDTH-1 : 0] data;
 	bit[2:0] delay;
+	bit [ID_WIDTH-1 : 0] id;
 
 endclass : axi_data
