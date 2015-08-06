@@ -10,12 +10,19 @@
 //
 //------------------------------------------------------------------------------
 
-class axi_master_write_arbitration;
+class axi_master_write_scheduler extends uvm_object;
 
-	axi_master_write_arbitration_burst burst_queue[$];
-	axi_master_write_arbitration_burst single_burst;
-	axi_master_write_arbitration_burst next_frame_for_sending;
+	axi_master_write_scheduler_packages burst_queue[$];
+	axi_master_write_scheduler_packages single_burst;
+	axi_master_write_scheduler_packages next_frame_for_sending;
+
+	rand axi_data rand_data;
+	virtual interface axi_if vif;
+
+	extern function void addBurst(input axi_frame);
+	extern function void buld();
+	extern function axi_data getNexPackageForDriveingVif();
+	extern function axi_
 
 
-
-endclass : axi_master_write_arbitration
+endclass : axi_master_write_scheduler
