@@ -47,7 +47,8 @@ typedef enum {
 
 typedef enum {
 	READY = 0,
-	NOT_READY = 1
+	NOT_READY = 1,
+	QUEUE_EMPTY = 2
 }axi_mssg_enum;
 
 `endif

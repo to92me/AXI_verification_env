@@ -12,9 +12,10 @@
 
 class axi_master_write_scheduler_packages;
 
-	axi_data data_queue[$];
-	axi_data one_frame;
+	axi_single_frame data_queue[$]; // MENJAO
+	axi_single_frame one_frame;
 	axi_mssg mssg;
+	int items_in_queue = 0;
 
 	function new ();
 		one_frame = new();
@@ -22,7 +23,8 @@ class axi_master_write_scheduler_packages;
 
 
 	extern function axi_mssg getNextSingleFrame();
-	extern function void axi_decrement_delay();
+	extern function void decrementDelay();
+	extern function void addSingleFrame(axi_single_frame);
 
 
 endclass : axi_master_write_scheduler_packages
@@ -31,23 +33,39 @@ endclass : axi_master_write_scheduler_packages
 
 function axi_mssg axi_master_write_scheduler_packages::getNextSingleFrame();
 	mssg = new();
-	one_frame = data_queue.pop_front;
+	// if queue is empty then return QUEUE_EMPTY
+	if(data_queue.size == 0)
+		begin
+			mssg.state = axi_mssg_enum::QUEUE_EMPTY;
+			mssg.frame = null;
+			return mssg;
+		end
+	// if there is ready data return that and status READY
+	// else return NOT_READY
+	one_frame = data_queue.pop_front();
 	if (one_frame.delay == 0)
 		begin
 		mssg.state = axi_mssg_enum::READY;
-		mssg.data = one_frame.data;
+		mssg.frame = one_frame;
+		items_in_queue--;
 		end
 	else
 		begin
 		mssg.state = axi_mssg_enum::NOT_READY;
+		mssg.frame = null;
 		data_queue.push_front(one_frame);
 		end
 endfunction
 
 
-function axi_master_write_scheduler_packages::axi_decrement_delay();
+function void axi_master_write_scheduler_packages::decrementDelay();
 	one_frame = data_queue.pop_front;
 	if (one_frame.delay != 0)
 		one_frame.delay--;
 	data_queue.push_front(one_frame);
-endfunction: axi_decrement_delay
+endfunction: decrementDelay
+
+function void axi_master_write_scheduler_packages::addSingleFrame(axi_single_frame);
+	items_in_queue++;
+    data_queue.push_front(axi_single_frame);
+endfunction

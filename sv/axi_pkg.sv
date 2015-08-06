@@ -11,7 +11,6 @@ package axi_pkg;
 	`include "sv/axi_if.sv"
 	`include "sv/axi_frame.sv"
 	`include "sv/axi_types.sv"
-	`include "sv/axi_single_frame.sv"
 
 	//add include for master
 	`include "sv/master/axi_master_config.sv"
@@ -40,7 +39,7 @@ package axi_pkg;
 	`include "sv/slave/axi_slave_read_sequence_lib.sv"
 
 	`include "sv/utils/axi_master_write_scheduler_packages.sv"
-	`include "sv/utils/axi_master_write_svheduler.sv"
+	`include "sv/utils/axi_master_write_scheduler.sv"
 	`include "sv/utils/axi_mssg.sv"
 
 endpackage : axi_pkg
