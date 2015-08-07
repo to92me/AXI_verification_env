@@ -51,4 +51,9 @@ typedef enum {
 	QUEUE_EMPTY = 2
 }axi_mssg_enum;
 
+typedef enum {
+	QUEUE_LOCKED,
+	QUEUE_UNLOCKED
+}burst_queue_lock_enum;
+
 `endif

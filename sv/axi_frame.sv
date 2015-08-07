@@ -73,6 +73,8 @@ class axi_frame extends axi_frame_base;
 		super.new(name);
 	endfunction
 
+//	extern function copyQueue(input bit[DATA_WIDTH-1 : 0] input_data[$]);
+
 endclass :  axi_frame
 
 
@@ -80,6 +82,7 @@ class axi_single_frame extends axi_frame_base;
 		//Declare fields
 	rand bit[DATA_WIDTH-1 : 0]      data;
 	rand int 						delay;
+	rand int						delay_addrdata;
 
 	// UVM utility macros
 	`uvm_object_utils_begin(axi_single_frame)
@@ -96,3 +99,5 @@ class axi_single_frame extends axi_frame_base;
 	endfunction
 
 endclass
+
+

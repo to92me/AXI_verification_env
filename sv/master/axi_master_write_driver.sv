@@ -19,6 +19,7 @@ class axi_master_write_driver extends uvm_driver #(axi_frame);
 	// Configuration object
 	axi_config config_obj;
 	axi_master_write_scheduler scheduler;
+	axi_master_write_vif_driver driver;
 
 	`uvm_component_utils_begin(axi_master_write_driver)
 	 `uvm_field_object(config_obj, UVM_DEFAULT)
@@ -44,8 +45,8 @@ class axi_master_write_driver extends uvm_driver #(axi_frame);
 			if(!uvm_config_db#(axi_config)::get(this, "", "master_config_obj", config_obj))
 				`uvm_fatal("NOCONFIG",{"Config object must be set for: ",get_full_name(),".config_obj"})
 
-		scheduler = axi_master_write_scheduler::getSchedulerInstance();  // create scheduler and buld id to fetch vif from database
-		scheduler.buld();
+		scheduler = axi_master_write_scheduler::getSchedulerInstance(this);  // create scheduler and buld id to fetch vif from database
+		driver = axi_master_write_vif_driver::getDriverInstance(this); // TODO
 	endfunction: build_phase
 
 	// run_phase
@@ -131,7 +132,7 @@ endclass : axi_master_write_driver
 	vif.wvalid = 0;
 
 	//wready and awready should slave reset
-	vif.bready = 0; // this is anser to slave TODO this maybe should set to 1 becuse than transfer is quicker
+	vif.bready = 0; // this is answer to slave TODO this maybe should set to 1 becuse than transfer is quicker -- konfigurabilno
 
  endtask : reset_signals
 
