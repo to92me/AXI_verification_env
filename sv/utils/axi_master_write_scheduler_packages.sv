@@ -10,12 +10,6 @@
 //
 //------------------------------------------------------------------------------
 
-typedef enum {
-	NEXT_FRAME,
-	NEXT_BURST_PACKAGE,
-	NEW_ID,
-	DONE
-} state_check_ID_enum;
 
 class axi_master_write_scheduler_packages;
 
@@ -25,7 +19,6 @@ class axi_master_write_scheduler_packages;
 	int items_in_queue = 0;
 	bit [ID_WIDTH-1 : 0] queu_id;
 	burst_queue_lock_enum lock_state = QUEUE_LOCKED;
-	state_check_ID_enum state_check_ID;
 
 	function new ();
 		one_frame = new();

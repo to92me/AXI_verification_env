@@ -22,7 +22,7 @@ typedef enum {
 } state_enum;
 
 
-class axi_master_write_vif_drvier extends uvm_component;
+class axi_master_write_vif_driver extends uvm_component;
 
 	axi_single_frame current_frame;
 	axi_mssg next_frame;
@@ -33,9 +33,9 @@ class axi_master_write_vif_drvier extends uvm_component;
 	virtual interface axi_if vif;
 
 	axi_master_write_scheduler scheduler;
-	static axi_master_write_vif_drvier	driverInstance;
+	static axi_master_write_vif_driver	driverInstance;
 
-	`uvm_component_utils_begin(axi_master_write_vif_drvier)
+	`uvm_component_utils_begin(axi_master_write_vif_driver)
 	 `uvm_field_object(current_frame, UVM_DEFAULT)
 	 `uvm_field_object(driverInstance, UVM_DEFAULT)
  `uvm_component_utils_end
@@ -55,7 +55,7 @@ class axi_master_write_vif_drvier extends uvm_component;
 	endfunction : build_phase
 
 	// get instace - singleton class
-	extern static function axi_master_write_vif_drvier getDriverInstance(input uvm_object parent);
+	extern static function axi_master_write_vif_driver getDriverInstance(input uvm_object parent);
 
 	//metodes specific to driver
 	extern function void getNexItem();
@@ -69,10 +69,10 @@ class axi_master_write_vif_drvier extends uvm_component;
 	extern function void checkForResponde();
 	extern function void waitForSlaveReady();
 
-endclass : axi_master_write_vif_drvier
+endclass : axi_master_write_vif_driver
 
 
-	function axi_master_write_vif_drvier axi_master_write_vif_drvier::getDriverInstance(input uvm_object parent);
+	function axi_master_write_vif_driver axi_master_write_vif_driver::getDriverInstance(input uvm_object parent);
 		if(driverInstance == null)
 			begin
 				$display("Creating master driver");
@@ -83,18 +83,18 @@ endclass : axi_master_write_vif_drvier
 	endfunction
 
 
-function void axi_master_write_vif_drvier::getNexItem();
+function void axi_master_write_vif_driver::getNexItem();
     next_frame = scheduler.getFrameForDrivingVif();
 	if (next_frame.state == READY)
 		current_frame = next_frame.frame;
 endfunction
 
-function void axi_master_write_vif_drvier::reset();
+function void axi_master_write_vif_driver::reset();
     next_frame = null;
 	current_frame = null;
 endfunction
 
-task axi_master_write_vif_drvier::main();
+task axi_master_write_vif_driver::main();
 	forever
 		begin
 			case (state)
