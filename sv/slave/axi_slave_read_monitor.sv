@@ -6,59 +6,56 @@
 
 //------------------------------------------------------------------------------
 //
-// CLASS: uvc_company_uvc_name_monitor
+// CLASS: axi_slave_read_monitor
 //
 //------------------------------------------------------------------------------
 
-class uvc_company_uvc_name_monitor extends uvm_monitor;
+class axi_slave_read_monitor extends uvm_monitor;
 
 	// This property is the virtual interfaced needed for this component to drive
-	// and view HDL signals. 
-	protected virtual uvc_company_uvc_name_if vif;
+	// and view HDL signals.
+	virtual axi_if vif;
 
 	// Configuration object
-	uvc_company_uvc_name_config_obj config_obj;
+	axi_config config_obj;
 
 	// The following two bits are used to control whether checks and coverage are
 	// done both in the monitor class and the interface.
 	bit checks_enable = 1;
 	bit coverage_enable = 1;
 
-	uvm_analysis_port #(uvc_company_uvc_name_item) item_collected_port;
+	protected int unsigned num_trans = 0;
+
+	uvm_analysis_port #(axi_read_single_frame) item_collected_port;
 
 	// The following property holds the transaction information currently
-	// begin captured (by the collect_address_phase and data_phase methods). 
-	protected uvc_company_uvc_name_item trans_collected;
-
-	// Transfer collected covergroup
-	covergroup cov_trans;
-		option.per_instance = 1;
-		// TODO: Fill this place with relevant cover points
-		
-	endgroup : cov_trans
+	// begin captured (by the collect_address_phase and data_phase methods).
+	axi_read_single_frame trans_data_channel;
+	axi_frame trans_addr_channel;
 
 	// Provide implementations of virtual methods such as get_type_name and create
-	`uvm_component_utils_begin(uvc_company_uvc_name_monitor)
+	`uvm_component_utils_begin(axi_slave_read_monitor)
+		`uvm_field_object(config_obj, UVM_DEFAULT)
 		`uvm_field_int(checks_enable, UVM_DEFAULT)
 		`uvm_field_int(coverage_enable, UVM_DEFAULT)
+		`uvm_field_int(num_trans, UVM_DEFAULT)
 	`uvm_component_utils_end
 
 	// new - constructor
 	function new (string name, uvm_component parent);
 		super.new(name, parent);
-		cov_trans = new();
-		cov_trans.set_inst_name({get_full_name(), ".cov_trans"});
-		trans_collected = new();
+		trans_data_channel = axi_read_single_frame::type_id::create("trans_data_channel");
+		trans_addr_channel = axi_frame::type_id::create("trans_addr_channel");
 		item_collected_port = new("item_collected_port", this);
 	endfunction : new
 
 	// build_phase
 	function void build_phase(uvm_phase phase);
 		super.build_phase(phase);
-		if(!uvm_config_db#(virtual uvc_company_uvc_name_if)::get(this, "", "vif", vif))
+		if(!uvm_config_db#(virtual axi_if)::get(this, "", "vif", vif))
 			`uvm_fatal("NOVIF",{"virtual interface must be set for: ",get_full_name(),".vif"});
 		// Propagate the configuration object
-		if(!uvm_config_db#(uvc_company_uvc_name_config_obj)::get(this, "", "config_obj", config_obj))
+		if(!uvm_config_db#(axi_config)::get(this, "", "config_obj", config_obj))
 			`uvm_fatal("NOCONFIG",{"Config object must be set for: ",get_full_name(),".config_obj"})
 	endfunction: build_phase
 
@@ -94,6 +91,30 @@ class uvc_company_uvc_name_monitor extends uvm_monitor;
 			@(posedge vif.sig_clock);
 			// TODO : Fill this place with the logic for collecting the transfer data
 			// ...
+			if (vif.arvalid && vif.arready)
+				begin
+					trans_addr_channel.addr = vif.araddr;
+					trans_addr_channel.id = vif.arid;
+					trans_addr_channel.len = vif.arlen;
+					trans_addr_channel.size = vif.arsize;
+					trans_addr_channel.burst_type = vif.arburst;
+					trans_addr_channel.lock = vif.arlock;
+					trans_addr_channel.cache = vif.arcache;
+					trans_addr_channel.prot = vif.arprot;
+					trans_addr_channel.qos = vif.arqos;
+					trans_addr_channel.region = vif.arregion;
+					// user
+				end
+
+			if (vif.rvalid && vif.rready)
+				begin
+					trans_data_channel.data = vif.rdata;
+					trans_data_channel.id = vif.rid;
+					trans_data_channel.resp = vif.rresp;
+					trans_data_channel.last = vif.rlast;
+					// user
+				end
+
 			`uvm_info(get_full_name(), $sformatf("Transfer collected :\n!s",! trans_collected.sprint()), UVM_MEDIUM)
 			if (checks_enable)
 				perform_transfer_checks();
@@ -116,4 +137,4 @@ class uvc_company_uvc_name_monitor extends uvm_monitor;
 		// ...
 	endfunction : perform_transfer_coverage
 
-endclass : uvc_company_uvc_name_monitor
+endclass : axi_slave_read_monitor

@@ -19,10 +19,12 @@ class axi_slave_read_arbitration extends uvm_component;
 	axi_read_single_frame tmp_queue[$];
 
 	// Provide implementations of virtual methods such as get_type_name and create
-	`uvm_component_utils(axi_slave_read_arbitration)
+	`uvm_component_utils_begin(axi_slave_read_arbitration)
+    	`uvm_field_object(one_frame, UVM_DEFAULT)
+	`uvm_component_utils_end
 
 	// new - constructor
-	function new (string name, uvm_component parent);
+	function new (string name="axi_slave_read_arbit", uvm_component parent=null);
 		super.new(name, parent);
 		one_frame = new();
 	endfunction : new
@@ -33,28 +35,29 @@ class axi_slave_read_arbitration extends uvm_component;
 	endfunction : build_phase
 
 	// get burst information
-	static function void get_burst_info(ref axi_frame burst_frame);
+	function void get_new_burst(ref axi_frame burst_frame);
 		for (int i=0; i<burst_frame.len; i++) begin
-			assert one_frame.randomize();
+			one_frame = axi_read_single_frame::type_id::create("one_frame",this);
+			assert (one_frame.randomize())
 			one_frame.id = burst_frame.id;
 			one_frame.lock = burst_frame.lock;
 			if (i == burst_frame.len-1)
-				one_frame.read_last = 1;
+				one_frame.last = 1;
 			else
-				one_frame.read_last = 0;
+				one_frame.last = 0;
 
 			if (one_frame.delay == 0)
 				ready_queue.push_back(one_frame);
 			else
 				wait_queue.push_front(one_frame);
 		end
-	endfunction : get_burst_info
+	endfunction : get_new_burst
 
 	// decrement delay and rearrange queues
 	function void slave_read_dec_delay();
 		for (int i=0; i<wait_queue.size(); i++) begin
 			wait_queue[i].delay--;
-			if (wait_queue[i].delay)
+			if (!wait_queue[i].delay)
 				ready_queue.push_back(wait_queue[i]);
 			else
 				tmp_queue.push_back(wait_queue[i]);

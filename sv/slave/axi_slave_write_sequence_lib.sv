@@ -12,7 +12,7 @@
 //------------------------------------------------------------------------------
 // This sequence raises/drops objections in the pre/post_body so that root
 // sequences raise objections but subsequences do not.
-virtual class uvc_name_base_sequence extends uvm_sequence #(axi_frame);
+class uvc_name_base_sequence extends uvm_sequence #(axi_frame);
 
 	// TODO: Add fields here
 

@@ -65,7 +65,7 @@ class axi_slave_read_sequencer extends uvm_sequencer #(axi_frame);
 	endtask
 
 	// new - constructor
-	function new (string name, uvm_component parent);
+	function new (string name = "axi_slave_read_sequencer", uvm_component parent = null);
 		super.new(name, parent);
 		addr_trans_port = new("addr_trans_port", this);
 	endfunction : new

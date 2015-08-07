@@ -6,29 +6,30 @@
 
 //------------------------------------------------------------------------------
 //
-// CLASS: uvc_company_uvc_name_sequencer
+// CLASS: axi_master_read_sequencer
 //
 //------------------------------------------------------------------------------
 
-class uvc_company_uvc_name_sequencer extends uvm_sequencer #(uvc_name_transfer);
+class axi_master_read_sequencer extends uvm_sequencer #(axi_frame);
 
 	// Configuration object
-	uvc_company_uvc_name_config_obj config_obj;
+	axi_master_config config_obj;
 
 	// Reset TLM FIFO(since this is a transaction level component the
 	// reset should be fetched via a TLM analysis FIFO)
 	tlm_analysis_fifo#(bit) reset_port;
-	
-	// TODO: The reset event can also be fetched in other ways
-	
 
-	`uvm_component_utils(uvc_name_sequencer)
+	// TODO: The reset event can also be fetched in other ways
+
+	`uvm_component_utils_begin(axi_master_read_sequencer)
+		`uvm_field_object(config_obj, UVM_DEFAULT|UVM_REFERENCE)
+	`uvm_component_utils_end
 
 	// build_phase
 	function void build_phase(uvm_phase phase);
 		super.build_phase(phase);
 		// Propagate the configuration object
-		if(!uvm_config_db#(uvc_company_uvc_name_config_obj)::get(this, "", "config_obj", config_obj))
+		if(!uvm_config_db#(axi_master_config)::get(this, "", "config_obj", config_obj))
 			`uvm_fatal("NOCONFIG",{"Config object must be set for: ",get_full_name(),".config_obj"})
 	endfunction: build_phase
 
@@ -66,4 +67,4 @@ class uvc_company_uvc_name_sequencer extends uvm_sequencer #(uvc_name_transfer);
 		super.new(name, parent);
 	endfunction : new
 
-endclass : uvc_company_uvc_name_sequencer
+endclass : axi_master_read_sequencer
