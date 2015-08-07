@@ -9,8 +9,7 @@
 // CLASS: axi_frame
 //
 //------------------------------------------------------------------------------
-
-class axi_frame extends uvm_sequence_item;
+class axi_frame_base extends uvm_sequence_item;
 
 	//Declare fields
 	rand bit [ADDR_WIDTH-1 : 0]		addr;
@@ -25,36 +24,80 @@ class axi_frame extends uvm_sequence_item;
 	rand bit [3:0]					region;
 	// user
 
-	// constraints
-	constraint c_lock {
-		lock inside {NORMAL, EXCLUSIVE};
-	}
+//	// constraints
+//	constraint c_lock {
+//		lock inside {NORMAL, EXCLUSIVE};
+//	}
+//
+//	constraint c_burst_type {
+//		burst_type inside {FIXED, INCR, WRAP, Reserved};
+//	}
+//
+//	constraint c_burst_size {
+//		size inside {BYTE_1, BYTE_2, BYTE_4, BYTE_8, BYTE_16, BYTE_32, BYTE_64, BYTE_128};
+//	}
 
-	constraint c_burst_type {
-		burst_type inside {FIXED, INCR, WRAP, Reserved};
-	}
-
-	constraint c_burst_size {
-		size inside {BYTE_1, BYTE_2, BYTE_4, BYTE_8, BYTE_16, BYTE_32, BYTE_64, BYTE_128};
-	}
 
 	// UVM utility macros
-	`uvm_object_utils_begin(axi_frame)
-		`uvm_field_int(addr, UVM_DEFAULT)
-		`uvm_field_int(len, UVM_DEFAULT)
-		`uvm_field_enum(burst_size_enum, size, UVM_DEFAULT)
-		`uvm_field_enum(burst_type_enum, burst_type, UVM_DEFAULT)
-		`uvm_field_enum(lock_enum, lock, UVM_DEFAULT)
-		`uvm_field_int(id, UVM_DEFAULT)
-		`uvm_field_int(cache, UVM_DEFAULT)
-		`uvm_field_int(prot, UVM_DEFAULT)
-		`uvm_field_int(qos, UVM_DEFAULT)
-		`uvm_field_int(region, UVM_DEFAULT)
-		//`uvm_field_int(user, UVM_DEFAULT)
-	`uvm_object_utils_end
+	`uvm_object_utils_begin(axi_frame_base)
+	 `uvm_field_int(addr, UVM_DEFAULT)
+	 `uvm_field_int(len, UVM_DEFAULT)
+	 `uvm_field_enum(burst_size_enum, size, UVM_DEFAULT)
+	 `uvm_field_enum(burst_type_enum, burst_type, UVM_DEFAULT)
+	 `uvm_field_enum(lock_enum, lock, UVM_DEFAULT)
+	 `uvm_field_int(id, UVM_DEFAULT)
+	 `uvm_field_int(cache, UVM_DEFAULT)
+	 `uvm_field_int(prot, UVM_DEFAULT)
+	 `uvm_field_int(qos, UVM_DEFAULT)
+	 `uvm_field_int(region, UVM_DEFAULT)
+ //`uvm_field_int(user, UVM_DEFAULT)
+ `uvm_object_utils_end
 
 	function new (string name = "axi_frame");
 		super.new(name);
 	endfunction
 
+endclass
+
+class axi_frame extends axi_frame_base;
+
+	//Declare fields
+	rand bit[DATA_WIDTH-1 : 0]      data[$];
+
+	// UVM utility macros
+	`uvm_object_utils_begin(axi_frame)
+	 `uvm_field_queue_int(data, UVM_DEFAULT)
+ `   uvm_object_utils_end
+
+	function new (string name = "axi_frame");
+		super.new(name);
+	endfunction
+
+//	extern function copyQueue(input bit[DATA_WIDTH-1 : 0] input_data[$]);
+
 endclass :  axi_frame
+
+
+class axi_single_frame extends axi_frame_base;
+		//Declare fields
+	rand bit[DATA_WIDTH-1 : 0]      data;
+	rand int 						delay;
+	rand int						delay_addrdata;
+
+	// UVM utility macros
+	`uvm_object_utils_begin(axi_single_frame)
+	 `uvm_field_int(data, UVM_DEFAULT)
+	 `uvm_field_int(delay, UVM_DEFAULT)
+ `uvm_object_utils_end
+
+	constraint delay_cst{
+		delay inside {[0 : 5]};
+	}
+
+	function new (string name = "axi_frame");
+		super.new(name);
+	endfunction
+
+endclass
+
+

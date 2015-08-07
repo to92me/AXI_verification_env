@@ -47,7 +47,13 @@ typedef enum {
 
 typedef enum {
 	READY = 0,
-	NOT_READY = 1
+	NOT_READY = 1,
+	QUEUE_EMPTY = 2
 }axi_mssg_enum;
+
+typedef enum {
+	QUEUE_LOCKED,
+	QUEUE_UNLOCKED
+}burst_queue_lock_enum;
 
 `endif
