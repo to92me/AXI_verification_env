@@ -4,6 +4,7 @@
 package axi_pkg;
 	// uvm lib
 	import uvm_pkg::*;
+	// TODO dodat typedef class .. .
 	`include "uvm_macros.svh"
 
 	`include "sv/axi_config.sv"
