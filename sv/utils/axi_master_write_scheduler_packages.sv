@@ -13,15 +13,18 @@
 
 class axi_master_write_scheduler_packages;
 
-	axi_single_frame data_queue[$]; // MENJAO
+	axi_single_frame data_queue[$];
 	axi_single_frame one_frame;
 	axi_mssg mssg;
 	int items_in_queue = 0;
-	bit [ID_WIDTH-1 : 0] queu_id;
 	burst_queue_lock_enum lock_state = QUEUE_LOCKED;
+	unique_id_struct burst_status;
+	first_sent_enum first_status = FIRST_NOT_SENT;
+	bit [ID_WIDTH-1 : 0] ID;
 
 	function new ();
 		one_frame = new();
+		burst_status = new();
 	endfunction : new
 
 
@@ -45,12 +48,14 @@ function axi_mssg axi_master_write_scheduler_packages::getNextSingleFrame();
 		end
 	// if there is ready data return that and status READY
 	// else return NOT_READY
+
 	one_frame = data_queue.pop_front();
 	if (one_frame.delay == 0)
 		begin
 		mssg.state = READY;
 		mssg.frame = one_frame;
 		items_in_queue--;
+		first_status = FIRST_SENT;
 		end
 	else
 		begin
@@ -64,13 +69,16 @@ endfunction
 
 function void axi_master_write_scheduler_packages::decrementDelay();
 	one_frame = data_queue.pop_front;
-	if (one_frame.delay != 0)
-		one_frame.delay--;
-	data_queue.push_front(one_frame);
+	if(one_frame != null)
+	begin 
+		if (one_frame.delay != 0)
+			one_frame.delay--;
+		data_queue.push_front(one_frame);
+	end 
 endfunction: decrementDelay
 
 function void axi_master_write_scheduler_packages::addSingleFrame(input axi_single_frame frame_for_push);
-	$write(" added data to queu");
+	$write(" added data to queu \n");
 	items_in_queue++;
     data_queue.push_front(frame_for_push);
 endfunction

@@ -18,5 +18,16 @@ class axi_mssg ;
 
 endclass : axi_mssg
 
+// this class is used to check if it is unique ID
+// field counter had been deleted because ordering is set from queue order number;
+class unique_id_struct;
+	id_type_enum id_status = UNIQUE_ID; // this is defaulh and if needs to be set
+	bit [ID_WIDTH-1 : 0] ID;
+endclass: unique_id_struct
 
-// axi data represents one data and his delay that contains axi_scheduler_package
+class axi_burst_package_status;
+
+
+endclass: axi_burst_package_status
+
+// axi data epresentsone data and his delay that contains axi_scheduler_package

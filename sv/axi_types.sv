@@ -56,6 +56,15 @@ typedef enum {
 	QUEUE_UNLOCKED
 }burst_queue_lock_enum;
 
+typedef enum {
+ 	UNIQUE_ID,
+ 	EXISTING_ID,
+ 	FIRST_OF_EXISTING_ID
+} id_type_enum;
 
+typedef enum {
+	FIRST_SENT,
+	FIRST_NOT_SENT
+} first_sent_enum;
 
 `endif
