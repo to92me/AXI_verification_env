@@ -71,4 +71,9 @@ interface axi_if (input sig_reset, input sig_clock);
 	logic						rvalid;
 	logic						rready;
 
+
+	// Control flags
+	bit							has_checks = 1;
+	bit							has_coverage = 1;
+
 endinterface : axi_if

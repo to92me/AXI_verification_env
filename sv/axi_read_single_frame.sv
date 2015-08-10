@@ -15,22 +15,18 @@ class axi_read_single_frame extends uvm_sequence_item;
 	//Declare fields
 	rand bit [DATA_WIDTH-1 : 0]	data;
 	bit [ID_WIDTH-1 : 0]		id;
-	lock_enum					lock;
-	bit							read_last;
+	rand response_enum			resp;
+	bit							last;
 	rand bit [2:0]				delay;
 	// user
 
-	// constraints
-	constraint c_lock {
-		lock inside {NORMAL, EXCLUSIVE};
-	}
 
 	// UVM utility macros
 	`uvm_object_utils_begin(axi_read_single_frame)
 		`uvm_field_int(data, UVM_DEFAULT)
-		`uvm_field_enum(lock_enum, lock, UVM_DEFAULT)
+		`uvm_field_enum(response_enum, resp, UVM_DEFAULT)
 		`uvm_field_int(id, UVM_DEFAULT)
-		`uvm_field_int(read_last, UVM_DEFAULT)
+		`uvm_field_int(last, UVM_DEFAULT)
 		`uvm_field_int(delay, UVM_DEFAULT)
 		//`uvm_field_int(user, UVM_DEFAULT)
 	`uvm_object_utils_end
