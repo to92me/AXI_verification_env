@@ -10,7 +10,7 @@
 //
 //------------------------------------------------------------------------------
 
-class axi_master_read_driver extends uvm_driver #(axi_frame);
+class axi_master_read_driver extends uvm_driver #(axi_frame_base);
 
 	// The virtual interface used to drive and view HDL signals.
 	virtual axi_if vif;
@@ -110,7 +110,7 @@ class axi_master_read_driver extends uvm_driver #(axi_frame);
 	endtask : reset_driver
 
 	// drive_transfer
-	virtual protected task drive_transfer (axi_frame trans);
+	virtual protected task drive_transfer (axi_frame_base trans);
 		fork
 			// address channel
 			begin
@@ -137,6 +137,8 @@ class axi_master_read_driver extends uvm_driver #(axi_frame);
 				@(posedge vif.sig_clock);
 				vif.rready <= 1'b0;
 			end
+
+		join
 
 	endtask : drive_transfer
 

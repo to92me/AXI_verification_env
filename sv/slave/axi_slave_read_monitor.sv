@@ -26,12 +26,17 @@ class axi_slave_read_monitor extends uvm_monitor;
 
 	protected int unsigned num_trans = 0;
 
-	uvm_analysis_port #(axi_read_single_frame) item_collected_port;
+	// TLM Ports
+	uvm_analysis_port #(axi_read_single_frame) data_collected_port;
+	uvm_analysis_port #(axi_frame_base) addr_collected_port;
+
+	// allow sequencer access
+	uvm_blocking_peek_imp#(axi_frame_base, axi_slave_read_monitor) addr_trans_export;
 
 	// The following property holds the transaction information currently
 	// begin captured (by the collect_address_phase and data_phase methods).
 	axi_read_single_frame trans_data_channel;
-	axi_frame trans_addr_channel;
+	axi_frame_base trans_addr_channel;
 
 	// Provide implementations of virtual methods such as get_type_name and create
 	`uvm_component_utils_begin(axi_slave_read_monitor)
@@ -45,12 +50,22 @@ class axi_slave_read_monitor extends uvm_monitor;
 	function new (string name, uvm_component parent);
 		super.new(name, parent);
 		trans_data_channel = axi_read_single_frame::type_id::create("trans_data_channel");
-		trans_addr_channel = axi_frame::type_id::create("trans_addr_channel");
-		item_collected_port = new("item_collected_port", this);
+		trans_addr_channel = axi_frame_base::type_id::create("trans_addr_channel");
+		data_collected_port = new("data_collected_port", this);
+		addr_collected_port = new("addr_collected_port", this);
+		addr_trans_export = new("addr_trans_export", this);
 	endfunction : new
 
+	extern virtual function void build_phase(uvm_phase phase);
+	extern virtual task run_phase(uvm_phase phase);
+	extern virtual task collect_transactions();
+	extern virtual function void perform_transfer_checks();
+	extern virtual function void perform_transfer_coverage();
+
+endclass : axi_slave_read_monitor
+
 	// build_phase
-	function void build_phase(uvm_phase phase);
+	function void axi_slave_read_monitor::build_phase(uvm_phase phase);
 		super.build_phase(phase);
 		if(!uvm_config_db#(virtual axi_if)::get(this, "", "vif", vif))
 			`uvm_fatal("NOVIF",{"virtual interface must be set for: ",get_full_name(),".vif"});
@@ -60,12 +75,12 @@ class axi_slave_read_monitor extends uvm_monitor;
 	endfunction: build_phase
 
 	// run_phase
-	virtual task run_phase(uvm_phase phase);
+	task axi_slave_read_monitor::run_phase(uvm_phase phase);
 		process main; // used by the reset handling mechanism
 		// Start monitoring only after an initial reset pulse
 		@(negedge vif.sig_reset);
 		do
-			@(posedge vif.clock);
+			@(posedge vif.sig_clock);
 		while(vif.sig_reset!==1);
 		// Start monitoring here with reset handling mechanism
 		forever begin
@@ -86,7 +101,7 @@ class axi_slave_read_monitor extends uvm_monitor;
 	endtask : run_phase
 
 	// collect_transactions
-	virtual protected task collect_transactions();
+	task axi_slave_read_monitor::collect_transactions();
 		forever begin
 			@(posedge vif.sig_clock);
 			// TODO : Fill this place with the logic for collecting the transfer data
@@ -115,26 +130,26 @@ class axi_slave_read_monitor extends uvm_monitor;
 					// user
 				end
 
-			`uvm_info(get_full_name(), $sformatf("Transfer collected :\n!s",! trans_collected.sprint()), UVM_MEDIUM)
+			`uvm_info(get_full_name(), $sformatf("Transfer collected :\n!s",! trans_data_channel.sprint()), UVM_MEDIUM)
+			`uvm_info(get_full_name(), $sformatf("Transfer collected :\n!s",! trans_addr_channel.sprint()), UVM_MEDIUM)
 			if (checks_enable)
 				perform_transfer_checks();
 			if (coverage_enable)
 				perform_transfer_coverage();
-			item_collected_port.write(trans_collected);
+			data_collected_port.write(trans_data_channel);
+			addr_collected_port.write(trans_addr_channel);
 		end
 	endtask : collect_transactions
 
 	// perform_transfer_checks
-	virtual protected function void perform_transfer_checks();
+	function void axi_slave_read_monitor::perform_transfer_checks();
 		// TODO : Perform checks here
 		// ...
 	endfunction : perform_transfer_checks
 
 	// perform_transfer_coverage
-	virtual protected function void perform_transfer_coverage();
+	function void axi_slave_read_monitor::perform_transfer_coverage();
 		cov_trans.sample();
 		// TODO : Collect coverage here
 		// ...
 	endfunction : perform_transfer_coverage
-
-endclass : axi_slave_read_monitor

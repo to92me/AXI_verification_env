@@ -10,14 +10,13 @@
 //
 //------------------------------------------------------------------------------
 
-class axi_slave_read_driver extends uvm_driver #(axi_frame);
+class axi_slave_read_driver extends uvm_driver #(axi_frame_base);
 
 	// The virtual interface used to drive and view HDL signals.
 	protected virtual axi_if vif;
 
 	// Configuration object
 	axi_slave_config config_obj;
-
 
 	axi_slave_read_arbitration arbit;
 	axi_read_single_frame one_frame;
@@ -35,8 +34,20 @@ class axi_slave_read_driver extends uvm_driver #(axi_frame);
 		one_frame = new();
 	endfunction : new
 
+	// class methods
+	extern virtual function void build_phase(uvm_phase phase);
+	extern virtual task run_phase(uvm_phase phase);
+	extern virtual task get_and_drive();
+	extern virtual task get_from_seq();
+	extern virtual task reset();
+	extern virtual task drive_next_single_frame();
+	extern virtual task dec_delay();
+
+endclass : axi_slave_read_driver
+
+
 	// build_phase
-	function void build_phase(uvm_phase phase);
+	function void axi_slave_read_driver::build_phase(uvm_phase phase);
 		super.build_phase(phase);
 		// Propagate the interface
 		if(!uvm_config_db#(virtual axi_if)::get(this, "", "vif", vif))
@@ -47,7 +58,7 @@ class axi_slave_read_driver extends uvm_driver #(axi_frame);
 	endfunction: build_phase
 
 	// run_phase
-	virtual task run_phase(uvm_phase phase);
+	task axi_slave_read_driver::run_phase(uvm_phase phase);
 		// The driving should be triggered by an initial reset pulse
 		@(negedge vif.sig_reset);
 		do
@@ -58,7 +69,7 @@ class axi_slave_read_driver extends uvm_driver #(axi_frame);
 	endtask : run_phase
 
 	// get_and_drive
-	virtual task get_and_drive();
+	task axi_slave_read_driver::get_and_drive();
 		fork
 			get_from_seq();
 			reset();
@@ -67,7 +78,7 @@ class axi_slave_read_driver extends uvm_driver #(axi_frame);
 		join
 	endtask : get_and_drive
 
-	virtual task get_from_seq();
+	task axi_slave_read_driver::get_from_seq();
 		forever begin
 			seq_item_port.get_next_item(req);
 			$cast(rsp, req.clone());
@@ -82,7 +93,7 @@ class axi_slave_read_driver extends uvm_driver #(axi_frame);
 		end
 	endtask : get_from_seq
 
-	virtual task reset();
+	task axi_slave_read_driver::reset();
 		forever begin
 			@(negedge vif.sig_reset)
 			`uvm_info(get_type_name(), "Reset", UVM_MEDIUM)
@@ -103,10 +114,13 @@ class axi_slave_read_driver extends uvm_driver #(axi_frame);
 		end
 	endtask : reset
 
-	virtual task drive_next_single_frame();
+	task axi_slave_read_driver::drive_next_single_frame();
+		int i, tmp = 0;
+
 		forever begin
 			@(posedge vif.sig_clock);
-			// @ event
+
+			arbit.ready_sem.get(1);
 			if (arbit.ready_queue.size())
 				begin
 					one_frame = arbit.ready_queue.pop_front();
@@ -115,20 +129,37 @@ class axi_slave_read_driver extends uvm_driver #(axi_frame);
 					vif.rid <= one_frame.id;
 					vif.rdata <= one_frame.data;
 					vif.rresp <= response_enum::OKAY;
-					vif.rlast <= one_frame.read_last;
+					vif.rlast <= one_frame.last;
 					// user
 					vif.rvalid <= 1'b1;
+
+					// last frame of the burst sent, check if there is a
+					// burst with the same id waiting to be sent
+					arbit.burst_sem.get(1);
+					if (one_frame.last && arbit.burst_wait.size())
+						for (i=0; i<arbit.burst_wait.size(); i++) begin
+							if (arbit.burst_wait[i].id == one_frame.id) begin
+								arbit.create_single_frames(arbit.burst_wait[i]);
+								tmp = i;
+								break;
+							end
+						end
+						if (tmp) begin
+							arbit.burst_wait.delete(i);
+							tmp = 0;
+						end
+					arbit.burst_sem.put(1);
 				end
 			else
 				vif.rvalid <= 1'b0;
+
+			arbit.ready_sem.put(1);
 		end
 	endtask : drive_next_single_frame
 
-	virtual task dec_delay();
+	task axi_slave_read_driver::dec_delay();
 		forever begin
 			@(posedge vif.sig_clock);
-			arbit.slave_read_dec_delay();
+			arbit.dec_delay();
 		end
 	endtask : dec_delay
-
-endclass : axi_slave_read_driver

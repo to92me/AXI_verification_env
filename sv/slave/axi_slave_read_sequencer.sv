@@ -10,13 +10,13 @@
 //
 //------------------------------------------------------------------------------
 
-class axi_slave_read_sequencer extends uvm_sequencer #(axi_frame);
+class axi_slave_read_sequencer extends uvm_sequencer #(axi_frame_base);
 
 	// Configuration object
 	axi_slave_config config_obj;
 
 	// peek at monitor
-	uvm_blocking_peek_port#(axi_frame) addr_trans_port;
+	uvm_blocking_peek_port#(axi_frame_base) addr_trans_port;
 
 	// Reset TLM FIFO(since this is a transaction level component the
 	// reset should be fetched via a TLM analysis FIFO)
