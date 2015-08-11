@@ -20,7 +20,7 @@ class axi_slave_read_sequencer extends uvm_sequencer #(axi_frame_base);
 
 	// Reset TLM FIFO(since this is a transaction level component the
 	// reset should be fetched via a TLM analysis FIFO)
-	tlm_analysis_fifo#(bit) reset_port;
+	//tlm_analysis_fifo#(bit) reset_port;
 
 	// register
 	`uvm_object_utils_begin(axi_slave_read_sequencer)
@@ -39,7 +39,7 @@ class axi_slave_read_sequencer extends uvm_sequencer #(axi_frame_base);
 	// When a reset is detected the default sequence of the sequencer is killed
 	// and restarted
 	// This method might not always be safe to use so it is not recommended
-	virtual task run_phase(uvm_phase phase);
+	/*virtual task run_phase(uvm_phase phase);
 		process main;
 		bit reset_status;
 		bit test_finished=0;
@@ -62,12 +62,12 @@ class axi_slave_read_sequencer extends uvm_sequencer #(axi_frame_base);
 			join
 			if(test_finished) break;
 		end
-	endtask
+	endtask*/
 
 	// new - constructor
 	function new (string name = "axi_slave_read_sequencer", uvm_component parent = null);
 		super.new(name, parent);
-		addr_trans_port = new("addr_trans_port", this);
+		//addr_trans_port = new("addr_trans_port", this);
 	endfunction : new
 
 endclass : axi_slave_read_sequencer

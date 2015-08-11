@@ -2,7 +2,7 @@
 * DVT CODE TEMPLATE: sequence library
 * Created by root on Aug 4, 2015
 * uvc_company = uvc_company, uvc_name = uvc_name
-* axi_frame = axi_frame
+* axi_frame_base = axi_frame_base
 *******************************************************************************/
 
 //------------------------------------------------------------------------------
@@ -12,7 +12,7 @@
 //------------------------------------------------------------------------------
 // This sequence raises/drops objections in the pre/post_body so that root
 // sequences raise objections but subsequences do not.
-virtual class axi_master_read_base_seq extends uvm_sequence #(axi_frame);
+class axi_master_read_base_seq extends uvm_sequence #(axi_frame_base);
 
 	// TODO: Add fields here
 

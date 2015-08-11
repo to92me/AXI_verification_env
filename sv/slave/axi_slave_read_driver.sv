@@ -21,6 +21,9 @@ class axi_slave_read_driver extends uvm_driver #(axi_frame_base);
 	axi_slave_read_arbitration arbit;
 	axi_read_single_frame one_frame;
 
+	// for drive next single frame
+	int i, tmp = 0;
+
 	// Provide implmentations of virtual methods such as get_type_name and create
 	`uvm_component_utils_begin(axi_slave_read_driver)
     	`uvm_field_object(arbit, UVM_DEFAULT)
@@ -78,6 +81,7 @@ endclass : axi_slave_read_driver
 		join
 	endtask : get_and_drive
 
+	// get from seq
 	task axi_slave_read_driver::get_from_seq();
 		forever begin
 			seq_item_port.get_next_item(req);
@@ -93,6 +97,7 @@ endclass : axi_slave_read_driver
 		end
 	endtask : get_from_seq
 
+	// reset
 	task axi_slave_read_driver::reset();
 		forever begin
 			@(negedge vif.sig_reset)
@@ -114,8 +119,8 @@ endclass : axi_slave_read_driver
 		end
 	endtask : reset
 
+	// drive next single frame
 	task axi_slave_read_driver::drive_next_single_frame();
-		int i, tmp = 0;
 
 		forever begin
 			@(posedge vif.sig_clock);
@@ -128,7 +133,7 @@ endclass : axi_slave_read_driver
 					// vif signals
 					vif.rid <= one_frame.id;
 					vif.rdata <= one_frame.data;
-					vif.rresp <= response_enum::OKAY;
+					vif.rresp <= OKAY;
 					vif.rlast <= one_frame.last;
 					// user
 					vif.rvalid <= 1'b1;
@@ -157,6 +162,7 @@ endclass : axi_slave_read_driver
 		end
 	endtask : drive_next_single_frame
 
+	// decrement delay
 	task axi_slave_read_driver::dec_delay();
 		forever begin
 			@(posedge vif.sig_clock);

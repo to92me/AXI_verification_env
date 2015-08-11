@@ -1,9 +1,7 @@
 `ifndef AXI_TYPES_SVH
 `define AXI_TYPES_SVH
 
-parameter ADDR_WIDTH = 32;
-parameter DATA_WIDTH = 64;
-parameter ID_WIDTH = 32;
+
 
 typedef struct {
 	bit[ADDR_WIDTH-1 : 0] start_address;
@@ -66,5 +64,10 @@ typedef enum {
 	FIRST_SENT,
 	FIRST_NOT_SENT
 } first_sent_enum;
+
+typedef enum {
+	GOOD_LAST_BIT,
+	BAD_LAST_BIT
+} last_enum;
 
 `endif

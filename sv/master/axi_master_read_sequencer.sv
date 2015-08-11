@@ -10,14 +10,14 @@
 //
 //------------------------------------------------------------------------------
 
-class axi_master_read_sequencer extends uvm_sequencer #(axi_frame);
+class axi_master_read_sequencer extends uvm_sequencer #(axi_frame_base);
 
 	// Configuration object
 	axi_master_config config_obj;
 
 	// Reset TLM FIFO(since this is a transaction level component the
 	// reset should be fetched via a TLM analysis FIFO)
-	tlm_analysis_fifo#(bit) reset_port;
+	//tlm_analysis_fifo#(bit) reset_port;
 
 	// TODO: The reset event can also be fetched in other ways
 
@@ -37,7 +37,7 @@ class axi_master_read_sequencer extends uvm_sequencer #(axi_frame);
 	// When a reset is detected the default sequence of the sequencer is killed
 	// and restarted
 	// This method might not always be safe to use so it is not recommended
-	virtual task run_phase(uvm_phase phase);
+	/*virtual task run_phase(uvm_phase phase);
 		process main;
 		bit reset_status;
 		bit test_finished=0;
@@ -60,7 +60,7 @@ class axi_master_read_sequencer extends uvm_sequencer #(axi_frame);
 			join
 			if(test_finished) break;
 		end
-	endtask
+	endtask*/
 
 	// new - constructor
 	function new (string name, uvm_component parent);
