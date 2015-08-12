@@ -22,7 +22,7 @@ class axi_master_read_agent extends uvm_agent;
 	virtual axi_if vif;
 
 	// Provide implementations of virtual methods such as get_type_name and create
-	`uvm_component_utils_begin(axi_slave_read_agent)
+	`uvm_component_utils_begin(axi_master_read_agent)
 	    `uvm_field_object(monitor, UVM_DEFAULT | UVM_REFERENCE)
 	    `uvm_field_enum(uvm_active_passive_enum, is_active, UVM_DEFAULT)
 	    `uvm_field_object(config_obj, UVM_DEFAULT | UVM_REFERENCE)
@@ -62,9 +62,9 @@ class axi_master_read_agent extends uvm_agent;
 	endfunction : connect_phase
 
 	// update config
-	function void update_config(input axi_slave_config cfg);
+	function void update_config(input axi_master_config config_obj);
 		if (is_active == UVM_ACTIVE) begin
-			sequencer.config_obj = cfg;
+			sequencer.config_obj = config_obj;
 		end
 	endfunction : update_config
 

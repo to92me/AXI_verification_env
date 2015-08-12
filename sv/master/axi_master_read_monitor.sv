@@ -57,7 +57,7 @@ class axi_master_read_monitor extends uvm_monitor;
 	endfunction : new
 
 	extern virtual function void build_phase(uvm_phase phase);
-	extern virtual task run_phase(uvm_phase phase);
+	//extern virtual task run_phase(uvm_phase phase);
 	extern virtual task collect_transactions();
 	extern virtual function void perform_transfer_checks();
 	extern virtual function void perform_transfer_coverage();
@@ -75,7 +75,7 @@ endclass : axi_master_read_monitor
 	endfunction: build_phase
 
 	// run_phase
-	task axi_master_read_monitor::run_phase(uvm_phase phase);
+	/*task axi_master_read_monitor::run_phase(uvm_phase phase);
 		process main; // used by the reset handling mechanism
 		// Start monitoring only after an initial reset pulse
 		@(negedge vif.sig_reset);
@@ -98,7 +98,7 @@ endclass : axi_master_read_monitor
 				end
 			join_any
 		end
-	endtask : run_phase
+	endtask : run_phase*/
 
 	// collect_transactions
 	task axi_master_read_monitor::collect_transactions();
@@ -149,7 +149,7 @@ endclass : axi_master_read_monitor
 
 	// perform_transfer_coverage
 	function void axi_master_read_monitor::perform_transfer_coverage();
-		cov_trans.sample();
+		//cov_trans.sample();
 		// TODO : Collect coverage here
 		// ...
 	endfunction : perform_transfer_coverage

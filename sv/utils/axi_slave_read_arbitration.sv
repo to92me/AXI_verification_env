@@ -22,6 +22,12 @@ class axi_slave_read_arbitration extends uvm_component;
 
 	semaphore ready_sem, wait_sem, burst_sem;
 
+	// if next burst has the same id, it must wait for the previous one to be sent
+	int id_flag = 0;
+
+	// delay value of previous frame in burst
+	int previous_delay = 0;
+
 	// Configuration object
 	axi_slave_config config_obj;
 
@@ -57,36 +63,35 @@ endclass : axi_slave_read_arbitration
 	// get burst information
 	task axi_slave_read_arbitration::get_new_burst(axi_frame_base burst_frame);
 
-		// if next burst has the same id, it must wait for the previous one to be sent
-		int tmp = 0;
-
 		wait_sem.get(1);
 		burst_sem.get(1);
 
 		foreach (wait_queue[i])
 			if (burst_frame.id == wait_queue[i].id) begin
 				burst_wait.push_back(burst_frame);
-				tmp = 1;
+				id_flag = 1;
 			end
 
-		if (!tmp)
+		if (!id_flag)
 			foreach (ready_queue[i])
 				if (burst_frame.id == ready_queue[i].id) begin
 					burst_wait.push_back(burst_frame);
-					tmp = 1;
+					id_flag = 1;
 				end
 		wait_sem.put(1);
 		burst_sem.put(1);
 
 		// new burst doesn't have the same id, create all single frames for it
-		if (!tmp)
+		if (!id_flag) begin
+			id_flag = 0;
 			create_single_frames(burst_frame);
+		end
 
 	endtask : get_new_burst
 
 	task axi_slave_read_arbitration::create_single_frames(axi_frame_base burst_frame);
-		// delay value of previous frame in burst
-		int previous_delay = 0;
+
+		previous_delay = 0;
 
 		wait_sem.get(1);
 		ready_sem.get(1);
@@ -107,6 +112,8 @@ endclass : axi_slave_read_arbitration
 				one_frame.last = 1;
 			else
 				one_frame.last = 0;
+			if (one_frame.last_mode == BAD_LAST_BIT)
+				one_frame.last = ~one_frame.last;
 
 			if (one_frame.delay == 0)
 				ready_queue.push_back(one_frame);

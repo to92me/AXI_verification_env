@@ -12,10 +12,11 @@
 //------------------------------------------------------------------------------
 // This sequence raises/drops objections in the pre/post_body so that root
 // sequences raise objections but subsequences do not.
-virtual class axi_slave_read_base_sequence extends uvm_sequence #(axi_frame_base);
+class axi_slave_read_base_sequence extends uvm_sequence #(axi_frame_base);
 
 	axi_frame_base req;
-	axi_frame_base util_transfer;
+	axi_frame_base rsp;
+	axi_frame_base util_transfer;	// TODO : ili util ili rsp
 
 	`uvm_object_utils(axi_slave_read_base_sequence)
 	`uvm_declare_p_sequencer(axi_slave_read_sequencer)
@@ -80,3 +81,40 @@ class axi_slave_read_transfer_seq extends axi_slave_read_base_sequence;
 	endtask
 
 endclass : axi_slave_read_transfer_seq
+
+//------------------------------------------------------------------------------
+//
+// SEQUENCE: axi_slave_read_simple_two_phase_seq
+//
+//------------------------------------------------------------------------------
+class axi_slave_read_simple_two_phase_seq extends axi_slave_read_base_sequence;
+
+	`uvm_object_utils(axi_slave_read_simple_two_phase_seq)
+
+	// new - constructor
+	function new(string name="axi_slave_read_simple_two_phase_seq");
+		super.new(name);
+	endfunction
+
+	virtual task body();
+		forever begin
+			req = axi_frame_base::type_id::create("req");
+			rsp = axi_frame_base::type_id::create("rsp");
+
+			// request
+			start_item(req);
+			finish_item(req);
+
+			// if address is (some addr), slave should return SLVEERR
+			if (req.addr == 32)	// TODO : specify which addr
+				// something req.?
+
+			start_item(rsp);
+			rsp.copy(req);
+			// maybe something else
+			finish_item(rsp);
+		end
+
+	endtask
+
+endclass : axi_slave_read_simple_two_phase_seq

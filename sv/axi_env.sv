@@ -10,9 +10,6 @@
 //
 //------------------------------------------------------------------------------
 
-`include "uvm_macros.svh"
-import uvm_pkg::*;
-
 class axi_env extends uvm_env;
 
 	// Virtual Interface variable
@@ -50,7 +47,7 @@ class axi_env extends uvm_env;
 	extern virtual function void build_phase(uvm_phase phase);
 	extern virtual function void connect_phase(uvm_phase phase);
 	extern virtual function void start_of_simulation_phase(uvm_phase phase);
-	extern virtual function void update_config(axi_config cfg);
+	extern virtual function void update_config(axi_config config_obj);
 	extern virtual task run_phase(uvm_phase phase);
 	extern virtual task update_vif_enables();
 

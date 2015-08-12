@@ -62,9 +62,9 @@ class axi_slave_read_agent extends uvm_agent;
 	endfunction : connect_phase
 
 	// update config
-	function void update_config(input axi_slave_config cfg);
+	function void update_config(input axi_slave_config config_obj);
 		if (is_active == UVM_ACTIVE) begin
-			sequencer.config_obj = cfg;
+			sequencer.config_obj = config_obj;
 		end
 	endfunction : update_config
 
