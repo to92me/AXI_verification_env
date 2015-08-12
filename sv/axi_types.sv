@@ -67,4 +67,10 @@ typedef enum {
 	FIRST_NOT_SENT
 } first_sent_enum;
 
+typedef enum {
+	TRUE = 1,
+	FALSE = 0
+}true_false_enum;
+
+
 `endif

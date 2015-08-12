@@ -32,7 +32,7 @@ interface axi_if (input sig_reset, input sig_clock);
 	logic 						awready;
 
 	// write data channel signals
-	logic [ID_WIDTH-1 : 0]		wid;
+//	logic [ID_WIDTH-1 : 0]		wid;
 	logic [DATA_WIDTH-1 : 0]	wdata;
 	logic [STRB_WIDTH-1 : 0]	wstrb;
 	logic						wlast;
