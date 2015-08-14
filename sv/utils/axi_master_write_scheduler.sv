@@ -12,27 +12,12 @@
 //
 //------------------------------------------------------------------------------
 
-// TODO treba da se impelmentrira da scheduler moze da prati koji ID je bio i koji je zavrsen ako posalje sve a ne stigne
 typedef enum {
 	DELETE_ONE,
 	NEXT_CHECK,
 	CALCULATE_STATE
 } state_check_ID_enum;
-/*
-class randomize_data;
-		rand int delay;
-		rand int delay_addrdata;
 
-		constraint delay_cst{
-			delay inside {[2 : 5]}; // initial constraint - needst ti be reset for real testing
-		}
-
-		constraint deleay_addrdata_csr{
-			delay_addrdata inside {[2:5]};
-		}
-
-endclass: randomize_data
-*/
 
 class axi_master_write_scheduler extends uvm_component;
 
@@ -42,14 +27,16 @@ class axi_master_write_scheduler extends uvm_component;
 	axi_waiting_resp						single_waiting_for_resp;
 	axi_master_write_scheduler_packages 	single_burst;
 	axi_single_frame 						next_frame_for_sending[$];
+	axi_single_frame 						next_address_for_sending[$];
 	axi_frame 								used_ID_queue[$];
 	axi_frame 								frame_same_id;
 	axi_mssg 								mssg;
 	axi_mssg 								send;
 	int 									response_latenes_error_rising = 100;
-	axi_slave_response				response_from_slave_queue[$];
-	axi_slave_response				single_response_from_slave;
+	axi_slave_response						response_from_slave_queue[$];
+	axi_slave_response						single_response_from_slave;
 	int 									error_before_delte_item = 4;
+//	mailbox 								mbx;
 
 
 	state_check_ID_enum state_check_ID = DELETE_ONE;   //check for same - new after deletion - ID
@@ -72,15 +59,17 @@ class axi_master_write_scheduler extends uvm_component;
 	extern local function void delayCalculator(); // DONE
 	extern function axi_mssg getFrameForDrivingVif(); // DONE
 	extern function void resetAll(); // DONE
-	extern local function void checkUniqueID(input int delete = 0); // DONE
+	extern local function void checkUniqueID(); // DONE
 	extern function void putResponseFromSlave(input axi_slave_response rsp); //DONE
 	extern local function void calculateRepsonseLatenes(); //DONE
-	extern local function void errorFromSlaveRepetaTransaction(input bit[ID_WIDTH - 1 : 0] rsp_id ); //TODO
-	extern local function void readSlaveResponse(); // TODO
+	extern local function void errorFromSlaveRepetaTransaction(input bit[ID_WIDTH - 1 : 0] rsp_id ); //DONE
+	extern local function void readSlaveResponse(); // DONE
 	extern local function void putOkResp(input bit[ID_WIDTH - 1 : 0] rsp_id );
-	extern local function void errorFromSlaveDecError(input bit[ID_WIDTH - 1 : 0] rsp_id); // TODO
-//	extern local function void reaadExistingBurst();
+	extern local function void errorFromSlaveDecError(input bit[ID_WIDTH - 1 : 0] rsp_id); // DONE
 	extern local function void removeBurstAndCheckExisintgID(input bit[ID_WIDTH - 1 : 0] rsp_id);
+
+
+
 
 	extern static function axi_master_write_scheduler getSchedulerInstance(input uvm_component parent); // DONE
 
@@ -91,7 +80,7 @@ endclass : axi_master_write_scheduler
 		super.new(name,parent);
 		mssg = new();
 		single_response_from_slave = new();
-
+//		mbx = new(axi_mssg);
 	endfunction : new
 
 // BUILD
@@ -112,19 +101,22 @@ endclass : axi_master_write_scheduler
 				rand_data = new();
 				assert(rand_data.randomize);
 				tmp_data = new();
-				tmp_data.data = frame.data[i];
-				tmp_data.addr = frame.addr;
-				tmp_data.size = frame.size;
-				tmp_data.burst_type = frame.burst_type;
-				tmp_data.lock = frame.lock;
-				tmp_data.id = frame.id;
-				tmp_data.cache = frame.cache;
-				tmp_data.prot = frame.prot;
-				tmp_data.qos = frame.qos;
-				tmp_data.region = frame.region;
-				tmp_data.delay = rand_data.delay;
-				tmp_data.delay_addrdata = rand_data.delay_addrdata;
-				tmp_data.last_one = FALSE;
+				tmp_data.data 				= frame.data[i];
+				tmp_data.addr 				= frame.addr;
+				tmp_data.size 				= frame.size;
+				tmp_data.burst_type 		= frame.burst_type;
+				tmp_data.lock 				= frame.lock;
+				tmp_data.id 				= frame.id;
+				tmp_data.cache 				= frame.cache;
+				tmp_data.prot 				= frame.prot;
+				tmp_data.qos 				= frame.qos;
+				tmp_data.region 			= frame.region;
+				tmp_data.delay 				= rand_data.delay;
+				tmp_data.delay_addr 		= rand_data.delay_addr;
+				tmp_data.delay_data 		= rand_data.delay_data;
+				tmp_data.delay_awvalid 		= rand_data.delay_awvalid;
+				tmp_data.delay_wvalid 		= rand_data.delay_wvalid;
+				tmp_data.last_one 			= FALSE;
 				sem.get(1);
 				single_burst.addSingleFrame(tmp_data);
 				sem.put(1);
@@ -232,7 +224,7 @@ endclass : axi_master_write_scheduler
 		    end
 	endtask
 
-
+// reset all queues and
 	function void axi_master_write_scheduler::resetAll();
 		sem.get(1);
 		for(int  i = 0; i < burst_queue.size(); i++ )
@@ -461,7 +453,6 @@ function void axi_master_write_scheduler::removeBurstAndCheckExisintgID(input bi
 				end
 		end
 endfunction
-
 
 
 

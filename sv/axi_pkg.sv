@@ -13,6 +13,13 @@ package axi_pkg;
 	`include "sv/axi_frame.sv"
 	`include "sv/axi_types.sv"
 
+	//utils
+	`include "sv/utils/axi_master_write_base_driver.sv"
+	`include "sv/utils/axi_master_write_data_driver.sv"
+	`include "sv/utils/axi_master_write_address_driver.sv"
+	`include "sv/utils/axi_master_write_main_driver.sv"
+	`include "sv/utils/axi_master_write_response_driver.sv"
+
 	//add include for master
 	`include "sv/master/axi_master_config.sv"
 

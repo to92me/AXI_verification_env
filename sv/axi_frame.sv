@@ -68,7 +68,8 @@ class axi_single_frame extends axi_frame_base;
 		//Declare fields
 	rand bit[DATA_WIDTH-1 : 0]      data;
 	rand int 						delay;
-	rand int						delay_addrdata;
+	rand int						delay_addr;
+	rand int 						delay_data;
 	rand int 						delay_awvalid;
 	rand int 						delay_wvalid;
 	true_false_enum 				last_one = FALSE;
@@ -78,7 +79,8 @@ class axi_single_frame extends axi_frame_base;
 `uvm_object_utils_begin(axi_single_frame)
 	 `uvm_field_int(data, UVM_DEFAULT)
 	 `uvm_field_int(delay, UVM_DEFAULT)
-	 `uvm_field_int(delay_addrdata, UVM_DEFAULT)
+	 `uvm_field_int(delay_addr, UVM_DEFAULT)
+	 `uvm_field_int(delay_data, UVM_DEFAULT)
 	 `uvm_field_int(delay_awvalid, UVM_DEFAULT)
 	 `uvm_field_int(delay_wvalid, UVM_DEFAULT)
 	 `uvm_field_enum(true_false_enum, last_one, UVM_DEFAULT)
@@ -91,7 +93,8 @@ class axi_single_frame extends axi_frame_base;
 	}
 
 	constraint delay_addrdata_csr{
-		delay_addrdata inside {[-5 : 5]};
+		delay_data inside 	{[0 : 5]};
+		delay_addr inside	{[0 : 5]};
 	}
 
 	constraint delay_awvalid_csr{
