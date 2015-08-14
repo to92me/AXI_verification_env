@@ -13,6 +13,16 @@ package axi_pkg;
 	`include "sv/axi_frame.sv"
 	`include "sv/axi_types.sv"
 	`include "sv/axi_read_frames.sv"
+	`include "sv/axi_read_monitor.sv"
+
+	//utils
+	`include "sv/utils/axi_master_write_base_driver.sv"
+	`include "sv/utils/axi_master_write_data_driver.sv"
+	`include "sv/utils/axi_master_write_address_driver.sv"
+	`include "sv/utils/axi_master_write_main_driver.sv"
+	`include "sv/utils/axi_master_write_response_driver.sv"
+
+	`include "sv/utils/axi_slave_read_arbitration.sv"
 
 	//add include for master
 	`include "sv/master/axi_master_config.sv"
@@ -23,7 +33,6 @@ package axi_pkg;
 	`include "sv/master/axi_master_write_sequence_lib.sv"
 
 	`include "sv/master/axi_master_read_driver.sv"
-	`include "sv/master/axi_master_read_monitor.sv"
 	`include "sv/master/axi_master_read_sequencer.sv"
 	`include "sv/master/axi_master_read_sequence_lib.sv"
 
@@ -36,7 +45,6 @@ package axi_pkg;
 	`include "sv/slave/axi_slave_write_sequence_lib.sv"
 
 	`include "sv/slave/axi_slave_read_driver.sv"
-	`include "sv/slave/axi_slave_read_monitor.sv"
 	`include "sv/slave/axi_slave_read_sequencer.sv"
 	`include "sv/slave/axi_slave_read_sequence_lib.sv"
 

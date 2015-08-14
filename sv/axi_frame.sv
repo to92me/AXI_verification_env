@@ -25,20 +25,6 @@ class axi_frame_base extends uvm_sequence_item;
 	rand bit [2:0]					prot;
 	rand bit [3:0]					qos;
 	rand bit [3:0]					region;
-	// user
-
-//	// constraints
-//	constraint c_lock {
-//		lock inside {NORMAL, EXCLUSIVE};
-//	}
-//
-//	constraint c_burst_type {
-//		burst_type inside {FIXED, INCR, WRAP, Reserved};
-//	}
-//
-//	constraint c_burst_size {
-//		size inside {BYTE_1, BYTE_2, BYTE_4, BYTE_8, BYTE_16, BYTE_32, BYTE_64, BYTE_128};
-//	}
 
 
 	// UVM utility macros
@@ -85,16 +71,41 @@ class axi_single_frame extends axi_frame_base;
 		//Declare fields
 	rand bit[DATA_WIDTH-1 : 0]      data;
 	rand int 						delay;
-	rand int						delay_addrdata;
+	rand int						delay_addr;
+	rand int 						delay_data;
+	rand int 						delay_awvalid;
+	rand int 						delay_wvalid;
+	true_false_enum 				last_one = FALSE;
+	true_false_enum 				first_one = FALSE;
 
 	// UVM utility macros
-	`uvm_object_utils_begin(axi_single_frame)
+`uvm_object_utils_begin(axi_single_frame)
 	 `uvm_field_int(data, UVM_DEFAULT)
 	 `uvm_field_int(delay, UVM_DEFAULT)
+	 `uvm_field_int(delay_addr, UVM_DEFAULT)
+	 `uvm_field_int(delay_data, UVM_DEFAULT)
+	 `uvm_field_int(delay_awvalid, UVM_DEFAULT)
+	 `uvm_field_int(delay_wvalid, UVM_DEFAULT)
+	 `uvm_field_enum(true_false_enum, last_one, UVM_DEFAULT)
+	 `uvm_field_enum(true_false_enum, first_one, UVM_DEFAULT)
+	 `uvm_field_enum(true_false_enum, first_one, UVM_DEFAULT)
  `uvm_object_utils_end
 
 	constraint delay_cst{
 		delay inside {[0 : 5]};
+	}
+
+	constraint delay_addrdata_csr{
+		delay_data inside 	{[0 : 5]};
+		delay_addr inside	{[0 : 5]};
+	}
+
+	constraint delay_awvalid_csr{
+		delay_awvalid inside {[0 : 5]};
+	}
+
+	constraint delay_wvalid_csr{
+		delay_wvalid inside {[0:5]};
 	}
 
 	function new (string name = "axi_frame");

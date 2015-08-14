@@ -11,6 +11,7 @@
 //------------------------------------------------------------------------------
 
 // axi mssg is for sending data to scheduler if package is ready or not
+
 class axi_mssg ;
 
 	axi_single_frame frame;
@@ -18,16 +19,22 @@ class axi_mssg ;
 
 endclass : axi_mssg
 
-// this class is used to check if it is unique ID
-// field counter had been deleted because ordering is set from queue order number;
+
 class unique_id_struct;
-	id_type_enum id_status = UNIQUE_ID; // this is defaulh and if needs to be set
+	id_type_enum id_status = UNIQUE_ID;
 	bit [ID_WIDTH-1 : 0] ID;
 endclass: unique_id_struct
 
-class axi_burst_package_status;
+class axi_waiting_resp;
+	axi_frame  			 frame;
+	int 				 counter;
+endclass
+
+class axi_slave_response;
+	bit [ID_WIDTH-1 : 0]	ID;
+	response_enum 			resp;
+endclass
 
 
-endclass: axi_burst_package_status
 
-// axi data epresentsone data and his delay that contains axi_scheduler_package
+
