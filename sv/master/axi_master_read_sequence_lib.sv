@@ -14,9 +14,6 @@
 // sequences raise objections but subsequences do not.
 class axi_master_read_base_seq extends uvm_sequence #(axi_frame_base);
 
-	// TODO: Add fields here
-
-
 	`uvm_object_utils(axi_master_read_base_seq)
 	`uvm_declare_p_sequencer(axi_master_read_sequencer)
 

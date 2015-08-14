@@ -12,6 +12,7 @@ package axi_pkg;
 	`include "sv/axi_if.sv"
 	`include "sv/axi_frame.sv"
 	`include "sv/axi_types.sv"
+	`include "sv/axi_read_frames.sv"
 
 	//add include for master
 	`include "sv/master/axi_master_config.sv"

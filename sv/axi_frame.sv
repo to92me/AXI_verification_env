@@ -4,6 +4,9 @@
 	* uvc_company = uvc_company, uvc_name = uvc_name
 *******************************************************************************/
 
+`ifndef AXI_FRAME_BASE_SVH
+`define AXI_FRAME_BASE_SVH
+
 //------------------------------------------------------------------------------
 //
 // CLASS: axi_frame
@@ -100,4 +103,4 @@ class axi_single_frame extends axi_frame_base;
 
 endclass
 
-
+`endif

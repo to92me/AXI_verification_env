@@ -10,21 +10,20 @@
 //
 //------------------------------------------------------------------------------
 
-class axi_slave_read_sequencer extends uvm_sequencer #(axi_frame_base);
+`ifndef AXI_SLAVE_READ_SEQUENCER_SV
+`define AXI_SLAVE_READ_SEQUENCER_SV
+
+class axi_slave_read_sequencer extends uvm_sequencer #(axi_read_base_frame);
 
 	// Configuration object
 	axi_slave_config config_obj;
 
-	// peek at monitor
-	uvm_blocking_peek_port#(axi_frame_base) addr_trans_port;
-
-	// Reset TLM FIFO(since this is a transaction level component the
-	// reset should be fetched via a TLM analysis FIFO)
-	//tlm_analysis_fifo#(bit) reset_port;
+	axi_slave_read_arbitration arbit;
 
 	// register
 	`uvm_object_utils_begin(axi_slave_read_sequencer)
 		`uvm_field_object(config_obj, UVM_DEFAULT)
+		`uvm_field_object(arbit, UVM_DEFAULT)
 	`uvm_component_utils_end
 
 	// build_phase
@@ -35,39 +34,12 @@ class axi_slave_read_sequencer extends uvm_sequencer #(axi_frame_base);
 			`uvm_fatal("NOCONFIG",{"Config object must be set for: ",get_full_name(),".config_obj"})
 	endfunction: build_phase
 
-	// Run phase with reset handling mechanism
-	// When a reset is detected the default sequence of the sequencer is killed
-	// and restarted
-	// This method might not always be safe to use so it is not recommended
-	/*virtual task run_phase(uvm_phase phase);
-		process main;
-		bit reset_status;
-		bit test_finished=0;
-		super.run_phase(phase);
-		forever begin
-			fork
-				// Main process
-				begin
-					main=process::self();
-					start_default_sequence();
-					test_finished=1;
-				end
-				// Reset process
-				begin
-					reset_port.get(reset_status);
-					stop_sequences();
-					main.kill();
-					reset_port.get(reset_status);
-				end
-			join
-			if(test_finished) break;
-		end
-	endtask*/
-
 	// new - constructor
 	function new (string name = "axi_slave_read_sequencer", uvm_component parent = null);
 		super.new(name, parent);
-		//addr_trans_port = new("addr_trans_port", this);
+		arbit = new();
 	endfunction : new
 
 endclass : axi_slave_read_sequencer
+
+`endif

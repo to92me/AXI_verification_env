@@ -10,6 +10,9 @@
 //
 //------------------------------------------------------------------------------
 
+`ifndef AXI_SLAVE_READ_AGENT_SV
+`define AXI_SLAVE_READ_AGENT_SV
+
 class axi_slave_read_agent extends uvm_agent;
 
 	// Configuration object
@@ -17,7 +20,7 @@ class axi_slave_read_agent extends uvm_agent;
 
 	axi_slave_read_driver driver;
 	axi_slave_read_sequencer sequencer;
-	axi_slave_read_monitor monitor;
+	axi_read_monitor monitor;
 
 	virtual axi_if vif;
 
@@ -36,7 +39,7 @@ class axi_slave_read_agent extends uvm_agent;
 	// build_phase
 	function void build_phase(uvm_phase phase);
 		super.build_phase(phase);
-		monitor = axi_slave_read_monitor::type_id::create("monitor", this);
+		monitor = axi_read_monitor::type_id::create("monitor", this);
 
 		// Propagate the configuration object
 		if(!uvm_config_db#(axi_slave_config)::get(this, "", "config_obj", config_obj))
@@ -69,3 +72,5 @@ class axi_slave_read_agent extends uvm_agent;
 	endfunction : update_config
 
 endclass : axi_slave_read_agent
+
+`endif

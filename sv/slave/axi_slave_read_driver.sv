@@ -10,7 +10,10 @@
 //
 //------------------------------------------------------------------------------
 
-class axi_slave_read_driver extends uvm_driver #(axi_frame_base);
+`ifndef AXI_SLAVE_READ_DRIVER_SV
+`define AXI_SLAVE_READ_DRIVER_SV
+
+class axi_slave_read_driver extends uvm_driver #(axi_read_base_frame, axi_read_base_frame);
 
 	// The virtual interface used to drive and view HDL signals.
 	protected virtual axi_if vif;
@@ -18,23 +21,16 @@ class axi_slave_read_driver extends uvm_driver #(axi_frame_base);
 	// Configuration object
 	axi_slave_config config_obj;
 
-	axi_slave_read_arbitration arbit;
-	axi_read_single_frame one_frame;
-
-	// for drive next single frame
-	int i, tmp = 0;
+	uvm_blocking_peek_port#(axi_read_burst_frame) addr_trans_port;
 
 	// Provide implmentations of virtual methods such as get_type_name and create
 	`uvm_component_utils_begin(axi_slave_read_driver)
-    	`uvm_field_object(arbit, UVM_DEFAULT)
-    	`uvm_field_object(one_frame, UVM_DEFAULT)
 	`uvm_component_utils_end
 
 	// new - constructor
 	function new (string name, uvm_component parent);
 		super.new(name, parent);
-		arbit = new();
-		one_frame = new();
+		addr_trans_port = new("addr_trans_port", this);
 	endfunction : new
 
 	// class methods
@@ -43,11 +39,9 @@ class axi_slave_read_driver extends uvm_driver #(axi_frame_base);
 	extern virtual task get_and_drive();
 	extern virtual task get_from_seq();
 	extern virtual task reset();
-	extern virtual task drive_next_single_frame();
-	extern virtual task dec_delay();
+	extern virtual task drive_next_single_frame(axi_read_single_frame rsp);
 
 endclass : axi_slave_read_driver
-
 
 	// build_phase
 	function void axi_slave_read_driver::build_phase(uvm_phase phase);
@@ -76,24 +70,37 @@ endclass : axi_slave_read_driver
 		fork
 			get_from_seq();
 			reset();
-			dec_delay();
-			drive_next_single_frame();
 		join
 	endtask : get_and_drive
 
-	// get from seq
+	// get new burst from sequencer
 	task axi_slave_read_driver::get_from_seq();
+
+		axi_read_base_frame item;
+		axi_read_burst_frame req;
+		axi_read_single_frame rsp;
+
 		forever begin
-			seq_item_port.get_next_item(req);
-			$cast(rsp, req.clone());
-			rsp.set_id_info(req);
 
-			// send burst info to arbitration where it will make
-			// all the single frames and update the queues
-			arbit.get_new_burst(rsp);
-
+			// phase 1
+			seq_item_port.get_next_item(item);
+			if ($cast(req, item))
+				begin
+					// TODO : uzmi od monitora, ako ima
+				end
+			else
+				`uvm_error("CASTFAIL", "The recieved seq. item is not a request seq. item");
 			seq_item_port.item_done();
-			seq_item_port.put_response(rsp);
+
+			// phase 2
+			seq_item_port.get_next_item(item);
+			if ($cast(rsp, item))
+				begin
+					drive_next_single_frame(rsp);
+				end
+			else
+				`uvm_error("CASTFAIL", "The recieved seq. item is not a response seq. item");
+			seq_item_port.item_done();
 		end
 	endtask : get_from_seq
 
@@ -120,52 +127,20 @@ endclass : axi_slave_read_driver
 	endtask : reset
 
 	// drive next single frame
-	task axi_slave_read_driver::drive_next_single_frame();
-
-		forever begin
+	task axi_slave_read_driver::drive_next_single_frame(axi_read_single_frame rsp);
 			@(posedge vif.sig_clock);
-
-			arbit.ready_sem.get(1);
-			if (arbit.ready_queue.size())
-				begin
-					one_frame = arbit.ready_queue.pop_front();
-
+			if (rsp.valid == FRAME_VALID) begin
 					// vif signals
-					vif.rid <= one_frame.id;
-					vif.rdata <= one_frame.data;
-					vif.rresp <= OKAY;
-					vif.rlast <= one_frame.last;
+					vif.rid <= rsp.id;
+					vif.rdata <= rsp.data;
+					vif.rresp <= rsp.resp;
+					vif.rlast <= rsp.last;
 					// user
 					vif.rvalid <= 1'b1;
-
-					// last frame of the burst sent, check if there is a
-					// burst with the same id waiting to be sent
-					arbit.burst_sem.get(1);
-					if (one_frame.last && arbit.burst_wait.size())
-						for (i=0; i<arbit.burst_wait.size(); i++) begin
-							if (arbit.burst_wait[i].id == one_frame.id) begin
-								arbit.create_single_frames(arbit.burst_wait[i]);
-								tmp = i;
-								break;
-							end
-						end
-						if (tmp) begin
-							arbit.burst_wait.delete(i);
-							tmp = 0;
-						end
-					arbit.burst_sem.put(1);
 				end
-			else
+			else begin
 				vif.rvalid <= 1'b0;
-
-			arbit.ready_sem.put(1);
-		end
+			end
 	endtask : drive_next_single_frame
 
-	// decrement delay
-	task axi_slave_read_driver::dec_delay();
-		forever begin
-			@(posedge vif.sig_clock);
-			arbit.dec_delay();
-		end
-	endtask : dec_delay
+`endif

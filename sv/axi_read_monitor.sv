@@ -6,11 +6,14 @@
 
 //------------------------------------------------------------------------------
 //
-// CLASS: axi_master_read_monitor
+// CLASS: axi_read_monitor
 //
 //------------------------------------------------------------------------------
 
-class axi_master_read_monitor extends uvm_monitor;
+`ifndef AXI_READ_MONITOR_SV
+`define AXI_READ_MONITOR_SV
+
+class axi_read_monitor extends uvm_monitor;
 
 	// This property is the virtual interfaced needed for this component to drive
 	// and view HDL signals.
@@ -31,7 +34,8 @@ class axi_master_read_monitor extends uvm_monitor;
 	uvm_analysis_port #(axi_frame_base) addr_collected_port;
 
 	// allow sequencer access
-	uvm_blocking_peek_imp#(axi_frame_base, axi_master_read_monitor) addr_trans_export;
+	uvm_blocking_peek_imp#(axi_frame_base, axi_read_monitor) addr_trans_export;
+	event trans_addr_grabbed;
 
 	// The following property holds the transaction information currently
 	// begin captured (by the collect_address_phase and data_phase methods).
@@ -39,7 +43,7 @@ class axi_master_read_monitor extends uvm_monitor;
 	axi_frame_base trans_addr_channel;
 
 	// Provide implementations of virtual methods such as get_type_name and create
-	`uvm_component_utils_begin(axi_master_read_monitor)
+	`uvm_component_utils_begin(axi_read_monitor)
 		`uvm_field_object(config_obj, UVM_DEFAULT)
 		`uvm_field_int(checks_enable, UVM_DEFAULT)
 		`uvm_field_int(coverage_enable, UVM_DEFAULT)
@@ -58,14 +62,15 @@ class axi_master_read_monitor extends uvm_monitor;
 
 	extern virtual function void build_phase(uvm_phase phase);
 	//extern virtual task run_phase(uvm_phase phase);
+	extern task peek (output axi_frame_base trans); // Interface to the sequencer
 	extern virtual task collect_transactions();
 	extern virtual function void perform_transfer_checks();
 	extern virtual function void perform_transfer_coverage();
 
-endclass : axi_master_read_monitor
+endclass : axi_read_monitor
 
 	// build_phase
-	function void axi_master_read_monitor::build_phase(uvm_phase phase);
+	function void axi_read_monitor::build_phase(uvm_phase phase);
 		super.build_phase(phase);
 		if(!uvm_config_db#(virtual axi_if)::get(this, "", "vif", vif))
 			`uvm_fatal("NOVIF",{"virtual interface must be set for: ",get_full_name(),".vif"});
@@ -74,34 +79,13 @@ endclass : axi_master_read_monitor
 			`uvm_fatal("NOCONFIG",{"Config object must be set for: ",get_full_name(),".config_obj"})
 	endfunction: build_phase
 
-	// run_phase
-	/*task axi_master_read_monitor::run_phase(uvm_phase phase);
-		process main; // used by the reset handling mechanism
-		// Start monitoring only after an initial reset pulse
-		@(negedge vif.sig_reset);
-		do
-			@(posedge vif.sig_clock);
-		while(vif.sig_reset!==1);
-		// Start monitoring here with reset handling mechanism
-		forever begin
-			fork
-				// Start the monitoring thread
-				begin
-					main=process::self();
-					collect_transactions();
-				end
-				// Monitor the reset signal
-				begin
-					@(negedge vif.sig_reset);
-					reset_monitor();
-					if(main) main.kill();
-				end
-			join_any
-		end
-	endtask : run_phase*/
+	task axi_read_monitor::peek(output axi_frame_base trans);
+		@trans_addr_grabbed;
+		trans = trans_addr_channel;
+	endtask
 
 	// collect_transactions
-	task axi_master_read_monitor::collect_transactions();
+	task axi_read_monitor::collect_transactions();
 		forever begin
 			@(posedge vif.sig_clock);
 			// TODO : Fill this place with the logic for collecting the transfer data
@@ -119,6 +103,7 @@ endclass : axi_master_read_monitor
 					trans_addr_channel.qos = vif.arqos;
 					trans_addr_channel.region = vif.arregion;
 					// user
+					->trans_addr_grabbed;
 				end
 
 			if (vif.rvalid && vif.rready)
@@ -130,8 +115,6 @@ endclass : axi_master_read_monitor
 					// user
 				end
 
-			`uvm_info(get_full_name(), $sformatf("Transfer collected :\n!s",! trans_data_channel.sprint()), UVM_MEDIUM)
-			`uvm_info(get_full_name(), $sformatf("Transfer collected :\n!s",! trans_addr_channel.sprint()), UVM_MEDIUM)
 			if (checks_enable)
 				perform_transfer_checks();
 			if (coverage_enable)
@@ -142,14 +125,16 @@ endclass : axi_master_read_monitor
 	endtask : collect_transactions
 
 	// perform_transfer_checks
-	function void axi_master_read_monitor::perform_transfer_checks();
+	function void axi_read_monitor::perform_transfer_checks();
 		// TODO : Perform checks here
 		// ...
 	endfunction : perform_transfer_checks
 
 	// perform_transfer_coverage
-	function void axi_master_read_monitor::perform_transfer_coverage();
+	function void axi_read_monitor::perform_transfer_coverage();
 		//cov_trans.sample();
 		// TODO : Collect coverage here
 		// ...
 	endfunction : perform_transfer_coverage
+
+`endif

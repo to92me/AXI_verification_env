@@ -9,10 +9,7 @@
 // CLASS: uvc_company_uvc_name_config_obj
 //
 //------------------------------------------------------------------------------
-	import uvm_pkg::*;
-	`include "uvm_macros.svh"
-	`include "sv/master/axi_master_config.sv"
-	`include "sv/slave/axi_slave_config.sv"
+
 
 class axi_config extends uvm_object;
 
