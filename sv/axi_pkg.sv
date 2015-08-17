@@ -64,10 +64,9 @@ package axi_pkg;
 //	`include "sv/slave/axi_slave_write_sequencer.sv"
 //	`include "sv/slave/axi_slave_write_sequence_lib.sv"
 
-//	`include "sv/slave/axi_slave_read_driver.sv"
-//	`include "sv/slave/axi_slave_read_monitor.sv"
-//	`include "sv/slave/axi_slave_read_sequencer.sv"
-//	`include "sv/slave/axi_slave_read_sequence_lib.sv"
+	`include "sv/slave/axi_slave_read_driver.sv"
+	`include "sv/slave/axi_slave_read_sequencer.sv"
+	`include "sv/slave/axi_slave_read_sequence_lib.sv"
 
 
 endpackage : axi_pkg

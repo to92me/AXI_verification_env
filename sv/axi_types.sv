@@ -1,6 +1,8 @@
 `ifndef AXI_TYPES_SVH
 `define AXI_TYPES_SVH
 
+parameter PIPE_SIZE = 5;
+
 parameter ADDR_WIDTH = 32;
 parameter DATA_WIDTH = 64;
 parameter ID_WIDTH = 32;
@@ -68,14 +70,18 @@ typedef enum {
 } first_sent_enum;
 
 typedef enum {
-	TRUE = 1,
-	FALSE = 0
-}true_false_enum;
-
-typedef enum{
-	GOOD_LAST_BIT,
-	BAD_LAST_BIT
+	BAD_LAST_BIT = 0,
+	GOOD_LAST_BIT = 1
 } last_enum;
 
+typedef enum {
+	FRAME_VALID,
+	FRAME_NOT_VALID
+} valid_enum;
+
+typedef enum {
+	TRUE = 1,
+	FALSE = 0
+} true_false_enum;
 
 `endif

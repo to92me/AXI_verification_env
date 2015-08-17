@@ -7,13 +7,12 @@
 //
 //-------------------------------------------------------------------------
 
-
 interface axi_if (input sig_reset, input sig_clock);
-
 
 	parameter ADDR_WIDTH = 32;
 	parameter DATA_WIDTH = 64;
 	parameter ID_WIDTH = 32;
+	
 	parameter STRB_WIDTH = DATA_WIDTH / 8;
 
 	// write address channel signals

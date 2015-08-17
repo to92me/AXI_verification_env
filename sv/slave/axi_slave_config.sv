@@ -1,5 +1,5 @@
-`ifndef AXI_SLAVE_CONFIG
-`define AXI_SLAVE_CONFIG
+`ifndef AXI_SLAVE_CONFIG_SVH
+`define AXI_SLAVE_CONFIG_SVH
 //------------------------------------------------------------------------------
 //
 // CLASS: axi_slave_config
@@ -107,6 +107,7 @@ endclass : slave_config_factory
 
 function void slave_config_factory::createSlaves(ref axi_slave_config slave_list[$], input int numberOfSlaves);
 		 address_points.sort();
+		
 
 	  for ( int i = 0; i < address_points.size(); i+=2)
 		  begin
@@ -118,7 +119,7 @@ function void slave_config_factory::createSlaves(ref axi_slave_config slave_list
 		  end
 
 
-endfunction
+	endfunction : createSlaves
 
 //------------------------------------------------------------------------------
 //
@@ -128,5 +129,5 @@ endfunction
 //
 //------------------------------------------------------------------------------
 
-`endif
+
 

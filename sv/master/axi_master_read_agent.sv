@@ -10,6 +10,9 @@
 //
 //------------------------------------------------------------------------------
 
+`ifndef AXI_MASTER_READ_AGENT_SV
+`define AXI_MASTER_READ_AGENT_SV
+
 class axi_master_read_agent extends uvm_agent;
 
 	// Configuration object
@@ -17,7 +20,7 @@ class axi_master_read_agent extends uvm_agent;
 
 	axi_master_read_driver driver;
 	axi_master_read_sequencer sequencer;
-	axi_master_read_monitor monitor;
+	axi_read_monitor monitor;
 
 	virtual axi_if vif;
 
@@ -36,7 +39,7 @@ class axi_master_read_agent extends uvm_agent;
 	// build_phase
 	function void build_phase(uvm_phase phase);
 		super.build_phase(phase);
-		monitor = axi_master_read_monitor::type_id::create("monitor", this);
+		monitor = axi_read_monitor::type_id::create("monitor", this);
 
 		// Propagate the configuration object
 		if(!uvm_config_db#(axi_master_config)::get(this, "", "config_obj", config_obj))
@@ -69,3 +72,5 @@ class axi_master_read_agent extends uvm_agent;
 	endfunction : update_config
 
 endclass : axi_master_read_agent
+
+`endif

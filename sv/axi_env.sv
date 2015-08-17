@@ -10,6 +10,9 @@
 //
 //------------------------------------------------------------------------------
 
+`ifndef AXI_ENV_SV
+`define AXI_ENV_SV
+
 class axi_env extends uvm_env;
 
 	// Virtual Interface variable
@@ -21,7 +24,7 @@ class axi_env extends uvm_env;
 	// Components of the environment
 	axi_slave_read_agent read_slaves[];
 	axi_master_read_agent read_master;
-	axi_master_read_monitor read_monitor; //TODO : i slave i master monitori su isti; kako ovo uraditi? jos jedan monitor?
+	axi_read_monitor read_monitor;
 
 	// Configuration
 	axi_config config_obj;
@@ -73,7 +76,7 @@ endclass : axi_env
 			uvm_config_object::set(this, sname, "config_obj", config_obj.slave_list[i]);
 		end
 
-		read_monitor = axi_master_read_monitor::type_id::create("read_monitor",this);
+		read_monitor = axi_read_monitor::type_id::create("read_monitor",this);
 		read_master = axi_master_read_agent::type_id::create(config_obj.master.name,this);
 		read_slaves = new[config_obj.slave_list.size()];
 		for(int i = 0; i < config_obj.slave_list.size(); i++) begin
@@ -92,7 +95,7 @@ endclass : axi_env
 		foreach(read_slaves[i]) begin
 			read_slaves[i].monitor = read_monitor;
 			if (read_slaves[i].is_active == UVM_ACTIVE)
-				read_slaves[i].sequencer.addr_trans_port.connect(read_monitor.addr_trans_export);
+				read_slaves[i].driver.addr_trans_port.connect(read_monitor.addr_trans_export);
 		end
 	endfunction
 
@@ -129,3 +132,5 @@ task axi_env::run_phase(uvm_phase phase);
     update_vif_enables();
   join
 endtask : run_phase
+
+`endif
