@@ -1,15 +1,11 @@
-/******************************************************************************
-	* DVT CODE TEMPLATE: configuration object
-	* Created by root on Aug 2, 2015
-	* uvc_company = uvc_company, uvc_name = uvc_name
-*******************************************************************************/
+`ifndef AXI_CONFIG_SVH
+`define AXI_CONFIG_SVH
 
 //------------------------------------------------------------------------------
 //
 // CLASS: uvc_company_uvc_name_config_obj
 //
 //------------------------------------------------------------------------------
-
 
 class axi_config extends uvm_object;
 
@@ -49,3 +45,4 @@ endclass : axi_config
 		factory.createSlaves(slave_list, number_of_slaves);
 	endfunction
 
+`endif

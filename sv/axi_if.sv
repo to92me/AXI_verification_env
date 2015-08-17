@@ -1,9 +1,5 @@
-/******************************************************************************
-	* DVT CODE TEMPLATE: interface
-	* Created by root on Aug 2, 2015
-	* ovc_company = ovc_company, ovc_name = ovc_name ovc_if = ovc_if
-	* interface arguments = interface_args
-*******************************************************************************/
+`ifndef AXI_IF
+`define AXI_IF
 
 //-------------------------------------------------------------------------
 //
@@ -80,3 +76,7 @@ interface axi_if (input sig_reset, input sig_clock);
 	bit							has_coverage = 1;
 
 endinterface : axi_if
+
+`endif
+
+

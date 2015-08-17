@@ -1,12 +1,5 @@
-/******************************************************************************
-	* DVT CODE TEMPLATE: sequence item
-	* Created by root on Aug 4, 2015
-	* uvc_company = uvc_company, uvc_name = uvc_name
-*******************************************************************************/
-
-`ifndef AXI_FRAME_BASE_SVH
-`define AXI_FRAME_BASE_SVH
-
+`ifndef AXI_FRAME_SVH
+`define AXI_FRAME_SVH
 //------------------------------------------------------------------------------
 //
 // CLASS: axi_frame

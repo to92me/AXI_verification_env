@@ -1,8 +1,5 @@
-/******************************************************************************
-	* DVT CODE TEMPLATE: sequencer
-	* Created by root on Aug 2, 2015
-	* uvc_company = uvc_company, uvc_name = uvc_name
-*******************************************************************************/
+`ifndef AXI_MASTER_WRITE_SEQUENCER_SVH
+`define AXI_MASTER_WRITE_SEQUENCER_SVH
 
 //------------------------------------------------------------------------------
 //
@@ -10,21 +7,21 @@
 //
 //------------------------------------------------------------------------------
 
-class uvc_company_uvc_name_sequencer extends uvm_sequencer #(uvc_company_uvc_name_item);
+class axi_master_write_sequencer extends uvm_sequencer #(axi_frame);
 
 	// Configuration object
-	uvc_company_uvc_name_config_obj config_obj;
-	
-	// TODO: Add fields here
-	
+	axi_master_config config_obj;
 
-	`uvm_component_utils(uvc_company_uvc_name_sequencer)
+
+`uvm_component_utils_begin(axi_master_write_sequencer)
+	 `uvm_field_object(config_obj, UVM_REFERENCE | UVM_DEFAULT)
+ `uvm_component_utils_end
 
 	// build_phase
 	function void build_phase(uvm_phase phase);
 		super.build_phase(phase);
-		// Propagate the configuration object
-		if(!uvm_config_db#(uvc_company_uvc_name_config_obj)::get(this, "", "config_obj", config_obj))
+
+		if(!uvm_config_db#(axi_master_config)::get(this, "", "config_obj", config_obj))
 			`uvm_fatal("NOCONFIG",{"Config object must be set for: ",get_full_name(),".config_obj"})
 	endfunction: build_phase
 
@@ -33,4 +30,6 @@ class uvc_company_uvc_name_sequencer extends uvm_sequencer #(uvc_company_uvc_nam
 		super.new(name, parent);
 	endfunction : new
 
-endclass : uvc_company_uvc_name_sequencer
+endclass : axi_master_write_sequencer
+
+`endif

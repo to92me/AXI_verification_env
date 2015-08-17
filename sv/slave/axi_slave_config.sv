@@ -1,10 +1,5 @@
-/******************************************************************************
-	* DVT CODE TEMPLATE: configuration object
-	* Created by root on Aug 4, 2015
-	* uvc_company = uvc_company, uvc_name = uvc_name
-*******************************************************************************/
-`ifndef AXI_SLAVE_CONFIG_SV
-`define AXI_SLAVE_CONFIG_SV
+`ifndef AXI_SLAVE_CONFIG_SVH
+`define AXI_SLAVE_CONFIG_SVH
 //------------------------------------------------------------------------------
 //
 // CLASS: axi_slave_config
@@ -105,17 +100,14 @@ class slave_config_factory extends uvm_object;
 		super.new(name);
  	endfunction: new
 
- 	extern function void createSlaves(ref axi_slave_config slave_list[$] , input int numberOfSlaves);
-
-
+ 	extern function void createSlaves(ref axi_slave_config slave_list[$], input int numberOfSlaves);
 
 endclass : slave_config_factory
 
 
-	function void slave_config_factory::createSlaves(ref axi_slave_config slave_list[$], input int numberOfSlaves);
+function void slave_config_factory::createSlaves(ref axi_slave_config slave_list[$], input int numberOfSlaves);
 		 address_points.sort();
-		/*if(address_points.size() % 2 != 0)
-			address_points.delete[address_points.size()];*/
+
 
 	  for ( int i = 0; i < address_points.size(); i+=2)
 		  begin
@@ -137,6 +129,5 @@ endclass : slave_config_factory
 //
 //------------------------------------------------------------------------------
 
-
-
 `endif
+

@@ -1,8 +1,5 @@
-/******************************************************************************
-	* DVT CODE TEMPLATE: configuration object
-	* Created by root on Aug 4, 2015
-	* uvc_company = uvc_company, uvc_name = uvc_name
-*******************************************************************************/
+`ifndef AXI_MASTER_CONFIG_SVH
+`define AXI_MASTER_CONFIG_SVH
 
 //------------------------------------------------------------------------------
 //
@@ -30,3 +27,5 @@ class axi_master_config extends uvm_object;
 	endfunction: new
 
 endclass : axi_master_config
+
+`endif

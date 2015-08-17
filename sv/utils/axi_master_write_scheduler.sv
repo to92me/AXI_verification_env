@@ -1,8 +1,6 @@
-/******************************************************************************
-	* DVT CODE TEMPLATE: component
-	* Created by root on Aug 5, 2015
-	* uvc_company = uvc_company, uvc_name = uvc_name
-*******************************************************************************/
+`ifndef AXI_MASTER_WRITE_SCHEDULER_SVH
+`define AXI_MASTER_WRITE_SCHEDULER_SVH
+
 
 //------------------------------------------------------------------------------
 //
@@ -53,10 +51,9 @@ class axi_master_write_scheduler extends uvm_component;
 
 	extern local function new(string name, uvm_component parent); // DONE
 	extern function void addBurst(input axi_frame frame); // DONE
-	extern function void buld();  // DONE
-	extern local function void serchForReadyFrame(); //DONE
-	extern task main(); // DONE
-	extern local function void delayCalculator(); // DONE
+	extern  function void serchForReadyFrame(); //DONE
+	extern task main(input int clocks); // DONE
+	extern  function void delayCalculator(); // DONE
 	extern function axi_mssg getFrameForDrivingVif(); // DONE
 	extern function void resetAll(); // DONE
 	extern local function void checkUniqueID(); // DONE
@@ -80,15 +77,8 @@ endclass : axi_master_write_scheduler
 		super.new(name,parent);
 		mssg = new();
 		single_response_from_slave = new();
-//		mbx = new(axi_mssg);
+		sem = new(1);
 	endfunction : new
-
-// BUILD
-	function void axi_master_write_scheduler::buld();
-		 if(!uvm_config_db#(virtual axi_if)::get(this, "", "vif", vif))
-			 `uvm_fatal("NOVIF",{"virtual interface must be set for: ",get_full_name(),".vif"})
-	     sem = new(1);
-	endfunction
 
 // ADD BURST
 	function void axi_master_write_scheduler::addBurst(input axi_frame frame);
@@ -215,10 +205,9 @@ endclass : axi_master_write_scheduler
 		sem.put(1);
 	endfunction
 
-	task axi_master_write_scheduler::main();
-	    forever
+	task axi_master_write_scheduler::main(input int clocks);
+	    repeat(clocks)
 		    begin
-			    @(posedge vif.sig_clock);
 			    this.delayCalculator;
 			    this.serchForReadyFrame;
 		    end
@@ -464,7 +453,7 @@ endfunction
 
 
 
-
+`endif
 
 
 

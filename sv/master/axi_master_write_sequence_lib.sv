@@ -1,30 +1,25 @@
-/******************************************************************************
-* DVT CODE TEMPLATE: sequence library
-* Created by root on Aug 2, 2015
-* uvc_company = uvc_company, uvc_name = uvc_name
-* uvc_trans = uvc_trans
-*******************************************************************************/
+
+`ifndef AXI_MASTER_WRITE_SEQUENCE_LIB_SVH
+`define AXI_MASTER_WRITE_SEQUENCE_LIB_SVH
 
 //------------------------------------------------------------------------------
 //
 // CLASS: uvc_company_uvc_name_base_seq
 //
 //------------------------------------------------------------------------------
-// This sequence raises/drops objections in the pre/post_body so that root
-// sequences raise objections but subsequences do not.
-virtual class uvc_name_base_sequence extends uvm_sequence #(uvc_trans);
 
-	// TODO: Add fields here
+virtual class axi_master_write_sequence_base extends uvm_sequence #(axi_frame);
 
 
 	// new - constructor
-	function new(string name="uvc_name_base_seq");
+	function new(string name="axi_master_write_sequence_base");
 		super.new(name);
 	endfunction
 
-	// Raise in pre_body so the objection is only raised for root sequences.
-	// There is no need to raise for sub-sequences since the root sequence
-	// will encapsulate the sub-sequence.
+//	`uvm_object_utils(axi_master_write_sequence_base)
+	`uvm_declare_p_sequencer(axi_master_write_sequence_base)
+
+
 	virtual task pre_body();
 		if (starting_phase!=null) begin
 			`uvm_info(get_type_name(),
@@ -32,11 +27,11 @@ virtual class uvc_name_base_sequence extends uvm_sequence #(uvc_trans);
 					get_sequence_path(),
 					starting_phase.get_name()), UVM_MEDIUM);
 			starting_phase.raise_objection(this);
+			uvm_test_done.set_drain_time(this, 20000ns);
 		end
 	endtask
 
-	// Drop the objection in the post_body so the objection is removed when
-	// the root sequence is complete.
+
 	virtual task post_body();
 		if (starting_phase!=null) begin
 			`uvm_info(get_type_name(),
@@ -47,28 +42,30 @@ virtual class uvc_name_base_sequence extends uvm_sequence #(uvc_trans);
 		end
 	endtask
 
-endclass : uvc_name_base_sequence
+endclass : axi_master_write_sequence_base
 
 //------------------------------------------------------------------------------
 //
 // SEQUENCE: uvc_name_transfer_seq
 //
 //------------------------------------------------------------------------------
-class uvc_name_transfer_seq extends uvc_name_base_sequence;
+class axi_master_write_sequence_lib_test1 extends axi_master_write_sequence_base;
 
 	// Add local random fields and constraints here
 
-	`uvm_object_utils(uvc_name_transfer_seq)
+	`uvm_object_utils(axi_master_write_sequence_lib_test1)
 
 	// new - constructor
-	function new(string name="uvc_name_transfer_seq");
+	function new(string name="axi_master_write_sequence_lib_test1");
 		super.new(name);
 	endfunction
 
 	virtual task body();
-		`uvm_do_with(req,
-			{ /* TODO : add constraints here*/ } )
+		`uvm_do(req);
 		get_response(rsp);
 	endtask
 
-endclass : uvc_name_transfer_seq
+endclass : axi_master_write_sequence_lib_test1
+
+
+`endif
