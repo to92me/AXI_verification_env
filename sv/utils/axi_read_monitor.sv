@@ -31,16 +31,16 @@ class axi_read_monitor extends uvm_monitor;
 
 	// TLM Ports
 	uvm_analysis_port #(axi_read_single_frame) data_collected_port;
-	uvm_analysis_port #(axi_frame_base) addr_collected_port;
+	uvm_analysis_port #(axi_read_burst_frame) addr_collected_port;
 
 	// allow sequencer access
-	uvm_blocking_peek_imp#(axi_frame_base, axi_read_monitor) addr_trans_export;
+	uvm_blocking_peek_imp#(axi_read_burst_frame, axi_read_monitor) addr_trans_export;
 	event trans_addr_grabbed;
 
 	// The following property holds the transaction information currently
 	// begin captured (by the collect_address_phase and data_phase methods).
 	axi_read_single_frame trans_data_channel;
-	axi_frame_base trans_addr_channel;
+	axi_read_burst_frame trans_addr_channel;
 
 	// Provide implementations of virtual methods such as get_type_name and create
 	`uvm_component_utils_begin(axi_read_monitor)
@@ -54,7 +54,7 @@ class axi_read_monitor extends uvm_monitor;
 	function new (string name, uvm_component parent);
 		super.new(name, parent);
 		trans_data_channel = axi_read_single_frame::type_id::create("trans_data_channel");
-		trans_addr_channel = axi_frame_base::type_id::create("trans_addr_channel");
+		trans_addr_channel = axi_read_burst_frame::type_id::create("trans_addr_channel");
 		data_collected_port = new("data_collected_port", this);
 		addr_collected_port = new("addr_collected_port", this);
 		addr_trans_export = new("addr_trans_export", this);
@@ -62,7 +62,7 @@ class axi_read_monitor extends uvm_monitor;
 
 	extern virtual function void build_phase(uvm_phase phase);
 	//extern virtual task run_phase(uvm_phase phase);
-	extern task peek (output axi_frame_base trans); // Interface to the sequencer
+	extern task peek (output axi_read_burst_frame trans); // Interface to driver
 	extern virtual task collect_transactions();
 	extern virtual function void perform_transfer_checks();
 	extern virtual function void perform_transfer_coverage();
@@ -79,7 +79,7 @@ endclass : axi_read_monitor
 			`uvm_fatal("NOCONFIG",{"Config object must be set for: ",get_full_name(),".config_obj"})
 	endfunction: build_phase
 
-	task axi_read_monitor::peek(output axi_frame_base trans);
+	task axi_read_monitor::peek(output axi_read_burst_frame trans);
 		@trans_addr_grabbed;
 		trans = trans_addr_channel;
 	endtask
