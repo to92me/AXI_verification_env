@@ -107,7 +107,7 @@ endclass : slave_config_factory
 
 function void slave_config_factory::createSlaves(ref axi_slave_config slave_list[$], input int numberOfSlaves);
 		 address_points.sort();
-		
+
 
 	  for ( int i = 0; i < address_points.size(); i+=2)
 		  begin
@@ -129,5 +129,5 @@ function void slave_config_factory::createSlaves(ref axi_slave_config slave_list
 //
 //------------------------------------------------------------------------------
 
-
+`endif
 
