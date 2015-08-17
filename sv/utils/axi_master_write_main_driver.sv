@@ -1,14 +1,13 @@
-/******************************************************************************
-	* DVT CODE TEMPLATE: component
-	* Created by root on Aug 13, 2015
-	* uvc_company = uvc_company, uvc_name = uvc_name
-*******************************************************************************/
+`ifndef AXI_MASTER_WRITE_MAIN_DRIVER_SVH
+`define AXI_MASTER_WRITE_MAIN_DRIVER_SVH
 
 //------------------------------------------------------------------------------
 //
 // CLASS: axi_master_write_main_driver
 //
 //------------------------------------------------------------------------------
+
+
 
 //this class is bridge for scheduler and separate vif drivers ( data vif driver and addess vid driver)
 //usage: this struct will get all redy frames from scheduler and do specific delay for packages;
@@ -37,32 +36,35 @@ class axi_master_write_main_driver extends uvm_component;
 	// new - constructor
 	function new (string name, uvm_component parent);
 		super.new(name, parent);
-	endfunction : new
-
-	// build_phase
-	function void build_phase(uvm_phase phase);
-		super.build_phase(phase);
-		 if(!uvm_config_db#(virtual axi_if)::get(this, "", "vif", vif))
-			 `uvm_fatal("NOVIF",{"virtual interface must be set for: ",get_full_name(),".vif"})
 		scheduler = axi_master_write_scheduler::getSchedulerInstance(this);
 		address_driver = axi_master_write_address_driver::getDriverInstance(this);
 		data_driver = axi_master_write_data_driver::getDriverInstance(this);
+	endfunction : new
+
+	// build_phase
+	function void build();
+
+		address_driver.build();
+		data_driver.build();
+
 		sem = new(1);
 		inbox_mssg = new();
+
 		fork
 			address_driver.main();
 			data_driver.main();
-			this.main();
 		join_none;
 
-	endfunction : build_phase
+	endfunction
 
 	extern function axi_mssg getAddrFrame();
 	extern function axi_mssg getDataFrame();
 	extern static function axi_master_write_main_driver getDriverInstance(input uvm_component parent);
+	extern function void mainMainDriver(input int clocks);
 	extern task main();
 	extern function void getFramesFromScheduler();
 	extern function void decrementDelay();
+	extern function void reset();
 
 endclass : axi_master_write_main_driver
 
@@ -71,7 +73,7 @@ endclass : axi_master_write_main_driver
 function axi_master_write_main_driver axi_master_write_main_driver::getDriverInstance(input uvm_component parent);
     if(driverInstance == null)
 	    begin
-	    driverInstance = new("write driver main", parent);
+	    driverInstance = new("Write driver main", parent);
 		$display("Created  Driver Core");
 	    end
 	return driverInstance;
@@ -115,14 +117,21 @@ function axi_mssg axi_master_write_main_driver::getDataFrame();
 	sem.put(1);
 endfunction
 
-
 task axi_master_write_main_driver::main();
-	forever begin
-		@(posedge vif.sig_clock)
-		this.getFramesFromScheduler();
-		this.decrementDelay();
-	end
+    fork
+//	    this.mainMainDriver();
+	    this.data_driver.main();
+	    this.address_driver.main();
+    join
 endtask
+
+function void axi_master_write_main_driver::mainMainDriver(input int clocks);
+	repeat(clocks)
+		begin
+			this.getFramesFromScheduler();
+			this.decrementDelay();
+		end
+endfunction
 
 
 function void axi_master_write_main_driver::getFramesFromScheduler();
@@ -163,7 +172,7 @@ function void axi_master_write_main_driver::decrementDelay();
 		end
 	if(data_inbox_queue.size() > 0)
 		begin
-			if(data_inbox_queue[0].delay_data == 0)
+			if(data_inbox_queue[0].first_one == FALSE || data_inbox_queue[0].delay_data == 0 )
 				begin
 					data_ready_queue.push_back(data_inbox_queue.pop_front());
 				end
@@ -176,4 +185,14 @@ function void axi_master_write_main_driver::decrementDelay();
 endfunction
 
 
+function void axi_master_write_main_driver::reset();
+   	sem.get(1);
+	addr_inbox_queue.delete();
+	addr_ready_queue.delete();
+	data_inbox_queue.delete();
+	data_ready_queue.delete();
+	sem.put(1);
+endfunction
+
+`endif
 

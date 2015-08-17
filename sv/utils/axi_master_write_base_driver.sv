@@ -1,14 +1,13 @@
-/******************************************************************************
-	* DVT CODE TEMPLATE: component
-	* Created by root on Aug 13, 2015
-	* uvc_company = uvc_company, uvc_name = uvc_name
-*******************************************************************************/
+`ifndef AXI_MASTER_WRITE_BASE_DRIVER_SVH
+`define AXI_MASTER_WRITE_BASE_DRIVER_SVH
 
 //------------------------------------------------------------------------------
 //
 // CLASS: uvc_company_uvc_name_component
 //
 //------------------------------------------------------------------------------
+
+
 
 typedef enum{
 	GET_FRAME = 1,
@@ -27,13 +26,15 @@ class axi_master_write_base_driver extends uvm_component;
 	static axi_master_write_base_driver 	driverInstance;
 	axi_mssg 								mssg;
 	axi_master_write_main_driver			main_driver;
+	axi_master_write_scheduler				scheduler;
 	bit 									valid_default = 1'b1;
 
 //	axi_single_frame						address_queue[$];
 	semaphore 								sem;
 
 	// Provide implementations of virtual methods such as get_type_name and create
-	`uvm_component_utils(axi_master_write_base_driver)
+`uvm_component_utils(axi_master_write_base_driver)
+
 
 
 
@@ -44,12 +45,13 @@ class axi_master_write_base_driver extends uvm_component;
 	endfunction : new
 
 	// build_phase
-	function void build_phase(uvm_phase phase);
-		super.build_phase(phase);
-		 if(!uvm_config_db#(virtual axi_if)::get(this, "", "vif", vif))
-			 `uvm_fatal("NOVIF",{"virtual interface must be set for: ",get_full_name(),".vif"})
+	function void build();
+		`uvm_info("axi master write base vif driver","Building", UVM_MEDIUM);
 		main_driver = axi_master_write_main_driver::getDriverInstance(this);
-	endfunction : build_phase
+		scheduler = axi_master_write_scheduler::getSchedulerInstance(this);
+		if(!uvm_config_db#(virtual axi_if)::get(this, "", "vif", vif))
+			 `uvm_fatal("NOVIF",{"virtual interface must be set for: ",get_full_name(),".vif"})
+	endfunction
 
 	extern static function axi_master_write_base_driver getDriverInsance(input uvm_component parent);
 
@@ -59,6 +61,7 @@ class axi_master_write_base_driver extends uvm_component;
 	extern virtual task main();
 	extern virtual function void init();
 	extern function void setValiDefaultValue(input bit input_valid);
+	extern virtual function void reset();
 
 
 endclass : axi_master_write_base_driver
@@ -80,14 +83,18 @@ function void axi_master_write_base_driver::completeTransaction();
 endfunction
 
 function void axi_master_write_base_driver::init();
-     	 $display("ERRROR AXI MASTER WRITE BASE: redefine this please");
+     $display("ERRROR AXI MASTER WRITE BASE: redefine this please");
+endfunction
+
+function void axi_master_write_base_driver::reset();
+	$display("ERRROR AXI MASTER WRITE BASE: redefine this please");
 endfunction
 
 function axi_master_write_base_driver axi_master_write_base_driver::getDriverInsance(input uvm_component parent);
 	 if(driverInstance == null)
 	    begin
-	    driverInstance = new("write driver", parent);
-		$display("Created  Driver Core");
+	    driverInstance = new("AxiMasterWriteMainDriverCore", parent);
+		$display("Creating Axi Master Write Main Driver Core");
 	    end
 	return getDriverInsance;
 endfunction
@@ -96,6 +103,6 @@ function void axi_master_write_base_driver::setValiDefaultValue(input bit input_
 	this.valid_default = input_valid;
 endfunction
 
-
+`endif
 
 

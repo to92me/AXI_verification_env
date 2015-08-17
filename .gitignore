@@ -1,3 +1,5 @@
 .dvt/
 .project
 *.log
+INCA_libs
+run.f

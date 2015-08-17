@@ -1,8 +1,5 @@
-/******************************************************************************
-	* DVT CODE TEMPLATE: component
-	* Created by root on Aug 5, 2015
-	* uvc_company = uvc_company, uvc_name = uvc_name
-*******************************************************************************/
+`ifndef AXI_MASTER_WRITE_SCHEDULER_PACKAGES_SVH
+`define AXI_MASTER_WRITE_SCHEDULER_PACKAGES_SVH
 
 //------------------------------------------------------------------------------
 //
@@ -198,3 +195,4 @@ function int axi_master_write_scheduler_packages::getErrorCounter();
 endfunction
 
 
+`endif

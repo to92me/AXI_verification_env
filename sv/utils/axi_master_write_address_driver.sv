@@ -1,8 +1,5 @@
-/******************************************************************************
-	* DVT CODE TEMPLATE: component
-	* Created by root on Aug 13, 2015
-	* uvc_company = uvc_company, uvc_name = uvc_name
-*******************************************************************************/
+`ifndef AXI_MASTER_WRITE_ADDRESS_DRIVER_SVH
+`define AXI_MASTER_WRITE_ADDRESS_DRIVER_SVH
 
 //------------------------------------------------------------------------------
 //
@@ -12,10 +9,12 @@
 
 
 
+
+
 class axi_master_write_address_driver extends axi_master_write_base_driver;
 
 	write_states_enum		 					state = GET_FRAME;
-	static  axi_master_write_address_driver		driverInstance; 
+	static  axi_master_write_address_driver		driverInstance;
 	// Provide implementations of virtual methods such as get_type_name and create
 
 	// new - constructor
@@ -26,25 +25,26 @@ class axi_master_write_address_driver extends axi_master_write_base_driver;
 		current_frame = new();
 	endfunction : new
 
-	extern static function axi_master_write_address_driver getDriverInstance(input uvm_component parent); 
+	extern static function axi_master_write_address_driver getDriverInstance(input uvm_component parent);
 
 	extern function void getNextFrame();
 	extern function void driverVif();
 	extern function void completeTransaction();
 	extern function void init();
+	extern function void reset();
 	extern task main();
 
 
 endclass : axi_master_write_address_driver
 
-function axi_master_write_address_driver axi_master_write_address_driver::getDriverInstance(input uvm_component parent); 
+function axi_master_write_address_driver axi_master_write_address_driver::getDriverInstance(input uvm_component parent);
 	if(driverInstance == null)
 	begin
 		$display("Creating Axi Master Write Address Driver");
-		driverInstance = new("AxiMasterWriteAddressDriver", parent); 
-	end 
-	return driverInstance; 
-endfunction 
+		driverInstance = new("AxiMasterWriteAddressDriver", parent);
+	end
+	return driverInstance;
+endfunction
 
 function void axi_master_write_address_driver::getNextFrame();
 
@@ -98,6 +98,21 @@ function void axi_master_write_address_driver::init();
 		vif.awvalid = valid_default;
 endfunction
 
+function void axi_master_write_address_driver::reset();
+		vif.awid	= 0;
+		vif.awaddr	= 0;
+		vif.awlen 	= 0;
+		vif.awsize 	= 0;
+		vif.awburst = 0;
+		vif.awlock 	= 0;
+		vif.awcache = 0;
+		vif.awprot 	= 0;
+		vif.awqos 	= 0;
+		vif.awregion= 0;
+		vif.awvalid = valid_default;
+		`uvm_info(get_name(),$sformatf("reset recievied"), UVM_LOW)
+endfunction
+
 task axi_master_write_address_driver::main();
 	this.init();
 	forever
@@ -144,6 +159,9 @@ task axi_master_write_address_driver::main();
 					state = WAIT_READY;
 				end
 			endcase
+			$display("FATAL ADDRESS DRIVER");
 		end
 endtask
 
+
+`endif

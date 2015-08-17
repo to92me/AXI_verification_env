@@ -1,8 +1,5 @@
-/******************************************************************************
-	* DVT CODE TEMPLATE: component
-	* Created by root on Aug 13, 2015
-	* uvc_company = uvc_company, uvc_name = uvc_name
-*******************************************************************************/
+`ifndef AXI_MASTER_WRITE_DATA_DRIVER_SVH
+`define AXI_MASTER_WRITE_DATA_DRIVER_SVH
 
 //------------------------------------------------------------------------------
 //
@@ -16,7 +13,8 @@ class axi_master_write_data_driver extends axi_master_write_base_driver;
 
 	write_states_enum 						state = GET_FRAME;
 	write_states_enum						next_state;
-	static 	axi_master_write_data_driver	driverInstance; 
+	static 	axi_master_write_data_driver	driverInstance;
+	int 									clock_counter;
 
 	// Provide implementations of virtual methods such as get_type_name and create
 
@@ -28,24 +26,26 @@ class axi_master_write_data_driver extends axi_master_write_base_driver;
 		current_frame = new();
 	endfunction : new
 
-	extern static function axi_master_write_data_driver getDriverInstance(input uvm_component parent); 
+	extern static function axi_master_write_data_driver getDriverInstance(input uvm_component parent);
 
 	extern function void getNextFrame();
 	extern function void driverVif();
 	extern function void completeTransaction();
 	extern function void calculateStrobe(input axi_single_frame strobe_frame);
 	extern function void init();
+	extern function void reset();
+	extern task spinClock(input int clocks);
 	extern task main();
 
 
 endclass : axi_master_write_data_driver
 
-function axi_master_write_data_driver axi_master_write_data_driver::getDriverInstance(input uvm_component parent); 
+function axi_master_write_data_driver axi_master_write_data_driver::getDriverInstance(input uvm_component parent);
 	if(driverInstance == null)
-	begin 
+	begin
 		$display("Creating Axi Master Write Data Driver ");
 		driverInstance = new("AxiMasterWriteDataDriver", parent);
-	end 
+	end
 	return driverInstance;
 endfunction
 
@@ -91,12 +91,24 @@ function void axi_master_write_data_driver::init();
 		vif.wvalid	= 	valid_default;
 endfunction
 
+function void axi_master_write_data_driver::reset();
+		vif.wid 	= 	0;
+		vif.wlast 	=  	0;
+		vif.wvalid	= 	valid_default;
+		`uvm_info(get_name(),$sformatf("reset recievied"), UVM_LOW)
+endfunction
+
 function void axi_master_write_data_driver::calculateStrobe(input axi_single_frame strobe_frame);
     $display("NOT IMPLEMENTDE STROBE SELECT");
 	vif.wdata = current_frame.data;
 	vif.wstrb = 1;
 
 endfunction
+
+task axi_master_write_data_driver::spinClock(input int clocks);
+	this.scheduler.main(clocks);
+	this.main_driver.mainMainDriver(clocks);
+endtask
 
 task axi_master_write_data_driver::main();
 	this.init();
@@ -129,14 +141,21 @@ task axi_master_write_data_driver::main();
 				begin
 					state = GET_FRAME;
 					if(vif.awready == 1)
+						begin
+							spinClock(clock_counter);
+							clock_counter = 0;
 							continue;
-					@(posedge vif.sig_clock iff vif.awready == 1);
+						end
+					@(posedge vif.sig_clock);
+					clock_counter++;
+					state = WAIT_READY;
 				end
 
 				WAIT_CLK:
 				begin
 					@(posedge vif.sig_clock);
 					state = next_state;
+					spinClock(1);
 				end
 
 				COMPLETE_TRANSACTION:
@@ -147,6 +166,8 @@ task axi_master_write_data_driver::main();
 					state = WAIT_READY;
 				end
 			endcase
+			$display("FATAL DATA DRIVER");
 		end
 endtask
 
+`endif

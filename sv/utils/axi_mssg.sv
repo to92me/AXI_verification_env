@@ -1,9 +1,5 @@
-/******************************************************************************
-	* DVT CODE TEMPLATE: component
-	* Created by root on Aug 5, 2015
-	* uvc_company = uvc_company, uvc_name = uvc_name
-*******************************************************************************/
-
+`ifndef AXI_MASTER_WRITE_MSSG_SVH
+`define AXI_MASTER_WRITE_MSSG_SVH
 //------------------------------------------------------------------------------
 //
 // CLASS: uvc_company_uvc_name_component
@@ -36,5 +32,5 @@ class axi_slave_response;
 endclass
 
 
-
+`endif
 
