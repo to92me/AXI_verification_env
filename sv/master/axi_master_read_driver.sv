@@ -21,6 +21,7 @@ class axi_master_read_driver extends uvm_driver #(axi_read_burst_frame);
 	// Configuration object
 	axi_master_config config_obj;
 
+	// for sending correct responses
 	axi_master_read_response resp;
 
 	// Provide implmentations of virtual methods such as get_type_name and create
@@ -63,8 +64,14 @@ class axi_master_read_driver extends uvm_driver #(axi_read_burst_frame);
 		join
 	endtask : get_and_drive
 
+	extern virtual task read_data_channel();
+	extern virtual task read_addr_channel();
+	extern virtual task reset();
+
+endclass : axi_master_read_driver
+
 	// reset
-	virtual protected task reset();
+	task axi_master_read_driver::reset();
 		forever begin
 			@(negedge vif.sig_reset)
 			`uvm_info(get_type_name(), "Reset", UVM_MEDIUM)
@@ -87,16 +94,7 @@ class axi_master_read_driver extends uvm_driver #(axi_read_burst_frame);
 		end
 	endtask : reset
 
-	// drive_transfer
-	virtual protected task drive_transfer ();
-
-	endtask : drive_transfer
-
-	extern virtual task read_data_channel();
-	extern virtual task read_addr_channel();
-
-endclass : axi_master_read_driver
-
+	// monitoring the data channel and sending responses back to the seq.
 	task axi_master_read_driver::read_data_channel();
 		axi_read_single_frame data_frame;
 		axi_read_burst_frame burst_frame;
@@ -123,6 +121,7 @@ endclass : axi_master_read_driver
 		end
 	endtask : read_data_channel
 
+	// get from seq. and drive signals to the address channel
 	task axi_master_read_driver::read_addr_channel();
 		forever begin
 			seq_item_port.get(req);

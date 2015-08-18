@@ -15,6 +15,7 @@
 
 class axi_master_read_response extends uvm_component;
 
+	// queue that holds all the sent bursts that have not been completed
 	axi_read_burst_frame sent_bursts[$];
 
 	semaphore sem;
@@ -38,9 +39,8 @@ class axi_master_read_response extends uvm_component;
 
 endclass : axi_master_read_response
 
-
+// for each frame that the slave sends to the master, check if it has an error or if it completes the burst
 task axi_master_read_response::check_response(axi_read_single_frame one_frame, ref axi_read_burst_frame matching_burst);
-
 	int i, flag = 0;
 
 	// if a frame returns with a bad resp, return the matching burst (same id)
@@ -92,6 +92,8 @@ task axi_master_read_response::check_response(axi_read_single_frame one_frame, r
 	matching_burst = null;	// no errors
 endtask : check_response
 
+
+// when the master sends a new burst frame, put it in the queue
 task axi_master_read_response::new_burst(axi_read_burst_frame one_burst);
 
 	sem.get(1);

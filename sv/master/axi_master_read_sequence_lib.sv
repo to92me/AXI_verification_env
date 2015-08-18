@@ -49,9 +49,11 @@ endclass : axi_master_read_base_seq
 //------------------------------------------------------------------------------
 class axi_master_read_transfer_seq extends axi_master_read_base_seq;
 
-	// Add local random fields and constraints here
-
 	`uvm_object_utils(axi_master_read_transfer_seq)
+
+	int count = 0;
+	int num_of_err = 0;
+	axi_read_burst_frame error_bursts[$];	// a queue for holding bursts that returned an error
 
 	// new - constructor
 	function new(string name="axi_master_read_transfer_seq");
@@ -59,57 +61,48 @@ class axi_master_read_transfer_seq extends axi_master_read_base_seq;
 	endfunction
 
 	virtual task body();
-		axi_read_burst_frame error_bursts[$];
-		int i, flag;
 
-		// two threads - one for sending to the driver
-		// and one for getting responses
+		use_response_handler(1);
+
+		count = 3;	// number of bursts to be sent
+
+		repeat(3) begin
+			`uvm_do_with(req, {req.valid == FRAME_VALID;})
+		end
+
+		// after sending all frames, check if there was an error
+		// and send that burst request again
 		fork
-			begin
-				repeat(3) begin
-					`uvm_do_with(req, {req.valid == FRAME_VALID;})
-				end
-
-				begin
-					if (error_bursts.size()) begin
-						// send it again, no randomization
-						req = error_bursts.pop_front();
-						start_item(req);
-						finish_item(req);
-						// if there is an error once, the burst will be sent again
-						// but if there is an error again, it will not be sent again
-					end
-				end
-
+			if (num_of_err) begin
+				count++;	// increase number of bursts waiting for response
+				req = error_bursts.pop_front();
+				num_of_err--;
+				// send it again, no randomization
+				start_item(req);
+				finish_item(req);
+				// if there is an error once, the burst will be sent again
+				// but if there is an error again, it will not be sent again
 			end
+		join_none
 
-			forever begin
-				get_response(rsp);
+		wait(!count);	// wait for all responses before finishing simulation
+
+	endtask
+
+	// this is called by the sequencer for each response that arrives for this sequence
+	virtual function void response_handler(uvm_sequence_item response);
+
+				if(!($cast(rsp, response)))
+					`uvm_error("CASTFAIL", "The recieved response item is not a burst frame");
+
+				count--;	// keep track of number of responses
+
+				// if there was an error put the burst in the error queue so it will be sent agian
 				if (rsp.valid == FRAME_NOT_VALID) begin
 					error_bursts.push_back(rsp);
+					num_of_err++;
 				end
-				else begin
-					flag = 0;
-					for (i = 0; i < error_bursts.size(); i++)
-						if (error_bursts[i] == rsp)
-							flag = 1;
-					if (flag)
-						error_bursts.delete(i);
-				end
-			end
-		join_any
 
-/*		begin
-		i = error_bursts.size();
-		while (i--) begin
-			// send it again, no randomization
-			req = error_bursts.pop_front();
-			start_item(req);
-			finish_item(req);
-			// if there is an error once, the burst will be sent again
-			// but if there is an error again, it will not be sent again
-		end
-		end*/
-	endtask
+	endfunction: response_handler
 
 endclass : axi_master_read_transfer_seq
