@@ -1,5 +1,5 @@
-`ifndef AXI_WRITE_TEST_TOP
-`define AXI_WRITE_TEST_TOP
+`ifndef AXI_WRITE_TEST_TOP_SVH
+`define AXI_WRITE_TEST_TOP_SVH
 
 
 `include "sv/axi_if.sv"
@@ -21,9 +21,9 @@ module top;
 
 
 initial begin
-
-	uvm_config_db#(virtual axi_if)::set(null,"uvm_test_top.*","vif",if0);
-	$display("TOME TOME TOME ");
+	//axi_write_test_tb
+	uvm_config_db#(virtual axi_if)::set(null,"uvm_test_top.tb0.*","vif",if0);
+//	$display("TOME TOME TOME ");
  	run_test("base_test");
 
 end

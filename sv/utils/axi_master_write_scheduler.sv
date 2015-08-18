@@ -83,7 +83,7 @@ endclass : axi_master_write_scheduler
 // ADD BURST
 	function void axi_master_write_scheduler::addBurst(input axi_frame frame);
 		int tmp_add = 0;
-		$write("\nadded new frame \n");
+
 
 		single_burst = new();
 		for(int i = 0; i<=frame.len; i++)
@@ -111,6 +111,8 @@ endclass : axi_master_write_scheduler
 				single_burst.addSingleFrame(tmp_data);
 				sem.put(1);
 			end
+
+			$display("\nadded new frame, size: %d  \n ", single_burst.size());
 
 			sem.get(1);
 			single_burst.frame_copy = frame; // keep the frame copy if recieved error repeat transaction
@@ -206,6 +208,7 @@ endclass : axi_master_write_scheduler
 	endfunction
 
 	task axi_master_write_scheduler::main(input int clocks);
+//		$display("scheduler clock %d", clocks);
 	    repeat(clocks)
 		    begin
 			    this.delayCalculator;

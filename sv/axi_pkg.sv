@@ -82,9 +82,10 @@ package axi_pkg;
 	`include "axi_write_test/axi_master_write_test_config.sv"
 	`include "axi_write_test/axi_master_write_test_env.sv"
 	`include "axi_write_test/axi_write_test_tb.sv"
-	`include "axi_write_test/axi_master_write_test_config.sv"
-`endif
+	`include "axi_write_test/axi_master_write_test_lib.sv"
 
+
+`endif
 `endif
 
 //	`include "sv/slave/axi_slave_write_driver.sv"

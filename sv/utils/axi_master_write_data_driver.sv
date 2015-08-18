@@ -60,10 +60,11 @@ function void axi_master_write_data_driver::getNextFrame();
 		sem.put(1);
 		end
 	else
+		begin
 		sem.get(1);
 		current_frame = null;
 		sem.put(1);
-
+		end
 endfunction
 
 
@@ -106,27 +107,33 @@ function void axi_master_write_data_driver::calculateStrobe(input axi_single_fra
 endfunction
 
 task axi_master_write_data_driver::spinClock(input int clocks);
+//	$display("clock clock  = %d ", clocks);
 	this.scheduler.main(clocks);
 	this.main_driver.mainMainDriver(clocks);
 endtask
 
 task axi_master_write_data_driver::main();
 	this.init();
+	$display("Running data driver main core....  ");
 	forever
 		begin
 			case (state)
 				GET_FRAME:
 				begin
 					this.getNextFrame();
-					sem.get(1);
+//					sem.get(1);
 					if(current_frame == null)
 						begin
 							state = WAIT_CLK;
+//							$display("empty data");
 							next_state = GET_FRAME;
 						end
 					else
-						state = DRIVE_VIF;
-					sem.put(1);
+						begin
+							state = DRIVE_VIF;
+							$display(" +++ +++ ++++ +++ new not empty frame ++ ++ ++ ++ ++ +++ +++ ");
+						end
+//					sem.put(1);
 				end
 
 				DRIVE_VIF:
@@ -139,16 +146,22 @@ task axi_master_write_data_driver::main();
 
 				WAIT_READY:
 				begin
-					state = GET_FRAME;
-					if(vif.awready == 1)
+
+
+					if(vif.awready != 0)
 						begin
 							spinClock(clock_counter);
 							clock_counter = 0;
-							continue;
+							state = GET_FRAME;
 						end
-					@(posedge vif.sig_clock);
-					clock_counter++;
-					state = WAIT_READY;
+					else
+						begin
+							@(posedge vif.sig_clock);
+//							$display("wait ready");
+							clock_counter++;
+//							state = WAIT_READY;
+							state = GET_FRAME;
+						end
 				end
 
 				WAIT_CLK:
@@ -166,8 +179,8 @@ task axi_master_write_data_driver::main();
 					state = WAIT_READY;
 				end
 			endcase
-			$display("FATAL DATA DRIVER");
 		end
+		$display("FATAL DATA DRIVER");
 endtask
 
 `endif

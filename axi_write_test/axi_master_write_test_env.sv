@@ -1,5 +1,5 @@
-`ifndef AXI_MASTER_WRITE_ENV
-`define AXI_MASTER_WRITE_ENV
+`ifndef AXI_MASTER_WRITE_ENV_SVH
+`define AXI_MASTER_WRITE_ENV_SVH
 //------------------------------------------------------------------------------
 //
 // CLASS: uvc_company_uvc_name_env
@@ -13,7 +13,7 @@ class axi_master_write_env extends uvm_env;
 
 	bit checks_enable = 1;
 	bit coverage_enable = 1;
-	axi_config config_obj;
+	axi_write_test_config config_obj;
 	axi_master_write_agent master;
 
 
@@ -48,9 +48,9 @@ function void axi_master_write_env::build_phase(uvm_phase phase);
 		super.build_phase(phase);
 
 		if(config_obj == null) //begin
-			if (!uvm_config_db#(axi_config)::get(this, "", "config_obj", config_obj)) begin
+			if (!uvm_config_db#(axi_write_test_config)::get(this, "", "axi_config", config_obj)) begin
 				`uvm_info("NOCONFIG", "Using default_axi_config", UVM_MEDIUM)
-				$cast(config_obj, factory.create_object_by_name("axi_config","config_obj"));
+				$cast(config_obj, factory.create_object_by_name("axi_write_test_config","config_obj"));
 			end
 
 		uvm_config_object::set(this, "*", "axi_config", config_obj);
@@ -61,7 +61,7 @@ function void axi_master_write_env::build_phase(uvm_phase phase);
 			uvm_config_object::set(this, sname, "config_obj", config_obj.slave_list[i]);
 		end
 
-		master = axi_master_write_agent::type_id::create("master write agent",this);
+		master = axi_master_write_agent::type_id::create("master_write_agent",this);
 
 endfunction : build_phase
 
