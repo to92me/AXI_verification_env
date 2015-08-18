@@ -14,7 +14,7 @@
 //------------------------------------------------------------------------------
 class axi_read_base_frame extends uvm_sequence_item;
 
-	bit [ID_WIDTH-1 : 0]	id;
+	rand bit [ID_WIDTH-1 : 0]	id;
 
 	// control
 	valid_enum 				valid;

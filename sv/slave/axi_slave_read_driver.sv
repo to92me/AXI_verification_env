@@ -109,6 +109,7 @@ endclass : axi_slave_read_driver
 		forever begin
 			@(negedge vif.sig_reset)
 			`uvm_info(get_type_name(), "Reset", UVM_MEDIUM)
+			@(posedge vif.sig_clock)	// reset can be asynchronous, but deassertion must be synchronous with clk
 
 			// reset signals
 			vif.rid <= {ID_WIDTH {1'b0}};

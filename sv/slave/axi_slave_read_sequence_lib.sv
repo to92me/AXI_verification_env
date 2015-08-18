@@ -101,7 +101,7 @@ class axi_slave_read_simple_two_phase_seq extends axi_slave_read_base_sequence;
 			req = axi_read_burst_frame::type_id::create("req");
 			rsp = axi_read_single_frame::type_id::create("rsp");
 
-			// request from driver
+			// request burst from driver
 			start_item(req);
 			finish_item(req);
 
@@ -113,7 +113,7 @@ class axi_slave_read_simple_two_phase_seq extends axi_slave_read_base_sequence;
 			// get single frame
 			p_sequencer.arbit.get_single_frame(rsp);
 
-			// response
+			// response - send single frame to driver
 			start_item(rsp);
 			finish_item(rsp);
 
