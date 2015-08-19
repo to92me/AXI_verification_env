@@ -45,7 +45,7 @@ endclass
 
 class axi_slave_config extends uvm_object;
 
-	string name="slaveName";
+	string slave_name="slaveName";
 
 	rand uvm_active_passive_enum 		is_active = UVM_ACTIVE;
 	bit[ADDR_WIDTH-1 : 0] 				start_address;
@@ -55,12 +55,13 @@ class axi_slave_config extends uvm_object;
 
 
 	`uvm_object_utils_begin(axi_slave_config)
-		`uvm_field_string(name, UVM_DEFAULT)
-		`uvm_field_enum(uvm_active_passive_enum, is_active, UVM_DEFAULT)
-		`uvm_field_int(start_address, UVM_DEFAULT)
-		`uvm_field_int(end_address, UVM_DEFAULT)
-		`uvm_field_enum(lock_enum, lock, UVM_DEFAULT)
-	`uvm_object_utils_end
+	 `uvm_field_string(slave_name, UVM_DEFAULT)
+	 `uvm_field_enum(uvm_active_passive_enum, is_active, UVM_DEFAULT)
+	 `uvm_field_int(start_address, UVM_DEFAULT)
+	 `uvm_field_int(end_address, UVM_DEFAULT)
+	 `uvm_field_enum(lock_enum, lock, UVM_DEFAULT)
+//	 `uvm_field_object(memory, UVM_DEFAULT)
+ `uvm_object_utils_end
 
 	constraint lock_cst{
 				lock dist{
@@ -78,8 +79,9 @@ class axi_slave_config extends uvm_object;
 
 
 	// new - constructor
-	function new(string name = "slaveNO");
+	function new(string name = "slave_config");
 		super.new(name);
+		memory = new();
 	endfunction: new
 
 	// is the address in the defined range
@@ -87,8 +89,36 @@ class axi_slave_config extends uvm_object;
 		return (!((addr < start_address) || (addr > end_address)));
 	endfunction: check_addr_range
 
+	extern task readMemory(input bit [ADDR_WIDTH-1 : 0] read_addr, output axi_slave_memory_response read_rsp);
+	extern task writeMemory( bit [ADDR_WIDTH-1 : 0] write_addr, input bit [DATA_WIDTH-1 : 0] write_data);
 
 endclass : axi_slave_config
+
+
+task axi_slave_config::readMemory(input bit[ADDR_WIDTH-1:0] read_addr, output axi_slave_memory_response read_rsp);
+	if(this.check_addr_range(read_addr))
+		begin
+			memory.read(read_addr, read_rsp);
+		end
+	else
+		begin
+			`uvm_info(get_name(),$sformatf("%s: address boundery error: read_address %d, slave address space : %d ,%d "
+				, this.slave_name,read_addr, this.start_address , this.end_address), UVM_FATAL)
+		end
+endtask
+
+task axi_slave_config::writeMemory(input bit[ADDR_WIDTH-1:0] write_addr, input bit[DATA_WIDTH-1:0] write_data);
+    if(this.check_addr_range(write_data))
+	    begin
+		    memory.write(write_addr, write_data);
+	    end
+    else
+	    begin
+		    `uvm_info(get_name(),$sformatf("%s: address boundery error: write_address %d, slave address space : %d ,%d "
+			    , this.slave_name,write_addr, this.start_address , this.end_address), UVM_FATAL)
+	    end
+endtask
+
 
 //------------------------------------------------------------------------------
 //
@@ -139,7 +169,7 @@ function void slave_config_factory::createSlaves(ref axi_slave_config slave_list
 	  for ( int i = 0; i < rand_space.address_points.size(); i+=2)
 		  begin
 			  slave = axi_slave_config::type_id::create($sformatf("slave[%0d]", slave_list.size()));
-			  slave.name = $sformatf("slave[%0d]", slave_list.size());
+			  slave.slave_name = $sformatf("slave[%0d]", slave_list.size());
 			  slave.start_address = rand_space.address_points[i];
 			  slave.end_address = rand_space.address_points[i+1];
 			  slave_list.push_front(slave);

@@ -36,7 +36,7 @@ endclass
 
 
 
-class axi_slave_config_memory extends uvm_component;
+class axi_slave_config_memory ; // extends 	uvm_component;
 	axi_slave_config_memory_field 		memory_queue[$];
 	axi_slave_config_memory_field		memory_field;
 	axi_slave_memory_response			rsp;
@@ -48,20 +48,24 @@ class axi_slave_config_memory extends uvm_component;
 
 
 
-`uvm_component_utils_begin(axi_slave_config_memory)
+//`uvm_component_utils_begin(axi_slave_config_memory)
 //	 `uvm_field_queue_object(memory_queue, UVM_DEFAULT)
 //	 `uvm_field_object(memory_field, UVM_DEFAULT)
- `uvm_component_utils_end
+// `uvm_component_utils_end
 
 
-	function new (string name, uvm_component parent);
-		super.new(name, parent);
-		sem = new(1);
-	endfunction : new
+//	function new (string name, uvm_component parent);
+//		super.new(name, parent);
+//		sem = new(1);
+//	endfunction : new
 
-	function void build_phase(uvm_phase phase);
-		super.build_phase(phase);
-	endfunction : build_phase
+	function new();
+		sem = new();
+	endfunction
+
+//	function void build_phase(uvm_phase phase);
+//		super.build_phase(phase);
+//	endfunction : build_phase
 
 endclass : axi_slave_config_memory
 
@@ -82,10 +86,10 @@ task axi_slave_config_memory::read(input bit [ADDR_WIDTH-1 : 0] read_addr, outpu
 				end
 		end
 	sem.put(1);
-	if (rsp.getValid() == FALSE)
-		`uvm_info(get_name(),$sformatf("reding from empyt memory space, address : %d ", read_addr), UVM_LOW)
+//	if (rsp.getValid() == FALSE)
+//		`uvm_info(get_name(),$sformatf("reding from empyt memory space, address : %d ", read_addr), UVM_LOW)
 
-endtask;
+endtask
 
 task axi_slave_config_memory::write(input bit[ADDR_WIDTH-1:0] write_addr, input bit[DATA_WIDTH-1:0] write_data);
     int i;
