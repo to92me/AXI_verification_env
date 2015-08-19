@@ -33,6 +33,8 @@ package axi_pkg;
 	typedef class axi_config;
 	typedef class axi_frame;
 	typedef class slave_config_factory;
+	typedef class axi_slave_config_memory_field;
+	typedef class axi_slave_config_memory;
 
 	// axi_mssg
 	typedef class axi_slave_response;
@@ -60,6 +62,7 @@ package axi_pkg;
 	`include "sv/utils/axi_mssg.sv"
 	`include "sv/utils/axi_master_write_scheduler_packages.sv"
 	`include "sv/utils/axi_master_write_scheduler.sv"
+	`include "sv/utils/axi_slave_config_memory.sv"
 
 	//add include for master
 	`include "sv/master/axi_master_config.sv"
