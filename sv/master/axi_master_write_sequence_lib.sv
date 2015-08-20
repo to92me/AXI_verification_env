@@ -8,7 +8,7 @@
 //
 //------------------------------------------------------------------------------
 
-virtual class axi_master_write_sequence_base extends uvm_sequence #(axi_frame);
+ class axi_master_write_sequence_base extends uvm_sequence #(axi_frame);
 
 
 	// new - constructor
@@ -16,23 +16,31 @@ virtual class axi_master_write_sequence_base extends uvm_sequence #(axi_frame);
 		super.new(name);
 	endfunction
 
-//	`uvm_object_utils(axi_master_write_sequence_base)
-	`uvm_declare_p_sequencer(axi_master_write_sequence_base)
+	`uvm_object_utils(axi_master_write_sequence_base)
+	`uvm_declare_p_sequencer(axi_master_write_sequencer)
 
 
 	virtual task pre_body();
+		/*
 		if (starting_phase!=null) begin
 			`uvm_info(get_type_name(),
 				$sformatf("!s! pre_body() raising !s! objection",
 					get_sequence_path(),
 					starting_phase.get_name()), UVM_MEDIUM);
 			starting_phase.raise_objection(this);
-			uvm_test_done.set_drain_time(this, 20000ns);
+			uvm_test_done.set_drain_time(this, 20000000ns);
 		end
+		*/
+		 if (starting_phase != null) begin
+        starting_phase.raise_objection(this, {"Executing sequence '",
+                                              get_full_name(), "'"});
+     end
+     `uvm_info(get_full_name(), {"Executing sequence '",get_full_name(), "'"}, UVM_MEDIUM)
 	endtask
 
 
 	virtual task post_body();
+		/*
 		if (starting_phase!=null) begin
 			`uvm_info(get_type_name(),
 				$sformatf("!s! post_body() dropping !s! objection",
@@ -40,6 +48,11 @@ virtual class axi_master_write_sequence_base extends uvm_sequence #(axi_frame);
 					starting_phase.get_name()), UVM_MEDIUM);
 			starting_phase.drop_objection(this);
 		end
+		*/
+		 if (starting_phase != null) begin
+        starting_phase.drop_objection(this, {"Completed sequence '",
+                                             get_full_name(), "'"});
+     end
 	endtask
 
 endclass : axi_master_write_sequence_base
@@ -62,7 +75,14 @@ class axi_master_write_sequence_lib_test1 extends axi_master_write_sequence_base
 
 	virtual task body();
 		`uvm_do(req);
-		get_response(rsp);
+		`uvm_do(req);
+		`uvm_do(req);
+		`uvm_do(req);
+		`uvm_do(req);
+		`uvm_do(req);
+		`uvm_do(req);
+		`uvm_do(req);
+//		get_response(rsp);
 	endtask
 
 endclass : axi_master_write_sequence_lib_test1

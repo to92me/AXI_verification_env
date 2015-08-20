@@ -37,26 +37,36 @@ class axi_master_write_driver extends uvm_driver #(axi_frame);
 	// build_phase
 	function void build_phase(uvm_phase phase);
 		super.build_phase(phase);
+		if(!uvm_config_db#(virtual axi_if)::get(this, "", "vif", vif))
+			`uvm_fatal("NOVIF",{"virtual interface must be set for: ",get_full_name(),".vif"})
+
+			scheduler = axi_master_write_scheduler::getSchedulerInstance(this);
+			driver = axi_master_write_main_driver::getDriverInstance(this);
+			response = axi_master_write_response_driver::getDriverInstance(this);
+
+			driver.build();
+			response.build();
+
 	endfunction: build_phase
 
 	// run_phase
 	virtual task run_phase(uvm_phase phase);
 		// The driving should be triggered by an initial reset pulse
-		@(negedge vif.sig_reset);
-		do
-			@(posedge vif.sig_clock);
-		while(vif.sig_reset!==1);
+//		@(negedge vif.sig_reset);
+//		do
+//			@(posedge vif.sig_clock);
+//		while(vif.sig_reset!==1);
 
 		get_and_drive();
 	endtask : run_phase
 
 	virtual protected task get_and_drive();
-		process main; // used by the reset handling mechanism
+//		process main; // used by the reset handling mechanism
 		forever begin
 			fork
+				this.getNextBurstFrame();
 				this.startDriver();
 				this.startScheduler();
-				this.getNextBurstFrame();
 				this.resetAll();
 			join
 		end
@@ -69,11 +79,13 @@ endclass : axi_master_write_driver
  task axi_master_write_driver::getNextBurstFrame();
     forever
 	    begin
+		     $display("adding new item --------------------------------------------------------------------------------------------------------");
 		    seq_item_port.get_next_item(req);
 			$cast(rsp, req.clone());
 		    scheduler.addBurst(rsp);
 //			rsp.set_id_info(req);
-//		    seq_item_port.item_done();
+		    seq_item_port.item_done();
+		    $display("adding new item DONE--------------------------------------------------------------------------------------------------------");
 //			seq_item_port.put_response(rsp);
 	    end
  endtask
@@ -91,19 +103,17 @@ endclass : axi_master_write_driver
  endtask
 
 task axi_master_write_driver::startScheduler();
-		scheduler = axi_master_write_scheduler::getSchedulerInstance(this);
+
 //     scheduler.main();
  endtask
 
 
  task  axi_master_write_driver::startDriver();
-		driver = axi_master_write_main_driver::getDriverInstance(this);
-		response = axi_master_write_response_driver::getDriverInstance(this);
-		driver.build();
-		response.build();
-//	 	this.driver.main();
+	fork
+	 	this.driver.main();
 //		this.response.main();
- endtask
+	join_any
+endtask
 
 function void axi_master_write_driver::resetDrivers();
 	this.scheduler.resetAll();

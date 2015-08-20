@@ -28,6 +28,13 @@ package axi_pkg;
 	typedef class axi_master_write_driver;
 	typedef class axi_master_write_sequencer;
 
+	typedef class axi_slave_write_response_driver;
+	typedef class axi_slave_write_data_driver;
+	typedef class axi_slave_write_address_driver;
+	typedef class axi_slave_write_main_driver;
+	typedef class axi_slave_write_base_driver;
+//	typedef class axi_slave_write_driver;
+//	typedef class axi_slave_write_sequencer;
 
 	//confing and frames
 	typedef class axi_master_config;
@@ -35,6 +42,8 @@ package axi_pkg;
 	typedef class axi_config;
 	typedef class axi_frame;
 	typedef class slave_config_factory;
+	typedef class axi_slave_config_memory_field;
+	typedef class axi_slave_config_memory;
 
 	// axi_mssg
 	typedef class axi_slave_response;
@@ -88,14 +97,23 @@ package axi_pkg;
 `ifdef tome_test
 
 	//utils
-	`include "sv/utils/axi_master_write_base_driver.sv"
-	`include "sv/utils/axi_master_write_main_driver.sv"
-	`include "sv/utils/axi_master_write_data_driver.sv"
-	`include "sv/utils/axi_master_write_address_driver.sv"
-	`include "sv/utils/axi_master_write_response_driver.sv"
+	`include "sv/utils/axi_master_write_driver/base_driver.sv"
+	`include "sv/utils/axi_master_write_driver/main_driver.sv"
+	`include "sv/utils/axi_master_write_driver/data_driver.sv"
+	`include "sv/utils/axi_master_write_driver/address_driver.sv"
+	`include "sv/utils/axi_master_write_driver/response_driver.sv"
+
 	`include "sv/utils/axi_mssg.sv"
-	`include "sv/utils/axi_master_write_scheduler_packages.sv"
-	`include "sv/utils/axi_master_write_scheduler.sv"
+	`include "sv/utils/axi_slave_config_memory.sv"
+
+	`include "sv/utils/axi_master_write_scheduler/scheduler_packages.sv"
+	`include "sv/utils/axi_master_write_scheduler/scheduler.sv"
+
+	`include "sv/utils/axi_slave_write_driver/base_driver.sv"
+	`include "sv/utils/axi_slave_write_driver/main_driver.sv"
+	`include "sv/utils/axi_slave_write_driver/data_driver.sv"
+	`include "sv/utils/axi_slave_write_driver/address_driver.sv"
+	`include "sv/utils/axi_slave_write_driver/response_driver.sv"
 
 	//add include for master
 	`include "sv/master/axi_master_config.sv"
@@ -118,9 +136,10 @@ package axi_pkg;
 	`include "axi_write_test/axi_master_write_test_config.sv"
 	`include "axi_write_test/axi_master_write_test_env.sv"
 	`include "axi_write_test/axi_write_test_tb.sv"
-	`include "axi_write_test/axi_master_write_test_config.sv"
-`endif
+	`include "axi_write_test/axi_master_write_test_lib.sv"
 
+
+`endif
 `endif
 
 //	`include "sv/slave/axi_slave_write_driver.sv"

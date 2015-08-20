@@ -8,7 +8,6 @@
 //------------------------------------------------------------------------------
 
 
-
 typedef enum{
 	GET_FRAME = 1,
 	DRIVE_VIF = 2,
@@ -67,27 +66,27 @@ class axi_master_write_base_driver extends uvm_component;
 endclass : axi_master_write_base_driver
 
 function void axi_master_write_base_driver::driverVif();
-    $display("ERRROR AXI MASTER WRITE BASE: redefine this please");
+    $display("ERRROR AXI MASTER WRITE BASE: redefine this please 1");
 endfunction
 
 function void axi_master_write_base_driver::getNextFrame();
-    $display("ERRROR AXI MASTER WRITE BASE: redefine this please");
+    $display("ERRROR AXI MASTER WRITE BASE: redefine this please 2");
 endfunction
 
 task axi_master_write_base_driver::main();
- 	 $display("ERRROR AXI MASTER WRITE BASE: redefine this please");
+ 	 $display("ERRROR AXI MASTER WRITE BASE: redefine this please 3");
 endtask
 
 function void axi_master_write_base_driver::completeTransaction();
- 	 $display("ERRROR AXI MASTER WRITE BASE: redefine this please");
+ 	 $display("ERRROR AXI MASTER WRITE BASE: redefine this please 4");
 endfunction
 
 function void axi_master_write_base_driver::init();
-     $display("ERRROR AXI MASTER WRITE BASE: redefine this please");
+     $display("ERRROR AXI MASTER WRITE BASE: redefine this please 5");
 endfunction
 
 function void axi_master_write_base_driver::reset();
-	$display("ERRROR AXI MASTER WRITE BASE: redefine this please");
+	$display("ERRROR AXI MASTER WRITE BASE: redefine this please 6 ");
 endfunction
 
 function axi_master_write_base_driver axi_master_write_base_driver::getDriverInsance(input uvm_component parent);

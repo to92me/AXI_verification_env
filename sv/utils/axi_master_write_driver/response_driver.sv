@@ -17,7 +17,7 @@ typedef enum{
 
 class axi_master_write_response_driver extends axi_master_write_base_driver;
 
-	response_state_enum 						state;
+	response_state_enum 						state = WAIT_RSP;
 	axi_slave_response							rsp;
 	axi_master_write_scheduler 					scheduler;
 	static axi_master_write_response_driver 	driverInstance;
@@ -29,7 +29,6 @@ class axi_master_write_response_driver extends axi_master_write_base_driver;
 		mssg = new();
 		sem = new(1);
 		current_frame = new();
-		scheduler = axi_master_write_scheduler::getSchedulerInstance(this);
 	endfunction : new
 
 	extern static function axi_master_write_response_driver getDriverInstance(input uvm_component parent);
@@ -37,6 +36,8 @@ class axi_master_write_response_driver extends axi_master_write_base_driver;
 	extern function void getNextFrame();
 	extern function void completeTransaction();
 	extern task main();
+	extern function void build();
+	extern function void init();
 
 endclass : axi_master_write_response_driver
 
@@ -61,7 +62,8 @@ endfunction
 
 task axi_master_write_response_driver::main();
 	this.init();
-    forever begin
+    forever
+	    begin
 	    case(state)
 		    WAIT_RSP:
 		    begin
@@ -96,5 +98,12 @@ task axi_master_write_response_driver::main();
     end
 endtask
 
+function void axi_master_write_response_driver::build();
+    scheduler = axi_master_write_scheduler::getSchedulerInstance(this);
+endfunction
+
+function void axi_master_write_response_driver::init();
+	$display("++++ +++ ++++ TOME ++ +++ +++ +++  ");
+endfunction
 
 `endif

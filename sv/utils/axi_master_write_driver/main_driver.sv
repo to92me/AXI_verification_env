@@ -36,25 +36,17 @@ class axi_master_write_main_driver extends uvm_component;
 	// new - constructor
 	function new (string name, uvm_component parent);
 		super.new(name, parent);
-		scheduler = axi_master_write_scheduler::getSchedulerInstance(this);
-		address_driver = axi_master_write_address_driver::getDriverInstance(this);
-		data_driver = axi_master_write_data_driver::getDriverInstance(this);
+
 	endfunction : new
 
 	// build_phase
 	function void build();
-
+		scheduler = axi_master_write_scheduler::getSchedulerInstance(this);
+		address_driver = axi_master_write_address_driver::getDriverInstance(this);
+		data_driver = axi_master_write_data_driver::getDriverInstance(this);
 		address_driver.build();
 		data_driver.build();
-
-		sem = new(1);
-		inbox_mssg = new();
-
-		fork
-			address_driver.main();
-			data_driver.main();
-		join_none;
-
+		sem = new(10);
 	endfunction
 
 	extern function axi_mssg getAddrFrame();
@@ -96,6 +88,7 @@ function axi_mssg axi_master_write_main_driver::getAddrFrame();
 		addr_mssg.state = NOT_READY;
 		end;
 	sem.put(1);
+	return addr_mssg;
 endfunction
 
 // get datat frame - it shoul be called from virtual interface data bus driver
@@ -115,11 +108,11 @@ function axi_mssg axi_master_write_main_driver::getDataFrame();
 		data_mssg.state = NOT_READY;
 		end;
 	sem.put(1);
+	return data_mssg;
 endfunction
 
 task axi_master_write_main_driver::main();
     fork
-//	    this.mainMainDriver();
 	    this.data_driver.main();
 	    this.address_driver.main();
     join
@@ -128,6 +121,7 @@ endtask
 function void axi_master_write_main_driver::mainMainDriver(input int clocks);
 	repeat(clocks)
 		begin
+
 			this.getFramesFromScheduler();
 			this.decrementDelay();
 		end
@@ -137,6 +131,7 @@ endfunction
 function void axi_master_write_main_driver::getFramesFromScheduler();
    forever
 	   begin
+//		   $display("get frame from scheduler");
 		   inbox_mssg = scheduler.getFrameForDrivingVif();
 		   if(inbox_mssg.state == QUEUE_EMPTY)
 			   return;
@@ -174,6 +169,7 @@ function void axi_master_write_main_driver::decrementDelay();
 		begin
 			if(data_inbox_queue[0].first_one == FALSE || data_inbox_queue[0].delay_data == 0 )
 				begin
+					$display("adding frame to ready data queue");
 					data_ready_queue.push_back(data_inbox_queue.pop_front());
 				end
 			else

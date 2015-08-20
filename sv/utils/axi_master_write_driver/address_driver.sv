@@ -57,10 +57,11 @@ function void axi_master_write_address_driver::getNextFrame();
 		sem.put(1);
 		end
 	else
+		begin
 		sem.get(1);
 		current_frame = null;
 		sem.put(1);
-
+		end
 endfunction
 
 
@@ -115,18 +116,19 @@ endfunction
 
 task axi_master_write_address_driver::main();
 	this.init();
+	$display("Running address driver main core... .");
 	forever
 		begin
 			case (state)
 				GET_FRAME:
 				begin
 					this.getNextFrame();
-					sem.get(1);
+//					sem.get(1);
 					if(current_frame == null)
 						state = WAIT_CLK;
 					else
 						state = DRIVE_VIF;
-					sem.put(1);
+//					sem.put(1);
 				end
 
 				DRIVE_VIF:
@@ -139,10 +141,14 @@ task axi_master_write_address_driver::main();
 
 				WAIT_READY:
 				begin
-					state = GET_FRAME;
+
 					if(vif.awready == 1)
-							continue;
-					@(posedge vif.sig_clock iff vif.awready == 1);
+						state = GET_FRAME;
+					else
+						begin
+						@(posedge vif.sig_clock iff vif.awready == 1);
+						state = GET_FRAME;
+						end
 				end
 
 				WAIT_CLK:
@@ -159,8 +165,8 @@ task axi_master_write_address_driver::main();
 					state = WAIT_READY;
 				end
 			endcase
-			$display("FATAL ADDRESS DRIVER");
 		end
+		$display("FATAL ADDRESS DRIVER");
 endtask
 
 

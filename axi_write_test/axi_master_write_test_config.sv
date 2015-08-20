@@ -1,5 +1,5 @@
-`ifndef AXI_WRITE_TEST_CONFIG
-`define AXI_WRITE_TEST_CONFIG
+`ifndef AXI_WRITE_TEST_CONFIG_SVH
+`define AXI_WRITE_TEST_CONFIG_SVH
 
 //------------------------------------------------------------------------------
 //
@@ -9,9 +9,11 @@
 
 class axi_write_test_config extends axi_config;
 
+	`uvm_object_utils(axi_write_test_config)
 	function new(string name = "axi_write_test_config");
 		super.new(name);
-		this.number_of_slaves = 10;
+		`uvm_info(get_name(),$sformatf("Creating test config"), UVM_LOW)
+		this.number_of_slaves = 2;
 		this.createConfiguration();
 	endfunction: new
 
