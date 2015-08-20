@@ -46,8 +46,10 @@ class axi_read_single_frame extends axi_read_base_frame;
 	// control
 	rand bit [2:0]				delay;
 	rand last_enum				last_mode;
+	err_enum					err;
 
-	constraint default_last_bit {last_mode dist {GOOD_LAST_BIT := 80, BAD_LAST_BIT := 20};}
+	//constraint default_last_bit {last_mode dist {GOOD_LAST_BIT := 80, BAD_LAST_BIT := 20};}
+	constraint default_last_bit {last_mode == GOOD_LAST_BIT;}	// TODO : put back to dist
 
 	// UVM utility macros
 	`uvm_object_utils_begin(axi_read_single_frame)
@@ -56,6 +58,7 @@ class axi_read_single_frame extends axi_read_base_frame;
 		`uvm_field_int(last, UVM_DEFAULT)
 		`uvm_field_int(delay, UVM_DEFAULT)
 		`uvm_field_enum(last_enum, last_mode, UVM_DEFAULT)
+		`uvm_field_enum(err_enum, err, UVM_DEFAULT)
 		//`uvm_field_int(user, UVM_DEFAULT)
 	`uvm_object_utils_end
 
@@ -73,7 +76,7 @@ endclass :  axi_read_single_frame
 class axi_read_burst_frame extends axi_read_base_frame;
 
 	rand bit [ADDR_WIDTH-1 : 0]		addr;
-	rand bit [7:0]					len;
+	rand bit [2:0]					len;		// TODO : [7:0]
 	rand burst_size_enum			size;
 	rand burst_type_enum			burst_type;
 	rand lock_enum					lock;
@@ -82,6 +85,8 @@ class axi_read_burst_frame extends axi_read_base_frame;
 	rand bit [3:0]					qos;
 	rand bit [3:0]					region;
 	// user
+
+	constraint default_length {len > 0;}
 
 	// UVM utility macros
 	`uvm_object_utils_begin(axi_read_burst_frame)

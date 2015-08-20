@@ -33,9 +33,8 @@ class axi_read_monitor extends uvm_monitor;
 	uvm_analysis_port #(axi_read_single_frame) data_collected_port;
 	uvm_analysis_port #(axi_read_burst_frame) addr_collected_port;
 
-	// allow sequencer access
-	uvm_blocking_peek_imp#(axi_read_burst_frame, axi_read_monitor) addr_trans_export;
-	event trans_addr_grabbed;
+	// TLM connection to slave driver - for sending master requests
+	//uvm_analysis_port #(axi_read_burst_frame) master_to_slave_port;
 
 	// The following property holds the transaction information currently
 	// begin captured (by the collect_address_phase and data_phase methods).
@@ -57,12 +56,11 @@ class axi_read_monitor extends uvm_monitor;
 		trans_addr_channel = axi_read_burst_frame::type_id::create("trans_addr_channel");
 		data_collected_port = new("data_collected_port", this);
 		addr_collected_port = new("addr_collected_port", this);
-		addr_trans_export = new("addr_trans_export", this);
+		//master_to_slave_port = new("master_to_slave_port", this);
 	endfunction : new
 
 	extern virtual function void build_phase(uvm_phase phase);
-	//extern virtual task run_phase(uvm_phase phase);
-	extern task peek (output axi_read_burst_frame trans); // Interface to driver
+	extern task run_phase(uvm_phase phase);
 	extern virtual task collect_transactions();
 	extern virtual function void perform_transfer_checks();
 	extern virtual function void perform_transfer_coverage();
@@ -75,21 +73,26 @@ endclass : axi_read_monitor
 		if(!uvm_config_db#(virtual axi_if)::get(this, "", "vif", vif))
 			`uvm_fatal("NOVIF",{"virtual interface must be set for: ",get_full_name(),".vif"});
 		// Propagate the configuration object
-		if(!uvm_config_db#(axi_config)::get(this, "", "config_obj", config_obj))
+		if(!uvm_config_db#(axi_config)::get(this, "", "axi_config", config_obj))
 			`uvm_fatal("NOCONFIG",{"Config object must be set for: ",get_full_name(),".config_obj"})
 	endfunction: build_phase
 
-	task axi_read_monitor::peek(output axi_read_burst_frame trans);
-		@trans_addr_grabbed;
-		trans = trans_addr_channel;
-	endtask
+	// run_phase
+	task axi_read_monitor::run_phase(uvm_phase phase);
+		@(negedge vif.sig_reset);
+		do
+			@(posedge vif.sig_clock);
+		while(vif.sig_reset!==1);
+    	`uvm_info(get_type_name(), "Detected Reset Done", UVM_LOW)
+    	collect_transactions();
+	endtask : run_phase
 
 	// collect_transactions
 	task axi_read_monitor::collect_transactions();
+
 		forever begin
 			@(posedge vif.sig_clock);
-			// TODO : Fill this place with the logic for collecting the transfer data
-			// ...
+
 			if (vif.arvalid && vif.arready)
 				begin
 					trans_addr_channel.addr = vif.araddr;
@@ -103,7 +106,8 @@ endclass : axi_read_monitor
 					trans_addr_channel.qos = vif.arqos;
 					trans_addr_channel.region = vif.arregion;
 					// user
-					->trans_addr_grabbed;
+					//master_to_slave_port.write(trans_addr_channel);
+
 				end
 
 			if (vif.rvalid && vif.rready)
@@ -119,6 +123,7 @@ endclass : axi_read_monitor
 				perform_transfer_checks();
 			if (coverage_enable)
 				perform_transfer_coverage();
+
 			data_collected_port.write(trans_data_channel);
 			addr_collected_port.write(trans_addr_channel);
 		end

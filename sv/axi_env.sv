@@ -30,8 +30,8 @@ class axi_env extends uvm_env;
 	axi_config config_obj;
 
 	// control bits
-	bit checks_enable;
-	bit coverage_enable;
+	bit checks_enable = 1;
+	bit coverage_enable = 1;
 
 	// Provide implementations of virtual methods such as get_type_name and create
 	`uvm_component_utils_begin(axi_env)
@@ -62,22 +62,22 @@ endclass : axi_env
 		super.build_phase(phase);
 
 		if(config_obj == null) //begin
-			if (!uvm_config_db#(axi_config)::get(this, "", "config_obj", config_obj)) begin
+			if (!uvm_config_db#(axi_config)::get(this, "", "axi_config", config_obj)) begin
 				`uvm_info("NOCONFIG", "Using default_axi_config", UVM_MEDIUM)
 				$cast(config_obj, factory.create_object_by_name("axi_config","config_obj"));
 			end
 
 		// set the master config
-		uvm_config_object::set(this, "*", "config_obj", config_obj);
+		uvm_config_db#(axi_master_config)::set(this, "*", "axi_master_config", config_obj.master);
 		// set the slave configs
 		foreach(config_obj.slave_list[i]) begin
 			string sname;
 			sname = $sformatf("read_slave[%0d]*", i);
-			uvm_config_object::set(this, sname, "config_obj", config_obj.slave_list[i]);
+			uvm_config_db#(axi_slave_config)::set(this, sname, "axi_slave_config", config_obj.slave_list[i]);
 		end
 
 		read_monitor = axi_read_monitor::type_id::create("read_monitor",this);
-		read_master = axi_master_read_agent::type_id::create(config_obj.master.name,this);
+		read_master = axi_master_read_agent::type_id::create("read_master",this);
 		read_slaves = new[config_obj.slave_list.size()];
 		for(int i = 0; i < config_obj.slave_list.size(); i++) begin
 			read_slaves[i] = axi_slave_read_agent::type_id::create($sformatf("read_slave[%0d]", i), this);
@@ -94,8 +94,8 @@ endclass : axi_env
 		read_master.monitor = read_monitor;
 		foreach(read_slaves[i]) begin
 			read_slaves[i].monitor = read_monitor;
-			if (read_slaves[i].is_active == UVM_ACTIVE)
-				read_slaves[i].driver.addr_trans_port.connect(read_monitor.addr_trans_export);
+			//if (read_slaves[i].is_active == UVM_ACTIVE)
+				//read_slaves[i].driver.burst_collected_port.connect(read_monitor.master_to_slave_port);
 		end
 	endfunction
 
@@ -110,7 +110,7 @@ endclass : axi_env
 // update_config() method
 function void axi_env::update_config(axi_config config_obj);
   read_monitor.config_obj = config_obj;
-  read_master.update_config(config_obj);
+  read_master.update_config(config_obj.master);
   foreach(read_slaves[i])
     read_slaves[i].update_config(config_obj.slave_list[i]);
 endfunction : update_config

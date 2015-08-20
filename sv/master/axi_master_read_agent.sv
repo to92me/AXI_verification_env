@@ -42,7 +42,7 @@ class axi_master_read_agent extends uvm_agent;
 		monitor = axi_read_monitor::type_id::create("monitor", this);
 
 		// Propagate the configuration object
-		if(!uvm_config_db#(axi_master_config)::get(this, "", "config_obj", config_obj))
+		if(!uvm_config_db#(axi_master_config)::get(this, "", "axi_master_config", config_obj))
 			`uvm_fatal("NOCONFIG",{"Config object must be set for: ",get_full_name(),".config_obj"})
 
 			if(config_obj.is_active == UVM_ACTIVE) begin
@@ -55,7 +55,7 @@ class axi_master_read_agent extends uvm_agent;
 	function void connect_phase(uvm_phase phase);
 		// Get the agents virtual interface if set via get_config
 		if (!uvm_config_db#(virtual axi_if)::get(this, "", "vif", vif))
-		`uvm_error("NOVIF",{"virtual interface must be set for: ",get_full_name(),".vif"})
+			`uvm_error("NOVIF",{"virtual interface must be set for: ",get_full_name(),".vif"})
 		// If the vif was set to the agent, apply it to its children
 		uvm_config_db#(virtual axi_if)::set(this, "*", "vif", vif);
 

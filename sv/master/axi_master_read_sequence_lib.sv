@@ -55,6 +55,8 @@ class axi_master_read_transfer_seq extends axi_master_read_base_seq;
 	int num_of_err = 0;
 	axi_read_burst_frame error_bursts[$];	// a queue for holding bursts that returned an error
 
+	rand bit[ADDR_WIDTH-1 : 0] addr_rand;
+
 	// new - constructor
 	function new(string name="axi_master_read_transfer_seq");
 		super.new(name);
@@ -67,12 +69,13 @@ class axi_master_read_transfer_seq extends axi_master_read_base_seq;
 		count = 3;	// number of bursts to be sent
 
 		repeat(3) begin
-			`uvm_do_with(req, {req.valid == FRAME_VALID;})
+			`uvm_do_with(req, {req.valid == FRAME_VALID; req.addr == addr_rand;})
 		end
 
 		// after sending all frames, check if there was an error
 		// and send that burst request again
-		fork
+/*		fork
+		begin
 			if (num_of_err) begin
 				count++;	// increase number of bursts waiting for response
 				req = error_bursts.pop_front();
@@ -83,9 +86,24 @@ class axi_master_read_transfer_seq extends axi_master_read_base_seq;
 				// if there is an error once, the burst will be sent again
 				// but if there is an error again, it will not be sent again
 			end
-		join_none
+			end
+		join_none*/
 
 		wait(!count);	// wait for all responses before finishing simulation
+
+		// if there was an error, send those frames again
+		num_of_err = error_bursts.size();
+		count = num_of_err;
+		while (num_of_err--) begin
+			req = error_bursts.pop_front();
+			// send it again, no randomization
+			start_item(req);
+			finish_item(req);
+			// if there is an error once, the burst will be sent again
+			// but if there is an error again, it will not be sent again
+		end
+
+		wait(!count);
 
 	endtask
 
@@ -100,7 +118,6 @@ class axi_master_read_transfer_seq extends axi_master_read_base_seq;
 				// if there was an error put the burst in the error queue so it will be sent agian
 				if (rsp.valid == FRAME_NOT_VALID) begin
 					error_bursts.push_back(rsp);
-					num_of_err++;
 				end
 
 	endfunction: response_handler

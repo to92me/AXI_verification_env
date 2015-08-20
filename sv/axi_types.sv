@@ -84,4 +84,9 @@ typedef enum {
 	FALSE = 0
 } true_false_enum;
 
+typedef enum {
+	ERROR,
+	NO_ERROR
+} err_enum;
+
 `endif

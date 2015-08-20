@@ -47,43 +47,6 @@ endclass : axi_slave_read_base_sequence
 
 //------------------------------------------------------------------------------
 //
-// SEQUENCE: axi_slave_read_transfer_seq
-//
-//------------------------------------------------------------------------------
-/*class axi_slave_read_transfer_seq extends axi_slave_read_base_sequence;
-
-	`uvm_object_utils(axi_slave_read_transfer_seq)
-
-	// new - constructor
-	function new(string name="axi_slave_read_transfer_seq");
-		super.new(name);
-	endfunction
-
-	virtual task body();
-		forever	begin
-			p_sequencer.addr_trans_port.peek(util_transfer);
-			if(p_sequencer.config_obj.check_addr_range(util_transfer.addr)) begin
-				`uvm_do_with(req,
-					{ req.addr == util_transfer.addr;
-						req.id == util_transfer.id;
-						req.burst_type == util_transfer.burst_type;
-						req.cache == util_transfer.cache;
-						req.len == util_transfer.len;
-						req.size == util_transfer.size;
-						req.lock == util_transfer.lock;
-						req.qos == util_transfer.qos;
-						req.prot == util_transfer.prot;
-						req.region == util_transfer.region;
-						})
-				get_response(rsp);
-			end
-		end
-	endtask
-
-endclass : axi_slave_read_transfer_seq*/
-
-//------------------------------------------------------------------------------
-//
 // SEQUENCE: axi_slave_read_simple_two_phase_seq
 //
 //------------------------------------------------------------------------------
@@ -97,7 +60,7 @@ class axi_slave_read_simple_two_phase_seq extends axi_slave_read_base_sequence;
 	endfunction
 
 	virtual task body();
-		repeat(100) begin	// TODO : verovatno forever begin?
+		forever begin
 			req = axi_read_burst_frame::type_id::create("req");
 			rsp = axi_read_single_frame::type_id::create("rsp");
 
@@ -118,7 +81,7 @@ class axi_slave_read_simple_two_phase_seq extends axi_slave_read_base_sequence;
 			finish_item(rsp);
 
 			// check if burst is complete
-			if ((rsp.valid == FRAME_VALID) && (rsp.last == rsp.last_mode)) begin
+			if ((rsp.valid == FRAME_VALID) && ((rsp.last == rsp.last_mode) || (rsp.err == ERROR))) begin
 				p_sequencer.arbit.burst_complete(rsp.id);
 			end
 

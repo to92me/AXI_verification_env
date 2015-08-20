@@ -47,10 +47,11 @@ task axi_master_read_response::check_response(axi_read_single_frame one_frame, r
 	if (one_frame.resp == SLVERR || one_frame.resp == DECERR) begin
 		sem.get(1);
 		for (i=0; i<sent_bursts.size(); i++) begin
-			if (sent_bursts[i].id == one_frame.id)
+			if (sent_bursts[i].id == one_frame.id) begin
 				matching_burst = sent_bursts[i];
 				matching_burst.valid = FRAME_NOT_VALID;
-			break;
+				break;
+			end
 		end
 		sent_bursts.delete(i);
 		sem.put(1);
@@ -65,8 +66,8 @@ task axi_master_read_response::check_response(axi_read_single_frame one_frame, r
 				matching_burst = sent_bursts[i];
 				matching_burst.valid = FRAME_NOT_VALID;
 				flag = 1;
+				break;
 			end
-			break;
 	end
 	if (flag) begin
 		sent_bursts.delete(i);
@@ -76,17 +77,23 @@ task axi_master_read_response::check_response(axi_read_single_frame one_frame, r
 	sem.put(1);
 
 	// check if a burst is complete - recieved frame with rlast set
-	if (one_frame.last == one_frame.last_mode) begin
+	if (one_frame.last) begin
+
 		sem.get(1);
 		for (i=0; i<sent_bursts.size(); i++) begin
-			if (sent_bursts[i].id == one_frame.id)
+			if (sent_bursts[i].id == one_frame.id) begin
 				matching_burst = sent_bursts[i];
 				matching_burst.valid = FRAME_VALID;
-			break;
+				flag = 1;
+				break;
+			end
 		end
-		sent_bursts.delete(i);
+		if(flag) begin
+			sent_bursts.delete(i);
+			sem.put(1);
+			return;
+		end
 		sem.put(1);
-		return;
 	end
 
 	matching_burst = null;	// no errors
