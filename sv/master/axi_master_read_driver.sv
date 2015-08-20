@@ -40,7 +40,7 @@ class axi_master_read_driver extends uvm_driver #(axi_read_burst_frame);
 		if(!uvm_config_db#(virtual axi_if)::get(this, "", "vif", vif))
 			`uvm_fatal("NOVIF",{"virtual interface must be set for: ",get_full_name(),".vif"})
 			// Propagate the configuration object
-			if(!uvm_config_db#(axi_master_config)::get(this, "", "config_obj", config_obj))
+			if(!uvm_config_db#(axi_master_config)::get(this, "", "axi_master_config", config_obj))
 				`uvm_fatal("NOCONFIG",{"Config object must be set for: ",get_full_name(),".config_obj"})
 	endfunction: build_phase
 
@@ -104,7 +104,7 @@ endclass : axi_master_read_driver
 			burst_frame = axi_read_burst_frame::type_id::create("burst_frame");
 
 			@(posedge vif.sig_clock iff vif.rvalid);
-			vif.rready <= 1'b1;
+			//vif.rready <= 1'b1;
 			// get info
 			data_frame.id = vif.rid;
 			data_frame.resp = vif.rresp;
@@ -116,8 +116,8 @@ endclass : axi_master_read_driver
 				seq_item_port.put(burst_frame);
 			end
 
-			// @(posedge vif.sig_clock);
-			// vif.rready <= 1'b0;
+			//@(posedge vif.sig_clock);
+			//vif.rready <= 1'b0;
 		end
 	endtask : read_data_channel
 
@@ -138,12 +138,12 @@ endclass : axi_master_read_driver
 			vif.arqos <= req.qos;
 			vif.arregion <= req.region;
 			// user
-			vif.rvalid <= 1'b1;
+			vif.arvalid <= 1'b1;
 
 			resp.new_burst(req);
 
-			//@(posedge vif.sig_clock iff vif.rready);
-			//vif.rvalid <= 1'b0;	// TODO : ??
+			@(posedge vif.sig_clock);
+			vif.arvalid <= 1'b0;	// TODO : ??
 		end
 	endtask : read_addr_channel
 

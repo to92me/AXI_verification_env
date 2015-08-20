@@ -21,7 +21,14 @@ class axi_slave_read_driver extends uvm_driver #(axi_read_base_frame, axi_read_b
 	// Configuration object
 	axi_slave_config config_obj;
 
-	uvm_blocking_peek_port#(axi_read_burst_frame) addr_trans_port;
+	// TLM port for geting master requests from monitor
+	//uvm_analysis_imp #(axi_read_burst_frame, axi_slave_read_driver) burst_collected_port;
+
+	// queue that holds master burst requests
+	axi_read_burst_frame burst_req[$];
+
+	// current burst req
+	//protected axi_read_burst_frame burst_collected;
 
 	// Provide implmentations of virtual methods such as get_type_name and create
 	`uvm_component_utils_begin(axi_slave_read_driver)
@@ -30,7 +37,8 @@ class axi_slave_read_driver extends uvm_driver #(axi_read_base_frame, axi_read_b
 	// new - constructor
 	function new (string name, uvm_component parent);
 		super.new(name, parent);
-		addr_trans_port = new("addr_trans_port", this);
+		//burst_collected_port = new("burst_collected_port", this);
+		//burst_collected = new();
 	endfunction : new
 
 	// class methods
@@ -40,6 +48,8 @@ class axi_slave_read_driver extends uvm_driver #(axi_read_base_frame, axi_read_b
 	extern virtual task get_from_seq();
 	extern virtual task reset();
 	extern virtual task drive_next_single_frame(axi_read_single_frame rsp);
+	//extern virtual function void write(axi_read_burst_frame new_burst);
+	extern virtual task addr_channel();
 
 endclass : axi_slave_read_driver
 
@@ -50,7 +60,7 @@ endclass : axi_slave_read_driver
 		if(!uvm_config_db#(virtual axi_if)::get(this, "", "vif", vif))
 			`uvm_fatal("NOVIF",{"virtual interface must be set for: ",get_full_name(),".vif"})
 			// Propagate the configuration object
-			if(!uvm_config_db#(axi_slave_config)::get(this, "", "config_obj", config_obj))
+			if(!uvm_config_db#(axi_slave_config)::get(this, "", "axi_slave_config", config_obj))
 				`uvm_fatal("NOCONFIG",{"Config object must be set for: ",get_full_name(),".config_obj"})
 	endfunction: build_phase
 
@@ -70,6 +80,7 @@ endclass : axi_slave_read_driver
 		fork
 			get_from_seq();
 			reset();
+			addr_channel();
 		join
 	endtask : get_and_drive
 
@@ -84,9 +95,18 @@ endclass : axi_slave_read_driver
 
 			// phase 1
 			seq_item_port.get_next_item(item);
+
 			if ($cast(req, item))
 				begin
-					// TODO : uzmi od monitora, ako ima
+					if (burst_req.size()) begin
+						req.copy(burst_req.pop_front());
+						req.valid = FRAME_VALID;
+
+						// DEBUG
+						$write("slave driver - valid frame to seq, id = %d\n", req.id);
+					end
+					else
+						req.valid = FRAME_NOT_VALID;
 				end
 			else
 				`uvm_error("CASTFAIL", "The recieved seq. item is not a request seq. item");
@@ -143,5 +163,48 @@ endclass : axi_slave_read_driver
 				vif.rvalid <= 1'b0;
 			end
 	endtask : drive_next_single_frame
+
+	/*function void axi_slave_read_driver::write(axi_read_burst_frame new_burst);
+		$cast(burst_collected, new_burst.clone());
+		`uvm_info(get_type_name(), {"Burst collected:\n", burst_collected.sprint()}, UVM_HIGH)
+
+		// fill in burst queue
+		burst_req.push_back(burst_collected);
+
+	endfunction : write*/
+
+	task axi_slave_read_driver::addr_channel();
+
+		axi_read_burst_frame burst_collected;
+
+		forever begin
+			burst_collected = axi_read_burst_frame::type_id::create("burst_collected");
+			@(posedge vif.sig_clock iff vif.arvalid);
+			vif.arready <= 1'b1;
+
+			// DEBUG
+			$write("slave driver - addr_channel get\n");
+
+			// get info
+			burst_collected.id = vif.arid;
+			burst_collected.addr = vif.araddr;
+			burst_collected.len = vif.arlen;
+			// DEBUG
+			$write("burst_collected.len = %d\n", burst_collected.len);
+
+			burst_collected.size = vif.arsize;
+			burst_collected.lock = vif.arlock;
+			burst_collected.cache = vif.arcache;
+			burst_collected.prot = vif.arprot;
+			burst_collected.qos = vif.arqos;
+			burst_collected.region = vif.arregion;
+			// user
+
+			if(config_obj.check_addr_range(burst_collected.addr))
+				// fill in burst queue
+				burst_req.push_back(burst_collected);
+
+		end
+	endtask : addr_channel
 
 `endif

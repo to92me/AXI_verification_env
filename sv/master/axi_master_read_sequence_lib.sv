@@ -73,7 +73,7 @@ class axi_master_read_transfer_seq extends axi_master_read_base_seq;
 		// after sending all frames, check if there was an error
 		// and send that burst request again
 		fork
-			if (num_of_err) begin
+			wait (num_of_err) begin
 				count++;	// increase number of bursts waiting for response
 				req = error_bursts.pop_front();
 				num_of_err--;

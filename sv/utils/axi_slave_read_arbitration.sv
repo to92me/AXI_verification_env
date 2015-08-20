@@ -95,6 +95,7 @@ endclass : axi_slave_read_arbitration
 	// right queues - ready or wait, based on delay
 	task axi_slave_read_arbitration::create_single_frames(axi_read_burst_frame burst_frame);
 
+		int err_flag = 0;
 		previous_delay = 0;
 
 	    for (int i=0; i<burst_frame.len; i++) begin
@@ -102,12 +103,18 @@ endclass : axi_slave_read_arbitration
 			assert (one_frame.randomize() with {delay >= previous_delay;})
 			previous_delay = one_frame.delay;
 			one_frame.id = burst_frame.id;
-			if ((burst_frame.lock == EXCLUSIVE) && (config_obj.lock == NORMAL))
+			if ((burst_frame.lock == EXCLUSIVE) ) begin//&& (config_obj.lock == NORMAL))	 TODO : fix
 				one_frame.resp = OKAY;
+				one_frame.err = ERROR;
+				err_flag = 1;
+			end
 			else if (burst_frame.lock == EXCLUSIVE)
 				one_frame.resp = EXOKAY;
 			else
 				one_frame.resp = OKAY;
+
+			if (!err_flag)
+				one_frame.err = NO_ERROR;
 
 			if (i == burst_frame.len-1)
 				one_frame.last = 1;
@@ -125,6 +132,11 @@ endclass : axi_slave_read_arbitration
 				wait_sem.get(1);
 				wait_queue.push_back(one_frame);
 				wait_sem.put(1);
+			end
+
+			// if there is an error kill the burst
+			if (err_flag) begin
+				break;
 			end
 		end
 	endtask : create_single_frames

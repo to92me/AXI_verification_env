@@ -42,7 +42,7 @@ class axi_slave_read_agent extends uvm_agent;
 		monitor = axi_read_monitor::type_id::create("monitor", this);
 
 		// Propagate the configuration object
-		if(!uvm_config_db#(axi_slave_config)::get(this, "", "config_obj", config_obj))
+		if(!uvm_config_db#(axi_slave_config)::get(this, "", "axi_slave_config", config_obj))
 			`uvm_fatal("NOCONFIG",{"Config object must be set for: ",get_full_name(),".config_obj"})
 
 			if(config_obj.is_active == UVM_ACTIVE) begin
