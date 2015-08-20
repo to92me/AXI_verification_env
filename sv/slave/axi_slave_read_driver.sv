@@ -196,6 +196,7 @@ endclass : axi_slave_read_driver
 			if(config_obj.check_addr_range(burst_collected.addr)) begin
 				// fill in burst queue
 				burst_req.push_back(burst_collected);
+			end
 
 		end
 	endtask : addr_channel

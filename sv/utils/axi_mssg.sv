@@ -135,6 +135,9 @@ class axi_slave_memory_response;
 	axi_slave_config_memory_field memory_field;
 	true_false_enum valid_data = FALSE;
 
+	function new(); 
+		memory_field = new(); 
+	endfunction 
 
 	extern function 	bit [DATA_WIDTH-1 : 0]  		getData();
 	extern function 	bit [ADDR_WIDTH-1 : 0]  		getAddr();

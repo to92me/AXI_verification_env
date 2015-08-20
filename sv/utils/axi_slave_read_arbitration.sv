@@ -31,10 +31,13 @@ class axi_slave_read_arbitration extends uvm_component;
 	// Configuration object
 	axi_slave_config config_obj;
 
+	// control bit to select whether or not to read from memory
+	bit read_enable = 1;
 
 	// Provide implementations of virtual methods such as get_type_name and create
 	`uvm_component_utils_begin(axi_slave_read_arbitration)
     	`uvm_field_object(one_frame, UVM_DEFAULT)
+    	`uvm_field_int(read_enable, UVM_DEFAULT)
 	`uvm_component_utils_end
 
 	// new - constructor
@@ -95,6 +98,8 @@ endclass : axi_slave_read_arbitration
 	// right queues - ready or wait, based on delay
 	task axi_slave_read_arbitration::create_single_frames(axi_read_burst_frame burst_frame);
 
+		axi_slave_memory_response rsp;
+
 		int err_flag = 0;
 		previous_delay = 0;
 
@@ -103,7 +108,7 @@ endclass : axi_slave_read_arbitration
 			assert (one_frame.randomize() with {delay >= previous_delay;})
 			previous_delay = one_frame.delay;
 			one_frame.id = burst_frame.id;
-			if ((burst_frame.lock == EXCLUSIVE) && (config_obj.lock == NORMAL)) begin//	 TODO : fix
+			if ((burst_frame.lock == EXCLUSIVE) && (config_obj.lock == NORMAL)) begin
 				one_frame.resp = OKAY;
 				one_frame.err = ERROR;
 				err_flag = 1;
@@ -112,6 +117,24 @@ endclass : axi_slave_read_arbitration
 				one_frame.resp = EXOKAY;
 			else
 				one_frame.resp = OKAY;
+
+			// read data from memory
+			if(read_enable) begin
+				config_obj.readMemory(burst_frame.addr, rsp);
+				if(rsp.getValid() == TRUE) begin
+					one_frame.data = rsp.getData();
+				end
+				/* // ako nije nista procitao, vrati random data bez errora
+				// ili da vrati SLVERR
+				// TODO : PITAJ DARKA
+				else
+					begin
+						one_frame.resp = SLVERR;
+						one_frame.err = ERROR;
+						err_flag = 1;
+					end
+				*/
+			end
 
 			if (!err_flag)
 				one_frame.err = NO_ERROR;

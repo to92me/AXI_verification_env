@@ -105,6 +105,7 @@ endclass : axi_master_read_driver
 
 			@(posedge vif.sig_clock iff vif.rvalid);
 			//vif.rready <= 1'b1;
+
 			// get info
 			data_frame.id = vif.rid;
 			data_frame.resp = vif.rresp;
