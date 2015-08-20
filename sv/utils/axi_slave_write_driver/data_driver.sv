@@ -9,7 +9,9 @@
 
 class axi_slave_write_data_driver extends uvm_component;
 
-	static axi_slave_write_data_driver 			driverInstance;
+//	static axi_slave_write_data_driver 			driverInstance;
+	axi_slave_write_ad
+
 
 
 	`uvm_component_utils(axi_slave_write_data_driver)
@@ -24,10 +26,10 @@ class axi_slave_write_data_driver extends uvm_component;
 		super.build_phase(phase);
 	endfunction : build_phase
 
-	extern static function axi_slave_write_data_driver getDriverInstance(uvm_component parent);
+//	extern static function axi_slave_write_data_driver getDriverInstance(uvm_component parent);
 
 endclass : axi_slave_write_data_driver
-
+/*
 	function axi_slave_write_data_driver axi_slave_write_data_driver::getDriverInstance(input uvm_component parent);
 	   if(driverInstance == null)
 		   begin
@@ -36,5 +38,5 @@ endclass : axi_slave_write_data_driver
 		   end
 		return driverInstance;
 	endfunction
-
+*/
 `endif

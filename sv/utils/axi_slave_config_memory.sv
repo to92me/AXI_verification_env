@@ -60,7 +60,7 @@ class axi_slave_config_memory ; // extends 	uvm_component;
 //	endfunction : new
 
 	function new();
-		sem = new();
+		sem = new(1);
 	endfunction
 
 //	function void build_phase(uvm_phase phase);
@@ -86,6 +86,7 @@ task axi_slave_config_memory::read(input bit [ADDR_WIDTH-1 : 0] read_addr, outpu
 				end
 		end
 	sem.put(1);
+	read_rsp = rsp;
 //	if (rsp.getValid() == FALSE)
 //		`uvm_info(get_name(),$sformatf("reding from empyt memory space, address : %d ", read_addr), UVM_LOW)
 
@@ -116,7 +117,6 @@ task axi_slave_config_memory::write(input bit[ADDR_WIDTH-1:0] write_addr, input 
 			memory_queue.push_back(memory_field);
 			sem.put(1);
 		end
-
 endtask
 
 

@@ -6,13 +6,11 @@
 //
 //------------------------------------------------------------------------------
 
-class axi_slave_write_address_driver extends uvm_component;
+class axi_slave_write_address_driver extends axi_slave_write_base_driver;
 
-	protected virtual axi_if 				vif;
+
 	static axi_slave_write_address_driver 	driverInstance;
-	axi_slave_write_main_driver 			main_driver;
-
-
+	axi_write_slave_addr_mssg				mssg;
 
 	`uvm_component_utils(axi_slave_write_address_driver)
 
@@ -20,15 +18,19 @@ class axi_slave_write_address_driver extends uvm_component;
 		super.new(name, parent);
 	endfunction : new
 
-	function void build_phase(uvm_phase phase);
-		super.build_phase(phase);
-	endfunction : build_phase
+//	extern static function axi_slave_write_address_driver getDriverInstance(input uvm_component parent);
 
-	extern static function axi_slave_write_address_driver getDriverInstance(input uvm_component parent);
-	extern task main();
+	extern function void init();
+	extern function void  send();
+	extern task waitOnValid(ref true_false_enum ready);
+	extern task getData();
+	extern task completeRecieve();
+	extern task setReady();
+	extern task getDelay(ref int delay);
 
 endclass : axi_slave_write_address_driver
 
+/*
 function axi_slave_write_address_driver axi_slave_write_address_driver::getDriverInstance(input uvm_component parent);
 	if(driverInstance == null)
 		begin
@@ -37,10 +39,21 @@ function axi_slave_write_address_driver axi_slave_write_address_driver::getDrive
 		end
 	return driverInstance;
 endfunction
+*/
 
-task axi_slave_write_address_driver::main();
-    // TODO Auto-generated task stub
+function void axi_slave_write_address_driver::init();
+	vif.awready = 1'b1;
+endfunction
 
+function void axi_slave_write_address_driver::send();
+	
+endfunction
+
+task axi_slave_write_address_driver::getData();
+   mssg = new();
+   mssg.setID(vif.awid);
+   mssg.setLen(vif.awlen);
 endtask
+
 
 `endif

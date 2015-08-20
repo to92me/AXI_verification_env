@@ -53,7 +53,7 @@ endfunction
 function void axi_master_write_response_driver::getNextFrame();
     rsp = new();
 	rsp.ID = vif.bid;
-	rsp.resp = vif.bresp;
+	rsp.rsp = vif.bresp;
 endfunction
 
 function void axi_master_write_response_driver::completeTransaction();

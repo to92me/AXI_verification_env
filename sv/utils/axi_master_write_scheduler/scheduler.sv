@@ -355,7 +355,7 @@ function void axi_master_write_scheduler::readSlaveResponse();
 				sem.put(1);
 			end
 
-		case (single_response_from_slave.resp) // check for  response
+		case (single_response_from_slave.rsp) // check for  response
 			OKAY:
 			begin
 				this.putOkResp(single_response_from_slave.ID);

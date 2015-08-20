@@ -20,7 +20,7 @@ typedef enum{
 
 class axi_master_write_base_driver extends uvm_component;
 
-	virtual interface 						axi_if vif;
+	virtual interface axi_if 				vif;
 	axi_single_frame 						current_frame;
 	static axi_master_write_base_driver 	driverInstance;
 	axi_mssg 								mssg;

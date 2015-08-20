@@ -26,12 +26,108 @@ class axi_waiting_resp;
 	int 				 counter;
 endclass
 
+
+
 class axi_slave_response;
 	bit [ID_WIDTH-1 : 0]	ID;
-	response_enum 			resp;
+	response_enum 			rsp;
+
+	// Get ID
+	function bit[ID_WIDTH-1:0] getID();
+		return ID;
+	endfunction : getID
+
+	// Set ID
+	function void setID(bit[ID_WIDTH-1:0] ID);
+		this.ID = ID;
+	endfunction : setID
+
+	// Get rsp
+	function response_enum getRsp();
+		return rsp;
+	endfunction : getRsp
+
+	// Set rsp
+	function void setRsp(response_enum rsp);
+		this.rsp = rsp;
+	endfunction : setRsp
+
+
+
 endclass
 
 
+class axi_slave_write_addr_mssg ;
+	bit [ID_WIDTH-1 : 0]	ID;
+	bit [7 : 0]				len;
+
+
+	// Get ID
+	function bit[ID_WIDTH-1:0] getID();
+		return ID;
+	endfunction
+
+	// Set ID
+	function void setID(bit[ID_WIDTH-1:0] ID);
+		this.ID = ID;
+	endfunction
+
+	// Get len
+	function bit[7:0] getLen();
+		return len;
+	endfunction
+
+	// Set len
+	function void setLen(bit[7:0] len);
+		this.len = len;
+	endfunction
+
+endclass
+
+
+
+class axi_slave_write_data_mssg;
+	bit [ID_WIDTH-1 : 0]	ID;
+
+	// Get ID
+	function bit[ID_WIDTH-1:0] getID();
+		return ID;
+	endfunction : getID
+
+	// Set ID
+	function void setID(bit[ID_WIDTH-1:0] ID);
+		this.ID = ID;
+	endfunction : setID
+
+endclass
+
+class axi_slave_write_rsp_mssg;
+	bit [ID_WIDTH-1 : 0]	ID;
+	response_enum			rsp;
+
+	// Get ID
+	function bit[ID_WIDTH-1:0] getID();
+		return ID;
+	endfunction : getID
+
+	// Set ID
+	function void setID(bit[ID_WIDTH-1:0] ID);
+		this.ID = ID;
+	endfunction : setID
+
+	// Get rsp
+	function response_enum getRsp();
+		return rsp;
+	endfunction : getRsp
+
+	// Set rsp
+	function void setRsp(response_enum rsp);
+		this.rsp = rsp;
+	endfunction : setRsp
+
+
+
+endclass
 
 class axi_slave_memory_response;
 
