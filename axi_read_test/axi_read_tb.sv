@@ -8,12 +8,11 @@ Notes         :
 Copyright 2010 (c) Cadence Design Systems
 -----------------------------------------------------------------*/
 
-`ifndef axi_read_tb_SV
-`define axi_read_tb_SV
+`ifndef AXI_READ_TB_SV
+`define AXI_READ_TB_SV
 
-//`include "sv/axi_config.sv"
-//`include "sv/master/axi_master_read_sequence_lib.sv"
-//`include "sv/slave/axi_slave_read_sequence_lib.sv"
+`include "sv/axi_virtual_sequencer.sv"
+`include "sv/axi_virtual_seq_lib.sv"
 
 //------------------------------------------------------------------------------
 // CLASS: apb_axi_read_tb
@@ -26,6 +25,9 @@ class axi_read_tb extends uvm_env;
 
   // configuration object
   axi_read_test_config config_obj;
+
+  // virtual seqr
+  axi_virtual_sequencer virtual_seqr;
 
   `uvm_component_utils_begin(axi_read_tb)
     `uvm_field_object(axi0, UVM_ALL_ON)
@@ -51,12 +53,14 @@ endclass : axi_read_tb
     uvm_config_db#(axi_config)::set(this, "*", "axi_config", config_obj);
 
     axi0 = axi_env::type_id::create("axi0", this);
+    virtual_seqr = axi_virtual_sequencer::type_id::create("virtual_seqr", this);
 
   endfunction : build_phase
 
   // connect_phase
   function void axi_read_tb::connect_phase(uvm_phase phase);
     super.connect_phase(phase);
+    virtual_seqr.read_seqr = axi0.read_master.sequencer;
   endfunction : connect_phase
 
 `endif // axi_read_tb_SV

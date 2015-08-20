@@ -66,11 +66,15 @@ package axi_pkg;
 	typedef class axi_slave_config;
 	typedef class axi_config;
 	typedef class slave_config_factory;
+	typedef class axi_slave_config_memory_field;
+	typedef class axi_slave_config_memory;
 
 	// utils
 	typedef class axi_slave_read_arbitration;
 	typedef class axi_master_read_response;
 	typedef class axi_read_monitor;
+	typedef class axi_slave_response;
+	typedef axi_slave_memory_response;
 
 	// slave
 	typedef class axi_slave_read_driver;
@@ -84,6 +88,10 @@ package axi_pkg;
 
 	// top
 	typedef class axi_env;
+	typedef class axi_virtual_sequencer;
+
+	typedef class axi_master_read_transfer_seq;
+
 `endif
 
 	import uvm_pkg::*;
@@ -181,6 +189,11 @@ package axi_pkg;
 	`include "sv/utils/axi_master_read_response.sv"
 	`include "sv/utils/axi_slave_read_arbitration.sv"
 	`include "sv/utils/axi_read_monitor.sv"
+	`include "sv/utils/axi_mssg.sv"
+	`include "sv/utils/axi_slave_config_memory.sv"
+
+	`include "sv/axi_virtual_sequencer.sv"
+	`include "sv/axi_virtual_seq_lib.sv"
 
 `endif
 

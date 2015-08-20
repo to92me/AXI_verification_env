@@ -37,7 +37,7 @@ class axi_slave_read_sequencer extends uvm_sequencer #(axi_read_base_frame);
 	// new - constructor
 	function new (string name, uvm_component parent);
 		super.new(name, parent);
-		arbit = new();
+		arbit = axi_slave_read_arbitration::type_id::create("arbit", this);
 	endfunction : new
 
 endclass : axi_slave_read_sequencer

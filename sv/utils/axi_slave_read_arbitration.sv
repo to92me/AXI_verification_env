@@ -51,7 +51,7 @@ class axi_slave_read_arbitration extends uvm_component;
 	function void build_phase(uvm_phase phase);
 		super.build_phase(phase);
 		// Propagate the configuration object
-		if(!uvm_config_db#(axi_slave_config)::get(this, "", "config_obj", config_obj))
+		if(!uvm_config_db#(axi_slave_config)::get(this, "", "axi_slave_config", config_obj))
 			`uvm_fatal("NOCONFIG",{"Config object must be set for: ",get_full_name(),".config_obj"})
 	endfunction : build_phase
 
@@ -103,7 +103,7 @@ endclass : axi_slave_read_arbitration
 			assert (one_frame.randomize() with {delay >= previous_delay;})
 			previous_delay = one_frame.delay;
 			one_frame.id = burst_frame.id;
-			if ((burst_frame.lock == EXCLUSIVE) ) begin//&& (config_obj.lock == NORMAL))	 TODO : fix
+			if ((burst_frame.lock == EXCLUSIVE) && (config_obj.lock == NORMAL)) begin//	 TODO : fix
 				one_frame.resp = OKAY;
 				one_frame.err = ERROR;
 				err_flag = 1;

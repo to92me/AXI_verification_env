@@ -73,8 +73,7 @@ endclass : axi_env
 		foreach(config_obj.slave_list[i]) begin
 			string sname;
 			sname = $sformatf("read_slave[%0d]*", i);
-			uvm_config_db#(axi_slave_config)::set(this, "*", "axi_slave_config", config_obj.slave_list[i]);
-			//uvm_config_object::set(this, sname, "config_obj", config_obj.slave_list[i]);
+			uvm_config_db#(axi_slave_config)::set(this, sname, "axi_slave_config", config_obj.slave_list[i]);
 		end
 
 		read_monitor = axi_read_monitor::type_id::create("read_monitor",this);

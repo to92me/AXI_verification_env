@@ -86,6 +86,8 @@ class axi_read_burst_frame extends axi_read_base_frame;
 	rand bit [3:0]					region;
 	// user
 
+	constraint default_length {len > 0;}
+
 	// UVM utility macros
 	`uvm_object_utils_begin(axi_read_burst_frame)
 		`uvm_field_int(addr, UVM_DEFAULT)

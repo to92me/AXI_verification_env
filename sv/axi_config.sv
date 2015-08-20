@@ -33,7 +33,6 @@ class axi_config extends uvm_object;
 	// new - constructor
 	function new(string name = "axi_config");
 		super.new(name);
-		createConfiguration();
 	endfunction: new
 
 	extern function void createConfiguration();

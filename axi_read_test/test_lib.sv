@@ -70,3 +70,25 @@ class test_simple extends demo_base_test;
   endfunction : build_phase
 
 endclass : test_simple
+
+class virtual_seq_test extends demo_base_test;
+  `uvm_component_utils(virtual_seq_test)
+
+  function new(string name = "virtual_seq_test", uvm_component parent);
+    super.new(name,parent);
+  endfunction : new
+
+    virtual function void build_phase(uvm_phase phase);
+
+    // uvm_config_db#(uvm_object_wrapper)::set(this, "tb0.virtual_sequencer.run_phase", "default_sequence", virtual_transfer_seq::type_id.get());
+    uvm_config_wrapper::set(this, "tb0.virtual_seqr.run_phase", "default_sequence",
+                           virtual_transfer_seq::get_type());
+    uvm_config_wrapper::set(this, "tb0.axi0.read_slave*.sequencer.run_phase", "default_sequence",
+                           axi_slave_read_simple_two_phase_seq::get_type());
+
+    // Create the tb
+    super.build_phase(phase);
+  endfunction : build_phase
+
+
+endclass : virtual_seq_test

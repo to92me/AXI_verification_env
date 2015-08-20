@@ -101,12 +101,10 @@ endclass : axi_slave_read_driver
 					if (burst_req.size()) begin
 						req.copy(burst_req.pop_front());
 						req.valid = FRAME_VALID;
-
-						// DEBUG
-						$write("slave driver - valid frame to seq, id = %d\n", req.id);
 					end
-					else
+					else begin
 						req.valid = FRAME_NOT_VALID;
+					end
 				end
 			else
 				`uvm_error("CASTFAIL", "The recieved seq. item is not a request seq. item");
@@ -182,15 +180,10 @@ endclass : axi_slave_read_driver
 			@(posedge vif.sig_clock iff vif.arvalid);
 			vif.arready <= 1'b1;
 
-			// DEBUG
-			$write("slave driver - addr_channel get\n");
-
 			// get info
 			burst_collected.id = vif.arid;
 			burst_collected.addr = vif.araddr;
 			burst_collected.len = vif.arlen;
-			// DEBUG
-			$write("burst_collected.len = %d\n", burst_collected.len);
 
 			burst_collected.size = vif.arsize;
 			burst_collected.lock = vif.arlock;
@@ -200,7 +193,7 @@ endclass : axi_slave_read_driver
 			burst_collected.region = vif.arregion;
 			// user
 
-			if(config_obj.check_addr_range(burst_collected.addr))
+			if(config_obj.check_addr_range(burst_collected.addr)) begin
 				// fill in burst queue
 				burst_req.push_back(burst_collected);
 
