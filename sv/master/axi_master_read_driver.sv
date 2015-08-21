@@ -59,13 +59,13 @@ class axi_master_read_driver extends uvm_driver #(axi_read_burst_frame);
 	virtual protected task get_and_drive();
 		fork
 			reset();
-			read_addr_channel();
+			drive_addr_channel();
 			read_data_channel();
 		join
 	endtask : get_and_drive
 
 	extern virtual task read_data_channel();
-	extern virtual task read_addr_channel();
+	extern virtual task drive_addr_channel();
 	extern virtual task reset();
 
 endclass : axi_master_read_driver
@@ -104,6 +104,7 @@ endclass : axi_master_read_driver
 			burst_frame = axi_read_burst_frame::type_id::create("burst_frame");
 
 			@(posedge vif.sig_clock iff vif.rvalid);
+			#3	// for simulation
 			//vif.rready <= 1'b1;
 
 			// get info
@@ -123,11 +124,17 @@ endclass : axi_master_read_driver
 	endtask : read_data_channel
 
 	// get from seq. and drive signals to the address channel
-	task axi_master_read_driver::read_addr_channel();
+	task axi_master_read_driver::drive_addr_channel();
 		forever begin
 			seq_item_port.get(req);
 
-			@(posedge vif.sig_clock)
+			if(req.delay > 0) begin
+				repeat(req.delay) @(posedge vif.sig_clock);
+			end
+			else
+				@ (posedge vif.sig_clock);
+			#3	// for simulation
+
 			vif.arid <= req.id;
 			vif.araddr <= req.addr;
 			vif.arlen <= req.len;
@@ -141,11 +148,12 @@ endclass : axi_master_read_driver
 			// user
 			vif.arvalid <= 1'b1;
 
-			resp.new_burst(req);
+			resp.new_burst(req);	// send burst to resp so responses can be calculated
 
-			@(posedge vif.sig_clock);
+			@(posedge vif.sig_clock iff vif.arready);	// wait for slave
+			#3	// for simulation
 			vif.arvalid <= 1'b0;	// TODO : ??
 		end
-	endtask : read_addr_channel
+	endtask : drive_addr_channel
 
 `endif

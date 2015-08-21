@@ -123,3 +123,68 @@ class axi_master_read_transfer_seq extends axi_master_read_base_seq;
 	endfunction: response_handler
 
 endclass : axi_master_read_transfer_seq
+
+class axi_master_read_multiple_slaves extends axi_master_read_base_seq;
+
+	`uvm_object_utils(axi_master_read_transfer_seq)
+
+	int count = 0;
+	int num_of_err = 0;
+	axi_read_burst_frame error_bursts[$];	// a queue for holding bursts that returned an error
+
+	bit[ADDR_WIDTH-1 : 0] addr_queue[$];
+	bit[ADDR_WIDTH-1 : 0] dummy;
+
+	// new - constructor
+	function new(string name="axi_master_read_transfer_seq");
+		super.new(name);
+	endfunction
+
+	virtual task body();
+
+		use_response_handler(1);
+
+		count = addr_queue.size();	// number of bursts to be sent
+
+		repeat(addr_queue.size()) begin
+			dummy = addr_queue.pop_front();
+			`uvm_do_with(req, {req.valid == FRAME_VALID; req.addr == dummy;})
+		end
+
+		wait(!count);	// wait for all responses before finishing simulation
+
+		// if there was an error, send those frames again
+		num_of_err = error_bursts.size();
+		count = num_of_err;
+		while (num_of_err--) begin
+			req = error_bursts.pop_front();
+			// send it again, no randomization
+			start_item(req);
+			finish_item(req);
+			// if there is an error once, the burst will be sent again
+			// but if there is an error again, it will not be sent again
+		end
+
+		wait(!count);
+
+	endtask
+
+	// this is called by the sequencer for each response that arrives for this sequence
+	virtual function void response_handler(uvm_sequence_item response);
+
+				if(!($cast(rsp, response)))
+					`uvm_error("CASTFAIL", "The recieved response item is not a burst frame");
+
+				count--;	// keep track of number of responses
+
+				//DEBUG
+				$write("count = %d\n", count);
+
+				// if there was an error put the burst in the error queue so it will be sent agian
+				if (rsp.valid == FRAME_NOT_VALID) begin
+					error_bursts.push_back(rsp);
+				end
+
+	endfunction: response_handler
+
+endclass : axi_master_read_multiple_slaves

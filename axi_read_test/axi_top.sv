@@ -46,7 +46,8 @@ initial begin
   end
 
   //Generate Clock
-  always #5 clock = ~clock;
-
+  always #5 begin clock = ~clock;
+          if (clock) $write ("**** =============================================================================== ****\n");
+end
 
 endmodule : axi_top

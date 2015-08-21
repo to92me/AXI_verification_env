@@ -16,17 +16,13 @@
 class axi_slave_read_arbitration extends uvm_component;
 
 	// fields
-	axi_read_single_frame one_frame;
-	axi_read_single_frame wait_queue[$];
-	axi_read_single_frame ready_queue[$];
-	axi_read_single_frame tmp_queue[$];
-	axi_read_burst_frame burst_wait[$];
+	axi_read_single_addr wait_queue[$];
+	axi_read_single_addr ready_queue[$];
+	axi_read_single_addr tmp_queue[$];
+	axi_read_whole_burst burst_wait[$];
 	bit [ID_WIDTH - 1 : 0] id_in_pipe[$];
 
 	semaphore ready_sem, wait_sem, burst_sem, pipe_sem;
-
-	// delay value of previous frame in burst
-	int previous_delay = 0;
 
 	// Configuration object
 	axi_slave_config config_obj;
@@ -36,14 +32,12 @@ class axi_slave_read_arbitration extends uvm_component;
 
 	// Provide implementations of virtual methods such as get_type_name and create
 	`uvm_component_utils_begin(axi_slave_read_arbitration)
-    	`uvm_field_object(one_frame, UVM_DEFAULT)
     	`uvm_field_int(read_enable, UVM_DEFAULT)
 	`uvm_component_utils_end
 
 	// new - constructor
 	function new (string name="axi_slave_read_arbitration", uvm_component parent=null);
 		super.new(name, parent);
-		one_frame = new();
 		ready_sem = new(1);
 		wait_sem = new(1);
 		burst_sem = new(1);
@@ -58,93 +52,55 @@ class axi_slave_read_arbitration extends uvm_component;
 			`uvm_fatal("NOCONFIG",{"Config object must be set for: ",get_full_name(),".config_obj"})
 	endfunction : build_phase
 
-	extern virtual task get_new_burst(axi_read_burst_frame burst_frame);
-	extern virtual task create_single_frames(axi_read_burst_frame burst_frame);
+	extern virtual task get_new_burst(axi_read_whole_burst whole_burst);
+	extern virtual task get_new_single_frames(axi_read_whole_burst whole_burst);
 	extern virtual task dec_delay();
 	extern virtual task burst_complete(int burst_id);
-	extern virtual task get_single_frame(ref axi_read_single_frame single_frame);
+	extern virtual task get_single_frame(output axi_read_single_frame single_frame);
 
 endclass : axi_slave_read_arbitration
 
 	// called when there is a new burst - first checks if the pipe is full
 	// or if the id matches to another burst. If it does, the burst has to wait
-	// otherwise all the single frames are created
-	task axi_slave_read_arbitration::get_new_burst(axi_read_burst_frame burst_frame);
+	task axi_slave_read_arbitration::get_new_burst(axi_read_whole_burst whole_burst);
 		pipe_sem.get(1);
 
 		// check if pipe is full
 		if (id_in_pipe.size() == PIPE_SIZE) begin
-			burst_wait.push_back(burst_frame);
+			burst_wait.push_back(whole_burst);
 			pipe_sem.put(1);
 			return;
 		end
 
 		// check if there is already a burst with that id
 		foreach (id_in_pipe[i])
-			if (burst_frame.id == id_in_pipe[i]) begin
-				burst_wait.push_back(burst_frame);
+			if (whole_burst.id == id_in_pipe[i]) begin
+				burst_wait.push_back(whole_burst);
 				pipe_sem.put(1);
 				return;
 			end
 
-		// if not, create all single frames
-		id_in_pipe.push_back(burst_frame.id);
+		// if not it can be sent
+		id_in_pipe.push_back(whole_burst.id);
 		pipe_sem.put(1);
-		create_single_frames(burst_frame);
+		get_new_single_frames(whole_burst);
 
 	endtask : get_new_burst
 
-	// based on burst info., create all the single frames and put them in the
-	// right queues - ready or wait, based on delay
-	task axi_slave_read_arbitration::create_single_frames(axi_read_burst_frame burst_frame);
+	// put the single frames in the right queues - ready or wait, based on delay
+	task axi_slave_read_arbitration::get_new_single_frames(axi_read_whole_burst whole_burst);
 
-		axi_slave_memory_response rsp;
+		axi_read_single_addr one_frame;
 
-		int err_flag = 0;
-		previous_delay = 0;
+		for (int i = 0; i < whole_burst.len; i++) begin
 
-	    for (int i=0; i<burst_frame.len; i++) begin
-			one_frame = axi_read_single_frame::type_id::create("one_frame",this);
-			assert (one_frame.randomize() with {delay >= previous_delay;})
-			previous_delay = one_frame.delay;
-			one_frame.id = burst_frame.id;
-			if ((burst_frame.lock == EXCLUSIVE) && (config_obj.lock == NORMAL)) begin
-				one_frame.resp = OKAY;
-				one_frame.err = ERROR;
-				err_flag = 1;
+			one_frame = axi_read_single_addr::type_id::create("one_frame",this);
+			one_frame.copy(whole_burst.single_frames.pop_front());
+
+			// calculate addresses if needed
+			if (read_enable) begin
+				one_frame.addr = whole_burst.addr;	// TODO : ovo je samo za fixed
 			end
-			else if (burst_frame.lock == EXCLUSIVE)
-				one_frame.resp = EXOKAY;
-			else
-				one_frame.resp = OKAY;
-
-			// read data from memory
-			if(read_enable) begin
-				config_obj.readMemory(burst_frame.addr, rsp);
-				if(rsp.getValid() == TRUE) begin
-					one_frame.data = rsp.getData();
-				end
-				/* // ako nije nista procitao, vrati random data bez errora
-				// ili da vrati SLVERR
-				// TODO : PITAJ DARKA
-				else
-					begin
-						one_frame.resp = SLVERR;
-						one_frame.err = ERROR;
-						err_flag = 1;
-					end
-				*/
-			end
-
-			if (!err_flag)
-				one_frame.err = NO_ERROR;
-
-			if (i == burst_frame.len-1)
-				one_frame.last = 1;
-			else
-				one_frame.last = 0;
-			if (one_frame.last_mode == BAD_LAST_BIT)
-				one_frame.last = ~one_frame.last;
 
 			if (one_frame.delay == 0) begin
 				ready_sem.get(1);
@@ -158,11 +114,11 @@ endclass : axi_slave_read_arbitration
 			end
 
 			// if there is an error kill the burst
-			if (err_flag) begin
+			if (one_frame.err == ERROR) begin
 				break;
 			end
 		end
-	endtask : create_single_frames
+	endtask : get_new_single_frames
 
 	// decrement delay and rearrange queues - if there is a frame
 	// with 0 delay in wait queue, move it to ready queue
@@ -220,17 +176,40 @@ endclass : axi_slave_read_arbitration
 		burst_sem.put(1);
 	endtask
 
-	task axi_slave_read_arbitration::get_single_frame(ref axi_read_single_frame single_frame);
+	task axi_slave_read_arbitration::get_single_frame(output axi_read_single_frame single_frame);
+		axi_slave_memory_response rsp;
+		axi_read_single_addr addr_frame;
+
 		// send frame, if there is one ready to be sent
 		ready_sem.get(1);
 		if (ready_queue.size()) begin
-			single_frame = ready_queue.pop_front();
-			single_frame.valid = FRAME_VALID;
+			addr_frame = ready_queue.pop_front();
+			addr_frame.valid = FRAME_VALID;
+
+			// read from memory
+			if(read_enable) begin
+				config_obj.readMemory(addr_frame.addr, rsp);
+				if(rsp.getValid() == TRUE) begin
+					addr_frame.data = rsp.getData();
+				end
+				/* // ako nije nista procitao, vrati random data bez errora
+				// ili da vrati SLVERR
+				// TODO : PITAJ DARKA
+				else
+					begin
+						addr_frame.resp = SLVERR;
+						addr_frame.err = ERROR;
+					end
+				*/
+			end
 		end
 		else begin
-			single_frame.valid = FRAME_NOT_VALID;
+			addr_frame = axi_read_single_addr::type_id::create("addr_frame");
+			addr_frame.valid = FRAME_NOT_VALID;
 		end
 		ready_sem.put(1);
+
+		single_frame = addr_frame;
 
 	endtask
 

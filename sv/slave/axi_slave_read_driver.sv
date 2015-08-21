@@ -22,13 +22,13 @@ class axi_slave_read_driver extends uvm_driver #(axi_read_base_frame, axi_read_b
 	axi_slave_config config_obj;
 
 	// TLM port for geting master requests from monitor
-	//uvm_analysis_imp #(axi_read_burst_frame, axi_slave_read_driver) burst_collected_port;
+	//uvm_analysis_imp #(axi_read_whole_burst, axi_slave_read_driver) burst_collected_port;
 
 	// queue that holds master burst requests
-	axi_read_burst_frame burst_req[$];
+	axi_read_whole_burst burst_req[$];
 
 	// current burst req
-	//protected axi_read_burst_frame burst_collected;
+	//protected axi_read_whole_burst burst_collected;
 
 	// Provide implmentations of virtual methods such as get_type_name and create
 	`uvm_component_utils_begin(axi_slave_read_driver)
@@ -48,7 +48,7 @@ class axi_slave_read_driver extends uvm_driver #(axi_read_base_frame, axi_read_b
 	extern virtual task get_from_seq();
 	extern virtual task reset();
 	extern virtual task drive_next_single_frame(axi_read_single_frame rsp);
-	//extern virtual function void write(axi_read_burst_frame new_burst);
+	//extern virtual function void write(axi_read_whole_burst new_burst);
 	extern virtual task addr_channel();
 
 endclass : axi_slave_read_driver
@@ -88,14 +88,13 @@ endclass : axi_slave_read_driver
 	task axi_slave_read_driver::get_from_seq();
 
 		axi_read_base_frame item;
-		axi_read_burst_frame req;
+		axi_read_whole_burst req;
 		axi_read_single_frame rsp;
 
 		forever begin
 
 			// phase 1
 			seq_item_port.get_next_item(item);
-
 			if ($cast(req, item))
 				begin
 					if (burst_req.size()) begin
@@ -136,7 +135,7 @@ endclass : axi_slave_read_driver
 			vif.rlast <= 1'b0;
 			//vif.ruser
 			vif.rvalid <= 1'b0;
-			vif.arready <= 1'b1;
+			vif.arready <= 1'b0;	// TODO : based on number of slaves
 
 			// TODO: reset queues
 
@@ -148,6 +147,7 @@ endclass : axi_slave_read_driver
 	// drive next single frame
 	task axi_slave_read_driver::drive_next_single_frame(axi_read_single_frame rsp);
 			@(posedge vif.sig_clock);
+			#3	// for simulation
 			if (rsp.valid == FRAME_VALID) begin
 					// vif signals
 					vif.rid <= rsp.id;
@@ -162,7 +162,7 @@ endclass : axi_slave_read_driver
 			end
 	endtask : drive_next_single_frame
 
-	/*function void axi_slave_read_driver::write(axi_read_burst_frame new_burst);
+	/*function void axi_slave_read_driver::write(axi_read_whole_burst new_burst);
 		$cast(burst_collected, new_burst.clone());
 		`uvm_info(get_type_name(), {"Burst collected:\n", burst_collected.sprint()}, UVM_HIGH)
 
@@ -173,31 +173,33 @@ endclass : axi_slave_read_driver
 
 	task axi_slave_read_driver::addr_channel();
 
-		axi_read_burst_frame burst_collected;
+		axi_read_whole_burst burst_collected;
 
 		forever begin
-			burst_collected = axi_read_burst_frame::type_id::create("burst_collected");
+			burst_collected = axi_read_whole_burst::type_id::create("burst_collected");
 			@(posedge vif.sig_clock iff vif.arvalid);
-			vif.arready <= 1'b1;
+			if(config_obj.check_addr_range(vif.araddr)) begin
+				#3	// for simulation
+				vif.arready <= 1'b1;
 
-			// get info
-			burst_collected.id = vif.arid;
-			burst_collected.addr = vif.araddr;
-			burst_collected.len = vif.arlen;
+				// get info
+				burst_collected.id = vif.arid;
+				burst_collected.addr = vif.araddr;
+				burst_collected.len = vif.arlen;
+				burst_collected.size = vif.arsize;
+				burst_collected.lock = vif.arlock;
+				burst_collected.cache = vif.arcache;
+				burst_collected.prot = vif.arprot;
+				burst_collected.qos = vif.arqos;
+				burst_collected.region = vif.arregion;
+				// user
 
-			burst_collected.size = vif.arsize;
-			burst_collected.lock = vif.arlock;
-			burst_collected.cache = vif.arcache;
-			burst_collected.prot = vif.arprot;
-			burst_collected.qos = vif.arqos;
-			burst_collected.region = vif.arregion;
-			// user
-
-			if(config_obj.check_addr_range(burst_collected.addr)) begin
-				// fill in burst queue
 				burst_req.push_back(burst_collected);
-			end
 
+				@ (posedge vif.sig_clock);
+				#3	// for simulation
+				vif.arready <= 1'b0;
+			end
 		end
 	endtask : addr_channel
 
