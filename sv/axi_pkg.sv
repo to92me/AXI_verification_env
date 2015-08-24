@@ -93,7 +93,7 @@ package axi_pkg;
 	typedef class axi_virtual_sequencer;
 
 	typedef class axi_master_read_transfer_seq;
-	typedef class axi_master_read_multiple_slaves;
+	typedef class axi_master_read_multiple_addr;
 
 `endif
 

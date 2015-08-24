@@ -40,8 +40,8 @@ initial begin
     reset <= 1'b0;
     clock <= 1'b0;
     #6 reset <= 1'b1;
-    //#11 reset <= 1'b0;
-    //#16 reset <=1'b1;
+    #11 reset <= 1'b0;
+    #16 reset <=1'b1;
 
   end
 

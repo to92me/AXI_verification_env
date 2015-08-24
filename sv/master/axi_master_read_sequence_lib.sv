@@ -7,7 +7,7 @@
 
 //------------------------------------------------------------------------------
 //
-// CLASS: uvc_company_uvc_name_base_seq
+// CLASS: axi_master_read_base_seq
 //
 //------------------------------------------------------------------------------
 // This sequence raises/drops objections in the pre/post_body so that root
@@ -18,7 +18,7 @@ class axi_master_read_base_seq extends uvm_sequence #(axi_read_burst_frame);
 	`uvm_declare_p_sequencer(axi_master_read_sequencer)
 
 	// new - constructor
-	function new(string name="uvc_name_base_seq");
+	function new(string name="axi_master_read_base_seq");
 		super.new(name);
 	endfunction
 
@@ -72,23 +72,6 @@ class axi_master_read_transfer_seq extends axi_master_read_base_seq;
 			`uvm_do_with(req, {req.valid == FRAME_VALID; req.addr == addr_rand;})
 		end
 
-		// after sending all frames, check if there was an error
-		// and send that burst request again
-/*		fork
-		begin
-			if (num_of_err) begin
-				count++;	// increase number of bursts waiting for response
-				req = error_bursts.pop_front();
-				num_of_err--;
-				// send it again, no randomization
-				start_item(req);
-				finish_item(req);
-				// if there is an error once, the burst will be sent again
-				// but if there is an error again, it will not be sent again
-			end
-			end
-		join_none*/
-
 		wait(!count);	// wait for all responses before finishing simulation
 
 		// if there was an error, send those frames again
@@ -124,19 +107,23 @@ class axi_master_read_transfer_seq extends axi_master_read_base_seq;
 
 endclass : axi_master_read_transfer_seq
 
-class axi_master_read_multiple_slaves extends axi_master_read_base_seq;
+//------------------------------------------------------------------------------
+//
+// SEQUENCE: axi_master_read_multiple_addr
+//
+//------------------------------------------------------------------------------
+class axi_master_read_multiple_addr extends axi_master_read_base_seq;
 
-	`uvm_object_utils(axi_master_read_transfer_seq)
+	`uvm_object_utils(axi_master_read_multiple_addr)
 
 	int count = 0;
 	int num_of_err = 0;
 	axi_read_burst_frame error_bursts[$];	// a queue for holding bursts that returned an error
 
-	bit[ADDR_WIDTH-1 : 0] addr_queue[$];
-	bit[ADDR_WIDTH-1 : 0] dummy;
+	rand bit[3:0][ADDR_WIDTH-1 : 0] address;	// slave addresses
 
 	// new - constructor
-	function new(string name="axi_master_read_transfer_seq");
+	function new(string name="axi_master_read_multiple_addr");
 		super.new(name);
 	endfunction
 
@@ -144,11 +131,10 @@ class axi_master_read_multiple_slaves extends axi_master_read_base_seq;
 
 		use_response_handler(1);
 
-		count = addr_queue.size();	// number of bursts to be sent
+		count = 3;	// number of bursts to be sent
 
-		repeat(addr_queue.size()) begin
-			dummy = addr_queue.pop_front();
-			`uvm_do_with(req, {req.valid == FRAME_VALID; req.addr == dummy;})
+		for(int i = 0; i < 3; i++) begin
+			`uvm_do_with(req, {req.valid == FRAME_VALID; req.addr == address[i];})
 		end
 
 		wait(!count);	// wait for all responses before finishing simulation
@@ -187,4 +173,4 @@ class axi_master_read_multiple_slaves extends axi_master_read_base_seq;
 
 	endfunction: response_handler
 
-endclass : axi_master_read_multiple_slaves
+endclass : axi_master_read_multiple_addr

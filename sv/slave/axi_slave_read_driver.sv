@@ -21,14 +21,10 @@ class axi_slave_read_driver extends uvm_driver #(axi_read_base_frame, axi_read_b
 	// Configuration object
 	axi_slave_config config_obj;
 
-	// TLM port for geting master requests from monitor
-	//uvm_analysis_imp #(axi_read_whole_burst, axi_slave_read_driver) burst_collected_port;
-
 	// queue that holds master burst requests
 	axi_read_whole_burst burst_req[$];
-
-	// current burst req
-	//protected axi_read_whole_burst burst_collected;
+	// queue that holds single frames that are ready to be sent
+	axi_read_single_frame ready_queue[$];
 
 	// Provide implmentations of virtual methods such as get_type_name and create
 	`uvm_component_utils_begin(axi_slave_read_driver)
@@ -37,8 +33,6 @@ class axi_slave_read_driver extends uvm_driver #(axi_read_base_frame, axi_read_b
 	// new - constructor
 	function new (string name, uvm_component parent);
 		super.new(name, parent);
-		//burst_collected_port = new("burst_collected_port", this);
-		//burst_collected = new();
 	endfunction : new
 
 	// class methods
@@ -47,9 +41,8 @@ class axi_slave_read_driver extends uvm_driver #(axi_read_base_frame, axi_read_b
 	extern virtual task get_and_drive();
 	extern virtual task get_from_seq();
 	extern virtual task reset();
-	extern virtual task drive_next_single_frame(axi_read_single_frame rsp);
-	//extern virtual function void write(axi_read_whole_burst new_burst);
-	extern virtual task addr_channel();
+	extern virtual task drive_addr_channel();
+	extern virtual task drive_data_channel();
 
 endclass : axi_slave_read_driver
 
@@ -80,7 +73,8 @@ endclass : axi_slave_read_driver
 		fork
 			get_from_seq();
 			reset();
-			addr_channel();
+			drive_addr_channel();
+			drive_data_channel();
 		join
 	endtask : get_and_drive
 
@@ -93,7 +87,10 @@ endclass : axi_slave_read_driver
 
 		forever begin
 
-			// phase 1
+			@(posedge vif.sig_clock);
+			#1	// for simulation
+
+			// phase 1 - send burst info to seq.
 			seq_item_port.get_next_item(item);
 			if ($cast(req, item))
 				begin
@@ -109,11 +106,14 @@ endclass : axi_slave_read_driver
 				`uvm_error("CASTFAIL", "The recieved seq. item is not a request seq. item");
 			seq_item_port.item_done();
 
-			// phase 2
+			// phase 2 - get single frame from seq.
 			seq_item_port.get_next_item(item);
 			if ($cast(rsp, item))
 				begin
-					drive_next_single_frame(rsp);
+					// put the frame in the ready queue
+					if(rsp.valid == FRAME_VALID) begin
+						ready_queue.push_back(rsp);
+					end
 				end
 			else
 				`uvm_error("CASTFAIL", "The recieved seq. item is not a response seq. item");
@@ -135,7 +135,7 @@ endclass : axi_slave_read_driver
 			vif.rlast <= 1'b0;
 			//vif.ruser
 			vif.rvalid <= 1'b0;
-			vif.arready <= 1'b0;	// TODO : based on number of slaves
+			vif.arready <= 1'b1;	// TODO : based on number of slaves?
 
 			// TODO: reset queues
 
@@ -144,43 +144,18 @@ endclass : axi_slave_read_driver
 		end
 	endtask : reset
 
-	// drive next single frame
-	task axi_slave_read_driver::drive_next_single_frame(axi_read_single_frame rsp);
-			@(posedge vif.sig_clock);
-			#3	// for simulation
-			if (rsp.valid == FRAME_VALID) begin
-					// vif signals
-					vif.rid <= rsp.id;
-					vif.rdata <= rsp.data;
-					vif.rresp <= rsp.resp;
-					vif.rlast <= rsp.last;
-					// user
-					vif.rvalid <= 1'b1;
-				end
-			else begin
-				vif.rvalid <= 1'b0;
-			end
-	endtask : drive_next_single_frame
-
-	/*function void axi_slave_read_driver::write(axi_read_whole_burst new_burst);
-		$cast(burst_collected, new_burst.clone());
-		`uvm_info(get_type_name(), {"Burst collected:\n", burst_collected.sprint()}, UVM_HIGH)
-
-		// fill in burst queue
-		burst_req.push_back(burst_collected);
-
-	endfunction : write*/
-
-	task axi_slave_read_driver::addr_channel();
+	// address channel signals - collect burst request
+	task axi_slave_read_driver::drive_addr_channel();
 
 		axi_read_whole_burst burst_collected;
 
 		forever begin
 			burst_collected = axi_read_whole_burst::type_id::create("burst_collected");
+
 			@(posedge vif.sig_clock iff vif.arvalid);
 			if(config_obj.check_addr_range(vif.araddr)) begin
-				#3	// for simulation
-				vif.arready <= 1'b1;
+				//#1	// for simulation
+				//vif.arready <= 1'b1;
 
 				// get info
 				burst_collected.id = vif.arid;
@@ -196,11 +171,48 @@ endclass : axi_slave_read_driver
 
 				burst_req.push_back(burst_collected);
 
-				@ (posedge vif.sig_clock);
-				#3	// for simulation
-				vif.arready <= 1'b0;
+				// TODO : PITAJ DARKA
+				// da li je ovo potrebno - ovako ce uvek transfer trajati 2 clk-a
+				// ali ako ima vise slave-ova, mora tako??
+				//@ (posedge vif.sig_clock);
+				//#1	// for simulation
+				//vif.arready <= 1'b0;
+
 			end
 		end
-	endtask : addr_channel
+	endtask : drive_addr_channel
+
+	// data channel signals - drive responses
+	task axi_slave_read_driver::drive_data_channel();
+		axi_read_single_frame rsp;
+
+		// @clk only before first if-else check
+		// after that, waiting for clk is done in the if-else branches
+		@(posedge vif.sig_clock);
+		#1	// for simulation
+		forever begin
+			// is there a frame waiting to be sent
+			if (ready_queue.size()) begin
+				rsp = ready_queue.pop_front();
+
+				#1	// for simulation
+				// vif signals
+				vif.rid <= rsp.id;
+				vif.rdata <= rsp.data;
+				vif.rresp <= rsp.resp;
+				vif.rlast <= rsp.last;
+				// user
+				vif.rvalid <= 1'b1;
+
+				@(posedge vif.sig_clock iff vif.rready);	// wait for master
+			end
+			else begin
+				#1	// for simulation
+				vif.rvalid <= 1'b0;
+
+				@(posedge vif.sig_clock);
+			end
+		end
+	endtask : drive_data_channel
 
 `endif

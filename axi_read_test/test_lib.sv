@@ -83,7 +83,7 @@ class virtual_seq_test extends demo_base_test;
 
     // uvm_config_db#(uvm_object_wrapper)::set(this, "tb0.virtual_sequencer.run_phase", "default_sequence", virtual_transfer_seq::type_id.get());
     uvm_config_wrapper::set(this, "tb0.virtual_seqr.run_phase", "default_sequence",
-                           virtual_transfer_multiple_slaves::get_type());
+                           virtual_transfer_multiple_addr::get_type());
     uvm_config_wrapper::set(this, "tb0.axi0.read_slave*.sequencer.run_phase", "default_sequence",
                            axi_slave_read_simple_two_phase_seq::get_type());
 

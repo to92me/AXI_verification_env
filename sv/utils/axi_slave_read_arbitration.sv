@@ -176,6 +176,8 @@ endclass : axi_slave_read_arbitration
 		burst_sem.put(1);
 	endtask
 
+	// return the next ready frame (if there is none set FRAME_NOT_VALID)
+	// and if needed, read from memory
 	task axi_slave_read_arbitration::get_single_frame(output axi_read_single_frame single_frame);
 		axi_slave_memory_response rsp;
 		axi_read_single_addr addr_frame;
@@ -186,7 +188,7 @@ endclass : axi_slave_read_arbitration
 			addr_frame = ready_queue.pop_front();
 			addr_frame.valid = FRAME_VALID;
 
-			// read from memory
+			// read from memory - this is done here so that the correct value will be read
 			if(read_enable) begin
 				config_obj.readMemory(addr_frame.addr, rsp);
 				if(rsp.getValid() == TRUE) begin

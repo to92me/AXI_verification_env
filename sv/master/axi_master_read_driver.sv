@@ -104,8 +104,8 @@ endclass : axi_master_read_driver
 			burst_frame = axi_read_burst_frame::type_id::create("burst_frame");
 
 			@(posedge vif.sig_clock iff vif.rvalid);
-			#3	// for simulation
-			//vif.rready <= 1'b1;
+			#1	// for simulation
+			vif.rready <= 1'b1;
 
 			// get info
 			data_frame.id = vif.rid;
@@ -113,7 +113,7 @@ endclass : axi_master_read_driver
 			data_frame.data = vif.rdata;
 			data_frame.last = vif.rlast;
 
-			resp.check_response(data_frame, burst_frame);
+			resp.check_response(data_frame, burst_frame);	// check if the burst is complete or if there is an error
 			if (burst_frame != null) begin
 				seq_item_port.put(burst_frame);
 			end
@@ -131,9 +131,11 @@ endclass : axi_master_read_driver
 			if(req.delay > 0) begin
 				repeat(req.delay) @(posedge vif.sig_clock);
 			end
-			else
-				@ (posedge vif.sig_clock);
-			#3	// for simulation
+			//else	// TODO : PITAJ DARKA
+				// ako ostavim else onda ce uvek biti jedan clk sa valid down
+				// izmedju dva zahteva za burstom
+				//@ (posedge vif.sig_clock);
+			#1	// for simulation
 
 			vif.arid <= req.id;
 			vif.araddr <= req.addr;
@@ -151,8 +153,9 @@ endclass : axi_master_read_driver
 			resp.new_burst(req);	// send burst to resp so responses can be calculated
 
 			@(posedge vif.sig_clock iff vif.arready);	// wait for slave
-			#3	// for simulation
-			vif.arvalid <= 1'b0;	// TODO : ??
+			#1	// for simulation
+			vif.arvalid <= 1'b0;
+
 		end
 	endtask : drive_addr_channel
 
