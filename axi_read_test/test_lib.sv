@@ -32,6 +32,7 @@ class demo_base_test extends uvm_test;
     // Enable transaction recording for everything
     set_config_int("*", "recording_detail", UVM_FULL);
     uvm_config_int::set(this, "tb0.axi0.read_monitor", "coverage_enable", 1);
+    uvm_config_int::set(this, "tb0.axi0.read_slave*.sequencer.arbit", "read_enable", 1);
     tb0 = axi_read_tb::type_id::create("tb0", this);
   endfunction : build_phase
 
@@ -82,7 +83,7 @@ class virtual_seq_test extends demo_base_test;
 
     // uvm_config_db#(uvm_object_wrapper)::set(this, "tb0.virtual_sequencer.run_phase", "default_sequence", virtual_transfer_seq::type_id.get());
     uvm_config_wrapper::set(this, "tb0.virtual_seqr.run_phase", "default_sequence",
-                           virtual_transfer_seq::get_type());
+                           virtual_transfer_multiple_addr::get_type());
     uvm_config_wrapper::set(this, "tb0.axi0.read_slave*.sequencer.run_phase", "default_sequence",
                            axi_slave_read_simple_two_phase_seq::get_type());
 

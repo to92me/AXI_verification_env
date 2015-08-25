@@ -70,4 +70,32 @@ class virtual_transfer_seq extends virtual_base_sequence;
 
 endclass : virtual_transfer_seq
 
+//------------------------------------------------------------------------------
+//
+// SEQUENCE: virtual_transfer_multiple_addr
+//
+//------------------------------------------------------------------------------
+class virtual_transfer_multiple_addr extends virtual_base_sequence;
+
+	`uvm_object_utils(virtual_transfer_multiple_addr)
+
+	bit[3:0][ADDR_WIDTH-1 : 0] slave_addr;	// packed array for storing addresses
+
+	// new - constructor
+	function new(string name="virtual_transfer_multiple_addr");
+		super.new(name);
+	endfunction
+
+	// axi read master
+	axi_master_read_multiple_addr read_seq;
+
+	virtual task body();
+		slave_addr[0] = p_sequencer.config_obj.slave_list[0].start_address;
+		slave_addr[1] = p_sequencer.config_obj.slave_list[0].start_address;
+		slave_addr[2] = p_sequencer.config_obj.slave_list[0].start_address;
+		`uvm_do_on_with(read_seq, p_sequencer.read_seqr, {address == slave_addr;})
+	endtask
+
+endclass : virtual_transfer_multiple_addr
+
 `endif

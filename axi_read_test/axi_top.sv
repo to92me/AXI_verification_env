@@ -40,13 +40,14 @@ initial begin
     reset <= 1'b0;
     clock <= 1'b0;
     #6 reset <= 1'b1;
-    //#11 reset <= 1'b0;
-    //#16 reset <=1'b1;
+    #11 reset <= 1'b0;
+    #16 reset <=1'b1;
 
   end
 
   //Generate Clock
-  always #5 clock = ~clock;
-
+  always #5 begin clock = ~clock;
+          if (clock) $write ("**** =============================================================================== ****\n");
+end
 
 endmodule : axi_top

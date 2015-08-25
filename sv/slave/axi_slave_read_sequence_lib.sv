@@ -14,7 +14,7 @@
 // sequences raise objections but subsequences do not.
 class axi_slave_read_base_sequence extends uvm_sequence #(axi_read_base_frame);
 
-	axi_read_burst_frame req;
+	axi_read_whole_burst req;
 	axi_read_single_frame rsp;
 
 	`uvm_object_utils(axi_slave_read_base_sequence)
@@ -52,6 +52,8 @@ endclass : axi_slave_read_base_sequence
 //------------------------------------------------------------------------------
 class axi_slave_read_simple_two_phase_seq extends axi_slave_read_base_sequence;
 
+	axi_read_single_frame one_frame;
+
 	`uvm_object_utils(axi_slave_read_simple_two_phase_seq)
 
 	// new - constructor
@@ -60,20 +62,40 @@ class axi_slave_read_simple_two_phase_seq extends axi_slave_read_base_sequence;
 	endfunction
 
 	virtual task body();
+
+		int previous_delay;
+
 		forever begin
-			req = axi_read_burst_frame::type_id::create("req");
+			req = axi_read_whole_burst::type_id::create("req");
 			rsp = axi_read_single_frame::type_id::create("rsp");
 
 			// request burst from driver
 			start_item(req);
 			finish_item(req);
 
-			// send burst info to arbitration where it will make
-			// all the single frames and update the queues
-			if (req.valid == FRAME_VALID)
-				p_sequencer.arbit.get_new_burst(req);
+			// if there is a new burst
+			// randomize single frames
+			if (req.valid == FRAME_VALID) begin
+				previous_delay = 0;
+				for (int i = 0; i < req.len; i++) begin
+					one_frame = axi_read_single_frame::type_id::create("one_frame");
 
-			// get single frame
+					assert (one_frame.randomize() with {delay >= previous_delay;})
+					previous_delay = one_frame.delay;
+
+					one_frame.id = req.id;
+					calc_resp(one_frame, p_sequencer.config_obj.lock, req.lock);
+					one_frame.last = calc_last_bit((i == req.len-1), one_frame.last_mode);
+
+					// store that single frame in the queue
+					req.single_frames.push_back(one_frame);
+				end
+
+				// send burst info (and the single frames) to arbitration
+				p_sequencer.arbit.get_new_burst(req);
+			end
+
+			// get single frame to send to driver
 			p_sequencer.arbit.get_single_frame(rsp);
 
 			// response - send single frame to driver
@@ -90,5 +112,30 @@ class axi_slave_read_simple_two_phase_seq extends axi_slave_read_base_sequence;
 		end
 
 	endtask
+
+
+	// TODO : premesti u axi_read_frames
+	function void calc_resp(ref axi_read_single_frame one_frame, lock_enum slave_lock, lock_enum burst_lock);
+		if ((burst_lock == EXCLUSIVE) && (slave_lock == NORMAL)) begin
+			one_frame.resp = OKAY;
+			one_frame.err = ERROR;
+		end
+		else if (burst_lock == EXCLUSIVE) begin
+			one_frame.resp = EXOKAY;
+			one_frame.err = NO_ERROR;
+		end
+		else begin
+			one_frame.resp = OKAY;
+			one_frame.err = NO_ERROR;
+		end
+	endfunction : calc_resp
+
+	function bit calc_last_bit(bit last, last_enum mode);
+		if(mode == BAD_LAST_BIT)
+			return ~last;
+		else
+			return last;
+	endfunction : calc_last_bit
+
 
 endclass : axi_slave_read_simple_two_phase_seq

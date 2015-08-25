@@ -169,6 +169,7 @@ function void slave_config_factory::createSlaves(ref axi_slave_config slave_list
 	  for ( int i = 0; i < rand_space.address_points.size(); i+=2)
 		  begin
 			  slave = axi_slave_config::type_id::create($sformatf("slave[%0d]", slave_list.size()));
+			  assert (slave.randomize());
 			  slave.slave_name = $sformatf("slave[%0d]", slave_list.size());
 			  slave.start_address = rand_space.address_points[i];
 			  slave.end_address = rand_space.address_points[i+1];

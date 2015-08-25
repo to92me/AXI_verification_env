@@ -65,6 +65,8 @@ package axi_pkg;
 	typedef class axi_read_single_frame;
 	typedef class axi_read_burst_frame;
 	typedef class axi_read_base_frame;
+	typedef class axi_read_whole_burst;
+	typedef class axi_read_single_addr;
 
 	// config
 	typedef class axi_master_config;
@@ -96,6 +98,7 @@ package axi_pkg;
 	typedef class axi_virtual_sequencer;
 
 	typedef class axi_master_read_transfer_seq;
+	typedef class axi_master_read_multiple_addr;
 
 `endif
 

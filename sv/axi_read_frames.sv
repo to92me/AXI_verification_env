@@ -18,10 +18,12 @@ class axi_read_base_frame extends uvm_sequence_item;
 
 	// control
 	valid_enum 				valid;
+	rand bit [2:0]			delay;
 
 	`uvm_object_utils_begin(axi_read_base_frame)
 		`uvm_field_int(id, UVM_DEFAULT)
 		`uvm_field_enum(valid_enum, valid, UVM_DEFAULT)
+		`uvm_field_int(delay, UVM_DEFAULT)
 	`uvm_object_utils_end
 
 	function new (string name = "axi_read_single_frame");
@@ -44,7 +46,6 @@ class axi_read_single_frame extends axi_read_base_frame;
 	// user
 
 	// control
-	rand bit [2:0]				delay;
 	rand last_enum				last_mode;
 	err_enum					err;
 
@@ -56,7 +57,6 @@ class axi_read_single_frame extends axi_read_base_frame;
 		`uvm_field_int(data, UVM_DEFAULT)
 		`uvm_field_enum(response_enum, resp, UVM_DEFAULT)
 		`uvm_field_int(last, UVM_DEFAULT)
-		`uvm_field_int(delay, UVM_DEFAULT)
 		`uvm_field_enum(last_enum, last_mode, UVM_DEFAULT)
 		`uvm_field_enum(err_enum, err, UVM_DEFAULT)
 		//`uvm_field_int(user, UVM_DEFAULT)
@@ -87,6 +87,7 @@ class axi_read_burst_frame extends axi_read_base_frame;
 	// user
 
 	constraint default_length {len > 0;}
+	constraint default_delay {delay < 5;}
 
 	// UVM utility macros
 	`uvm_object_utils_begin(axi_read_burst_frame)
@@ -102,10 +103,48 @@ class axi_read_burst_frame extends axi_read_base_frame;
 		// `uvm_field_int(user, UVM_DEFAULT)
 	`uvm_object_utils_end
 
-	function new (string name = "axi_frame");
+	function new (string name = "axi_read_burst_frame");
 		super.new(name);
 	endfunction
 
 endclass : axi_read_burst_frame
+
+//------------------------------------------------------------------------------
+//
+// CLASS: axi_read_whole_burst
+//
+//------------------------------------------------------------------------------
+class axi_read_whole_burst extends axi_read_burst_frame;
+
+	axi_read_single_frame single_frames[$];
+
+	`uvm_object_utils_begin(axi_read_whole_burst)
+		//`uvm_field_queue_int(single_frames, UVM_DEFAULT)
+	`uvm_object_utils_end
+
+	function new (string name = "axi_read_whole_burst");
+		super.new(name);
+	endfunction
+
+endclass : axi_read_whole_burst
+
+//------------------------------------------------------------------------------
+//
+// CLASS: axi_read_whole_burst
+//
+//------------------------------------------------------------------------------
+class axi_read_single_addr extends axi_read_single_frame;
+
+	bit [ADDR_WIDTH-1 : 0]	addr;
+
+	`uvm_object_utils_begin(axi_read_single_addr)
+		`uvm_field_int(addr, UVM_DEFAULT)
+	`uvm_object_utils_end
+
+	function new (string name = "axi_read_single_addr");
+		super.new(name);
+	endfunction
+
+endclass : axi_read_single_addr
 
 `endif
