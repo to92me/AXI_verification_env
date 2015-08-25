@@ -43,7 +43,7 @@ class base_test extends uvm_test;
 		super.run_phase(phase);
 		// Print the UVM instance tree at the beginning of simulation (optional)
 //		printer.knobs.depth = 5;
-		phase.phase_done.set_drain_time(this, 20000000);
+		phase.phase_done.set_drain_time(this, 2000000);
 //		this.print(printer);
 	endtask
 endclass

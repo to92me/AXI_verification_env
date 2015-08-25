@@ -49,14 +49,14 @@ class axi_master_write_main_driver extends uvm_component;
 		sem = new(10);
 	endfunction
 
-	extern function axi_mssg getAddrFrame();
-	extern function axi_mssg getDataFrame();
+	extern task  getAddrFrame(output axi_mssg rsp_mssg);
+	extern task  getDataFrame(output axi_mssg rsp_mssg);
 	extern static function axi_master_write_main_driver getDriverInstance(input uvm_component parent);
-	extern function void mainMainDriver(input int clocks);
+	extern task mainMainDriver(input int clocks);
 	extern task main();
-	extern function void getFramesFromScheduler();
-	extern function void decrementDelay();
-	extern function void reset();
+	extern task getFramesFromScheduler();
+	extern task decrementDelay();
+	extern task reset();
 
 endclass : axi_master_write_main_driver
 
@@ -74,7 +74,7 @@ endfunction
 // get address frame - it should be called from virtual interface address bus driver
 // it returns axi_mssg with frame and status:
 // 		if address queue is empty axi_mssg status will be NOT_READY and null as frame
-function axi_mssg axi_master_write_main_driver::getAddrFrame();
+task axi_master_write_main_driver::getAddrFrame(output axi_mssg rsp_mssg);
 	addr_mssg = new();
 	sem.get(1);
 	if(addr_ready_queue.size() > 0 )
@@ -88,19 +88,20 @@ function axi_mssg axi_master_write_main_driver::getAddrFrame();
 		addr_mssg.state = NOT_READY;
 		end;
 	sem.put(1);
-	return addr_mssg;
-endfunction
+	rsp_mssg = addr_mssg;
+endtask
 
 // get datat frame - it shoul be called from virtual interface data bus driver
 // it returns axi_mssg with frame and status:
 // 		if data queue is empty axi_mssg status will be NOT_READY and null as frame
-function axi_mssg axi_master_write_main_driver::getDataFrame();
+task  axi_master_write_main_driver::getDataFrame(output axi_mssg rsp_mssg);
 	data_mssg = new();
 	sem.get(1);
 	if(data_ready_queue.size() > 0 )
 		begin
 		data_mssg.frame = data_ready_queue.pop_front();
 		data_mssg.state = READY;
+//		$display("DRIVER MASTER MAIN: Sendding full data");
 		end
 	else
 		begin
@@ -108,31 +109,34 @@ function axi_mssg axi_master_write_main_driver::getDataFrame();
 		data_mssg.state = NOT_READY;
 		end;
 	sem.put(1);
-	return data_mssg;
-endfunction
+	rsp_mssg = data_mssg;
+endtask
 
 task axi_master_write_main_driver::main();
     fork
 	    this.data_driver.main();
 	    this.address_driver.main();
+//	    this.address_driver.testClock();
     join
+    $display("2++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++");
 endtask
 
-function void axi_master_write_main_driver::mainMainDriver(input int clocks);
+task axi_master_write_main_driver::mainMainDriver(input int clocks);
 	repeat(clocks)
 		begin
-
+//			$display("                                        MAIN DRIVER CLOCK ");
 			this.getFramesFromScheduler();
 			this.decrementDelay();
 		end
-endfunction
+endtask
 
 
-function void axi_master_write_main_driver::getFramesFromScheduler();
+task axi_master_write_main_driver::getFramesFromScheduler();
    forever
 	   begin
-//		   $display("get frame from scheduler");
-		   inbox_mssg = scheduler.getFrameForDrivingVif();
+//		   $display("MAIN DRIVER:::: GET DATA ::::::::::::::::::::::::::::");
+		   scheduler.getFrameForDrivingVif(inbox_mssg);
+//		   $display("MAIN DRIVER ::::: GOT DATA ::::::::::::::::::::::::::::");
 		   if(inbox_mssg.state == QUEUE_EMPTY)
 			   return;
 		   if (inbox_mssg.frame.first_one == TRUE)
@@ -149,10 +153,10 @@ function void axi_master_write_main_driver::getFramesFromScheduler();
 			data_inbox_queue.push_back(data_frame);
 			sem.put(1);
 	   end
-endfunction
+endtask
 
 
-function void axi_master_write_main_driver::decrementDelay();
+task axi_master_write_main_driver::decrementDelay();
 	sem.get(1);
 	if(addr_inbox_queue.size() > 0)
 		begin
@@ -169,7 +173,7 @@ function void axi_master_write_main_driver::decrementDelay();
 		begin
 			if(data_inbox_queue[0].first_one == FALSE || data_inbox_queue[0].delay_data == 0 )
 				begin
-					$display("adding frame to ready data queue");
+//					$display("adding frame to ready data queue");
 					data_ready_queue.push_back(data_inbox_queue.pop_front());
 				end
 			else
@@ -178,17 +182,17 @@ function void axi_master_write_main_driver::decrementDelay();
 				end
 		end
 		sem.put(1);
-endfunction
+endtask
 
 
-function void axi_master_write_main_driver::reset();
+task axi_master_write_main_driver::reset();
    	sem.get(1);
 	addr_inbox_queue.delete();
 	addr_ready_queue.delete();
 	data_inbox_queue.delete();
 	data_ready_queue.delete();
 	sem.put(1);
-endfunction
+endtask
 
 `endif
 

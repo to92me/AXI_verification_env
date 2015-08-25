@@ -37,19 +37,19 @@ class axi_master_write_agent extends uvm_agent;
 
 //		 Propagate the configuration object
 		if(!uvm_config_db#(axi_master_config)::get(this, "", "axi_master_config", config_obj))
-			`uvm_fatal("NOCONFIG",{"Config object must be set for: ",get_full_name(),".config_obj"}) // FIXME CONFIG
+			`uvm_fatal("NOCONFIG",{"Config object must be set for: ",get_full_name(),".config_obj"})
 
-			if(config_obj.is_active == UVM_ACTIVE) begin  // FIXME CONFIG
+			if(config_obj.is_active == UVM_ACTIVE) begin
 				sequencer = axi_master_write_sequencer::type_id::create("sequencer", this);
 				driver = axi_master_write_driver::type_id::create("driver", this);
-			end // FIXME
+			end
 	endfunction : build_phase
 
 	// connect_phase
 	function void connect_phase(uvm_phase phase);
-//		if(config_obj.is_active == UVM_ACTIVE) begin // FIXME CONFIG
+		if(config_obj.is_active == UVM_ACTIVE) begin
 			driver.seq_item_port.connect(sequencer.seq_item_export);
-//		end
+		end
 	endfunction : connect_phase
 
 endclass : axi_master_write_agent

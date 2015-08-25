@@ -29,12 +29,13 @@ initial begin
 end
 
 initial begin
-	reset <= 1'b1;
-	clock <= 1'b0;
+	 reset <= 1'b1;
+	 clock <= 1'b0;
+   // #6 reset <= 1'b1;
 end
 
 always
-	#5 clock =~ clock;
+	#50 clock =~ clock;
 endmodule
 
 

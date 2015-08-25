@@ -25,14 +25,24 @@ class axi_master_write_address_driver extends axi_master_write_base_driver;
 		current_frame = new();
 	endfunction : new
 
+	function void build_phase(uvm_phase phase);
+		`uvm_info("axi master write address driver","Building", UVM_MEDIUM);
+		main_driver = axi_master_write_main_driver::getDriverInstance(this);
+		scheduler = axi_master_write_scheduler::getSchedulerInstance(this);
+		if(!uvm_config_db#(virtual axi_if)::get(this, "", "vif", vif))
+			 `uvm_fatal("NOVIF",{"virtual interface must be set for: ",get_full_name(),".vif"})
+	endfunction
+
 	extern static function axi_master_write_address_driver getDriverInstance(input uvm_component parent);
 
-	extern function void getNextFrame();
-	extern function void driverVif();
-	extern function void completeTransaction();
-	extern function void init();
-	extern function void reset();
+	extern task getNextFrame();
+	extern task driverVif();
+	extern task completeTransaction();
+	extern task init();
+	extern task reset();
 	extern task main();
+
+	extern task testClock();
 
 
 endclass : axi_master_write_address_driver
@@ -46,9 +56,9 @@ function axi_master_write_address_driver axi_master_write_address_driver::getDri
 	return driverInstance;
 endfunction
 
-function void axi_master_write_address_driver::getNextFrame();
+task axi_master_write_address_driver::getNextFrame();
 
-	mssg = main_driver.getAddrFrame();
+	main_driver.getAddrFrame(mssg);
 
 	if(mssg.state == READY)
 		begin
@@ -62,57 +72,59 @@ function void axi_master_write_address_driver::getNextFrame();
 		current_frame = null;
 		sem.put(1);
 		end
-endfunction
+endtask
 
 
-function void axi_master_write_address_driver::driverVif();
-    	sem.get(1);
-		vif.awid	= current_frame.id;
-		vif.awaddr	= current_frame.addr;
-		vif.awlen 	= current_frame.len;
-		vif.awsize 	= current_frame.size;
-		vif.awburst = current_frame.burst_type;
-		vif.awlock 	= current_frame.lock;
-		vif.awcache = current_frame.cache;
-		vif.awprot 	= current_frame.prot;
-		vif.awqos 	= current_frame.qos;
-		vif.awregion= current_frame.region;
-		vif.awvalid = 1'b1;
-		sem.put(1);
-endfunction
+task axi_master_write_address_driver::driverVif();
+//		#5
+//		$display("MASTER: sending address item");
+		vif.awid	<= current_frame.id;
+		vif.awaddr	<= current_frame.addr;
+		vif.awlen 	<= current_frame.len;
+		vif.awsize 	<= current_frame.size;
+		vif.awburst <= current_frame.burst_type;
+		vif.awlock 	<= current_frame.lock;
+		vif.awcache <= current_frame.cache;
+		vif.awprot 	<= current_frame.prot;
+		vif.awqos 	<= current_frame.qos;
+		vif.awregion<= current_frame.region;
+		vif.awvalid <= 1'b1;
+endtask
 
-function void axi_master_write_address_driver::completeTransaction();
-	    vif.awvalid = this.valid_default;
-endfunction
+task axi_master_write_address_driver::completeTransaction();
+	    vif.awvalid <= 1'b1;
+endtask
 
-function void axi_master_write_address_driver::init();
-		vif.awid	= 0;
-		vif.awaddr	= 0;
-		vif.awlen 	= 0;
-		vif.awsize 	= 0;
-		vif.awburst = 0;
-		vif.awlock 	= 0;
-		vif.awcache = 0;
-		vif.awprot 	= 0;
-		vif.awqos 	= 0;
-		vif.awregion= 0;
-		vif.awvalid = valid_default;
-endfunction
+task axi_master_write_address_driver::init();
+//		#5
+		vif.awid	<= 0;
+		vif.awaddr	<= 0;
+		vif.awlen 	<= 0;
+		vif.awsize 	<= 0;
+		vif.awburst <= 0;
+		vif.awlock 	<= 0;
+		vif.awcache <= 0;
+		vif.awprot 	<= 0;
+		vif.awqos 	<= 0;
+		vif.awregion<= 0;
+		vif.awvalid <= 1'b0;
+endtask
 
-function void axi_master_write_address_driver::reset();
-		vif.awid	= 0;
-		vif.awaddr	= 0;
-		vif.awlen 	= 0;
-		vif.awsize 	= 0;
-		vif.awburst = 0;
-		vif.awlock 	= 0;
-		vif.awcache = 0;
-		vif.awprot 	= 0;
-		vif.awqos 	= 0;
-		vif.awregion= 0;
-		vif.awvalid = valid_default;
+task axi_master_write_address_driver::reset();
+//		#5
+		vif.awid	<= 0;
+		vif.awaddr	<= 0;
+		vif.awlen 	<= 0;
+		vif.awsize  <= 0;
+		vif.awburst <= 0;
+		vif.awlock 	<= 0;
+		vif.awcache <= 0;
+		vif.awprot 	<= 0;
+		vif.awqos 	<= 0;
+		vif.awregion<= 0;
+		vif.awvalid <= 1'b0;
 		`uvm_info(get_name(),$sformatf("reset recievied"), UVM_LOW)
-endfunction
+endtask
 
 task axi_master_write_address_driver::main();
 	this.init();
@@ -123,18 +135,23 @@ task axi_master_write_address_driver::main();
 				GET_FRAME:
 				begin
 					this.getNextFrame();
-//					sem.get(1);
+
 					if(current_frame == null)
-						state = WAIT_CLK;
+						begin
+							state = WAIT_CLK;
+							this.init();
+						end
 					else
+						begin
+//						$display("MASTER new ADDR package");
 						state = DRIVE_VIF;
+						end
 //					sem.put(1);
 				end
 
 				DRIVE_VIF:
 				begin
-					@(posedge vif.sig_clock);
-					#10
+//					$display("DRIVING ADDR VIF");
 					this.driverVif();
 					state = COMPLETE_TRANSACTION;
 				end
@@ -142,8 +159,11 @@ task axi_master_write_address_driver::main();
 				WAIT_READY:
 				begin
 
-					if(vif.awready == 1)
-						state = GET_FRAME;
+					if(vif.awready == 'b1)
+						begin
+							state = GET_FRAME;
+//							$display("MASTER: address reacieved ready from slave ");
+						end
 					else
 						begin
 						@(posedge vif.sig_clock iff vif.awready == 1);
@@ -159,14 +179,37 @@ task axi_master_write_address_driver::main();
 
 				COMPLETE_TRANSACTION:
 				begin
-					repeat(current_frame.delay_addr)
-						@(posedge vif.sig_clock)
+					if(current_frame.delay_wvalid == 0)
+						begin
+							@(posedge vif.sig_clock);
+						end
+					else
+						begin
+							repeat(current_frame.delay_wvalid)
+								begin
+									vif.awvalid <= 1'b0;
+									@(posedge vif.sig_clock);
+								end
+						end
 					this.completeTransaction();
 					state = WAIT_READY;
 				end
 			endcase
 		end
 		$display("FATAL ADDRESS DRIVER");
+endtask
+
+task axi_master_write_address_driver::testClock();
+	fork
+		forever begin
+			@(posedge vif.sig_clock);
+    		scheduler.main(1);
+		end
+		forever begin
+			@(posedge vif.sig_clock);
+			main_driver.mainMainDriver(1);
+		end
+	join
 endtask
 
 

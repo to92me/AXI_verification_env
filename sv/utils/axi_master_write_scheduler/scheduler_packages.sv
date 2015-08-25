@@ -59,13 +59,13 @@ class axi_master_write_scheduler_packages;
 	endfunction : new
 
 
-	extern function axi_mssg getNextSingleFrame();
-	extern function void decrementDelay();
-	extern function void addSingleFrame(input axi_single_frame frame_for_push);
+	extern task getNextSingleFrame(output axi_mssg rps_mssg);
+	extern task decrementDelay();
+	extern task addSingleFrame(input axi_single_frame frame_for_push);
 	extern function int size();
-	extern function void addBurst(input axi_frame frame);
-	extern local function void empyQueue();
-	extern function void reincarnate();
+	extern task addBurst(input axi_frame frame);
+	extern task empyQueue();
+	extern task reincarnate();
 	extern function void resetErrorCounter();
 	extern function int incrementErrorCounter(); // it returns state = number of error counter
 	extern function int getErrorCounter();
@@ -76,14 +76,15 @@ endclass : axi_master_write_scheduler_packages
 
 
 
-function axi_mssg axi_master_write_scheduler_packages::getNextSingleFrame();
+task axi_master_write_scheduler_packages::getNextSingleFrame(output axi_mssg rps_mssg);
 	mssg = new();
 	// if queue is empty then return QUEUE_EMPTY
 	if(data_queue.size == 0)
 		begin
 			mssg.state = QUEUE_EMPTY;
 			mssg.frame = null;
-			return mssg;
+			rps_mssg = mssg;
+			return;
 		end
 	// if there is ready data return that and status READY
 	// else return NOT_READY
@@ -102,11 +103,11 @@ function axi_mssg axi_master_write_scheduler_packages::getNextSingleFrame();
 		mssg.frame = null;
 		data_queue.push_front(one_frame);
 		end
-	return mssg;
-endfunction
+	rps_mssg = mssg;
+endtask
 
 
-function void axi_master_write_scheduler_packages::decrementDelay();
+task axi_master_write_scheduler_packages::decrementDelay();
 	one_frame = data_queue.pop_front;
 	if(one_frame != null)
 	begin
@@ -114,19 +115,19 @@ function void axi_master_write_scheduler_packages::decrementDelay();
 			one_frame.delay--;
 		data_queue.push_front(one_frame);
 	end
-endfunction: decrementDelay
+endtask
 
-function void axi_master_write_scheduler_packages::addSingleFrame(input axi_single_frame frame_for_push);
+task axi_master_write_scheduler_packages::addSingleFrame(input axi_single_frame frame_for_push);
 	// $write(" added data to queu \n");
 	items_in_queue++;
     data_queue.push_front(frame_for_push);
-endfunction
+endtask
 
 function int axi_master_write_scheduler_packages::size();
     return(data_queue.size);
 endfunction
 
-function void axi_master_write_scheduler_packages::addBurst(input axi_frame frame);
+task axi_master_write_scheduler_packages::addBurst(input axi_frame frame);
 		int tmp_add = 0;
 		$write("\nadded new frame \n");
 
@@ -151,6 +152,7 @@ function void axi_master_write_scheduler_packages::addBurst(input axi_frame fram
 				tmp_single_frame.delay_awvalid 	= rand_data.delay_awvalid;
 				tmp_single_frame.delay_wvalid 	= rand_data.delay_wvalid;
 				tmp_single_frame.last_one 		= FALSE;
+				tmp_single_frame.len			= frame.len+1;
 				sem.get(1);
 				this.addSingleFrame(tmp_single_frame);
 				sem.put(1);
@@ -163,22 +165,22 @@ function void axi_master_write_scheduler_packages::addBurst(input axi_frame fram
 			data_queue[0].first_one = TRUE;
 			this.address = frame.addr;
 
-endfunction
+endtask
 
 
-function void axi_master_write_scheduler_packages::empyQueue();
+task axi_master_write_scheduler_packages::empyQueue();
 
 	sem.get(1);
 	while(data_queue.size())
 		void'(data_queue.pop_front());
+	sem.put(1);
+endtask
 
-endfunction
-
-function void axi_master_write_scheduler_packages::reincarnate();
+task  axi_master_write_scheduler_packages::reincarnate();
    	$display("recreating burst with ID: %d", this.ID);
 	this.empyQueue();
 	this.addBurst(this.frame_copy);
-endfunction
+endtask
 
 function void axi_master_write_scheduler_packages::resetErrorCounter();
 	this.slave_error_counter = 0;

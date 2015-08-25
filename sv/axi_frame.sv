@@ -51,6 +51,13 @@ class axi_frame extends axi_frame_base;
 	 `uvm_field_queue_int(data, UVM_DEFAULT)
  `   uvm_object_utils_end
 
+ 	constraint len_crs{
+	 	len inside {[5 : 20 ]};
+ 	}
+
+ 	constraint data_size_csr {
+	 	data.size() == this.len + 1;
+	}
 	function new (string name = "axi_frame");
 		super.new(name);
 	endfunction

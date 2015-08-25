@@ -21,6 +21,7 @@ class axi_master_write_response_driver extends axi_master_write_base_driver;
 	axi_slave_response							rsp;
 	axi_master_write_scheduler 					scheduler;
 	static axi_master_write_response_driver 	driverInstance;
+	axi_slave_write_base_driver_delays			random_delay;
 
 	`uvm_component_utils(axi_master_write_response_driver)
 
@@ -29,15 +30,16 @@ class axi_master_write_response_driver extends axi_master_write_base_driver;
 		mssg = new();
 		sem = new(1);
 		current_frame = new();
+		random_delay = new();
 	endfunction : new
 
 	extern static function axi_master_write_response_driver getDriverInstance(input uvm_component parent);
 
-	extern function void getNextFrame();
-	extern function void completeTransaction();
+	extern task getNextFrame();
+	extern task completeTransaction();
 	extern task main();
 	extern function void build();
-	extern function void init();
+	extern task init();
 
 endclass : axi_master_write_response_driver
 
@@ -50,15 +52,16 @@ function axi_master_write_response_driver axi_master_write_response_driver::getD
 	return driverInstance;
 endfunction
 
-function void axi_master_write_response_driver::getNextFrame();
+task axi_master_write_response_driver::getNextFrame();
     rsp = new();
 	rsp.ID = vif.bid;
 	rsp.rsp = vif.bresp;
-endfunction
+endtask
 
-function void axi_master_write_response_driver::completeTransaction();
-	$display("TODO COMPLETE_RESPONSE",);
-endfunction
+task axi_master_write_response_driver::completeTransaction();
+	$display("sending recieved package from slave ");
+	scheduler.putResponseFromSlave(rsp);
+endtask
 
 task axi_master_write_response_driver::main();
 	this.init();
@@ -67,8 +70,8 @@ task axi_master_write_response_driver::main();
 	    case(state)
 		    WAIT_RSP:
 		    begin
-			    @(posedge vif.sig_clock iff vif.bvalid == 1);
-			    state = GET_DATA;
+			    @(posedge vif.sig_clock iff vif.bvalid == 1'b1 );
+			     state = GET_DATA;
 		    end
 
 		    GET_DATA:
@@ -83,15 +86,21 @@ task axi_master_write_response_driver::main();
 			    state = COMPLETE_RECIEVE;
 		    end
 
-		    COMPLETE_TRANSACTION:
+		    COMPLETE_RECIEVE:
 		    begin
-			    this.completeTransaction();
-			    state = WAIT_CLK;
+			    assert(random_delay.randomize());
+			    repeat (random_delay.delay)
+				    begin
+						@(posedge vif.sig_clock);
+				    end
+				vif.bready <= 'b1;
+			    state = WAIT_CLK_RECIEVE;
 		    end
 
 		    WAIT_CLK_RECIEVE:
 		    begin
-			    @(posedge vif.sig_clock)
+			    @(posedge vif.sig_clock);
+			    vif.bready <= 1'b0;
 			    state = WAIT_RSP;
 		    end
 	    endcase
@@ -100,10 +109,12 @@ endtask
 
 function void axi_master_write_response_driver::build();
     scheduler = axi_master_write_scheduler::getSchedulerInstance(this);
+	if(!uvm_config_db#(virtual axi_if)::get(this, "", "vif", vif))
+			 `uvm_fatal("NOVIF",{"virtual interface must be set for: ",get_full_name(),".vif"})
 endfunction
 
-function void axi_master_write_response_driver::init();
-	$display("++++ +++ ++++ TOME ++ +++ +++ +++  ");
-endfunction
+task axi_master_write_response_driver::init();
+	vif.bready <= 1'b0;
+endtask
 
 `endif

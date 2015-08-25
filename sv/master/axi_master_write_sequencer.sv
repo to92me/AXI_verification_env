@@ -21,8 +21,8 @@ class axi_master_write_sequencer extends uvm_sequencer #(axi_frame);
 	function void build_phase(uvm_phase phase);
 		super.build_phase(phase);
 
-//		if(!uvm_config_db#(axi_master_config)::get(this, "", "config_obj", config_obj))
-//			`uvm_fatal("NOCONFIG",{"Config object must be set for: ",get_full_name(),".config_obj"}) // FIXME CONFIG
+		if(!uvm_config_db#(axi_master_config)::get(this, "", "axi_master_config", config_obj))
+			`uvm_fatal("NOCONFIG",{"Config object must be set for: ",get_full_name(),".config_obj"}) // FIXME CONFIG
 	endfunction: build_phase
 
 	// new - constructor

@@ -30,7 +30,7 @@ class axi_master_write_scheduler extends uvm_component;
 	axi_frame 								frame_same_id;
 	axi_mssg 								mssg;
 	axi_mssg 								send;
-	int 									response_latenes_error_rising = 100;
+	int 									response_latenes_error_rising = 10000;
 	axi_slave_response						response_from_slave_queue[$];
 	axi_slave_response						single_response_from_slave;
 	int 									error_before_delte_item = 4;
@@ -42,6 +42,7 @@ class axi_master_write_scheduler extends uvm_component;
 
 	static axi_master_write_scheduler scheduler_instance; // singleton
 	semaphore sem;
+	axi_master_write_driver					top_driver;
 
 	randomize_data rand_data; // randomize delays
 	axi_single_frame tmp_data;
@@ -50,20 +51,22 @@ class axi_master_write_scheduler extends uvm_component;
 	int empyt_scheduler_packages[$];
 
 	extern local function new(string name, uvm_component parent); // DONE
-	extern function void addBurst(input axi_frame frame); // DONE
-	extern  function void serchForReadyFrame(); //DONE
+	extern task addBurst(input axi_frame frame); // DONE
+	extern task serchForReadyFrame(); //DONE
 	extern task main(input int clocks); // DONE
-	extern  function void delayCalculator(); // DONE
-	extern function axi_mssg getFrameForDrivingVif(); // DONE
-	extern function void resetAll(); // DONE
-	extern local function void checkUniqueID(); // DONE
-	extern function void putResponseFromSlave(input axi_slave_response rsp); //DONE
-	extern local function void calculateRepsonseLatenes(); //DONE
-	extern local function void errorFromSlaveRepetaTransaction(input bit[ID_WIDTH - 1 : 0] rsp_id ); //DONE
-	extern local function void readSlaveResponse(); // DONE
-	extern local function void putOkResp(input bit[ID_WIDTH - 1 : 0] rsp_id );
-	extern local function void errorFromSlaveDecError(input bit[ID_WIDTH - 1 : 0] rsp_id); // DONE
-	extern local function void removeBurstAndCheckExisintgID(input bit[ID_WIDTH - 1 : 0] rsp_id);
+	extern task delayCalculator(); // DONE
+	extern task  getFrameForDrivingVif(output axi_mssg mssg); // DONE
+	extern task resetAll(); // DONE
+	extern local task checkUniqueID(); // DONE
+	extern task putResponseFromSlave(input axi_slave_response rsp); //DONE
+	extern task  calculateRepsonseLatenes(); //DONE
+	extern task  errorFromSlaveRepetaTransaction(input bit[ID_WIDTH - 1 : 0] rsp_id ); //DONE
+	extern local task readSlaveResponse(); // DONE
+	extern local task putOkResp(input bit[ID_WIDTH - 1 : 0] rsp_id );
+	extern local task errorFromSlaveDecError(input bit[ID_WIDTH - 1 : 0] rsp_id); // DONE
+	extern local task removeBurstAndCheckExisintgID(input bit[ID_WIDTH - 1 : 0] rsp_id);
+	extern local task checkForDone();
+	extern function  void setTopDriverInstance(input axi_master_write_driver top_driver_instance);
 
 
 
@@ -81,12 +84,13 @@ endclass : axi_master_write_scheduler
 	endfunction : new
 
 // ADD BURST
-	function void axi_master_write_scheduler::addBurst(input axi_frame frame);
+	task axi_master_write_scheduler::addBurst(input axi_frame frame);
 		int tmp_add = 0;
 
 
 		single_burst = new();
 		for(int i = 0; i<=frame.len; i++)
+
 			begin
 				rand_data = new();
 				assert(rand_data.randomize);
@@ -107,12 +111,15 @@ endclass : axi_master_write_scheduler
 				tmp_data.delay_awvalid 		= rand_data.delay_awvalid;
 				tmp_data.delay_wvalid 		= rand_data.delay_wvalid;
 				tmp_data.last_one 			= FALSE;
+				tmp_data.len				= frame.len+1;
 				sem.get(1);
 				single_burst.addSingleFrame(tmp_data);
 				sem.put(1);
+
+//				$display("item id: %d data %d", tmp_data.id, tmp_data.data);
 			end
 
-			$display("\nadded new frame, size: %d  \n ", single_burst.size());
+//			$display("\nadded new frame, size: %d  \n ", single_burst.size());
 
 			sem.get(1);
 			single_burst.frame_copy = frame; // keep the frame copy if recieved error repeat transaction
@@ -138,7 +145,7 @@ endclass : axi_master_write_scheduler
 						 burst_existing_id.push_back(single_burst);
 						 tmp_add = 1;
 					 end
-					 sem.put(1);
+					sem.put(1);
 				end
 			end
 
@@ -149,19 +156,20 @@ endclass : axi_master_write_scheduler
 				burst_queue.push_back(single_burst);
 				sem.put(1);
 			end
-	endfunction
+	endtask
 
 // SEARCH FOR READY FRAME
-	function void axi_master_write_scheduler::serchForReadyFrame();
+	task axi_master_write_scheduler::serchForReadyFrame();
 		int i;
 //		int smallest_delay = -1;
 		foreach(burst_queue[i])
 			begin
 
-				mssg = burst_queue[i].getNextSingleFrame();
+				burst_queue[i].getNextSingleFrame(mssg);
 				if(mssg.state == READY)
 					begin
 						next_frame_for_sending.push_front(mssg.frame);
+//						$display("+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++Scheduler ready frame ");
 						if(burst_queue[i+1] != null)
 							burst_queue[i+1].lock_state = QUEUE_UNLOCKED;
 					end
@@ -173,52 +181,63 @@ endclass : axi_master_write_scheduler
 			begin
 				checkUniqueID();
 			end
-	endfunction
+	endtask
 
 // GET FRAME FOR DRIVING VIF
-	function axi_mssg axi_master_write_scheduler::getFrameForDrivingVif();
+	task axi_master_write_scheduler::getFrameForDrivingVif(output axi_mssg mssg);
 		int tmp;
 		send = new();
-		sem.get(1);
+//		sem.get(1);
 		tmp = next_frame_for_sending.size();
-		sem.put(1);
+//		sem.put(1);
 	    if(tmp > 0)
 		    begin
+//			sem.get(1);
 		    send.frame  = next_frame_for_sending.pop_back();
 	    	send.state = READY;
+//			sem.put(1);
 		    end
 	    else
 		    begin
+//			    sem.get(1);
 			    send.state = QUEUE_EMPTY;
 			    send.frame = null;
+//			    sem.put(1);
 		    end
 
-		return send;
-	endfunction
+		mssg = send;
+	endtask
 
 // DELAY CALCULATOR
-	function void axi_master_write_scheduler::delayCalculator();
+	task axi_master_write_scheduler::delayCalculator();
 		int i;
-		sem.get(1);
+
+//		sem.get(1);
 		foreach(burst_queue[i])
 			begin
+
 				burst_queue[i].decrementDelay();
+
 			end
-		sem.put(1);
-	endfunction
+//		sem.put(1);
+
+	endtask
 
 	task axi_master_write_scheduler::main(input int clocks);
 //		$display("scheduler clock %d", clocks);
 	    repeat(clocks)
 		    begin
-			    this.delayCalculator;
-			    this.serchForReadyFrame;
+//			    $display("SCHEDULER CLOCK ");
+			    this.delayCalculator();
+			    this.serchForReadyFrame();
+			    this.calculateRepsonseLatenes();
 		    end
+		readSlaveResponse();
 	endtask
 
 // reset all queues and
-	function void axi_master_write_scheduler::resetAll();
-		sem.get(1);
+	task axi_master_write_scheduler::resetAll();
+//		sem.get(1);
 		for(int  i = 0; i < burst_queue.size(); i++ )
 			void'(burst_queue.pop_front());
 		for(int i = 0; i< next_frame_for_sending.size(); i++ )
@@ -226,8 +245,8 @@ endclass : axi_master_write_scheduler
 		for(int i = 0; i<burst_existing_id.size(); i++)
 			void'(burst_existing_id.pop_front());
 		`uvm_info("AXI MASTER WRITE SCHEDULER", "recived reset signal, deleting all bursts and items",UVM_HIGH);
-		sem.put(1);
-	endfunction
+//		sem.put(1);
+	endtask
 
 
 	function axi_master_write_scheduler axi_master_write_scheduler::getSchedulerInstance(input uvm_component parent);
@@ -235,13 +254,12 @@ endclass : axi_master_write_scheduler
 		   begin
 			   $display("Creating Scheduler");
 			   scheduler_instance = new("master scheduler", parent);
-			   // scheduler_instance.build(); // TODO FIXBUG
 		   end
 		   return scheduler_instance;
 	endfunction
 
 
-	function void axi_master_write_scheduler::checkUniqueID();
+	task axi_master_write_scheduler::checkUniqueID();
 		int check_ID;
 		int done = 0;
 		int tmp_for_delete;
@@ -252,19 +270,19 @@ endclass : axi_master_write_scheduler
 				CALCULATE_STATE:
 				begin
 					i = 0;
-					sem.get(1);
+//					sem.get(1);
 					if(empyt_scheduler_packages.size() == 0)
 						done = 1;
 					else
 						state_check_ID = DELETE_ONE;
-					sem.put(1);
+//					sem.put(1);
 				end
 
 
 				DELETE_ONE:
 				begin
 					i = 0;
-					sem.get(1);
+//					sem.get(1);
 					tmp_for_delete = empyt_scheduler_packages.pop_front();									 // check for next one to be first
 					state_check_ID = NEXT_CHECK;
 					check_ID = burst_queue[tmp_for_delete].ID;
@@ -276,12 +294,12 @@ endclass : axi_master_write_scheduler
 					waiting_for_resp_queue.push_back(single_waiting_for_resp);
 					//$display("DELETE ONE ***************************************************************************************************");
 					burst_queue.delete(tmp_for_delete); //deleted complited burst_package
-					sem.put(1);
+//					sem.put(1);
 				end
 
 				NEXT_CHECK:
 				begin
-					sem.get(1);
+//					sem.get(1);
 					if(burst_existing_id[i] == null)
 						state_check_ID = CALCULATE_STATE;
 					else
@@ -292,12 +310,12 @@ endclass : axi_master_write_scheduler
 									burst_existing_id[i].lock_state = QUEUE_UNLOCKED;
 								burst_queue.push_back(burst_existing_id[i]);
 								burst_existing_id.delete(i);
-								sem.put(1);
+//								sem.put(1);
 								state_check_ID = CALCULATE_STATE;
 							end
 						else
 							begin
-								sem.put(1);
+//								sem.put(1);
 								state_check_ID = NEXT_CHECK;
 								i++;
 								if(i == burst_existing_id.size())
@@ -308,13 +326,14 @@ endclass : axi_master_write_scheduler
 				end
 			endcase // end case
 		end // end while
-	endfunction
+	endtask
 
 
-function void axi_master_write_scheduler::calculateRepsonseLatenes();
+task axi_master_write_scheduler::calculateRepsonseLatenes();
 	int foreach_i;
+	int tmp_i[$];
 
-	sem.get(1);
+//	sem.get(1);
 	if(waiting_for_resp_queue.size != 0)
 		begin
 			foreach(waiting_for_resp_queue[foreach_i])
@@ -324,35 +343,45 @@ function void axi_master_write_scheduler::calculateRepsonseLatenes();
 						begin
 							`uvm_info(get_name(),$sformatf("for burst ID: %d response did not come after %d",
 								waiting_for_resp_queue[foreach_i].frame.id, response_latenes_error_rising), UVM_HIGH)
+							tmp_i.push_front(foreach_i);
 						end
 				end
 		end
-	sem.put(1);
 
-endfunction
+		foreach(tmp_i[foreach_i])
+			begin
+				waiting_for_resp_queue.delete(foreach_i);
+			end
+
+		this.checkForDone();
+//	sem.put(1);
+
+endtask
 
 
-function void axi_master_write_scheduler::putResponseFromSlave(input axi_slave_response rsp);
-	sem.get(1);
+task axi_master_write_scheduler::putResponseFromSlave(input axi_slave_response rsp);
+//	sem.get(1);
 		response_from_slave_queue.push_back(rsp);
-	sem.put(1);
+//	sem.put(1);
 
-endfunction
+endtask
 
 
-function void axi_master_write_scheduler::readSlaveResponse();
+task axi_master_write_scheduler::readSlaveResponse();
 	while(1)
 		begin
-		sem.get(1);
-		if(waiting_for_resp_queue.size == 0)
+//		sem.get(1);
+//		if(waiting_for_resp_queue.size == 0)
+			if(response_from_slave_queue.size == 0)
 			begin
-				sem.put(1);
+//				sem.put(1);
 				return;
 			end
 		else
 			begin
-				single_waiting_for_resp = waiting_for_resp_queue.pop_front();
-				sem.put(1);
+//				single_waiting_for_resp = waiting_for_resp_queue.pop_front();
+				single_response_from_slave = response_from_slave_queue.pop_front();
+//				sem.put(1);
 			end
 
 		case (single_response_from_slave.rsp) // check for  response
@@ -377,20 +406,23 @@ function void axi_master_write_scheduler::readSlaveResponse();
 			end
 
 		endcase
+
+			this.checkForDone();
+
 		end
 
-endfunction
+endtask
 
 
-function void axi_master_write_scheduler::putOkResp(input bit[ID_WIDTH-1:0] rsp_id);
+task axi_master_write_scheduler::putOkResp(input bit[ID_WIDTH-1:0] rsp_id);
  	int tmp_size;
-	sem.get(1);
+//	sem.get(1);
 	tmp_size = waiting_for_resp_queue.size();
-	sem.put(1);
+//	sem.put(1);
 
 	for(int i = 0; i < tmp_size-1 ;i++)
 		begin
-			sem.get(1);
+//			sem.get(1);
 			if(waiting_for_resp_queue[i].frame.id == rsp_id)
 				begin
 					`uvm_info(get_name(),$sformatf("burst ID: %d recivede OK or EXOKAY from slave,\
@@ -399,19 +431,19 @@ function void axi_master_write_scheduler::putOkResp(input bit[ID_WIDTH-1:0] rsp_
 					sem.put(1);
 					return;
 				end
-				sem.put(1);
+//				sem.put(1);
 		end
 	$display("EROOR recieved OK response for not existing or not conmlited burst, rsp ID: %d", rsp_id);
 //	`uvm_info(get_name(),$sformatf("recieved resp with ID: %d and there is no complited burst with that ID "rsp_id), UVM_ERROR)
 
-endfunction
+endtask
 
-function void axi_master_write_scheduler::errorFromSlaveDecError(input bit[ID_WIDTH-1:0] rsp_id);
+task axi_master_write_scheduler::errorFromSlaveDecError(input bit[ID_WIDTH-1:0] rsp_id);
 	this.removeBurstAndCheckExisintgID(rsp_id);
-endfunction
+endtask
 
-function void axi_master_write_scheduler::errorFromSlaveRepetaTransaction(input bit[ID_WIDTH-1:0] rsp_id);
-	sem.get(1);
+task axi_master_write_scheduler::errorFromSlaveRepetaTransaction(input bit[ID_WIDTH-1:0] rsp_id);
+//	sem.get(1);
 	for(int i = 0; i < burst_queue.size()-1; i++)
 		begin
 			if(burst_queue[i].ID == rsp_id)
@@ -422,11 +454,11 @@ function void axi_master_write_scheduler::errorFromSlaveRepetaTransaction(input 
 						this.removeBurstAndCheckExisintgID(rsp_id);
 				end
 		end
-		sem.put(1);
+//		sem.put(1);
 
-endfunction
+endtask
 
-function void axi_master_write_scheduler::removeBurstAndCheckExisintgID(input bit[ID_WIDTH - 1 : 0] rsp_id); // za sada se samo odavde poziva i onda ne mora da vide lockovan semaphore
+task axi_master_write_scheduler::removeBurstAndCheckExisintgID(input bit[ID_WIDTH - 1 : 0] rsp_id); // za sada se samo odavde poziva i onda ne mora da vide lockovan semaphore
 	for(int i = 0;i < burst_queue.size()-1; i++ )
 		begin
 			if(burst_queue[i].ID == rsp_id)
@@ -444,14 +476,22 @@ function void axi_master_write_scheduler::removeBurstAndCheckExisintgID(input bi
 					burst_existing_id.delete(i);
 				end
 		end
+endtask
+
+
+function void axi_master_write_scheduler::setTopDriverInstance(input axi_master_write_driver top_driver_instance);
+    this.top_driver = top_driver_instance;
 endfunction
 
 
 
+task axi_master_write_scheduler::checkForDone();
 
+   if(burst_queue.size() == 0 && burst_existing_id.size() == 0 && waiting_for_resp_queue.size() == 0)
+	   $display("  ============================= THE END =====================================");
+	   top_driver.putResponseToSequencer();
 
-
-
+endtask
 
 
 

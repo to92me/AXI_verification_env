@@ -21,37 +21,20 @@
 
 
 	virtual task pre_body();
-		/*
-		if (starting_phase!=null) begin
-			`uvm_info(get_type_name(),
-				$sformatf("!s! pre_body() raising !s! objection",
-					get_sequence_path(),
-					starting_phase.get_name()), UVM_MEDIUM);
-			starting_phase.raise_objection(this);
-			uvm_test_done.set_drain_time(this, 20000000ns);
-		end
-		*/
-		 if (starting_phase != null) begin
-        starting_phase.raise_objection(this, {"Executing sequence '",
-                                              get_full_name(), "'"});
+	if (starting_phase != null) begin
+        starting_phase.raise_objection(this, {"Executing sequence '", get_full_name(), "'"});
+		uvm_test_done.set_drain_time(this, 200ns);
      end
      `uvm_info(get_full_name(), {"Executing sequence '",get_full_name(), "'"}, UVM_MEDIUM)
 	endtask
 
 
 	virtual task post_body();
-		/*
-		if (starting_phase!=null) begin
-			`uvm_info(get_type_name(),
-				$sformatf("!s! post_body() dropping !s! objection",
-					get_sequence_path(),
-					starting_phase.get_name()), UVM_MEDIUM);
-			starting_phase.drop_objection(this);
-		end
-		*/
+
 		 if (starting_phase != null) begin
         starting_phase.drop_objection(this, {"Completed sequence '",
                                              get_full_name(), "'"});
+
      end
 	endtask
 
@@ -74,6 +57,7 @@ class axi_master_write_sequence_lib_test1 extends axi_master_write_sequence_base
 	endfunction
 
 	virtual task body();
+//		`uvm_do_with(req,{req.data.size inside{[1 : 10]};})
 		`uvm_do(req);
 		`uvm_do(req);
 		`uvm_do(req);
@@ -82,6 +66,55 @@ class axi_master_write_sequence_lib_test1 extends axi_master_write_sequence_base
 		`uvm_do(req);
 		`uvm_do(req);
 		`uvm_do(req);
+		`uvm_do(req);
+		`uvm_do(req);
+		`uvm_do(req);
+		`uvm_do(req);
+		`uvm_do(req);
+		`uvm_do(req);
+		`uvm_do(req);
+		`uvm_do(req);
+		`uvm_do(req);
+		`uvm_do(req);
+		`uvm_do(req);
+		`uvm_do(req);
+		`uvm_do(req);
+		`uvm_do(req);
+		`uvm_do(req);
+		`uvm_do(req);
+		`uvm_do(req);
+		`uvm_do(req);
+		`uvm_do(req);
+		`uvm_do(req);
+		`uvm_do(req);
+		`uvm_do(req);
+		`uvm_do(req);
+		`uvm_do(req);
+		`uvm_do(req);
+		`uvm_do(req);
+		`uvm_do(req);
+		`uvm_do(req);
+		`uvm_do(req);
+		`uvm_do(req);
+		`uvm_do(req);
+		`uvm_do(req);
+		`uvm_do(req);
+		`uvm_do(req);
+		`uvm_do(req);
+		`uvm_do(req);
+		`uvm_do(req);
+		`uvm_do(req);
+		`uvm_do(req);
+		`uvm_do(req);
+		`uvm_do(req);
+		`uvm_do(req);
+		`uvm_do(req);
+		`uvm_do(req);
+		`uvm_do(req);
+		`uvm_do(req);
+		`uvm_do(req);
+		`uvm_do(req);
+
 //		get_response(rsp);
 	endtask
 
