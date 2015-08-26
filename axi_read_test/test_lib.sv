@@ -33,6 +33,7 @@ class demo_base_test extends uvm_test;
     set_config_int("*", "recording_detail", UVM_FULL);
     uvm_config_int::set(this, "tb0.axi0.read_monitor", "coverage_enable", 1);
     uvm_config_int::set(this, "tb0.axi0.read_slave*.sequencer.arbit", "read_enable", 1);
+    uvm_config_int::set(this, "*", "terminate_enable", 1);
     tb0 = axi_read_tb::type_id::create("tb0", this);
   endfunction : build_phase
 

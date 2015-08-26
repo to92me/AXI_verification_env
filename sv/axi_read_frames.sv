@@ -66,6 +66,28 @@ class axi_read_single_frame extends axi_read_base_frame;
 		super.new(name);
 	endfunction
 
+	function void calc_resp(lock_enum slave_lock, lock_enum burst_lock);
+		if ((burst_lock == EXCLUSIVE) && (slave_lock == NORMAL)) begin
+			this.resp = OKAY;
+			this.err = ERROR;
+		end
+		else if (burst_lock == EXCLUSIVE) begin
+			this.resp = EXOKAY;
+			this.err = NO_ERROR;
+		end
+		else begin
+			this.resp = OKAY;
+			this.err = NO_ERROR;
+		end
+	endfunction : calc_resp
+
+	function bit calc_last_bit(bit last, last_enum mode);
+		if(mode == BAD_LAST_BIT)
+			return ~last;
+		else
+			return last;
+	endfunction : calc_last_bit
+
 endclass :  axi_read_single_frame
 
 //------------------------------------------------------------------------------
@@ -76,7 +98,7 @@ endclass :  axi_read_single_frame
 class axi_read_burst_frame extends axi_read_base_frame;
 
 	rand bit [ADDR_WIDTH-1 : 0]		addr;
-	rand bit [2:0]					len;		// TODO : [7:0]
+	rand bit [7:0]					len;
 	rand burst_size_enum			size;
 	rand burst_type_enum			burst_type;
 	rand lock_enum					lock;
@@ -86,8 +108,39 @@ class axi_read_burst_frame extends axi_read_base_frame;
 	rand bit [3:0]					region;
 	// user
 
-	constraint default_length {len > 0;}
 	constraint default_delay {delay < 5;}
+
+	// constrain number of bytes in a transfer
+	constraint default_burst_size {size <= $clog2(DATA_WIDTH / 8);}
+
+	// burst length for the INCR type can be 1 - 256, for others 1 - 16
+	// for a wrapping burst, length must be 2, 4, 8 or 16
+	constraint default_len {
+		len > 0;
+		if (burst_type == FIXED) {
+			len <= 16;
+		}
+		else if (burst_type == WRAP) {
+			len inside {2, 4, 8, 16};
+		}
+	}
+	constraint order_type {solve burst_type before len;}	// because of default_len constraint
+
+	// for a wrapping burst the start address must be aligned to the size of each transfer
+	constraint default_burst_type {
+		// TODO : ovde bi trebalo $floor umesto int' tj rounded down
+		// ali mislim da i ovako radi jer ja samo hocu da znam da li adresa poravnata ili nije
+		// a ne zanima me koliko iznosi poravnata adresa - PROVERITI
+		if (addr == ((int'(addr/(2**size)))*(2**size))) {
+			burst_type inside {FIXED, INCR, WRAP};
+		}
+		else {	// address not aligned
+			burst_type inside {FIXED, INCR};
+		}
+		// never use Reserved
+	}
+	constraint order_addr {solve addr before burst_type;}
+	constraint order_size {solve size before burst_type;}
 
 	// UVM utility macros
 	`uvm_object_utils_begin(axi_read_burst_frame)

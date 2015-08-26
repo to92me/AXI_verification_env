@@ -29,6 +29,8 @@ class axi_slave_read_agent extends uvm_agent;
 	    `uvm_field_object(monitor, UVM_DEFAULT | UVM_REFERENCE)
 	    `uvm_field_enum(uvm_active_passive_enum, is_active, UVM_DEFAULT)
 	    `uvm_field_object(config_obj, UVM_DEFAULT | UVM_REFERENCE)
+	    `uvm_field_object(driver, UVM_DEFAULT | UVM_REFERENCE)
+	    `uvm_field_object(sequencer, UVM_DEFAULT | UVM_REFERENCE)
 	`uvm_component_utils_end
 
 	// new - constructor

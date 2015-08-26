@@ -25,12 +25,14 @@ class axi_master_read_driver extends uvm_driver #(axi_read_burst_frame);
 	axi_master_read_response resp;
 
 	// Provide implmentations of virtual methods such as get_type_name and create
-	`uvm_component_utils(axi_master_read_driver)
+	`uvm_component_utils_begin(axi_master_read_driver)
+		`uvm_field_object(resp, UVM_DEFAULT)
+	`uvm_component_utils_end
 
 	// new - constructor
 	function new (string name, uvm_component parent);
 		super.new(name, parent);
-		resp = new();
+		resp = axi_master_read_response::type_id::create("resp", this);
 	endfunction : new
 
 	// build_phase
@@ -73,9 +75,9 @@ endclass : axi_master_read_driver
 	// reset
 	task axi_master_read_driver::reset();
 		forever begin
-			@(negedge vif.sig_reset)
+			@(negedge vif.sig_reset);
 			`uvm_info(get_type_name(), "Reset", UVM_MEDIUM)
-			@(posedge vif.sig_clock)	// reset can be asynchronous, but deassertion must be synchronous with clk
+			@(posedge vif.sig_clock);	// reset can be asynchronous, but deassertion must be synchronous with clk
 
 			vif.arid <= {ID_WIDTH {1'b0}};
 			vif.araddr <= {ADDR_WIDTH {1'b0}};
@@ -112,6 +114,7 @@ endclass : axi_master_read_driver
 			data_frame.resp = vif.rresp;
 			data_frame.data = vif.rdata;
 			data_frame.last = vif.rlast;
+			// user
 
 			resp.check_response(data_frame, burst_frame);	// check if the burst is complete or if there is an error
 			if (burst_frame != null) begin

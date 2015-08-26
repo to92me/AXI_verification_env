@@ -37,6 +37,8 @@ class axi_env extends uvm_env;
 	`uvm_component_utils_begin(axi_env)
 		`uvm_field_int(num_agents, UVM_DEFAULT)
 		`uvm_field_object(config_obj, UVM_DEFAULT)
+		`uvm_field_object(read_master, UVM_DEFAULT)
+		`uvm_field_sarray_object(read_slaves, UVM_DEFAULT)
 		`uvm_field_int(checks_enable, UVM_DEFAULT)
 		`uvm_field_int(coverage_enable, UVM_DEFAULT)
 	`uvm_component_utils_end

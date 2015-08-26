@@ -120,7 +120,7 @@ class axi_master_read_multiple_addr extends axi_master_read_base_seq;
 	int num_of_err = 0;
 	axi_read_burst_frame error_bursts[$];	// a queue for holding bursts that returned an error
 
-	rand bit[3:0][ADDR_WIDTH-1 : 0] address;	// slave addresses
+	rand bit [ADDR_WIDTH-1 : 0] address[];	// slave addresses
 
 	// new - constructor
 	function new(string name="axi_master_read_multiple_addr");
@@ -131,9 +131,9 @@ class axi_master_read_multiple_addr extends axi_master_read_base_seq;
 
 		use_response_handler(1);
 
-		count = 3;	// number of bursts to be sent
+		count = address.size();	// number of bursts to be sent
 
-		for(int i = 0; i < 3; i++) begin
+		for(int i = 0; i < address.size(); i++) begin
 			`uvm_do_with(req, {req.valid == FRAME_VALID; req.addr == address[i];})
 		end
 
@@ -162,9 +162,6 @@ class axi_master_read_multiple_addr extends axi_master_read_base_seq;
 					`uvm_error("CASTFAIL", "The recieved response item is not a burst frame");
 
 				count--;	// keep track of number of responses
-
-				//DEBUG
-				$write("count = %d\n", count);
 
 				// if there was an error put the burst in the error queue so it will be sent agian
 				if (rsp.valid == FRAME_NOT_VALID) begin

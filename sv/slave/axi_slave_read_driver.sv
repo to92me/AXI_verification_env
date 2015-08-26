@@ -71,8 +71,8 @@ endclass : axi_slave_read_driver
 	// get_and_drive
 	task axi_slave_read_driver::get_and_drive();
 		fork
-			get_from_seq();
 			reset();
+			get_from_seq();
 			drive_addr_channel();
 			drive_data_channel();
 		join
@@ -124,9 +124,9 @@ endclass : axi_slave_read_driver
 	// reset
 	task axi_slave_read_driver::reset();
 		forever begin
-			@(negedge vif.sig_reset)
+			@(negedge vif.sig_reset);
 			`uvm_info(get_type_name(), "Reset", UVM_MEDIUM)
-			@(posedge vif.sig_clock)	// reset can be asynchronous, but deassertion must be synchronous with clk
+			@(posedge vif.sig_clock);	// reset can be asynchronous, but deassertion must be synchronous with clk
 
 			// reset signals
 			vif.rid <= {ID_WIDTH {1'b0}};
@@ -162,6 +162,7 @@ endclass : axi_slave_read_driver
 				burst_collected.addr = vif.araddr;
 				burst_collected.len = vif.arlen;
 				burst_collected.size = vif.arsize;
+				burst_collected.burst_type = vif.arburst;
 				burst_collected.lock = vif.arlock;
 				burst_collected.cache = vif.arcache;
 				burst_collected.prot = vif.arprot;
