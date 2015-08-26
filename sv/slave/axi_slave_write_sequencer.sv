@@ -1,8 +1,5 @@
-/******************************************************************************
-	* DVT CODE TEMPLATE: sequencer with reset handling
-	* Created by root on Aug 2, 2015
-	* uvc_company = uvc_company, uvc_name = uvc_name
-*******************************************************************************/
+`ifndef AXI_SLAVE_WRITE_SEQUENCER_SVH
+`define AXI_SLAVE_WRITE_SEQUENCER_SVH
 
 //------------------------------------------------------------------------------
 //
@@ -51,10 +48,10 @@ class axi_slave_write_sequencer extends uvm_sequencer #(axi_frame);
 				end
 				// Reset process
 				begin
-					reset_port.get(reset_status);
+//					reset_port.get(reset_status);
 					stop_sequences();
 					main.kill();
-					reset_port.get(reset_status);
+//					reset_port.get(reset_status);
 				end
 			join
 			if(test_finished) break;
@@ -66,4 +63,6 @@ class axi_slave_write_sequencer extends uvm_sequencer #(axi_frame);
 		super.new(name, parent);
 	endfunction : new
 
-endclass : uvc_company_uvc_name_sequencer
+endclass : axi_slave_write_sequencer
+
+`endif

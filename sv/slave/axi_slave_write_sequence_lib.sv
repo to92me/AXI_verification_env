@@ -1,18 +1,13 @@
-/******************************************************************************
-* DVT CODE TEMPLATE: sequence library
-* Created by root on Aug 2, 2015
-* uvc_company = uvc_company, uvc_name = uvc_name
-* uvc_trans = uvc_trans
-*******************************************************************************/
+`ifndef AXI_SLAVE_WRITE_SEAUENCE_LIB_SVH
+`define AXI_SLAVE_WRITE_SEAUENCE_LIB_SVH
 
 //------------------------------------------------------------------------------
 //
 // CLASS: uvc_company_uvc_name_base_seq
 //
 //------------------------------------------------------------------------------
-// This sequence raises/drops objections in the pre/post_body so that root
-// sequences raise objections but subsequences do not.
-class uvc_name_base_sequence extends uvm_sequence #(axi_frame);
+
+class axi_slave_write_sequence_base extends uvm_sequence #(axi_frame);
 
 	// TODO: Add fields here
 
@@ -22,54 +17,47 @@ class uvc_name_base_sequence extends uvm_sequence #(axi_frame);
 		super.new(name);
 	endfunction
 
-	// Raise in pre_body so the objection is only raised for root sequences.
-	// There is no need to raise for sub-sequences since the root sequence
-	// will encapsulate the sub-sequence.
 	virtual task pre_body();
-		if (starting_phase!=null) begin
-			`uvm_info(get_type_name(),
-				$sformatf("!s! pre_body() raising !s! objection",
-					get_sequence_path(),
-					starting_phase.get_name()), UVM_MEDIUM);
-			starting_phase.raise_objection(this);
-		end
+	if (starting_phase != null) begin
+        starting_phase.raise_objection(this, {"Executing sequence '",
+                                              get_full_name(), "'"});
+     end
+     `uvm_info(get_full_name(), {"Executing sequence '",get_full_name(), "'"}, UVM_MEDIUM)
 	endtask
 
 	// Drop the objection in the post_body so the objection is removed when
 	// the root sequence is complete.
 	virtual task post_body();
-		if (starting_phase!=null) begin
-			`uvm_info(get_type_name(),
-				$sformatf("!s! post_body() dropping !s! objection",
-					get_sequence_path(),
-					starting_phase.get_name()), UVM_MEDIUM);
-			starting_phase.drop_objection(this);
-		end
+		 if (starting_phase != null) begin
+        starting_phase.drop_objection(this, {"Completed sequence '",
+                                             get_full_name(), "'"});
+     end
 	endtask
 
-endclass : uvc_name_base_sequence
+endclass : axi_slave_write_sequence_base
 
 //------------------------------------------------------------------------------
 //
 // SEQUENCE: uvc_name_transfer_seq
 //
 //------------------------------------------------------------------------------
-class uvc_name_transfer_seq extends uvc_name_base_sequence;
+class uvc_name_transfer_seq extends axi_slave_write_sequence_base;
 
-	// Add local random fields and constraints here
+	
 
 	`uvm_object_utils(uvc_name_transfer_seq)
 
-	// new - constructor
+
 	function new(string name="uvc_name_transfer_seq");
 		super.new(name);
 	endfunction
 
 	virtual task body();
-		`uvm_do_with(req,
-			{ /* TODO : add constraints here*/ } )
-			`uvm_do_w
+			`uvm_do(req)
 		get_response(rsp);
 	endtask
 
 endclass : uvc_name_transfer_seq
+
+
+`endif

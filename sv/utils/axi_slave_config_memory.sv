@@ -10,8 +10,7 @@ import uvm_pkg::*;
 	`include "uvm_macros.svh"
 
 // this class is strcut but because uvm can handle struct it is class with two fields and no methodes
-class axi_slave_config_memory_field;   // FIXME proveriti da li mozda moze da radi da je component ? da li ce onda moci dinamicki da
-									   // se dodaje posto je pravilo probleme kada sam radio new izvan build
+class axi_slave_config_memory_field;
 
 
 	bit [DATA_WIDTH-1 : 0] 			data;

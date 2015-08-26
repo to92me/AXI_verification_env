@@ -4,3 +4,13 @@
 INCA_libs
 run.f
 waves.shm
+.simvision/
+cov_work/
+*.sh
+*.key
+*.err
+ncsim.*
+*.diag
+*.tcl 
+*.svcf
+

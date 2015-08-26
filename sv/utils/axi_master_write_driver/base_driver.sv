@@ -44,7 +44,7 @@ class axi_master_write_base_driver extends uvm_component;
 	endfunction : new
 
 	// build_phase
-	function void build();
+	virtual function void build();
 		`uvm_info("axi master write base vif driver","Building", UVM_MEDIUM);
 		main_driver = axi_master_write_main_driver::getDriverInstance(this);
 		scheduler = axi_master_write_scheduler::getSchedulerInstance(this);
@@ -54,40 +54,40 @@ class axi_master_write_base_driver extends uvm_component;
 
 	extern static function axi_master_write_base_driver getDriverInsance(input uvm_component parent);
 
-	extern virtual function void getNextFrame();
-	extern virtual function void driverVif();
-	extern virtual function void completeTransaction();
+	extern virtual task getNextFrame();
+	extern virtual task driverVif();
+	extern virtual task completeTransaction();
 	extern virtual task main();
-	extern virtual function void init();
-	extern function void setValiDefaultValue(input bit input_valid);
-	extern virtual function void reset();
+	extern virtual task init();
+	extern task setValiDefaultValue(input bit input_valid);
+	extern virtual task reset();
 
 
 endclass : axi_master_write_base_driver
 
-function void axi_master_write_base_driver::driverVif();
+task axi_master_write_base_driver::driverVif();
     $display("ERRROR AXI MASTER WRITE BASE: redefine this please 1");
-endfunction
+endtask
 
-function void axi_master_write_base_driver::getNextFrame();
+task axi_master_write_base_driver::getNextFrame();
     $display("ERRROR AXI MASTER WRITE BASE: redefine this please 2");
-endfunction
+endtask
 
 task axi_master_write_base_driver::main();
  	 $display("ERRROR AXI MASTER WRITE BASE: redefine this please 3");
 endtask
 
-function void axi_master_write_base_driver::completeTransaction();
+task axi_master_write_base_driver::completeTransaction();
  	 $display("ERRROR AXI MASTER WRITE BASE: redefine this please 4");
-endfunction
+endtask
 
-function void axi_master_write_base_driver::init();
+task axi_master_write_base_driver::init();
      $display("ERRROR AXI MASTER WRITE BASE: redefine this please 5");
-endfunction
+endtask
 
-function void axi_master_write_base_driver::reset();
+task axi_master_write_base_driver::reset();
 	$display("ERRROR AXI MASTER WRITE BASE: redefine this please 6 ");
-endfunction
+endtask
 
 function axi_master_write_base_driver axi_master_write_base_driver::getDriverInsance(input uvm_component parent);
 	 if(driverInstance == null)
@@ -98,9 +98,9 @@ function axi_master_write_base_driver axi_master_write_base_driver::getDriverIns
 	return getDriverInsance;
 endfunction
 
-function void axi_master_write_base_driver::setValiDefaultValue(input bit input_valid);
+task axi_master_write_base_driver::setValiDefaultValue(input bit input_valid);
 	this.valid_default = input_valid;
-endfunction
+endtask
 
 `endif
 

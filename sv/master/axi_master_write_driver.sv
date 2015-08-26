@@ -33,7 +33,8 @@ class axi_master_write_driver extends uvm_driver #(axi_frame);
 	extern task startScheduler();
 	extern virtual task startDriver();
 	extern virtual task resetAll();
-	extern function void resetDrivers();
+	extern task resetDrivers();
+	extern task putResponseToSequencer();
 	// build_phase
 	function void build_phase(uvm_phase phase);
 		super.build_phase(phase);
@@ -46,7 +47,7 @@ class axi_master_write_driver extends uvm_driver #(axi_frame);
 
 			driver.build();
 			response.build();
-
+			scheduler.setTopDriverInstance(this);
 	endfunction: build_phase
 
 	// run_phase
@@ -82,8 +83,8 @@ endclass : axi_master_write_driver
 		     $display("adding new item --------------------------------------------------------------------------------------------------------");
 		    seq_item_port.get_next_item(req);
 			$cast(rsp, req.clone());
+//		    rsp.set_id_info(req);
 		    scheduler.addBurst(rsp);
-//			rsp.set_id_info(req);
 		    seq_item_port.item_done();
 		    $display("adding new item DONE--------------------------------------------------------------------------------------------------------");
 //			seq_item_port.put_response(rsp);
@@ -111,13 +112,18 @@ task axi_master_write_driver::startScheduler();
  task  axi_master_write_driver::startDriver();
 	fork
 	 	this.driver.main();
-//		this.response.main();
-	join_any
+		this.response.main();
+	join_none
+	$display("++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++");
 endtask
 
-function void axi_master_write_driver::resetDrivers();
+task axi_master_write_driver::resetDrivers();
 	this.scheduler.resetAll();
 	this.driver.reset();
-endfunction
+endtask
+
+task axi_master_write_driver::putResponseToSequencer();
+//	seq_item_port.put_response(rsp);
+endtask
 
 `endif

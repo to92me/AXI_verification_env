@@ -15,6 +15,7 @@ class axi_master_write_env extends uvm_env;
 	bit coverage_enable = 1;
 	axi_write_test_config config_obj;
 	axi_master_write_agent master;
+	axi_slave_write_agent slave;
 
 
 
@@ -62,6 +63,7 @@ function void axi_master_write_env::build_phase(uvm_phase phase);
 		end
 
 		master = axi_master_write_agent::type_id::create("master_write_agent",this);
+		slave = axi_slave_write_agent::type_id::create("slave_write_agnet", this);
 
 endfunction : build_phase
 
