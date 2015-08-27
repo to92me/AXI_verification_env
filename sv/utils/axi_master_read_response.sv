@@ -42,6 +42,7 @@ class axi_master_read_response extends uvm_component;
 
 	extern virtual task check_response(axi_read_single_frame one_frame, ref axi_read_burst_frame matching_burst);
 	extern virtual task new_burst(axi_read_burst_frame one_burst);
+	extern virtual task get_num_of_bursts(output int num);
 
 endclass : axi_master_read_response
 
@@ -128,5 +129,14 @@ task axi_master_read_response::new_burst(axi_read_burst_frame one_burst);
 	sem.put(1);
 
 endtask : new_burst
+
+// number of burst currently waiting for responses
+task axi_master_read_response::get_num_of_bursts(output int num);
+	
+	sem.get(1);
+	num = sent_bursts.size();
+	sem.put(1);
+
+endtask : get_num_of_bursts
 
 `endif

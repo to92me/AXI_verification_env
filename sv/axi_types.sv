@@ -1,7 +1,8 @@
 `ifndef AXI_TYPES_SVH
 `define AXI_TYPES_SVH
 
-parameter PIPE_SIZE = 5;
+parameter MASTER_PIPE_SIZE = 5;
+parameter SLAVE_PIPE_SIZE = 5;
 
 parameter ADDR_WIDTH = 32;
 parameter DATA_WIDTH = 64;
@@ -88,5 +89,10 @@ typedef enum {
 	ERROR,
 	NO_ERROR
 } err_enum;
+
+typedef union {
+	bit[7:0] lane[DATA_WIDTH/8];
+	bit[DATA_WIDTH-1:0] data;
+} mem_access;
 
 `endif

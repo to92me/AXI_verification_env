@@ -50,6 +50,8 @@ irun  $other_args \
   -nowarn PMBDVX \
   +UVM_TESTNAME=virtual_seq_test \
   +UVM_VERBOSITY=UVM_HIGH \
+  +UVM_TESTNAME=virtual_seq_test \
+  +svseed=RANDOM \
   $TB_HOME/axi_top.sv \
   $gui
  

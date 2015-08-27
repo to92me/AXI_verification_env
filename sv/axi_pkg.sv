@@ -68,6 +68,8 @@ package axi_pkg;
 	typedef class axi_read_whole_burst;
 	typedef class axi_read_single_addr;
 
+	typedef class ready_randomization;
+
 	// config
 	typedef class axi_master_config;
 	typedef class axi_slave_config;

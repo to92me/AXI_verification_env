@@ -27,7 +27,40 @@ class axi_address_calc extends uvm_sequence_item;
 		super.new(name);
 	endfunction : new
 
+	extern virtual task readMemory(input axi_slave_config config_obj, output bit[DATA_WIDTH-1 : 0] return_data);
+	extern virtual task writeMemory(input axi_slave_config config_obj, input bit[DATA_WIDTH-1 : 0] input_data);
+
 endclass : axi_address_calc
+
+task axi_address_calc::readMemory(input axi_slave_config config_obj, output bit[DATA_WIDTH-1 : 0] return_data);
+		mem_access read_data;	// union used for reading individual bytes
+		axi_slave_memory_response rsp;
+
+		for(int i = 0; i < (this.upper_byte_lane - this.lower_byte_lane + 1); i++) begin
+			config_obj.readMemory(this.addr, rsp);
+			if(rsp.getValid() == TRUE) begin
+				read_data.lane[this.lower_byte_lane] = rsp.getData();
+				this.lower_byte_lane++;
+			end
+			this.addr++;
+			// if nothing was written on that location, random data will be returned
+		end
+
+		return_data = read_data.data;
+endtask : readMemory
+
+// TODO : testirati write!!!!
+task axi_address_calc::writeMemory(input axi_slave_config config_obj, input bit[DATA_WIDTH-1 : 0] input_data);
+	mem_access write_data;	// union used for writing individual bytes
+
+	write_data.data = input_data;
+
+	for(int i = 0; i < (this.upper_byte_lane - this.lower_byte_lane + 1); i++) begin
+			config_obj.writeMemory(this.addr, write_data.lane[this.lower_byte_lane]);
+			lower_byte_lane++;
+			this.addr++;
+	end
+endtask : writeMemory
 
 //------------------------------------------------------------------------------
 //
@@ -85,7 +118,7 @@ function void axi_address_queue::calc_addr(bit[ADDR_WIDTH-1:0] start_addr, burst
 		upper_wrap_boundary = lower_wrap_boundary + dtsize;
 	end
 
-	for(int i = 0; i < burst_len; i++) begin
+	for(int i = 0; i <= burst_len; i++) begin
 		addr_frame.lower_byte_lane = addr - ($floor(addr/data_bus_bytes)) * data_bus_bytes;
 
 		if (aligned) begin
