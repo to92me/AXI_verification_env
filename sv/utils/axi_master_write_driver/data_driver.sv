@@ -11,10 +11,11 @@
 
 class axi_master_write_data_driver extends axi_master_write_base_driver;
 
-	write_states_enum 						state = GET_FRAME;
-	write_states_enum						next_state;
+
 	static 	axi_master_write_data_driver	driverInstance;
 	int 									clock_counter;
+	event 									frame_collected;
+	int 									send_items = 0;
 
 	// Provide implementations of virtual methods such as get_type_name and create
 
@@ -36,6 +37,9 @@ class axi_master_write_data_driver extends axi_master_write_base_driver;
 	extern task reset();
 	extern task spinClock(input int clocks);
 	extern task main();
+	extern task validTriger();
+	extern task dataDriver();
+	extern task testClock();
 
 
 endclass : axi_master_write_data_driver
@@ -65,55 +69,62 @@ endtask
 
 
 task axi_master_write_data_driver::driverVif();
-//		#5
-//		$display("MASTER: DATA driving vif");
-		$display("current frame: %d %d %d",current_frame.id, current_frame.last_one, current_frame.data);
+		#2
+		$display(" MASTER SEND current frame: %h %d %h, count: %d",current_frame.id, current_frame.last_one, current_frame.data, send_items );
+		send_items++;
 		calculateStrobe(current_frame);
 		vif.wid 	<= 	current_frame.id;
 		if(current_frame.last_one == TRUE)
 			begin
 				vif.wlast  	<= 'b1;
-//				vif.wvalid  <= 'b1;
 			end
 		else
 			vif.wlast 	<= 'b0;
 
 endtask
 task axi_master_write_data_driver::completeTransaction();
-//	#5
+	#2
     vif.wvalid 		<=	1'b1;
 endtask
 
 task axi_master_write_data_driver::init();
-//		#10
+		#2
 		vif.wid 	<= 	0;
 		vif.wlast 	<= 	0;
+		vif.wdata 	<= 	0;
 		vif.wvalid	<= 	1'b0;
 endtask
 
 task axi_master_write_data_driver::reset();
 		vif.wid 	<= 	0;
 		vif.wlast 	<= 	0;
+		vif.wdata 	<= 	0;
 		vif.wvalid	<= 	1'b0;
 		`uvm_info(get_name(),$sformatf("reset recievied"), UVM_LOW)
 endtask
 
 task axi_master_write_data_driver::calculateStrobe(input axi_single_frame strobe_frame);
-    $display("NOT IMPLEMENTDE STROBE SELECT");
 	vif.wdata <= current_frame.data;
 	vif.wstrb <= 1;
 
 endtask
 
 task axi_master_write_data_driver::spinClock(input int clocks);
-//	$display("clock clock  = %d ", clocks);
 	this.scheduler.main(clocks);
-	this.main_driver.mainMainDriver(clocks); // FIXME
+	this.main_driver.mainMainDriver(clocks);
 endtask
 
 task axi_master_write_data_driver::main();
-	true_false_enum got_ready = FALSE;
-//	#50
+    fork
+	    this.validTriger();
+	    this.dataDriver();
+	    this.testClock();
+    join
+endtask
+
+task axi_master_write_data_driver::validTriger();
+	axi_master_write_base_driver_valid_core state = GET_FRAME;
+
 	this.init();
 
 	$display("Running data driver main core....  ");
@@ -122,13 +133,12 @@ task axi_master_write_data_driver::main();
 			case (state)
 				GET_FRAME:
 				begin
-//				$display("MASTER DATA DRIVER                          GET FRAME: 1");
 					this.getNextFrame();
 					if(current_frame == null)
 						begin
-							state = WAIT_CLK;
 							this.init();
-							next_state = GET_FRAME;
+							@(posedge vif.sig_clock);
+							state = GET_FRAME;
 						end
 					else
 						begin
@@ -138,68 +148,76 @@ task axi_master_write_data_driver::main();
 
 				DRIVE_VIF:
 				begin
-//				$display("MASTER DATA DRIVER                          DRIVE VIF: 2");
 					this.driverVif();
-					state = COMPLETE_TRANSACTION;
+					state = DELAY_WVALID;
 				end
 
-				WAIT_READY:
+				DELAY_WVALID:
 				begin
-					if(vif.wready == 1'b1)
-						begin
-							spinClock(clock_counter);
-							clock_counter = 0;
-							state = GET_FRAME;
-//							$display("MASTER DATA DRIVER                          WAIT READY: 4 : GOT READY");
-							got_ready = FALSE;
-						end
-					else
-						begin
-							@(posedge vif.sig_clock);
-							if(got_ready == FALSE)
-								begin
-//									$display("MASTER DATA DRIVER                          WAIT READY: 4 : WAIT READY");
-									got_ready = TRUE;
-								end
-							clock_counter++;
-							state = WAIT_READY;
-						end
+					repeat (current_frame.delay_wvalid) begin
+						if(vif.wvalid == 1)
+							begin
+								#2
+								vif.wvalid <= 0;
+							end
+						@(posedge vif.sig_clock);
+					end
+					state = SET_WVALID;
 				end
 
-				WAIT_CLK:
+				SET_WVALID:
 				begin
-//					$display("MASTER DATA DRIVER                          WAIT CLK:  N ");
-					@(posedge vif.sig_clock);
-					state = next_state;
-					spinClock(1);
+					if(vif.wvalid == 1'b0)
+						begin
+							#2
+							vif.wvalid <= 1'b1;
+						end
+					state = WAIT_TO_COLLET;
 				end
 
-				COMPLETE_TRANSACTION:
+				WAIT_TO_COLLET:
 				begin
-					state = WAIT_READY;
-//					$display("MASTER DATA DRIVER                          COMPLETE_TRANSACTION: 3");
-//					$display("delay %d",current_frame.delay_wvalid);
-					if(current_frame.delay_wvalid == 0)
-						begin
-							@(posedge vif.sig_clock);
-							spinClock(1);
-						end
-					else
-						begin
-							repeat(current_frame.delay_wvalid)
-								begin
-//									#5
-									vif.wvalid <= 1'b0;
-									@(posedge vif.sig_clock);
-								end
-							spinClock(current_frame.delay_wvalid);
-						end
-					this.completeTransaction();
-					state = WAIT_READY;
+					wait(frame_collected.triggered);
+					state = GET_FRAME;
 				end
 			endcase
 		end
 		$display("FATAL DATA DRIVER");
+endtask
+
+task axi_master_write_data_driver::dataDriver();
+	axi_master_write_base_driver_data_core state = WAIT_TO_COLLECT;
+    forever begin
+	    case(state)
+		    WAIT_TO_COLLECT:
+		    begin
+			    @(posedge vif.sig_clock)
+			    if(vif.wvalid == 1 && vif.wready == 1)
+				    begin
+					    state = INFORM_VALID_CORE;
+				    end
+			    else
+				   begin
+					   state = WAIT_TO_COLLECT;
+				   end
+		    end
+
+		    INFORM_VALID_CORE:
+		    begin
+			    ->frame_collected;
+			    state = WAIT_TO_COLLECT;
+		    end
+
+	    endcase
+    end
+endtask
+
+
+task axi_master_write_data_driver::testClock();
+forever begin
+	@(posedge vif.sig_clock);
+	this.spinClock(1);
+end
 endtask
 
 `endif

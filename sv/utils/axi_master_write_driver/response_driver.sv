@@ -8,20 +8,25 @@
 //------------------------------------------------------------------------------
 
 typedef enum{
-	WAIT_RSP = 1 ,
-	GET_DATA = 2,
-	SEND_RESPONSE = 3,
-	COMPLETE_RECIEVE = 4,
-	WAIT_CLK_RECIEVE = 5
-} response_state_enum;
+	WAIT_RSP_VALID = 0 ,
+	DELAY_RSP_READY = 1,
+	COMPLETE_RSP = 2,
+	SET_RSP_READY = 3
+} master_write_response_dirver_ready_responder_eunum;
+
+typedef enum{
+	WAIT_RSP_FRAME = 0,
+	COLLECT_RSP_FRAME = 1,
+	SEND_RSP_FRAME = 2
+} master_write_respons_driver_package_record_enum;
 
 class axi_master_write_response_driver extends axi_master_write_base_driver;
 
-	response_state_enum 						state = WAIT_RSP;
-	axi_slave_response							rsp;
-	axi_master_write_scheduler 					scheduler;
-	static axi_master_write_response_driver 	driverInstance;
-	axi_slave_write_base_driver_delays			random_delay;
+	axi_slave_response									rsp;
+	axi_master_write_scheduler 							scheduler;
+	static axi_master_write_response_driver 			driverInstance;
+	axi_master_write_base_driver_delays					random_delay;
+	axi_master_write_base_driver_ready_default_value	random_ready;
 
 	`uvm_component_utils(axi_master_write_response_driver)
 
@@ -31,6 +36,11 @@ class axi_master_write_response_driver extends axi_master_write_base_driver;
 		sem = new(1);
 		current_frame = new();
 		random_delay = new();
+		random_ready = new();
+
+		random_delay.delay_max = 3;
+		random_delay.delay_min = 0;
+
 	endfunction : new
 
 	extern static function axi_master_write_response_driver getDriverInstance(input uvm_component parent);
@@ -40,6 +50,8 @@ class axi_master_write_response_driver extends axi_master_write_base_driver;
 	extern task main();
 	extern function void build();
 	extern task init();
+	extern task packageRecorder();
+	extern task readyResponder();
 
 endclass : axi_master_write_response_driver
 
@@ -64,48 +76,88 @@ task axi_master_write_response_driver::completeTransaction();
 endtask
 
 task axi_master_write_response_driver::main();
+    fork
+	    this.readyResponder();
+	    this.packageRecorder();
+    join
+endtask
+
+task axi_master_write_response_driver::readyResponder();
+	master_write_response_dirver_ready_responder_eunum state = WAIT_RSP_VALID;
 	this.init();
     forever
 	    begin
 	    case(state)
-		    WAIT_RSP:
+		    WAIT_RSP_VALID:
 		    begin
 			    @(posedge vif.sig_clock iff vif.bvalid == 1'b1 );
-			     state = GET_DATA;
+			     state = SET_RSP_READY;
 		    end
 
-		    GET_DATA:
+		    SET_RSP_READY:
 		    begin
-			   this.getNextFrame();
-				state = SEND_RESPONSE;
+			    if(vif.bready != 1)
+				    begin
+					    #2
+					    vif.bready <= 1'b0;
+				    end
+			    state = DELAY_RSP_READY;
 		    end
 
-		    SEND_RESPONSE:
-		    begin
-			    scheduler.putResponseFromSlave(rsp);
-			    state = COMPLETE_RECIEVE;
-		    end
-
-		    COMPLETE_RECIEVE:
+		    DELAY_RSP_READY:
 		    begin
 			    assert(random_delay.randomize());
 			    repeat (random_delay.delay)
 				    begin
 						@(posedge vif.sig_clock);
 				    end
-				vif.bready <= 'b1;
-			    state = WAIT_CLK_RECIEVE;
+			    vif.bready <= 1'b1;
+			    state = COMPLETE_RSP;
 		    end
 
-		    WAIT_CLK_RECIEVE:
+		    COMPLETE_RSP:
 		    begin
-			    @(posedge vif.sig_clock);
-			    vif.bready <= 1'b0;
-			    state = WAIT_RSP;
+			    assert(random_ready.randomize());
+//			    #2
+			    if(random_ready.ready == READY_DEFAULT_0)
+					vif.bready <= 'b0;
+			    else
+				    vif.bready <= 'b1;
+			    state = WAIT_RSP_VALID;
 		    end
+
 	    endcase
     end
 endtask
+
+task axi_master_write_response_driver::packageRecorder();
+master_write_respons_driver_package_record_enum state = WAIT_RSP_FRAME;
+	forever begin
+		case(state)
+			WAIT_RSP_FRAME:
+			begin
+				@(posedge vif.sig_clock);
+				if(vif.bvalid == 1 && vif.bready == 1)
+					state = COLLECT_RSP_FRAME;
+				else
+					state = WAIT_RSP_FRAME;
+			end
+
+			COLLECT_RSP_FRAME:
+			begin
+			   	this.getNextFrame();
+				state =	SEND_RSP_FRAME;
+			end
+
+			SEND_RSP_FRAME:
+			begin
+				scheduler.putResponseFromSlave(rsp);
+				state = WAIT_RSP_FRAME;
+			end
+		endcase
+	end
+endtask
+
 
 function void axi_master_write_response_driver::build();
     scheduler = axi_master_write_scheduler::getSchedulerInstance(this);

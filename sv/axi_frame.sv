@@ -52,7 +52,7 @@ class axi_frame extends axi_frame_base;
  `   uvm_object_utils_end
 
  	constraint len_crs{
-	 	len inside {[5 : 20 ]};
+	 	len inside {[5 : 500 ]};
  	}
 
  	constraint data_size_csr {

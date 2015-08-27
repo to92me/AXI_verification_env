@@ -8,17 +8,17 @@
 
 typedef enum {
 	WAIT_VALID = 0,
-	COLLECT_DATA =1,
-	DO_DELAY = 2,
-	SET_READY = 3,
-	SEND_FRAME = 4,
-	COMPLETE_RECIEVE_TRANSFER = 5
+	DO_DELAY = 1,
+	SET_READY = 2,
+	COMPLETE_RECIEVE_TRANSFER = 3
 } write_slave_states_enum;
 
 typedef enum{
-	READY_DEFAULT_0 = 0,
-	READY_DEFAULT_1 = 1
-}ready_default_enum;
+	WAIT_FRAME = 0,
+	COLLECT_FRAME =1,
+	CHECK_ID_ADDR = 2,
+	SEND_FRAME = 3
+} write_slave_get_frame_enum;
 
 class axi_slave_write_base_driver_delays;
 	rand int 			delay;
@@ -46,10 +46,10 @@ endclass
 class axi_slave_write_base_driver_ready_default_value;
 	rand ready_default_enum ready;
 
-	true_false_enum			ready_random = FALSE;
+	true_false_enum			ready_random = TRUE;
 	ready_default_enum		ready_default = READY_DEFAULT_0 ;
 	int 					ready_1_dist = 1;
-	int 					ready_0_dist = 1;
+	int 					ready_0_dist = 3;
 
 	constraint valid_default_csr{
 
@@ -69,22 +69,17 @@ endclass
 class axi_slave_write_base_driver extends uvm_component;
 
 
-	write_slave_states_enum 							state = WAIT_VALID;
 	true_false_enum										valid_detected;
-//	true_false_enum 									delay_exist;
 	axi_slave_write_base_driver_delays					delay_randomization;
-
 	axi_slave_write_base_driver_ready_default_value		ready_default_randomization;
-//	ready_default_enum									ready_default;
-//	true_false_enum										ready_rand;
-
 	axi_single_frame									single_frame;
-
 	axi_slave_write_main_driver 						main_driver;
 	protected virtual interface axi_if 					vif;
 	int 												delay;
-
+	slave_ID 											slave_ID;
+	axi_slave_config									config_obj;
 	semaphore 											sem;
+	true_false_enum										testing_one_slave = TRUE;
 
 
 
@@ -111,7 +106,11 @@ class axi_slave_write_base_driver extends uvm_component;
 	endfunction : build_phase
 
 
+	extern task setSlaveConfig(input axi_slave_config cfg);
+
 	extern task main();
+	extern task readyTriger();
+	extern task packageRecored();
 	// this methodes should be overrided if not it will display ERROR
 	extern virtual task init();
 	extern virtual task send();
@@ -120,6 +119,8 @@ class axi_slave_write_base_driver extends uvm_component;
 	extern virtual task completeRecieve();
 	extern virtual task setReady();
 	extern virtual task getDelay(ref int delay);
+	extern virtual task checkIDAddr(ref true_false_enum correct_slave);
+	extern virtual task waitFrame(ref true_false_enum detected_frame);
 
 	extern task setDefaultReady(input ready_default_enum cosnt_ready );
 	extern task setRandomReady(input int ready_0_ratio, int ready_1_ratio);
@@ -128,10 +129,25 @@ class axi_slave_write_base_driver extends uvm_component;
 	extern task setReadyDelayConst(input int delay_const);
 	extern task setReadyZeroDelay();
 
+	extern virtual task setTesting(input true_false_enum testing);
 
 endclass : axi_slave_write_base_driver
 
+	task axi_slave_write_base_driver::setSlaveConfig(input axi_slave_config cfg);
+		config_obj = cfg;
+	endtask
+
 	task axi_slave_write_base_driver::main();
+		fork
+			this.readyTriger();
+			this.packageRecored();
+		join
+	endtask
+
+
+	task axi_slave_write_base_driver::readyTriger();
+		write_slave_states_enum state;
+		true_false_enum correct_slave = FALSE;
 		true_false_enum got_valid = FALSE;
 		this.init();
 	    forever
@@ -141,71 +157,81 @@ endclass : axi_slave_write_base_driver
 				    WAIT_VALID:
 				    begin
 //					    #2				// FIXME
-//					    @(posedge vif.sig_clock)
 					    this.waitOnValid(valid_detected);
-					    if (valid_detected == TRUE)
-						    begin
-//							    $display("                 						        SLAVE DATA : VALID = 1   ");
-							    state = COLLECT_DATA;
-						    end
-					    else
-						    begin
-							    if(got_valid == FALSE)
-								    begin
-//									    $display("                 				 	               SLAVE DATA  vaiting valid");
-									    got_valid = TRUE;
-								    end
-							    state = WAIT_VALID;
-						    end
+						state = SET_READY;
 				    end
 
-// if data is valid get data from vif
-				    COLLECT_DATA:
+				    SET_READY:
 				    begin
-//					    $display("                                          SLAVE DATA : COLECT DATA   ");
-					    this.getData();
+//					     $display("                                          SLAVE DATA : SET_READY");
+//					    @(posedge vif.sig_clock);
+					    this.setReady();
 					    state = DO_DELAY;
 				    end
 
-// when colected data if delay is setted wait delay time
 				    DO_DELAY:
 				    begin
 //					     $display("                                          SLAVE DATA : DO DELAY   ");
 						this.getDelay(delay);
 						repeat(delay)
-							begin
-								@(posedge vif.sig_clock)
-							 	state = SET_READY;
-							end
+							@(posedge vif.sig_clock);
+						 state = COMPLETE_RECIEVE_TRANSFER;
 				    end
 
-// after delay or not set ready singnal to signal master that slave has colected data from bus
-				    SET_READY:
-				    begin
-//					      $display("                                          SLAVE DATA : SET_READY");
-//					    #10
-					    @(posedge vif.sig_clock);
-					    this.setReady();
-					    state = SEND_FRAME;
-				    end
 
-// whea
-				    SEND_FRAME:
-				    begin
-//					    $display("                                          SLAVE DATA : SEND_FRAME");
-					    this.send();
-					    state = COMPLETE_RECIEVE_TRANSFER;
-				    end
 
 				    COMPLETE_RECIEVE_TRANSFER:
 				    begin
 //					    $display("                                          SLAVE DATA : COMPLETE_RECIEVE_TRANSFER");
 					    @(posedge vif.sig_clock);
+//					      $display("                                          SLAVE DATA : COMPLETE_RECIEVE_TRANSFER");
 					    this.completeRecieve();
 					    state = WAIT_VALID;
 				    end
 			    endcase
 		    end
+	endtask
+
+	task axi_slave_write_base_driver::packageRecored();
+	    write_slave_get_frame_enum state = WAIT_FRAME;
+		true_false_enum	correct_slave;
+		true_false_enum detected_frame;
+	    forever begin
+		    case(state)
+			    WAIT_FRAME:
+			    begin
+				    this.waitFrame(detected_frame);
+				    if(detected_frame == TRUE)
+					 	state = COLLECT_FRAME;
+				    else
+					    state = WAIT_FRAME;
+			    end
+
+			    COLLECT_FRAME:
+			    begin
+				     this.getData();
+				     if(testing_one_slave == FALSE)
+						state = CHECK_ID_ADDR;
+				     else
+					     state = SEND_FRAME;
+			    end
+
+			    CHECK_ID_ADDR:
+			    begin
+				    this.checkIDAddr(correct_slave);
+				    if(correct_slave == TRUE)
+					    state = SEND_FRAME;
+				    else
+					    state = WAIT_FRAME;
+			    end
+
+			    SEND_FRAME:
+			    begin
+				    this.send();
+				    state = WAIT_FRAME;
+			    end
+		    endcase
+	    end
 	endtask
 
 	task axi_slave_write_base_driver::init();
@@ -234,6 +260,14 @@ endclass : axi_slave_write_base_driver
 
 	task axi_slave_write_base_driver::setReady();
 	    $display("AXI_SLAVE_WRITE_BASE_DRIVER_SVH ERRIR , setReady()NOT IMPELMENTED, OVERIDE IT  !");
+	endtask
+
+	task axi_slave_write_base_driver::checkIDAddr(ref true_false_enum correct_slave);
+	    $display("AXI_SLAVE_WRITE_BASE_DRIVER_SVH ERRIR ,checkID() NOT IMPELMENTED, OVERIDE IT  !");
+	endtask
+
+	task axi_slave_write_base_driver::waitFrame(ref true_false_enum detected_frame);
+	  	    $display("AXI_SLAVE_WRITE_BASE_DRIVER_SVH ERRIR ,waitFrame() NOT IMPELMENTED, OVERIDE IT  !");
 	endtask
 
 	task axi_slave_write_base_driver::setDefaultReady(input ready_default_enum cosnt_ready );
@@ -274,6 +308,11 @@ endclass : axi_slave_write_base_driver
 		this.ready_default_randomization.ready_random = TRUE;
 		sem.put(1);
 	endtask
+
+	task axi_slave_write_base_driver::setTesting(input true_false_enum testing);
+	   this.testing_one_slave = testing;
+	endtask
+
 
 
 `endif

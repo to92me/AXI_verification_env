@@ -9,8 +9,9 @@
 
 class axi_slave_write_agent extends uvm_agent;
 
-	string 							agent_name = "AxiSlaveWriteAgent";
+//	string 							agent_name = "AxiSlaveWriteAgent";
 	axi_slave_config 				config_obj;
+	true_false_enum					tesiting_one_slave = TRUE;
 
 	axi_slave_write_driver 			driver;
 	axi_slave_write_sequencer 		sequencer;
@@ -26,7 +27,7 @@ class axi_slave_write_agent extends uvm_agent;
 	// new - constructor
 	function new (string name, uvm_component parent);
 		super.new(name, parent);
-		this.agent_name = name;
+//		this.agent_name = name;
 	endfunction : new
 
 	// build_phase
@@ -34,20 +35,21 @@ class axi_slave_write_agent extends uvm_agent;
 		super.build_phase(phase);
 //		monitor = axi_slave_write_monitor::type_id::create("monitor", this);
 
-//		if(!uvm_config_db#(axi_slave_config)::get(this,"",this.agent_name, config_obj))
-//			`uvm_fatal("NOCONFIG",{"Config object must be set for: ",get_full_name(),".config_obj"}) // FIXME slave config fix
+		if(!uvm_config_db#(axi_slave_config)::get(this,"","axi_slave_config", config_obj))
+			`uvm_fatal("NOCONFIG",{"Config object must be set for: ",get_full_name(),".config_obj"}) // FIXME slave config fix
 
-//		if(config_obj.is_active == UVM_ACTIVE)
-//			begin
+		if(config_obj.is_active == UVM_ACTIVE)
+			begin
 				sequencer = axi_slave_write_sequencer::type_id::create("sequencer", this);
 				driver = axi_slave_write_driver::type_id::create("driver", this);
-//			end
+				driver.setSlaveConfig(config_obj);
+			end
 	endfunction : build_phase
 
 	// connect_phase
 	function void connect_phase(uvm_phase phase);
 //		if(config_obj.is_active == UVM_ACTIVE) begin
-			driver.seq_item_port.connect(sequencer.seq_item_export);
+//			driver.seq_item_port.connect(sequencer.seq_item_export);
 //		end
 	endfunction : connect_phase
 

@@ -27,6 +27,34 @@ class axi_waiting_resp;
 endclass
 
 
+class slave_ID;
+	bit[ID_WIDTH - 1 : 0]   ID;
+	true_false_enum			ID_setted;
+
+	// Get ID
+	function bit[ID_WIDTH-1:0] getID();
+		return ID;
+	endfunction : getID
+
+	// Set ID
+	function void setID(bit[ID_WIDTH-1:0] ID);
+		this.ID = ID;
+	endfunction : setID
+
+	// Get ID_setted
+	function true_false_enum getID_setted();
+		return ID_setted;
+	endfunction : getID_setted
+
+	// Set ID_setted
+	function void setID_setted(true_false_enum ID_setted);
+		this.ID_setted = ID_setted;
+	endfunction : setID_setted
+
+
+
+endclass
+
 
 class axi_slave_response;
 	bit [ID_WIDTH-1 : 0]	ID;
@@ -61,6 +89,19 @@ class axi_slave_write_addr_mssg ;
 	bit [ID_WIDTH-1 : 0]	ID;
 	bit [7 : 0]				len;
 	true_false_enum			last_one;
+	bit [ADDR_WIDTH -1 : 0] addr;
+
+	// Get addr
+	function bit[ADDR_WIDTH-1:0] getAddr();
+		return addr;
+	endfunction : getAddr
+
+	// Set addr
+	function void setAddr(bit[ADDR_WIDTH-1:0] addr);
+		this.addr = addr;
+	endfunction : setAddr
+
+
 
 	// Get len
 	function true_false_enum getLast_one();

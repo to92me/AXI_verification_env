@@ -37,6 +37,10 @@ class axi_slave_write_response_driver extends uvm_component;
 		rsp_mbox = new();
 		current_rsp = new();
 		valid_delay = new();
+
+		valid_delay.delay_max = 3;
+		valid_delay.delay_min = 0;
+		valid_delay.const_delay = FALSE;
 	endfunction : new
 
 	// build_phase
@@ -74,11 +78,13 @@ task axi_slave_write_response_driver::pushRsp(input axi_slave_write_rsp_mssg mes
 endtask
 
 task axi_slave_write_response_driver::driverVif();
+	#2
 	vif.bid   <= current_rsp.ID;
     vif.bresp <= current_rsp.rsp;
 endtask
 
 task axi_slave_write_response_driver::completeRspMessage();
+	#2
 	vif.bvalid <= 1'b0;
 endtask
 

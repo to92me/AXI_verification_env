@@ -13,7 +13,7 @@ class axi_write_test_config extends axi_config;
 	function new(string name = "axi_write_test_config");
 		super.new(name);
 		`uvm_info(get_name(),$sformatf("Creating test config"), UVM_LOW)
-		this.number_of_slaves = 2;
+		this.number_of_slaves = 1;
 		this.createConfiguration();
 	endfunction: new
 

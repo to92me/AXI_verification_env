@@ -19,26 +19,28 @@ package axi_pkg;
 	typedef class axi_master_write_scheduler;
 	typedef class axi_master_write_scheduler_packages;
 
-	//=================driveres=====================//
-	//master										//
-	typedef class axi_master_write_response_driver; //
-	typedef class axi_master_write_data_driver;		//
-	typedef class axi_master_write_address_driver;	//
-	typedef class axi_master_write_main_driver;		//
-	typedef class axi_master_write_base_driver;		//
-	typedef class axi_master_write_driver;			//
-	typedef class axi_master_write_sequencer;		//
-													//
-	//slave 										//
-	typedef class axi_slave_write_agent;			//
-	typedef class axi_slave_write_response_driver;	//
-	typedef class axi_slave_write_data_driver;		//
-	typedef class axi_slave_write_address_driver;	//
-	typedef class axi_slave_write_main_driver;		//
-	typedef class axi_slave_write_base_driver;		//
-	typedef class axi_slave_write_driver;			//
-	typedef class axi_slave_write_sequencer;		//
-	typedef class axi_slave_write_base_driver_delays;//
+	//=================driveres=====================================//
+	//master														//
+	typedef class axi_master_write_response_driver; 				//
+	typedef class axi_master_write_data_driver;						//
+	typedef class axi_master_write_address_driver;					//
+	typedef class axi_master_write_main_driver;						//
+	typedef class axi_master_write_base_driver;						//
+	typedef class axi_master_write_driver;							//
+	typedef class axi_master_write_sequencer;						//
+	typedef class axi_master_write_base_driver_delays;				//
+	typedef class axi_master_write_base_driver_ready_default_value; //
+																	//
+	//slave 														//
+	typedef class axi_slave_write_agent;							//
+	typedef class axi_slave_write_response_driver;					//
+	typedef class axi_slave_write_data_driver;						//
+	typedef class axi_slave_write_address_driver;					//
+	typedef class axi_slave_write_main_driver;						//
+	typedef class axi_slave_write_base_driver;						//
+	typedef class axi_slave_write_driver;							//
+	typedef class axi_slave_write_sequencer;						//
+	typedef class axi_slave_write_base_driver_delays;				//
 	//================================================
 
 	//confing and frames

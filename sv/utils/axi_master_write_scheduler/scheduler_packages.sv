@@ -12,6 +12,7 @@ class randomize_data;
 		rand int delay_addr;
 		rand int delay_awvalid;
 		rand int delay_wvalid;
+		true_false_enum delay_addr_exists = FALSE;
 
 
 		constraint delay_cst{
@@ -19,7 +20,11 @@ class randomize_data;
 		}
 
 		constraint deleay_addrdata_csr{
-			delay_addr inside {[0:5]};
+			if(delay_addr_exists == TRUE){
+				delay_addr inside {[0:5]};
+			}else{
+				delay_addr == 0;
+				}
 			delay_data inside {[0:5]};
 		}
 
@@ -27,6 +32,8 @@ class randomize_data;
 			delay_awvalid 	inside {[0:5]};
 			delay_wvalid 	inside {[0:5]};
 		}
+
+
 
 endclass: randomize_data
 
@@ -56,6 +63,7 @@ class axi_master_write_scheduler_packages;
 		rand_data = new();
 		sem = new(1);
 		tmp_single_frame = new();
+		frame_copy = new();
 	endfunction : new
 
 

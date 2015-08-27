@@ -29,14 +29,13 @@ class axi_slave_write_driver extends uvm_driver #(axi_frame);
 
 		if(!uvm_config_db#(virtual axi_if)::get(this, "", "vif", vif))
 			`uvm_fatal("NOVIF",{"virtual interface must be set for: ",get_full_name(),".vif"})
+		driver = axi_slave_write_main_driver::type_id::create("AxiSlaveWriteMainDriver",this);
+		driver.setSlaveCondig(config_obj);
 
-//		if(!uvm_config_db#(axi_slave_config)::get(this, "", "axi_slave_config", config_obj))
-//			`uvm_fatal("NOCONFIG",{"Config object must be set for: ",get_full_name(),".config_obj"}) // FIXME
-			driver = axi_slave_write_main_driver::type_id::create("AxiSlaveWriteMainDriver",this);
-//			driver.build_phase(phase);
 	endfunction: build_phase
 
 	extern task resetAll();
+	extern task setSlaveConfig(input axi_slave_config cfg);
 
 	// run_phase
 	virtual task run_phase(uvm_phase phase);
@@ -88,6 +87,10 @@ task axi_slave_write_driver::resetAll();
 	end
 endtask
 
+
+task axi_slave_write_driver::setSlaveConfig(input axi_slave_config cfg);
+    this.config_obj = cfg;
+endtask
 
 
 

@@ -10,8 +10,6 @@
 class axi_slave_write_main_driver extends uvm_component;
 
 
-//	axi_slave_write_addr_mssg					addr_mssg_queue[$];
-//	axi_slave_write_data_mssg					data_mssg_queue[$];
 	axi_slave_write_rsp_mssg					rsp_mssg;
 	axi_slave_write_addr_mssg					burst_status_queue[$];
 	event 										recived_something;
@@ -22,6 +20,7 @@ class axi_slave_write_main_driver extends uvm_component;
 	axi_slave_write_address_driver				driver_addr;
 	axi_slave_write_data_driver					driver_data;
 	axi_slave_write_response_driver				driver_rsp;
+	axi_slave_config							config_obj;
 
 	`uvm_component_utils(axi_slave_write_main_driver)
 
@@ -41,7 +40,9 @@ class axi_slave_write_main_driver extends uvm_component;
 	function void build_phase(uvm_phase phase);
 		super.build_phase(phase);
 		driver_addr.putMainDriverInstance(this);
+		driver_addr.setDataDriverInstance(driver_data);
 		driver_data.putMainDriverInstance(this);
+		driver_addr.setSlaveConfig(config_obj);
 	endfunction : build_phase
 
 //	extern static function axi_slave_write_main_driver getDriverInstance(uvm_component parent);
@@ -50,6 +51,8 @@ class axi_slave_write_main_driver extends uvm_component;
 	extern task pushDataMssg(input axi_slave_write_data_mssg message);
 	extern task decrementLen(input axi_slave_write_data_mssg message);
 	extern task addBurstStatus(input axi_slave_write_addr_mssg message);
+	extern task setSlaveCondig(input axi_slave_config cfg);
+	extern task setTesting(input true_false_enum testing);
 	extern task reset();
 	extern task startDriver();
 	extern task main();
@@ -67,6 +70,15 @@ endclass : axi_slave_write_main_driver
 	endfunction
 	*/
 `endif
+
+	task axi_slave_write_main_driver::setSlaveCondig(input axi_slave_config cfg);
+	    config_obj = cfg;
+	endtask
+
+	task axi_slave_write_main_driver::setTesting(input true_false_enum testing);
+	 	driver_addr.setTesting(testing);
+		driver_data.setTesting(testing);
+	endtask
 
 	task axi_slave_write_main_driver::startDriver();
 		fork
@@ -140,7 +152,6 @@ endclass : axi_slave_write_main_driver
 								if(message.last_one == FALSE)
 									begin
 										$display("ERROR  DATA PACKAGE ADDING sending last but di not get last, iD: %d, count = %d", rsp.ID, burst_status_queue[i].len);
-
 									end
 								driver_rsp.pushRsp(rsp);   // FIXME
 								tmp = i;
@@ -157,7 +168,7 @@ endclass : axi_slave_write_main_driver
 				burst_status.len=-1;
 				burst_status.last_one = message.last_one;
 				burst_status_queue.push_back(burst_status);
-				$display("                                                             new status, DATA, ID: %d , len: %d, last: %d", message.ID, burst_status.len, message.last_one);
+//				$display("                                                             new status, DATA, ID: %d , len: %d, last: %d", message.ID, burst_status.len, message.last_one);
 			end
 	endtask
 
@@ -197,6 +208,6 @@ endclass : axi_slave_write_main_driver
 		if(found_match_ID == FALSE)
 			begin
 				burst_status_queue.push_back(message);
-				$display("                                                                    new status, ADDR, ID: %d , len: %d", message.ID, message.len);
+//				$display("                                                                    new status, ADDR, ID: %d , len: %d", message.ID, message.len);
 			end
 	endtask

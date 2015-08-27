@@ -8,15 +8,80 @@
 //------------------------------------------------------------------------------
 
 
-typedef enum{
-	GET_FRAME = 1,
-	DRIVE_VIF = 2,
-	WAIT_READY = 3,
-	WAIT_CLK = 4,
-	WAIT_READY_DELAY = 6,
-	COMPLETE_TRANSACTION = 5
+//typedef enum{
+//	GET_FRAME = 1,
+//	DRIVE_VIF = 2,
+//	WAIT_READY = 3,
+//	WAIT_CLK = 4,
+//	WAIT_READY_DELAY = 6,
+//	COMPLETE_TRANSACTION = 5
 //	STATE_CALCULATOR = 6
-}write_states_enum;
+//}write_states_enum;
+
+typedef enum{
+	GET_FRAME = 0,
+	DRIVE_VIF = 1,
+	DELAY_WVALID = 2,
+	SET_WVALID = 3,
+	WAIT_TO_COLLET = 4
+}axi_master_write_base_driver_valid_core;
+
+
+typedef enum{
+	WAIT_TO_COLLECT = 2,
+	INFORM_VALID_CORE = 3
+}axi_master_write_base_driver_data_core;
+
+typedef enum{
+	WAIT_WVALID = 0,
+	SEND_DATA = 1,
+	INFOR_TRIGER = 2
+}axi_master_write_driver_data_enum;
+
+class axi_master_write_base_driver_delays;
+	rand int 			delay;
+
+	int 				delay_max = 5;
+	int 				delay_min = 0;
+	int 				cosnt_delay = 2;
+	true_false_enum 	const_delay = FALSE ;
+	true_false_enum		delay_exist = TRUE;
+
+	constraint ready_delay_csr{ // FIXME CSR NO!
+		if(delay_exist == TRUE){
+			if(const_delay == TRUE){
+				delay == const_delay;
+			}else{
+				delay inside {[delay_min : delay_max]};
+			}
+		}else{
+				delay == 0;
+			}
+		}
+endclass
+
+class axi_master_write_base_driver_ready_default_value;
+	rand ready_default_enum ready;
+
+	true_false_enum			ready_random = TRUE;
+	ready_default_enum		ready_default = READY_DEFAULT_0 ;
+	int 					ready_1_dist = 1;
+	int 					ready_0_dist = 3;
+
+	constraint valid_default_csr{
+
+		 if(ready_random == TRUE){
+			 ready dist{
+				READY_DEFAULT_0 	:= 	ready_0_dist,
+				READY_DEFAULT_1 	:= 	ready_1_dist
+			 };
+		 }else{
+			 ready == ready_default;
+			 }
+	}
+
+endclass
+
 
 class axi_master_write_base_driver extends uvm_component;
 

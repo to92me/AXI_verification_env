@@ -58,13 +58,15 @@ function void axi_master_write_env::build_phase(uvm_phase phase);
 
 		foreach(config_obj.slave_list[i]) begin
 			string sname;
-			sname = $sformatf("read_slave[%0d]*", i);
-			uvm_config_object::set(this, sname, "config_obj", config_obj.slave_list[i]);
+			sname = $sformatf("slave_write_agent[%0d]*", i);
+			uvm_config_db#(axi_slave_config)::set(this, sname, "axi_slave_config", config_obj.slave_list[i]);
 		end
 
 		master = axi_master_write_agent::type_id::create("master_write_agent",this);
-		slave = axi_slave_write_agent::type_id::create("slave_write_agnet", this);
 
+		foreach(config_obj.slave_list[i])begin
+			slave = axi_slave_write_agent::type_id::create($sformatf("slave_write_agent[%0d]", i), this);
+		end
 endfunction : build_phase
 
 

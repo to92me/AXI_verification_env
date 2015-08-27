@@ -22,6 +22,7 @@ class axi_master_write_scheduler extends uvm_component;
 	axi_master_write_scheduler_packages 	burst_queue[$];
 	axi_master_write_scheduler_packages 	burst_existing_id[$];
 	axi_waiting_resp						waiting_for_resp_queue[$];
+	bit[ID_WIDTH - 1: 0] 					burst_empyt_queue[$];
 	axi_waiting_resp						single_waiting_for_resp;
 	axi_master_write_scheduler_packages 	single_burst;
 	axi_single_frame 						next_frame_for_sending[$];
@@ -30,7 +31,7 @@ class axi_master_write_scheduler extends uvm_component;
 	axi_frame 								frame_same_id;
 	axi_mssg 								mssg;
 	axi_mssg 								send;
-	int 									response_latenes_error_rising = 10000;
+	int 									response_latenes_error_rising = 100000;
 	axi_slave_response						response_from_slave_queue[$];
 	axi_slave_response						single_response_from_slave;
 	int 									error_before_delte_item = 4;
@@ -174,10 +175,13 @@ endclass : axi_master_write_scheduler
 							burst_queue[i+1].lock_state = QUEUE_UNLOCKED;
 					end
 				else if(mssg.state == QUEUE_EMPTY)
-					empyt_scheduler_packages.push_front(i);
-
+					begin
+						$display("frame copy id: %h",burst_queue[i].frame_copy.id);
+						burst_empyt_queue.push_front(burst_queue[i].ID);
+//						burst_queue.delete(i);
+					end
 			end
-		while(empyt_scheduler_packages.size() > 0)
+		while(burst_empyt_queue.size() > 0)
 			begin
 				checkUniqueID();
 			end
@@ -264,6 +268,12 @@ endclass : axi_master_write_scheduler
 		int done = 0;
 		int tmp_for_delete;
 		int i;
+		int itertator;
+		int tmp_iterator;
+		axi_master_write_scheduler_packages sch_package;
+
+		sch_package = new();
+
 		while(!done)
 		begin
 			case (state_check_ID)
@@ -271,8 +281,11 @@ endclass : axi_master_write_scheduler
 				begin
 					i = 0;
 //					sem.get(1);
-					if(empyt_scheduler_packages.size() == 0)
-						done = 1;
+					if(burst_empyt_queue.size() == 0)
+						begin
+							done = 1;
+							state_check_ID = CALCULATE_STATE;
+						end
 					else
 						state_check_ID = DELETE_ONE;
 //					sem.put(1);
@@ -282,18 +295,42 @@ endclass : axi_master_write_scheduler
 				DELETE_ONE:
 				begin
 					i = 0;
-//					sem.get(1);
-					tmp_for_delete = empyt_scheduler_packages.pop_front();									 // check for next one to be first
-					state_check_ID = NEXT_CHECK;
-					check_ID = burst_queue[tmp_for_delete].ID;
-
-					single_waiting_for_resp = new();														// create copy of frame
-					single_waiting_for_resp.frame = burst_queue[tmp_for_delete].frame_copy;
-					single_waiting_for_resp.counter = 0;
-
+//					single_waiting_for_resp = new();
+////					$display("ID: %h", burst_empyt_queue[0].ID);
+//
+//					single_waiting_for_resp.frame = burst_empyt_queue[0].frame_copy;
+//					single_waiting_for_resp.counter = 0;
+//					check_ID = single_waiting_for_resp.frame.id;
+//					waiting_for_resp_queue.push_back(single_waiting_for_resp);
+//					burst_empyt_queue.delete(0);
+					check_ID = burst_empyt_queue.pop_front();
+					$display("tome: %h",check_ID);
+					foreach(burst_queue[itertator])
+						begin
+							if(burst_queue[itertator].ID == check_ID)
+								begin
+									single_waiting_for_resp = new();														// create copy of frame
+									single_waiting_for_resp.frame = burst_queue[itertator].frame_copy;
+									single_waiting_for_resp.counter = 0;
+									$display("tome 2 %h", single_waiting_for_resp.frame.id);
+									tmp_iterator = itertator;
+								end
+						end
 					waiting_for_resp_queue.push_back(single_waiting_for_resp);
+					burst_queue.delete(tmp_iterator);
+
+//					sem.get(1);
+//					check_ID = empyt_scheduler_packages.pop_front();									 // check for next one to be first
+					state_check_ID = NEXT_CHECK;
+//					check_ID = burst_queue[tmp_for_delete].ID;
+//					$display("check ID: %d", check_ID);
+//					single_waiting_for_resp = new();														// create copy of frame
+//					single_waiting_for_resp.frame = burst_queue[tmp_for_delete].frame_copy;
+//					single_waiting_for_resp.counter = 0;
+//					$display("adding burst frame for complete ID: %d", single_waiting_for_resp.frame.id);
+//					waiting_for_resp_queue.push_back(single_waiting_for_resp);
 					//$display("DELETE ONE ***************************************************************************************************");
-					burst_queue.delete(tmp_for_delete); //deleted complited burst_package
+//					burst_queue.delete(tmp_for_delete); //deleted complited burst_package
 //					sem.put(1);
 				end
 
@@ -420,7 +457,7 @@ task axi_master_write_scheduler::putOkResp(input bit[ID_WIDTH-1:0] rsp_id);
 	tmp_size = waiting_for_resp_queue.size();
 //	sem.put(1);
 
-	for(int i = 0; i < tmp_size-1 ;i++)
+	for(int i = 0; i < tmp_size ;i++)
 		begin
 //			sem.get(1);
 			if(waiting_for_resp_queue[i].frame.id == rsp_id)
@@ -433,7 +470,7 @@ task axi_master_write_scheduler::putOkResp(input bit[ID_WIDTH-1:0] rsp_id);
 				end
 //				sem.put(1);
 		end
-	$display("EROOR recieved OK response for not existing or not conmlited burst, rsp ID: %d", rsp_id);
+	$display("ERROR recieved OK response for not existing or not conmlited burst, rsp ID: %h", rsp_id);
 //	`uvm_info(get_name(),$sformatf("recieved resp with ID: %d and there is no complited burst with that ID "rsp_id), UVM_ERROR)
 
 endtask
@@ -488,9 +525,14 @@ endfunction
 task axi_master_write_scheduler::checkForDone();
 
    if(burst_queue.size() == 0 && burst_existing_id.size() == 0 && waiting_for_resp_queue.size() == 0)
-	   $display("  ============================= THE END =====================================");
-	   top_driver.putResponseToSequencer();
-
+	   begin
+	   	$display("  ============================= THE END =====================================");
+	   	top_driver.putResponseToSequencer();
+	   end
+   else
+	   begin
+//		   $display("CHECKING COMPLETNES: burst_size: %d, burst_existing size: %d, wairing rsp size: %d",burst_queue.size(),burst_existing_id.size(), waiting_for_resp_queue.size());
+	   end
 endtask
 
 

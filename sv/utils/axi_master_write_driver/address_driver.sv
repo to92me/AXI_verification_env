@@ -1,6 +1,6 @@
 `ifndef AXI_MASTER_WRITE_ADDRESS_DRIVER_SVH
 `define AXI_MASTER_WRITE_ADDRESS_DRIVER_SVH
-
+`define tome
 //------------------------------------------------------------------------------
 //
 // CLASS: uvc_company_uvc_name_component
@@ -10,14 +10,12 @@
 
 
 
-
+`ifdef tome
 class axi_master_write_address_driver extends axi_master_write_base_driver;
-
-	write_states_enum		 					state = GET_FRAME;
 	static  axi_master_write_address_driver		driverInstance;
-	// Provide implementations of virtual methods such as get_type_name and create
+	int 										send_items;
+	event 										frame_collected;
 
-	// new - constructor
 	local function new (string name, uvm_component parent);
 		super.new(name, parent);
 		mssg = new();
@@ -41,12 +39,11 @@ class axi_master_write_address_driver extends axi_master_write_base_driver;
 	extern task init();
 	extern task reset();
 	extern task main();
-
-	extern task testClock();
+	extern task dataDriver();
+	extern task validTriger();
 
 
 endclass : axi_master_write_address_driver
-
 function axi_master_write_address_driver axi_master_write_address_driver::getDriverInstance(input uvm_component parent);
 	if(driverInstance == null)
 	begin
@@ -76,8 +73,9 @@ endtask
 
 
 task axi_master_write_address_driver::driverVif();
-//		#5
-//		$display("MASTER: sending address item");
+		#2
+		$display(" MASTER SEND current frame: %h %d %h, count: %d",current_frame.id,current_frame.len, current_frame.data, send_items );
+		send_items++;
 		vif.awid	<= current_frame.id;
 		vif.awaddr	<= current_frame.addr;
 		vif.awlen 	<= current_frame.len;
@@ -92,11 +90,12 @@ task axi_master_write_address_driver::driverVif();
 endtask
 
 task axi_master_write_address_driver::completeTransaction();
+		#2
 	    vif.awvalid <= 1'b1;
 endtask
 
 task axi_master_write_address_driver::init();
-//		#5
+		#2
 		vif.awid	<= 0;
 		vif.awaddr	<= 0;
 		vif.awlen 	<= 0;
@@ -111,7 +110,7 @@ task axi_master_write_address_driver::init();
 endtask
 
 task axi_master_write_address_driver::reset();
-//		#5
+		#2
 		vif.awid	<= 0;
 		vif.awaddr	<= 0;
 		vif.awlen 	<= 0;
@@ -127,90 +126,102 @@ task axi_master_write_address_driver::reset();
 endtask
 
 task axi_master_write_address_driver::main();
+   fork
+   		this.validTriger();
+		this.dataDriver();
+   join
+endtask
+
+task axi_master_write_address_driver::validTriger();
+	axi_master_write_base_driver_valid_core state = GET_FRAME;
+
 	this.init();
-	$display("Running address driver main core... .");
+
+	$display("Running data driver main core....  ");
 	forever
 		begin
 			case (state)
 				GET_FRAME:
 				begin
 					this.getNextFrame();
-
 					if(current_frame == null)
 						begin
-							state = WAIT_CLK;
 							this.init();
+							@(posedge vif.sig_clock);
+							state = GET_FRAME;
 						end
 					else
 						begin
-//						$display("MASTER new ADDR package");
-						state = DRIVE_VIF;
+							state = DRIVE_VIF;
 						end
-//					sem.put(1);
 				end
 
 				DRIVE_VIF:
 				begin
-//					$display("DRIVING ADDR VIF");
 					this.driverVif();
-					state = COMPLETE_TRANSACTION;
+					state = DELAY_WVALID;
 				end
 
-				WAIT_READY:
+				DELAY_WVALID:
 				begin
-
-					if(vif.awready == 'b1)
-						begin
-							state = GET_FRAME;
-//							$display("MASTER: address reacieved ready from slave ");
-						end
-					else
-						begin
-						@(posedge vif.sig_clock iff vif.awready == 1);
-						state = GET_FRAME;
-						end
+					repeat (current_frame.delay_wvalid) begin
+						if(vif.awvalid == 1)
+							begin
+								#2
+								vif.awvalid <= 0;
+							end
+						@(posedge vif.sig_clock);
+					end
+					state = SET_WVALID;
 				end
 
-				WAIT_CLK:
+				SET_WVALID:
 				begin
-					@(posedge vif.sig_clock);
+					if(vif.awvalid == 1'b0)
+						begin
+							#2
+							vif.awvalid <= 1'b1;
+						end
+					state = WAIT_TO_COLLET;
+				end
+
+				WAIT_TO_COLLET:
+				begin
+					wait(frame_collected.triggered);
 					state = GET_FRAME;
-				end
-
-				COMPLETE_TRANSACTION:
-				begin
-					if(current_frame.delay_wvalid == 0)
-						begin
-							@(posedge vif.sig_clock);
-						end
-					else
-						begin
-							repeat(current_frame.delay_wvalid)
-								begin
-									vif.awvalid <= 1'b0;
-									@(posedge vif.sig_clock);
-								end
-						end
-					this.completeTransaction();
-					state = WAIT_READY;
 				end
 			endcase
 		end
-		$display("FATAL ADDRESS DRIVER");
+		$display("FATAL DATA DRIVER");
 endtask
 
-task axi_master_write_address_driver::testClock();
-	fork
-		forever begin
-			@(posedge vif.sig_clock);
-    		scheduler.main(1);
-		end
-		forever begin
-			@(posedge vif.sig_clock);
-			main_driver.mainMainDriver(1);
-		end
-	join
+task axi_master_write_address_driver::dataDriver();
+	axi_master_write_base_driver_data_core state = WAIT_TO_COLLECT;
+    forever begin
+	    case(state)
+		    WAIT_TO_COLLECT:
+		    begin
+			    @(posedge vif.sig_clock)
+			    if(vif.awvalid == 1 && vif.awready == 1)
+				    begin
+					    state = INFORM_VALID_CORE;
+				    end
+			    else
+				   begin
+					   state = WAIT_TO_COLLECT;
+				   end
+		    end
+
+		    INFORM_VALID_CORE:
+		    begin
+			    ->frame_collected;
+			    state = WAIT_TO_COLLECT;
+		    end
+
+	    endcase
+    end
 endtask
 
+`endif
 
 `endif

@@ -22,7 +22,7 @@ class  axi_master_write_tb extends uvm_env;
 	virtual function void build_phase(uvm_phase phase);
 		super.build_phase(phase);
 		config_obj = axi_write_test_config::type_id::create("config_obj",this);
-//		uvm_config_object::set(this, "axi_master_write_env.slave*", "axi_config", config_obj.slave_list[0]);
+		uvm_config_object::set(this, "*", "axi_slave_config", config_obj);
 //		uvm_config_object::set(this, "axi_master_write_env*", "axi_config", config_obj.slave_list[1]);
 		uvm_config_db#(axi_config)::set(this, "*", "axi_config", config_obj);
 		uvm_config_db#(axi_master_config)::set(this, "*", "axi_master_config", config_obj.master);

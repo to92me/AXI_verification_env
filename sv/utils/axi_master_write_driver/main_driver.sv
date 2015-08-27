@@ -1,6 +1,8 @@
 `ifndef AXI_MASTER_WRITE_MAIN_DRIVER_SVH
 `define AXI_MASTER_WRITE_MAIN_DRIVER_SVH
 
+
+`define data_before_addr
 //------------------------------------------------------------------------------
 //
 // CLASS: axi_master_write_main_driver
@@ -28,8 +30,9 @@ class axi_master_write_main_driver extends uvm_component;
 	axi_mssg 							inbox_mssg;
 	virtual interface axi_if 			vif;
 
-	axi_master_write_address_driver 	address_driver;
+	axi_master_write_address_driver 	address_driver; // FIXME
 	axi_master_write_data_driver		data_driver;
+	true_false_enum						correct_order = TRUE;
 
 	`uvm_component_utils(axi_master_write_main_driver)
 
@@ -42,9 +45,9 @@ class axi_master_write_main_driver extends uvm_component;
 	// build_phase
 	function void build();
 		scheduler = axi_master_write_scheduler::getSchedulerInstance(this);
-		address_driver = axi_master_write_address_driver::getDriverInstance(this);
+		address_driver = axi_master_write_address_driver::getDriverInstance(this); // FIXME
 		data_driver = axi_master_write_data_driver::getDriverInstance(this);
-		address_driver.build();
+		address_driver.build(); // FIXME
 		data_driver.build();
 		sem = new(10);
 	endfunction
@@ -134,9 +137,7 @@ endtask
 task axi_master_write_main_driver::getFramesFromScheduler();
    forever
 	   begin
-//		   $display("MAIN DRIVER:::: GET DATA ::::::::::::::::::::::::::::");
 		   scheduler.getFrameForDrivingVif(inbox_mssg);
-//		   $display("MAIN DRIVER ::::: GOT DATA ::::::::::::::::::::::::::::");
 		   if(inbox_mssg.state == QUEUE_EMPTY)
 			   return;
 		   if (inbox_mssg.frame.first_one == TRUE)
@@ -144,7 +145,10 @@ task axi_master_write_main_driver::getFramesFromScheduler();
 				   addr_frame = new();
 				   addr_frame = inbox_mssg.frame;
 				   sem.get(1);
-				   addr_inbox_queue.push_back(addr_frame);
+				   if(correct_order == TRUE)
+					   addr_ready_queue.push_back(addr_frame);
+				   else
+					   addr_inbox_queue.push_back(addr_frame);
 				   sem.put(1);
 			   end
 			data_frame = new();
