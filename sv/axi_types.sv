@@ -2,6 +2,9 @@
 `define AXI_TYPES_SVH
 
 parameter PIPE_SIZE = 5;
+parameter MASTER_PIPE_SIZE = 5;
+parameter SLAVE_PIPE_SIZE = 5;
+
 
 parameter ADDR_WIDTH = 32;
 parameter DATA_WIDTH = 64;
@@ -88,12 +91,5 @@ typedef enum {
 	ERROR,
 	NO_ERROR
 } err_enum;
-
-
-typedef enum{
-	READY_DEFAULT_0 = 0,
-	READY_DEFAULT_1 = 1
-}ready_default_enum;
-
 
 `endif

@@ -70,6 +70,8 @@ package axi_pkg;
 	typedef class axi_read_whole_burst;
 	typedef class axi_read_single_addr;
 
+	typedef class ready_randomization;
+
 	// config
 	typedef class axi_master_config;
 	typedef class axi_slave_config;
@@ -83,7 +85,9 @@ package axi_pkg;
 	typedef class axi_master_read_response;
 	typedef class axi_read_monitor;
 	typedef class axi_slave_response;
-	typedef axi_slave_memory_response;
+	typedef class axi_slave_memory_response;
+	typedef class axi_address_calc;
+	typedef class axi_address_queue;
 
 	// slave
 	typedef class axi_slave_read_driver;
@@ -206,6 +210,7 @@ package axi_pkg;
 	`include "sv/utils/axi_read_monitor.sv"
 	`include "sv/utils/axi_mssg.sv"
 	`include "sv/utils/axi_slave_config_memory.sv"
+	`include "sv/utils/axi_address_calc.sv"
 
 	`include "sv/axi_virtual_sequencer.sv"
 	`include "sv/axi_virtual_seq_lib.sv"

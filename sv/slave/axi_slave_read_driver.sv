@@ -26,13 +26,20 @@ class axi_slave_read_driver extends uvm_driver #(axi_read_base_frame, axi_read_b
 	// queue that holds single frames that are ready to be sent
 	axi_read_single_frame ready_queue[$];
 
+	// control bit for enabling ready randomization
+	bit slave_ready_rand_enable = 1;
+	ready_randomization ready_rand;
+
 	// Provide implmentations of virtual methods such as get_type_name and create
 	`uvm_component_utils_begin(axi_slave_read_driver)
+		`uvm_field_int(slave_ready_rand_enable, UVM_DEFAULT)
 	`uvm_component_utils_end
 
 	// new - constructor
 	function new (string name, uvm_component parent);
 		super.new(name, parent);
+		if(slave_ready_rand_enable)
+			ready_rand = new();
 	endfunction : new
 
 	// class methods
@@ -71,8 +78,8 @@ endclass : axi_slave_read_driver
 	// get_and_drive
 	task axi_slave_read_driver::get_and_drive();
 		fork
-			get_from_seq();
 			reset();
+			get_from_seq();
 			drive_addr_channel();
 			drive_data_channel();
 		join
@@ -124,9 +131,9 @@ endclass : axi_slave_read_driver
 	// reset
 	task axi_slave_read_driver::reset();
 		forever begin
-			@(negedge vif.sig_reset)
+			@(negedge vif.sig_reset);
 			`uvm_info(get_type_name(), "Reset", UVM_MEDIUM)
-			@(posedge vif.sig_clock)	// reset can be asynchronous, but deassertion must be synchronous with clk
+			@(posedge vif.sig_clock);	// reset can be asynchronous, but deassertion must be synchronous with clk
 
 			// reset signals
 			vif.rid <= {ID_WIDTH {1'b0}};
@@ -135,7 +142,10 @@ endclass : axi_slave_read_driver
 			vif.rlast <= 1'b0;
 			//vif.ruser
 			vif.rvalid <= 1'b0;
-			vif.arready <= 1'b1;	// TODO : based on number of slaves?
+			if (slave_ready_rand_enable)
+				vif.arready <= ready_rand.getRandom();
+			else
+				vif.arready <= 1'b1;
 
 			// TODO: reset queues
 
@@ -152,33 +162,39 @@ endclass : axi_slave_read_driver
 		forever begin
 			burst_collected = axi_read_whole_burst::type_id::create("burst_collected");
 
-			@(posedge vif.sig_clock iff vif.arvalid);
-			if(config_obj.check_addr_range(vif.araddr)) begin
-				//#1	// for simulation
-				//vif.arready <= 1'b1;
+			@ (posedge vif.sig_clock);
+			if(vif.arready && vif.arvalid) begin
+				if(config_obj.check_addr_range(vif.araddr)) begin
+					// get info
+					burst_collected.id = vif.arid;
+					burst_collected.addr = vif.araddr;
+					burst_collected.len = vif.arlen;
+					burst_collected.size = vif.arsize;
+					burst_collected.burst_type = vif.arburst;
+					burst_collected.lock = vif.arlock;
+					burst_collected.cache = vif.arcache;
+					burst_collected.prot = vif.arprot;
+					burst_collected.qos = vif.arqos;
+					burst_collected.region = vif.arregion;
+					// user
 
-				// get info
-				burst_collected.id = vif.arid;
-				burst_collected.addr = vif.araddr;
-				burst_collected.len = vif.arlen;
-				burst_collected.size = vif.arsize;
-				burst_collected.lock = vif.arlock;
-				burst_collected.cache = vif.arcache;
-				burst_collected.prot = vif.arprot;
-				burst_collected.qos = vif.arqos;
-				burst_collected.region = vif.arregion;
-				// user
+					burst_req.push_back(burst_collected);
+				end
 
-				burst_req.push_back(burst_collected);
-
-				// TODO : PITAJ DARKA
-				// da li je ovo potrebno - ovako ce uvek transfer trajati 2 clk-a
-				// ali ako ima vise slave-ova, mora tako??
-				//@ (posedge vif.sig_clock);
-				//#1	// for simulation
-				//vif.arready <= 1'b0;
-
+				// randomize ready
+				if(slave_ready_rand_enable) begin
+					#1	// for simulation
+					vif.arready <= ready_rand.getRandom();
+				end
 			end
+			else begin
+				// randomize ready
+				if(slave_ready_rand_enable) begin
+					#1	// for simulation
+					vif.arready <= ready_rand.getRandom();
+				end
+			end
+			
 		end
 	endtask : drive_addr_channel
 

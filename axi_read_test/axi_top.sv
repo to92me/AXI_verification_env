@@ -28,9 +28,9 @@ initial begin
 
 
   uvm_config_db#(virtual axi_if)::set(null,"uvm_test_top.*","vif", if0);
-  
+  /*
   `uvm_info("axi_top", "\n**** =============================================================================== ****", UVM_LOW)
-   
+   */
   run_test();
 
 end
@@ -40,14 +40,14 @@ initial begin
     reset <= 1'b0;
     clock <= 1'b0;
     #6 reset <= 1'b1;
-    #11 reset <= 1'b0;
+    #8 reset <= 1'b0;
     #16 reset <=1'b1;
 
   end
 
   //Generate Clock
   always #5 begin clock = ~clock;
-          if (clock) $write ("**** =============================================================================== ****\n");
+       /*   if (clock) $write ("**** =============================================================================== ****\n");*/
 end
 
 endmodule : axi_top

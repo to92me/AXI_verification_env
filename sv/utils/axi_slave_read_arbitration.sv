@@ -29,10 +29,13 @@ class axi_slave_read_arbitration extends uvm_component;
 
 	// control bit to select whether or not to read from memory
 	bit read_enable = 1;
+	// control bit to select whether early termination of bursts is supported
+	bit terminate_enable = 1;
 
 	// Provide implementations of virtual methods such as get_type_name and create
 	`uvm_component_utils_begin(axi_slave_read_arbitration)
     	`uvm_field_int(read_enable, UVM_DEFAULT)
+    	`uvm_field_int(terminate_enable, UVM_DEFAULT)
 	`uvm_component_utils_end
 
 	// new - constructor
@@ -66,7 +69,7 @@ endclass : axi_slave_read_arbitration
 		pipe_sem.get(1);
 
 		// check if pipe is full
-		if (id_in_pipe.size() == PIPE_SIZE) begin
+		if (id_in_pipe.size() == SLAVE_PIPE_SIZE) begin
 			burst_wait.push_back(whole_burst);
 			pipe_sem.put(1);
 			return;
@@ -91,15 +94,52 @@ endclass : axi_slave_read_arbitration
 	task axi_slave_read_arbitration::get_new_single_frames(axi_read_whole_burst whole_burst);
 
 		axi_read_single_addr one_frame;
+		axi_address_queue addr_queue;
+		axi_address_calc addr_frame;
 
-		for (int i = 0; i < whole_burst.len; i++) begin
+		// get all adresses
+		if (read_enable) begin
+			if (whole_burst.burst_type != Reserved) begin
+				addr_queue = new();
+				addr_queue.calc_addr(whole_burst.addr, whole_burst.size, whole_burst.len, whole_burst.burst_type);
+			end
+			else
+				// PITAJ DARKA
+				`uvm_fatal("MODE_ERR",{"cannot use Reserved burst type"});
+		end
+
+		for (int i = 0; i <= whole_burst.len; i++) begin
 
 			one_frame = axi_read_single_addr::type_id::create("one_frame",this);
 			one_frame.copy(whole_burst.single_frames.pop_front());
 
-			// calculate addresses if needed
+			// if requested size is larger than DATA_WIDTH, return an error
+			if(whole_burst.size <= ($clog2(DATA_WIDTH / 8))) begin
+				one_frame.resp = SLVERR;
+				one_frame.err = ERROR;
+			end
+
+			// get addr and byte lane info.
 			if (read_enable) begin
-				one_frame.addr = whole_burst.addr;	// TODO : ovo je samo za fixed
+				addr_frame = addr_queue.pop_front();
+				one_frame.addr_calc.addr = addr_frame.addr;
+				one_frame.addr_calc.upper_byte_lane = addr_frame.upper_byte_lane;
+				one_frame.addr_calc.lower_byte_lane = addr_frame.lower_byte_lane;
+
+				if (!(config_obj.check_addr_range(one_frame.addr_calc.addr - (one_frame.addr_calc.upper_byte_lane - one_frame.addr_calc.lower_byte_lane + 1)))) begin
+					// if the highest requested address is not in the address range of the
+					// given slave, return SLVERR TODO : PITAJ DARKA
+					one_frame.resp = SLVERR;
+					one_frame.err = ERROR;
+				end
+			end
+
+			if(!terminate_enable)
+				one_frame.err = NO_ERROR;	// so it doesn't complete the burst to early (in seq. lib)
+			if(one_frame.last_mode == BAD_LAST_BIT) begin
+				if (i == whole_burst.len) begin
+					one_frame.err = ERROR;	// if the last bit for the last frame is not set
+				end
 			end
 
 			if (one_frame.delay == 0) begin
@@ -114,7 +154,7 @@ endclass : axi_slave_read_arbitration
 			end
 
 			// if there is an error kill the burst
-			if (one_frame.err == ERROR) begin
+			if (terminate_enable && (one_frame.err == ERROR)) begin
 				break;
 			end
 		end
@@ -179,8 +219,9 @@ endclass : axi_slave_read_arbitration
 	// return the next ready frame (if there is none set FRAME_NOT_VALID)
 	// and if needed, read from memory
 	task axi_slave_read_arbitration::get_single_frame(output axi_read_single_frame single_frame);
-		axi_slave_memory_response rsp;
+
 		axi_read_single_addr addr_frame;
+		axi_address_calc addr_calc;
 
 		// send frame, if there is one ready to be sent
 		ready_sem.get(1);
@@ -189,20 +230,13 @@ endclass : axi_slave_read_arbitration
 			addr_frame.valid = FRAME_VALID;
 
 			// read from memory - this is done here so that the correct value will be read
-			if(read_enable) begin
-				config_obj.readMemory(addr_frame.addr, rsp);
-				if(rsp.getValid() == TRUE) begin
-					addr_frame.data = rsp.getData();
-				end
-				/* // ako nije nista procitao, vrati random data bez errora
-				// ili da vrati SLVERR
-				// TODO : PITAJ DARKA
-				else
-					begin
-						addr_frame.resp = SLVERR;
-						addr_frame.err = ERROR;
-					end
-				*/
+			if(read_enable && (addr_frame.resp != SLVERR)) begin
+				addr_calc = new();
+				/*addr_calc.addr = addr_frame.addr;
+				addr_calc.upper_byte_lane = addr_frame.upper_byte_lane;
+				addr_calc.lower_byte_lane = addr_frame.lower_byte_lane;*/
+				addr_calc = addr_frame.addr_calc;
+				addr_calc.readMemory(config_obj, addr_frame.data);
 			end
 		end
 		else begin

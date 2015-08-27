@@ -47,10 +47,19 @@ class axi_read_single_frame extends axi_read_base_frame;
 
 	// control
 	rand last_enum				last_mode;
-	err_enum					err;
+	err_enum					err;	// used for early termination and bad last bit for last frame in burst
 
-	//constraint default_last_bit {last_mode dist {GOOD_LAST_BIT := 80, BAD_LAST_BIT := 20};}
-	constraint default_last_bit {last_mode == GOOD_LAST_BIT;}	// TODO : put back to dist
+	// control bit for default value of resp
+	rand bit default_resp;	// if set use default value for resp (OKAY)
+
+	constraint default_last_bit {last_mode dist {GOOD_LAST_BIT := 90, BAD_LAST_BIT := 10};}
+	//constraint default_last_bit {last_mode == BAD_LAST_BIT;}	// TODO : put back to dist
+
+	constraint default_resp_constraint {
+		if (default_resp) {
+			resp == OKAY;
+		}
+	}
 
 	// UVM utility macros
 	`uvm_object_utils_begin(axi_read_single_frame)
@@ -66,6 +75,28 @@ class axi_read_single_frame extends axi_read_base_frame;
 		super.new(name);
 	endfunction
 
+	function void calc_resp(lock_enum slave_lock, lock_enum burst_lock);
+		if ((burst_lock == EXCLUSIVE) && (slave_lock == NORMAL)) begin
+			this.resp = OKAY;
+			this.err = ERROR;
+		end
+		else if (burst_lock == EXCLUSIVE) begin
+			this.resp = EXOKAY;
+			this.err = NO_ERROR;
+		end
+		else begin
+			this.resp = OKAY;
+			this.err = NO_ERROR;
+		end
+	endfunction : calc_resp
+
+	function bit calc_last_bit(bit last, last_enum mode);
+		if(mode == BAD_LAST_BIT)
+			return ~last;
+		else
+			return last;
+	endfunction : calc_last_bit
+
 endclass :  axi_read_single_frame
 
 //------------------------------------------------------------------------------
@@ -76,7 +107,7 @@ endclass :  axi_read_single_frame
 class axi_read_burst_frame extends axi_read_base_frame;
 
 	rand bit [ADDR_WIDTH-1 : 0]		addr;
-	rand bit [2:0]					len;		// TODO : [7:0]
+	rand bit [7:0]					len;
 	rand burst_size_enum			size;
 	rand burst_type_enum			burst_type;
 	rand lock_enum					lock;
@@ -86,8 +117,84 @@ class axi_read_burst_frame extends axi_read_base_frame;
 	rand bit [3:0]					region;
 	// user
 
-	constraint default_length {len > 0;}
-	constraint default_delay {delay < 5;}
+	// control for default signals - if set, use default value
+	rand bit default_id;
+	rand bit default_region;
+	rand bit default_len;
+	rand bit default_size;
+	rand bit default_burst_type;
+	rand bit default_lock;
+	rand bit default_cache;
+	rand bit default_qos;
+
+	constraint default_id_constraint {
+		if (default_id) {
+			id == {ID_WIDTH {1'b0}};
+		}
+	}
+	constraint default_region_constraint {
+		if (default_region) {
+			region == 4'h0;
+		}
+	}
+	constraint default_len_constraint {
+		if (default_size) {
+			size == BYTE_8;
+		}
+	}
+	constraint default_burst_type_constraint {
+		if (default_burst_type) {
+			burst_type == INCR;
+		}
+	}
+	constraint default_lock_constraint {
+		if (default_lock) {
+			lock == NORMAL;
+		}
+	}
+	constraint default_cache_constraint {
+		if (default_cache) {
+			cache == 4'h0;
+		}
+	}
+	constraint default_qos_constraint {
+		if (default_qos) {
+			qos == 4'h0;
+		}
+	}
+
+	constraint delay_constraint {delay < 5;}
+
+	// constrain number of bytes in a transfer
+	//constraint burst_size_constraint {size <= $clog2(DATA_WIDTH / 8);}
+
+	// burst length for the INCR type can be 1 - 256, for others 1 - 16
+	// for a wrapping burst, length must be 2, 4, 8 or 16
+	constraint len_constraint {
+		if (burst_type == FIXED) {
+			len < 16;
+		}
+		else if (burst_type == WRAP) {
+			len inside {1, 3, 7, 15};
+		}
+	}
+	constraint order_type {solve burst_type before len;}	// because of len_constraint
+
+	// for a wrapping burst the start address must be aligned to the size of each transfer
+	constraint burst_type_constraint {
+		// TODO : ovde bi trebalo $floor umesto int' tj rounded down
+		// ali mislim da i ovako radi jer ja samo hocu da znam da li adresa poravnata ili nije
+		// a ne zanima me koliko iznosi poravnata adresa - PROVERITI
+		if (addr == ((int'(addr/(2**size)))*(2**size))) {
+			burst_type inside {FIXED, INCR, WRAP};
+		}
+		else {	// address not aligned
+			burst_type inside {FIXED, INCR};
+		}
+		// never use Reserved
+	}
+	constraint order_addr {solve addr before burst_type;}
+	constraint order_size {solve size before burst_type;}
 
 	// UVM utility macros
 	`uvm_object_utils_begin(axi_read_burst_frame)
@@ -130,21 +237,41 @@ endclass : axi_read_whole_burst
 
 //------------------------------------------------------------------------------
 //
-// CLASS: axi_read_whole_burst
+// CLASS: axi_read_single_addr
 //
 //------------------------------------------------------------------------------
 class axi_read_single_addr extends axi_read_single_frame;
 
-	bit [ADDR_WIDTH-1 : 0]	addr;
+	axi_address_calc addr_calc;
 
 	`uvm_object_utils_begin(axi_read_single_addr)
-		`uvm_field_int(addr, UVM_DEFAULT)
+		`uvm_field_object(addr_calc, UVM_DEFAULT)
 	`uvm_object_utils_end
 
 	function new (string name = "axi_read_single_addr");
 		super.new(name);
+		addr_calc = axi_address_calc::type_id::create("addr_calc");
 	endfunction
 
 endclass : axi_read_single_addr
+
+// TODO : premesti negde drugde
+class ready_randomization;
+
+	rand bit ready;
+
+	constraint ready_default{
+		ready dist {
+			0 := 10,
+			1 := 90
+		};
+	}
+
+	function bit getRandom();
+		assert(this.randomize());
+		return this.ready;
+	endfunction : getRandom
+
+endclass : ready_randomization
 
 `endif
