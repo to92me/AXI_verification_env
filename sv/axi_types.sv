@@ -92,4 +92,12 @@ typedef enum {
 	NO_ERROR
 } err_enum;
 
+
+typedef enum {
+	READY_DEFAULT_0 = 0,
+	READY_DEFAULT_1 = 1
+}	ready_default_enum;
+
+
+
 `endif

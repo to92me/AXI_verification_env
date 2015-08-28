@@ -35,6 +35,7 @@ class axi_master_write_scheduler extends uvm_component;
 	axi_slave_response						response_from_slave_queue[$];
 	axi_slave_response						single_response_from_slave;
 	int 									error_before_delte_item = 4;
+	true_false_enum							testing_completed = FALSE;
 //	mailbox 								mbx;
 
 
@@ -525,10 +526,14 @@ endfunction
 task axi_master_write_scheduler::checkForDone();
 
    if(burst_queue.size() == 0 && burst_existing_id.size() == 0 && waiting_for_resp_queue.size() == 0)
-	   begin
-	   	$display("  ============================= THE END =====================================");
-	   	top_driver.putResponseToSequencer();
-	   end
+	  begin
+		  if(testing_completed == TRUE)
+			   begin
+				testing_completed = TRUE;
+			   	$display("  ============================= THE END =====================================");
+			   	top_driver.putResponseToSequencer();
+			   end
+		   end
    else
 	   begin
 //		   $display("CHECKING COMPLETNES: burst_size: %d, burst_existing size: %d, wairing rsp size: %d",burst_queue.size(),burst_existing_id.size(), waiting_for_resp_queue.size());
