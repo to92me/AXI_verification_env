@@ -92,4 +92,9 @@ typedef enum {
 	NO_ERROR
 } err_enum;
 
+typedef union {
+	bit[7:0] lane[DATA_WIDTH/8];
+	bit[DATA_WIDTH-1:0] data;
+} mem_access;
+
 `endif
