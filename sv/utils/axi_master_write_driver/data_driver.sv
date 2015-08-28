@@ -70,7 +70,7 @@ endtask
 
 task axi_master_write_data_driver::driverVif();
 		#2
-		$display(" MASTER SEND current frame: %h %d %h, count: %d",current_frame.id, current_frame.last_one, current_frame.data, send_items );
+		$display(" MASTER SEND current frame: %h %d %h, strobe: %b, count: %d",current_frame.id, current_frame.last_one, current_frame.data, current_frame.strobe,  send_items );
 		send_items++;
 		calculateStrobe(current_frame);
 		vif.wid 	<= 	current_frame.id;

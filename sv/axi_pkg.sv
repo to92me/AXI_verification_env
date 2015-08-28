@@ -57,6 +57,8 @@ package axi_pkg;
 	typedef class axi_waiting_resp;
 	typedef class unique_id_struct;
 	typedef class axi_mssg;
+	typedef class axi_address_queue;
+	typedef class axi_address_calc;
 `endif
 
 `ifdef andrea
@@ -137,6 +139,8 @@ package axi_pkg;
 	`include "sv/utils/axi_slave_write_driver/data_driver.sv"
 	`include "sv/utils/axi_slave_write_driver/address_driver.sv"
 	`include "sv/utils/axi_slave_write_driver/response_driver.sv"
+
+	`include "sv/utils/axi_address_calc.sv"
 
 	//add include for master
 	`include "sv/master/axi_master_config.sv"

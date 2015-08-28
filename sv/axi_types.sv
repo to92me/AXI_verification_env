@@ -10,6 +10,8 @@ parameter ADDR_WIDTH = 32;
 parameter DATA_WIDTH = 64;
 parameter ID_WIDTH = 32;
 
+parameter STRB_WIDTH = DATA_WIDTH / 8;
+
 typedef struct {
 	bit[ADDR_WIDTH-1 : 0] start_address;
 	bit[ADDR_WIDTH-1 : 0] end_address;
@@ -100,8 +102,14 @@ typedef enum {
 
 
 typedef union {
-	bit[7:0] lane[DATA_WIDTH/8];
+	bit[7:0] [DATA_WIDTH/8-1:0]lane;
 	bit[DATA_WIDTH-1:0] data;
 } mem_access;
+
+
+typedef union {
+	bit[7 : 0]	one_byte;
+	bit 		[7 : 0]one_bit;
+}bit_byte_union;
 
 `endif

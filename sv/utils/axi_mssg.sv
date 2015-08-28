@@ -26,6 +26,69 @@ class axi_waiting_resp;
 	int 				 counter;
 endclass
 
+class burst_package_info;
+	bit [ID_WIDTH-1 : 0] 	ID;
+	bit [ADDR_WIDTH -1: 0]	address;
+	bit  [7:0]				wlen;
+	burst_size_enum			wsize;
+	burst_type_enum			wburst;
+
+
+	// Get ID
+	function bit[ID_WIDTH-1:0] getID();
+		return ID;
+	endfunction
+
+	// Set ID
+	function void setID(bit[ID_WIDTH-1:0] ID);
+		this.ID = ID;
+	endfunction
+
+	// Get address
+	function bit[ADDR_WIDTH-1:0] getAddress();
+		return address;
+	endfunction
+
+	// Set address
+	function void setAddress(bit[ADDR_WIDTH-1:0] address);
+		this.address = address;
+	endfunction
+
+	// Get wburst
+	function burst_type_enum getBurst();
+		return wburst;
+	endfunction
+
+	// Set wburst
+	function void setBurst(burst_type_enum wburst);
+		this.wburst = wburst;
+	endfunction
+
+	// Get wlen
+	function bit[7:0] getwLen();
+		return wlen;
+	endfunction
+
+	// Set wlen
+	function void setWlen(bit[7:0] wlen);
+		this.wlen = wlen;
+	endfunction
+
+	// Get wsize
+	function burst_size_enum getWsize();
+		return wsize;
+	endfunction
+
+	// Set wsize
+	function void setWsize(burst_size_enum wsize);
+		this.wsize = wsize;
+	endfunction
+
+
+
+
+endclass
+
 
 class slave_ID;
 	bit[ID_WIDTH - 1 : 0]   ID;
@@ -141,6 +204,8 @@ endclass
 class axi_slave_write_data_mssg;
 	bit [ID_WIDTH-1 : 0]	ID;
 	true_false_enum 		last_one;
+	bit [DATA_WIDTH-1 : 0 ]	data;
+	bit [STRB_WIDTH-1 : 0 ] strobe;
 
 	function true_false_enum getLast_one();
 		return last_one;
@@ -159,6 +224,28 @@ class axi_slave_write_data_mssg;
 	function void setID(bit[ID_WIDTH-1:0] ID);
 		this.ID = ID;
 	endfunction : setID
+
+	// Get data
+	function bit[DATA_WIDTH-1:0] getData();
+		return data;
+	endfunction
+
+	// Set data
+	function void setData(bit[DATA_WIDTH-1:0] data);
+		this.data = data;
+	endfunction
+
+	// Get strobe
+	function bit[STRB_WIDTH-1:0] getStrobe();
+		return strobe;
+	endfunction
+
+	// Set strobe
+	function void setStrobe(bit[STRB_WIDTH-1:0] strobe);
+		this.strobe = strobe;
+	endfunction
+
+
 
 endclass
 

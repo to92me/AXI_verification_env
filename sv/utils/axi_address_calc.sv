@@ -143,7 +143,7 @@ function void axi_address_queue::calc_addr(bit[ADDR_WIDTH-1:0] start_addr, burst
 						addr = lower_wrap_boundary;
 			end
 			else begin
-				addr = addr + num_bytes;
+				addr = aligned_addr + num_bytes;
 				aligned = 1;	// all transfers after the first are aligned
 			end
 		end

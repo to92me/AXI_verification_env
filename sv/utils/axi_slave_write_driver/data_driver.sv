@@ -59,6 +59,8 @@ task axi_slave_write_data_driver::getData();
 	mssg = new();
    	mssg.setID(vif.wid);
 	mssg.setLast_one(vif.wlast);
+	mssg.setData(vif.wdata);
+	mssg.setStrobe(vif.wstrb);
 endtask
 
 task axi_slave_write_data_driver::waitOnValid(ref true_false_enum ready);

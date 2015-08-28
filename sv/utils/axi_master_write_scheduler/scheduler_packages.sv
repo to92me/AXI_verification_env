@@ -51,6 +51,9 @@ class axi_master_write_scheduler_packages;
 	first_sent_enum 		first_status = FIRST_NOT_SENT;
 	bit [ID_WIDTH-1 : 0] 	ID;
 	bit [ADDR_WIDTH -1: 0]	address;
+	bit  [7:0]				wlen;
+	burst_size_enum			wsize;
+	burst_type_enum			wburst;
 	axi_frame 				frame_copy;
 	int 					slave_error_counter = 0;
 	randomize_data 			rand_data;
@@ -77,7 +80,9 @@ class axi_master_write_scheduler_packages;
 	extern function void resetErrorCounter();
 	extern function int incrementErrorCounter(); // it returns state = number of error counter
 	extern function int getErrorCounter();
+	extern function burst_package_info getBurstInfo();
 
+	extern function void calculateStrobe();
 
 
 endclass : axi_master_write_scheduler_packages
@@ -166,7 +171,11 @@ task axi_master_write_scheduler_packages::addBurst(input axi_frame frame);
 				sem.put(1);
 			end
 
+
 			sem.get(1);
+			this.wburst = frame.burst_type;
+			this.wlen = frame.len+1;
+			this.wsize = frame.size;
 			this.frame_copy = frame; // keep the frame copy if recieved error repeat transaction
 			this.ID = frame.id;
 			data_queue[data_queue.size -1].last_one = TRUE;
@@ -204,5 +213,69 @@ function int axi_master_write_scheduler_packages::getErrorCounter();
     return this.slave_error_counter;
 endfunction
 
+function burst_package_info axi_master_write_scheduler_packages::getBurstInfo();
+	burst_package_info info;
+	info = new();
+	info.setAddress(this.address);
+	info.setBurst(this.wburst);
+	info.setID(this.ID);
+	info.setWlen(this.wlen);
+	info.setWsize(this.wsize);
+	return info;
+endfunction
+
+function void axi_master_write_scheduler_packages::calculateStrobe();
+    axi_address_queue 	strobe_calculator;
+	axi_address_calc	strobe_calculator_item;
+	mem_access			data_from_single_frame;
+	mem_access 			data_to_single_frame;
+	bit_byte_union		strobe_data;
+	int 				i;
+	int 				original_data_line_counter = 0;
+
+	strobe_calculator = new();
+	strobe_calculator_item = new();
+
+	strobe_calculator.calc_addr(this.address, this.wsize, this.wlen, this.wburst);
+	$display("________________________________________________________________________________________________________");
+	$display("BURST INFO: address: %h, size %h, len: %d, burst: %d",this.address, this.wsize, this.wlen, this.wburst );
+
+	foreach(data_queue[i])
+		begin
+			strobe_calculator_item = strobe_calculator.pop_front();
+			data_from_single_frame.data = data_queue[i].data;
+			original_data_line_counter = 0;
+			strobe_data.one_byte = 'b0;
+
+//			$display("lower lane: %d, upper lane: %d ", strobe_calculator_item.lower_byte_lane,strobe_calculator_item.upper_byte_lane);
+//
+//			for( int j = strobe_calculator_item.lower_byte_lane; j <= strobe_calculator_item.upper_byte_lane; j++)
+//				begin
+//					data_to_single_frame.lane[original_data_line_counter] = data_from_single_frame.lane[j];
+//					original_data_line_counter++;
+//					strobe_data.one_bit[j] = 1'b1;
+//				end
+
+			for(int j = 0; j <= (DATA_WIDTH/8); j++)
+				begin
+					if(j >= strobe_calculator_item.lower_byte_lane && j<= strobe_calculator_item.upper_byte_lane)
+						begin
+							data_to_single_frame.lane[j] = data_from_single_frame.lane[original_data_line_counter];
+							original_data_line_counter++;
+							strobe_data.one_bit[j] = 1'b1;
+//							$display("j: %dstrobe : %b ",j, strobe_data.one_byte);
+						end
+					else
+						begin
+							strobe_data.one_bit[j] = 1'b0;
+						end
+				end
+//			$display("data_from_frame_data: %h: ", data_from_single_frame.data);
+//			$display("data_for_frame_data:  %h: ", data_to_single_frame.data);
+//			$display("strobe : %b ", strobe_data.one_byte);
+			data_queue[i].data = data_to_single_frame.data;
+			data_queue[i].strobe = strobe_data.one_byte;
+		end
+endfunction
 
 `endif

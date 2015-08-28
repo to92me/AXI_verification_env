@@ -51,7 +51,7 @@ class axi_slave_write_main_driver extends uvm_component;
 	extern task pushDataMssg(input axi_slave_write_data_mssg message);
 	extern task decrementLen(input axi_slave_write_data_mssg message);
 	extern task addBurstStatus(input axi_slave_write_addr_mssg message);
-	extern task setSlaveCondig(input axi_slave_config cfg);
+	extern function void setSlaveCondig(input axi_slave_config cfg);
 	extern task setTesting(input true_false_enum testing);
 	extern task reset();
 	extern task startDriver();
@@ -71,9 +71,9 @@ endclass : axi_slave_write_main_driver
 	*/
 `endif
 
-	task axi_slave_write_main_driver::setSlaveCondig(input axi_slave_config cfg);
+	function void axi_slave_write_main_driver::setSlaveCondig(input axi_slave_config cfg);
 	    config_obj = cfg;
-	endtask
+	endfunction
 
 	task axi_slave_write_main_driver::setTesting(input true_false_enum testing);
 	 	driver_addr.setTesting(testing);
