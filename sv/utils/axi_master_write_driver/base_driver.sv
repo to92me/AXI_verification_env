@@ -60,6 +60,7 @@ class axi_master_write_base_driver_delays;
 		}
 endclass
 
+
 class axi_master_write_base_driver_ready_default_value;
 	rand ready_default_enum ready;
 

@@ -35,6 +35,7 @@ class axi_master_write_scheduler extends uvm_component;
 	axi_slave_response						response_from_slave_queue[$];
 	axi_slave_response						single_response_from_slave;
 	int 									error_before_delte_item = 4;
+	true_false_enum							testing_completed = FALSE;
 //	mailbox 								mbx;
 
 
@@ -123,15 +124,25 @@ endclass : axi_master_write_scheduler
 //			$display("\nadded new frame, size: %d  \n ", single_burst.size());
 
 			sem.get(1);
+			single_burst.wlen 		= frame.len + 1;
+			single_burst.wsize 		= frame.size;
+			single_burst.wburst		= frame.burst_type;
 			single_burst.frame_copy = frame; // keep the frame copy if recieved error repeat transaction
-			single_burst.ID = frame.id;
-			single_burst.data_queue[single_burst.size() -1].last_one = TRUE;
-			single_burst.data_queue[0].first_one = TRUE;
+			single_burst.ID 		= frame.id;
+			single_burst.address 	= frame.addr;
+
+			single_burst.data_queue[single_burst.size() -1].last_one 	= TRUE;
+			single_burst.data_queue[0].first_one 						= TRUE;
 
 			if(burst_queue.size() == 0)
 				single_burst.lock_state = QUEUE_UNLOCKED;
 			else if(burst_queue[burst_queue.size()-1].first_status == FIRST_SENT)
 				single_burst.lock_state = QUEUE_UNLOCKED;
+
+
+			single_burst.calculateStrobe();
+
+
 			sem.put(1);
 
 
@@ -295,14 +306,6 @@ endclass : axi_master_write_scheduler
 				DELETE_ONE:
 				begin
 					i = 0;
-//					single_waiting_for_resp = new();
-////					$display("ID: %h", burst_empyt_queue[0].ID);
-//
-//					single_waiting_for_resp.frame = burst_empyt_queue[0].frame_copy;
-//					single_waiting_for_resp.counter = 0;
-//					check_ID = single_waiting_for_resp.frame.id;
-//					waiting_for_resp_queue.push_back(single_waiting_for_resp);
-//					burst_empyt_queue.delete(0);
 					check_ID = burst_empyt_queue.pop_front();
 					$display("tome: %h",check_ID);
 					foreach(burst_queue[itertator])
@@ -318,20 +321,8 @@ endclass : axi_master_write_scheduler
 						end
 					waiting_for_resp_queue.push_back(single_waiting_for_resp);
 					burst_queue.delete(tmp_iterator);
-
-//					sem.get(1);
-//					check_ID = empyt_scheduler_packages.pop_front();									 // check for next one to be first
 					state_check_ID = NEXT_CHECK;
-//					check_ID = burst_queue[tmp_for_delete].ID;
-//					$display("check ID: %d", check_ID);
-//					single_waiting_for_resp = new();														// create copy of frame
-//					single_waiting_for_resp.frame = burst_queue[tmp_for_delete].frame_copy;
-//					single_waiting_for_resp.counter = 0;
-//					$display("adding burst frame for complete ID: %d", single_waiting_for_resp.frame.id);
-//					waiting_for_resp_queue.push_back(single_waiting_for_resp);
-					//$display("DELETE ONE ***************************************************************************************************");
-//					burst_queue.delete(tmp_for_delete); //deleted complited burst_package
-//					sem.put(1);
+//
 				end
 
 				NEXT_CHECK:
@@ -525,10 +516,14 @@ endfunction
 task axi_master_write_scheduler::checkForDone();
 
    if(burst_queue.size() == 0 && burst_existing_id.size() == 0 && waiting_for_resp_queue.size() == 0)
-	   begin
-	   	$display("  ============================= THE END =====================================");
-	   	top_driver.putResponseToSequencer();
-	   end
+	  begin
+		  if(testing_completed == TRUE)
+			   begin
+				testing_completed = TRUE;
+			   	$display("  ============================= THE END =====================================");
+			   	top_driver.putResponseToSequencer();
+			   end
+		   end
    else
 	   begin
 //		   $display("CHECKING COMPLETNES: burst_size: %d, burst_existing size: %d, wairing rsp size: %d",burst_queue.size(),burst_existing_id.size(), waiting_for_resp_queue.size());

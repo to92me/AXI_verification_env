@@ -30,7 +30,7 @@ class axi_slave_write_address_driver extends axi_slave_write_base_driver;
 	extern task setReady();
 	extern task getDelay(ref int delay);
 	extern task checkIDAddr(ref true_false_enum correct_slave);
-	extern task setDataDriverInstance(axi_slave_write_data_driver driver_isntance);
+	extern function void setDataDriverInstance(axi_slave_write_data_driver driver_isntance);
 	extern task waitFrame(ref true_false_enum detected_frame);
 
 
@@ -122,9 +122,9 @@ task axi_slave_write_address_driver::checkIDAddr(ref true_false_enum correct_sla
 		end
 endtask
 
-task axi_slave_write_address_driver::setDataDriverInstance(input axi_slave_write_data_driver driver_isntance);
+function void axi_slave_write_address_driver::setDataDriverInstance(input axi_slave_write_data_driver driver_isntance);
    this.data_driver = driver_isntance;
-endtask
+endfunction
 
 task axi_slave_write_address_driver::waitFrame(ref true_false_enum detected_frame);
 	@(posedge vif.sig_clock)

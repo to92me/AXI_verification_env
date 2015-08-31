@@ -19,8 +19,8 @@ package axi_pkg;
 	typedef class axi_master_write_scheduler;
 	typedef class axi_master_write_scheduler_packages;
 
-	//=================driveres=====================================//
-	//master														//
+	//======================DRIVERS=================================//
+	//MASTER														//
 	typedef class axi_master_write_response_driver; 				//
 	typedef class axi_master_write_data_driver;						//
 	typedef class axi_master_write_address_driver;					//
@@ -31,7 +31,7 @@ package axi_pkg;
 	typedef class axi_master_write_base_driver_delays;				//
 	typedef class axi_master_write_base_driver_ready_default_value; //
 																	//
-	//slave 														//
+	//SLAVE 														//
 	typedef class axi_slave_write_agent;							//
 	typedef class axi_slave_write_response_driver;					//
 	typedef class axi_slave_write_data_driver;						//
@@ -41,7 +41,24 @@ package axi_pkg;
 	typedef class axi_slave_write_driver;							//
 	typedef class axi_slave_write_sequencer;						//
 	typedef class axi_slave_write_base_driver_delays;				//
-	//================================================
+	//=====================END DRIVERS==============================//
+
+	//=====================MONITORS=================================//
+	// MASTER														//
+	typedef class axi_master_write_main_monitor;					//
+	typedef class axi_master_write_data_collector;					//
+	typedef class axi_master_write_address_collector;				//
+	typedef class axi_master_write_response_collector;				//
+	typedef class axi_master_write_base_collector;					//
+	typedef class axi_master_write_checker;							//
+	//SLAVE															//
+	typedef class axi_slave_write_main_monitor;						//
+	typedef class axi_slave_write_data_collector;					//
+	typedef class axi_slave_write_address_collector;				//
+	typedef class axi_slave_write_response_collector;				//
+	typedef class axi_slave_write_base_collector;					//
+	typedef class axi_slave_write_checker;							//
+	//==================END MONITORS================================//
 
 	//confing and frames
 	typedef class axi_master_config;
@@ -57,6 +74,8 @@ package axi_pkg;
 	typedef class axi_waiting_resp;
 	typedef class unique_id_struct;
 	typedef class axi_mssg;
+	typedef class axi_address_queue;
+	typedef class axi_address_calc;
 `endif
 
 `ifdef andrea
@@ -118,45 +137,63 @@ package axi_pkg;
 
 `ifdef tome_test
 
-	 // ======================drivers utils==============================
+	 // ======================DRIVER UTILS==============================
+	 // COMMON
+ 	`include "sv/utils/axi_mssg.sv"
+ 	`include "sv/utils/axi_address_calc.sv"
+	 // MASTER
 	`include "sv/utils/axi_master_write_driver/base_driver.sv"
 	`include "sv/utils/axi_master_write_driver/main_driver.sv"
 	`include "sv/utils/axi_master_write_driver/data_driver.sv"
 	`include "sv/utils/axi_master_write_driver/address_driver.sv"
 	`include "sv/utils/axi_master_write_driver/response_driver.sv"
-
-	`include "sv/utils/axi_mssg.sv"
-	`include "sv/utils/axi_slave_config_memory.sv"
-
 	`include "sv/utils/axi_master_write_scheduler/scheduler_packages.sv"
 	`include "sv/utils/axi_master_write_scheduler/scheduler.sv"
-
-
+	// SLAVE
 	`include "sv/utils/axi_slave_write_driver/base_driver.sv"
 	`include "sv/utils/axi_slave_write_driver/main_driver.sv"
 	`include "sv/utils/axi_slave_write_driver/data_driver.sv"
 	`include "sv/utils/axi_slave_write_driver/address_driver.sv"
 	`include "sv/utils/axi_slave_write_driver/response_driver.sv"
+	`include "sv/utils/axi_slave_config_memory.sv"
+	// =================== END DRIVER UTILS==============================
+
+
+
+
+	// ==================== MONITOR UTILS ==============================
+	// MASTER
+	`include "sv/utils/axi_master_write_monitor/address_collector.sv"
+	`include "sv/utils/axi_master_write_monitor/data_collector.sv"
+	`include "sv/utils/axi_master_write_monitor/response_collector.sv"
+	`include "sv/utils/axi_master_write_monitor/base_collector.sv"
+	`include "sv/utils/axi_master_write_monitor/coverage.sv"
+	`include "sv/utils/axi_master_write_monitor/checker.sv"
+	// SLAVE
+	`include "sv/utils/axi_slave_write_monitor/address_collector.sv"
+	`include "sv/utils/axi_slave_write_monitor/data_collector.sv"
+	`include "sv/utils/axi_slave_write_monitor/response_collector.sv"
+	`include "sv/utils/axi_slave_write_monitor/base_collector.sv"
+	`include "sv/utils/axi_slave_write_monitor/coverage.sv"
+	`include "sv/utils/axi_slave_write_monitor/checker.sv"
+	//==================== END MONITOR UTILS=============================
+
+
 
 	//add include for master
 	`include "sv/master/axi_master_config.sv"
 	`include "sv/master/axi_master_write_agent.sv"
 	`include "sv/master/axi_master_write_driver.sv"
-//	`include "sv/master/axi_master_write_monitor.sv"
+	`include "sv/master/axi_master_write_monitor.sv"
 	`include "sv/master/axi_master_write_sequencer.sv"
 	`include "sv/master/axi_master_write_sequence_lib.sv"
-
-
-//	`include "sv/master/axi_master_read_driver.sv"
-//	`include "sv/master/axi_master_read_monitor.sv"
-//	`include "sv/master/axi_master_read_sequencer.sv"
-//	`include "sv/master/axi_master_read_sequence_lib.sv"
 
 	//add include for slave
 	`include "sv/slave/axi_slave_config.sv"
 	`include "sv/slave/axi_slave_write_driver.sv"
 	`include "sv/slave/axi_slave_write_sequencer.sv"
 	`include "sv/slave/axi_slave_write_agent.sv"
+	`include "sv/slave/axi_slave_write_monitor.sv"
 //	`include "sv/slave/axi_slave_write_sequence_lib.sv"
 
 `ifdef testing_includes

@@ -61,6 +61,8 @@ class axi_master_write_main_driver extends uvm_component;
 	extern task decrementDelay();
 	extern task reset();
 
+	extern function void setCorrectAddressDataOrder(true_false_enum correct);
+
 endclass : axi_master_write_main_driver
 
 
@@ -121,7 +123,6 @@ task axi_master_write_main_driver::main();
 	    this.address_driver.main();
 //	    this.address_driver.testClock();
     join
-    $display("2++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++");
 endtask
 
 task axi_master_write_main_driver::mainMainDriver(input int clocks);
@@ -197,6 +198,11 @@ task axi_master_write_main_driver::reset();
 	data_ready_queue.delete();
 	sem.put(1);
 endtask
+
+function void axi_master_write_main_driver::setCorrectAddressDataOrder(input true_false_enum correct);
+ 		correct_order = correct;
+	`uvm_info("axi_master_write_main_driver","correct_order == TRUE", UVM_LOW);
+endfunction
 
 `endif
 

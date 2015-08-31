@@ -106,7 +106,7 @@ class axi_slave_write_base_driver extends uvm_component;
 	endfunction : build_phase
 
 
-	extern task setSlaveConfig(input axi_slave_config cfg);
+	extern function void setSlaveConfig(input axi_slave_config cfg);
 
 	extern task main();
 	extern task readyTriger();
@@ -133,9 +133,9 @@ class axi_slave_write_base_driver extends uvm_component;
 
 endclass : axi_slave_write_base_driver
 
-	task axi_slave_write_base_driver::setSlaveConfig(input axi_slave_config cfg);
+	function void axi_slave_write_base_driver::setSlaveConfig(input axi_slave_config cfg);
 		config_obj = cfg;
-	endtask
+	endfunction
 
 	task axi_slave_write_base_driver::main();
 		fork

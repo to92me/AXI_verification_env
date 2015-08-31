@@ -35,7 +35,7 @@ class axi_slave_write_driver extends uvm_driver #(axi_frame);
 	endfunction: build_phase
 
 	extern task resetAll();
-	extern task setSlaveConfig(input axi_slave_config cfg);
+	extern function void setSlaveConfig(input axi_slave_config cfg);
 
 	// run_phase
 	virtual task run_phase(uvm_phase phase);
@@ -88,9 +88,9 @@ task axi_slave_write_driver::resetAll();
 endtask
 
 
-task axi_slave_write_driver::setSlaveConfig(input axi_slave_config cfg);
+function void axi_slave_write_driver::setSlaveConfig(input axi_slave_config cfg);
     this.config_obj = cfg;
-endtask
+endfunction
 
 
 

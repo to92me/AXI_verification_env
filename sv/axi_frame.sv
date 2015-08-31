@@ -39,6 +39,10 @@ class axi_frame_base extends uvm_sequence_item;
 		super.new(name);
 	endfunction
 
+	constraint burst_size_constraint {size <= $clog2(DATA_WIDTH / 8);}
+	constraint burst_type_constraint {burst_type inside{FIXED, INCR, WRAP};}
+
+
 endclass
 
 class axi_frame extends axi_frame_base;
@@ -52,7 +56,7 @@ class axi_frame extends axi_frame_base;
  `   uvm_object_utils_end
 
  	constraint len_crs{
-	 	len inside {[5 : 500 ]};
+	 	len inside {[5 : 127 ]};
  	}
 
  	constraint data_size_csr {
@@ -75,6 +79,7 @@ class axi_single_frame extends axi_frame_base;
 	rand int 						delay_data;
 	rand int 						delay_awvalid;
 	rand int 						delay_wvalid;
+	bit [STRB_WIDTH - 1 : 0]		strobe;
 	true_false_enum 				last_one = FALSE;
 	true_false_enum 				first_one = FALSE;
 
