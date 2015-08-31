@@ -1,8 +1,33 @@
-/******************************************************************************
-	* DVT CODE TEMPLATE: driver
-	* Created by root on Aug 4, 2015
-	* uvc_company = uvc_company, uvc_name = uvc_name
-*******************************************************************************/
+// -----------------------------------------------------------------------------
+/**
+* Project : AXI UVC
+*
+* File : axi_master_read_driver.sv
+*
+* Language : SystemVerilog
+*
+* Company : Elsys Eastern Europe
+*
+* Author : Andrea Erdeljan
+*
+* E-Mail : andrea.erdeljan@elsys-eastern.com
+*
+* Mentor : Darko Tomusilovic
+*
+* Description : drives read requests to slave
+*
+* Classes :	1. axi_master_read_driver
+*
+* Functions :	1. new (string name, uvm_component parent);
+*				2. void build_phase(uvm_phase phase)
+*
+* Tasks :	1. run_phase(uvm_phase phase)
+*			2. get_and_drive()
+*			3. read_data_channel()
+*			4. drive_addr_channel()
+*			5. reset()
+**/
+// -----------------------------------------------------------------------------
 
 //------------------------------------------------------------------------------
 //
@@ -58,7 +83,8 @@ class axi_master_read_driver extends uvm_driver #(axi_read_burst_frame);
 		// The driving should be triggered by an initial reset pulse
 		@(negedge vif.sig_reset);
 		do
-			@(posedge vif.sig_clock);
+			//@(posedge vif.sig_clock);
+			reset();
 		while(vif.sig_reset!==1);
 		// Start driving here
 		get_and_drive();
@@ -67,7 +93,10 @@ class axi_master_read_driver extends uvm_driver #(axi_read_burst_frame);
 	// get_and_drive
 	virtual protected task get_and_drive();
 		fork
-			reset();
+			forever begin
+				@(negedge vif.sig_reset);
+				reset();
+			end
 			drive_addr_channel();
 			read_data_channel();
 		join
@@ -79,12 +108,21 @@ class axi_master_read_driver extends uvm_driver #(axi_read_burst_frame);
 
 endclass : axi_master_read_driver
 
-	// reset
+//------------------------------------------------------------------------------
+/**
+* Task : reset
+* Purpose : reset
+* Inputs :
+* Outputs :
+* Ref :
+**/
+//------------------------------------------------------------------------------
 	task axi_master_read_driver::reset();
-		forever begin
-			@(negedge vif.sig_reset);
+		//forever begin
+			//@(negedge vif.sig_reset);
 			`uvm_info(get_type_name(), "Reset", UVM_MEDIUM)
 			@(posedge vif.sig_clock);	// reset can be asynchronous, but deassertion must be synchronous with clk
+			#1	// for simulation
 
 			vif.arid <= {ID_WIDTH {1'b0}};
 			vif.araddr <= {ADDR_WIDTH {1'b0}};
@@ -103,10 +141,18 @@ endclass : axi_master_read_driver
 				vif.rready <= ready_rand.getRandom();
 			else
 				vif.rready <= 1'b1;
-		end
+		//end
 	endtask : reset
 
-	// monitoring the data channel and sending responses back to the seq.
+//------------------------------------------------------------------------------
+/**
+* Task : read_data_channel
+* Purpose : monitoring the data channel and sending responses back to the seq.
+* Inputs :
+* Outputs :
+* Ref :
+**/
+//------------------------------------------------------------------------------
 	task axi_master_read_driver::read_data_channel();
 		axi_read_single_frame data_frame;
 		axi_read_burst_frame burst_frame;
@@ -145,7 +191,15 @@ endclass : axi_master_read_driver
 		end
 	endtask : read_data_channel
 
-	// get from seq. and drive signals to the address channel
+//------------------------------------------------------------------------------
+/**
+* Task : drive_addr_channel
+* Purpose : get from seq. and drive signals to the address channel
+* Inputs :
+* Outputs :
+* Ref :
+**/
+//------------------------------------------------------------------------------
 	task axi_master_read_driver::drive_addr_channel();
 		int bursts_in_pipe;
 

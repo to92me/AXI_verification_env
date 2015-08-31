@@ -1,8 +1,34 @@
-/******************************************************************************
-	* DVT CODE TEMPLATE: driver
-	* Created by root on Aug 4, 2015
-	* uvc_company = uvc_company, uvc_name = uvc_name
-*******************************************************************************/
+// -----------------------------------------------------------------------------
+/**
+* Project : AXI UVC
+*
+* File : axi_slave_read_driver.sv
+*
+* Language : SystemVerilog
+*
+* Company : Elsys Eastern Europe
+*
+* Author : Andrea Erdeljan
+*
+* E-Mail : andrea.erdeljan@elsys-eastern.com
+*
+* Mentor : Darko Tomusilovic
+*
+* Description : drives responses from slave to master
+*
+* Classes :	1. axi_slave_read_driver
+*
+* Functions :	1. new (string name, uvm_component parent);
+*				2. void build_phase(uvm_phase phase)
+*
+* Tasks :	1. run_phase(uvm_phase phase)
+*			2. get_and_drive()
+*			3. get_from_seq()
+*			4. drive_addr_channel()
+*			5. reset()
+*			6. drive_data_channel()
+**/
+// -----------------------------------------------------------------------------
 
 //------------------------------------------------------------------------------
 //
@@ -69,7 +95,7 @@ endclass : axi_slave_read_driver
 		// The driving should be triggered by an initial reset pulse
 		@(negedge vif.sig_reset);
 		do
-			@(posedge vif.sig_clock);
+			reset();
 		while(vif.sig_reset!==1);
 		// Start driving here
 		get_and_drive();
@@ -78,14 +104,27 @@ endclass : axi_slave_read_driver
 	// get_and_drive
 	task axi_slave_read_driver::get_and_drive();
 		fork
-			reset();
+			forever begin
+				@(negedge vif.sig_reset);
+				reset();
+			end
 			get_from_seq();
 			drive_addr_channel();
 			drive_data_channel();
 		join
 	endtask : get_and_drive
 
-	// get new burst from sequencer
+//------------------------------------------------------------------------------
+/**
+* Task : get_from_seq
+* Purpose : get new burst from sequencer
+*				phase 1 - send burst info. to seq.
+*				phase 2 - get single frame from seq.
+* Inputs :
+* Outputs :
+* Ref :
+**/
+//------------------------------------------------------------------------------
 	task axi_slave_read_driver::get_from_seq();
 
 		axi_read_base_frame item;
@@ -128,12 +167,21 @@ endclass : axi_slave_read_driver
 		end
 	endtask : get_from_seq
 
-	// reset
+//------------------------------------------------------------------------------
+/**
+* Task : reset
+* Purpose : reset
+* Inputs :
+* Outputs :
+* Ref :
+**/
+//------------------------------------------------------------------------------
 	task axi_slave_read_driver::reset();
-		forever begin
-			@(negedge vif.sig_reset);
+		//forever begin
+			//@(negedge vif.sig_reset);
 			`uvm_info(get_type_name(), "Reset", UVM_MEDIUM)
 			@(posedge vif.sig_clock);	// reset can be asynchronous, but deassertion must be synchronous with clk
+			#1	// for simulation
 
 			// reset signals
 			vif.rid <= {ID_WIDTH {1'b0}};
@@ -151,10 +199,18 @@ endclass : axi_slave_read_driver
 
 			// TODO: reset sequence
 
-		end
+		//end
 	endtask : reset
 
-	// address channel signals - collect burst request
+//------------------------------------------------------------------------------
+/**
+* Task : drive_addr_channel
+* Purpose : address channel signals - collect burst request
+* Inputs :
+* Outputs :
+* Ref :
+**/
+//------------------------------------------------------------------------------
 	task axi_slave_read_driver::drive_addr_channel();
 
 		axi_read_whole_burst burst_collected;
@@ -198,7 +254,15 @@ endclass : axi_slave_read_driver
 		end
 	endtask : drive_addr_channel
 
-	// data channel signals - drive responses
+//------------------------------------------------------------------------------
+/**
+* Task : drive_data_channel
+* Purpose : data channel signals - drive responses
+* Inputs :
+* Outputs :
+* Ref :
+**/
+//------------------------------------------------------------------------------
 	task axi_slave_read_driver::drive_data_channel();
 		axi_read_single_frame rsp;
 

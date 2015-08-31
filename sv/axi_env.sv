@@ -1,8 +1,24 @@
-/******************************************************************************
-	* DVT CODE TEMPLATE: env
-	* Created by root on Aug 2, 2015
-	* uvc_company = uvc_company, uvc_name = uvc_name
-*******************************************************************************/
+// -----------------------------------------------------------------------------
+/**
+* Project : AXI UVC
+*
+* File : axi_env.sv
+*
+* Language : SystemVerilog
+*
+* Company : Elsys Eastern Europe
+*
+* Author : Andrea Erdeljan
+*
+* E-Mail : andrea.erdeljan@elsys-eastern.com
+*
+* Mentor : Darko Tomusilovic
+*
+* Description : read environment
+*
+* Classes : 1. axi_env
+**/
+// -----------------------------------------------------------------------------
 
 //------------------------------------------------------------------------------
 //

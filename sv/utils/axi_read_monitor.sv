@@ -1,9 +1,34 @@
-/******************************************************************************
-	* DVT CODE TEMPLATE: monitor
-	* Created by root on Aug 4, 2015
-	* uvc_company = uvc_company, uvc_name = uvc_name
-*******************************************************************************/
-
+// -----------------------------------------------------------------------------
+/**
+* Project : AXI UVC
+*
+* File : axi_read_monitor.sv
+*
+* Language : SystemVerilog
+*
+* Company : Elsys Eastern Europe
+*
+* Author : Andrea Erdeljan
+*
+* E-Mail : andrea.erdeljan@elsys-eastern.com
+*
+* Mentor : Darko Tomusilovic
+*
+* Description : monitors data and address channels
+*
+* Classes :	1. axi_read_monitor
+*
+* Functions :	1. new (string name, uvm_component parent)
+*				2. void build_phase(uvm_phase phase)
+*				3. report_phase(uvm_phase phase)
+*				4. perform_transfer_coverage()
+*
+* Tasks :	1. run_phase(uvm_phase phase)
+*			2. collect_transactions()
+*			3. new_burst(axi_read_burst_frame collected_burst)
+*			4. new_frame(axi_read_single_frame collected_frame)
+**/
+// -----------------------------------------------------------------------------
 //------------------------------------------------------------------------------
 //
 // CLASS: axi_read_monitor
@@ -29,7 +54,8 @@ class axi_read_monitor extends uvm_monitor;
 	// contorl bit - is early termination of bursts allowed
 	bit terminate_enable = 1;
 
-	protected int unsigned num_single_frames = 0;
+	int unsigned num_single_frames = 0;
+	axi_read_single_frame error_frames[$];
 	axi_read_whole_burst burst_queue[$];
 	axi_read_whole_burst finished_bursts[$];
 
@@ -157,16 +183,19 @@ endclass : axi_read_monitor
 	task axi_read_monitor::new_frame(axi_read_single_frame collected_frame);
 		int i = 0;
 		bit last = 0;
+		axi_read_single_addr single_addr_frame;
 
 		if (checks_enable) begin
 			// check response
 			if(collected_frame.resp == SLVERR) begin
 				`uvm_error(get_type_name(), "Collected frame with SLVERR response")
+				error_frames.push_back(collected_frame);
 				if(terminate_enable)
 					last = 1;
 			end
 			else if (collected_frame.resp == DECERR) begin
 				`uvm_error(get_type_name(), "Collected frame with DECERR response")
+				error_frames.push_back(collected_frame);
 				if(terminate_enable)
 					last = 1;
 			end
@@ -177,16 +206,19 @@ endclass : axi_read_monitor
 						if(burst_queue[i].single_frames.size() == (burst_queue[i].len)) begin
 							if (!collected_frame.last) begin
 								`uvm_error(get_type_name(), "Last bit not set for last frame in burst")
+								error_frames.push_back(collected_frame);
 								last = 1;
 							end
 						end
 						else if(collected_frame.last) begin
 							`uvm_error(get_type_name(), "Last bit set for frame that is not last in burst")
+							error_frames.push_back(collected_frame);
 						end
 
 						// check response
 						if((burst_queue[i].lock == EXCLUSIVE) && (collected_frame.resp == OKAY)) begin
 							`uvm_error(get_type_name(), "Recieved OKAY response for EXCLUSIVE request")
+							error_frames.push_back(collected_frame);
 							if(terminate_enable)
 								last = 1;
 						end
@@ -194,16 +226,20 @@ endclass : axi_read_monitor
 						break;
 					end
 				end
-				if (i > burst_queue.size())
+				if (i > burst_queue.size()) begin
 					`uvm_error(get_type_name(), "Collected frame with id that was not requested")
+					error_frames.push_back(collected_frame);
+				end
 			sem.put(1);
 		end
 
 		sem.get(1);
 			for(i = 0; i < burst_queue.size(); i++) begin
 				if(burst_queue[i].id == collected_frame.id) begin
-					burst_queue[i].single_frames.push_back(collected_frame);
-					if(burst_queue[i].single_frames.size() == burst_queue[i].len)
+					single_addr_frame = axi_read_single_addr::type_id::create("single_addr_frame");
+					single_addr_frame.copy(collected_frame);
+					burst_queue[i].single_frames.push_back(single_addr_frame);
+					if(burst_queue[i].single_frames.size() == (burst_queue[i].len+1))
 						last = 1;
 					break;
 				end
@@ -255,7 +291,7 @@ endclass : axi_read_monitor
 				if(collected_burst.addr != ($floor(collected_burst.addr/(2**collected_burst.size))*(2**collected_burst.size)))
 					`uvm_error(get_type_name(), "Start address must be aligned for EXCLUSIVE access")
 				// the number of bytes must be a power of 2
-				if(!(collected_burst.len inside {1, 3, 7, 16, 31, 63, 127}))
+				if(!(((2**collected_burst.size) * collected_burst.len) inside {1, 3, 7, 15, 31, 63, 127}))
 					`uvm_error(get_type_name(), "The number of bytes to be transferred in an exclusive access burst must be a power of 2")
 				// max number of bytes in a burst is 128
 				if(((2**collected_burst.size) * collected_burst.len) > 128)
@@ -275,7 +311,7 @@ endclass : axi_read_monitor
 
 	// FUNCTION: UVM report() phase
 	function void axi_read_monitor::report_phase(uvm_phase phase);
-		`uvm_info(get_type_name(), $sformatf("Report: AXI monitor collected: %0d bursts, %0d single frames, of which %0d bursts were finished and %0d were not", burst_queue.size()+finished_bursts.size(), num_single_frames, finished_bursts.size(), burst_queue.size()), UVM_LOW);
+		`uvm_info(get_type_name(), $sformatf("Report: AXI monitor collected: %0d bursts, %0d single frames, of which %0d bursts were finished and %0d were not and %0d frames had an error", burst_queue.size()+finished_bursts.size(), num_single_frames, finished_bursts.size(), burst_queue.size(), error_frames.size()), UVM_LOW);
 	endfunction : report_phase
 
 `endif

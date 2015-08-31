@@ -1,12 +1,27 @@
-/*-----------------------------------------------------------------
-File name     : test_lib.sv
-Developers    : Kathleen Meade
-Created       : Tue May  4 15:13:46 2010
-Description   :
-Notes         :
--------------------------------------------------------------------
-Copyright 2010 (c) Cadence Design Systems
------------------------------------------------------------------*/
+// -----------------------------------------------------------------------------
+/**
+* Project : AXI UVC
+*
+* File : test_lib.sv
+*
+* Language : SystemVerilog
+*
+* Company : Elsys Eastern Europe
+*
+* Author : Andrea Erdeljan
+*
+* E-Mail : andrea.erdeljan@elsys-eastern.com
+*
+* Mentor : Darko Tomusilovic
+*
+* Description : contains tests
+*
+* Classes : 1. demo_base_test
+*           2. test_simple
+*           3. virtual_seq_test
+**/
+// -----------------------------------------------------------------------------
+
 
 //----------------------------------------------------------------
 //
@@ -31,8 +46,8 @@ class demo_base_test extends uvm_test;
     super.build_phase(phase);
     // Enable transaction recording for everything
     set_config_int("*", "recording_detail", UVM_FULL);
-    uvm_config_int::set(this, "tb0.axi0.read_monitor", "coverage_enable", 1);
-    uvm_config_int::set(this, "tb0.axi0.read_slave*.sequencer.arbit", "read_enable", 1);
+    uvm_config_int::set(this, "tb0.axi0.*", "coverage_enable", 1);
+    uvm_config_int::set(this, "tb0.axi0.*", "checks_enable", 1);
     uvm_config_int::set(this, "*", "terminate_enable", 1);
     uvm_config_int::set(this, "tb0.axi0.read_master.driver", "master_ready_rand_enable", 1);
     uvm_config_int::set(this, "tb0.axi0.read_slave*.driver", "slave_ready_rand_enable", 1);

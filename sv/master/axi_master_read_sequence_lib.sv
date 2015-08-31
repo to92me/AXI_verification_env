@@ -1,9 +1,26 @@
-/******************************************************************************
-* DVT CODE TEMPLATE: sequence library
-* Created by root on Aug 4, 2015
-* uvc_company = uvc_company, uvc_name = uvc_name
-* axi_read_burst_frame = axi_read_burst_frame
-*******************************************************************************/
+// -----------------------------------------------------------------------------
+/**
+* Project : AXI UVC
+*
+* File : axi_master_read_sequence_lib.sv
+*
+* Language : SystemVerilog
+*
+* Company : Elsys Eastern Europe
+*
+* Author : Andrea Erdeljan
+*
+* E-Mail : andrea.erdeljan@elsys-eastern.com
+*
+* Mentor : Darko Tomusilovic
+*
+* Description : contains master sequences
+*
+* Classes :	1. axi_master_read_base_seq
+*			2. axi_master_read_transfer_seq
+*			3. axi_master_read_multiple_addr
+**/
+// -----------------------------------------------------------------------------
 
 //------------------------------------------------------------------------------
 //

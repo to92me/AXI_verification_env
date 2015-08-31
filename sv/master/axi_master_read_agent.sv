@@ -1,8 +1,29 @@
-/******************************************************************************
-	* DVT CODE TEMPLATE: agent
-	* Created by andrea on Aug 10, 2015
-	* uvc_company = axi, uvc_name = master_read
-*******************************************************************************/
+// -----------------------------------------------------------------------------
+/**
+* Project : AXI UVC
+*
+* File : axi_master_read_agent.sv
+*
+* Language : SystemVerilog
+*
+* Company : Elsys Eastern Europe
+*
+* Author : Andrea Erdeljan
+*
+* E-Mail : andrea.erdeljan@elsys-eastern.com
+*
+* Mentor : Darko Tomusilovic
+*
+* Description : monitor, driver and seqencer
+*
+* Classes :	1. axi_master_read_agent
+*
+* Functions :	1. new (string name, uvm_component parent)
+*				2. void build_phase(uvm_phase phase)
+*				3. void connect_phase(uvm_phase phase)
+*				4. void update_config(input axi_master_config config_obj)
+**/
+// -----------------------------------------------------------------------------
 
 //------------------------------------------------------------------------------
 //
