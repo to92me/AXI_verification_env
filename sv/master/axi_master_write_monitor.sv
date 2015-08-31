@@ -1,137 +1,127 @@
-/******************************************************************************
-	* DVT CODE TEMPLATE: monitor
-	* Created by root on Aug 2, 2015
-	* uvc_company = uvc_company, uvc_name = uvc_name
-*******************************************************************************/
+`ifndef AXI_MASTER_WRITE_MAIN_MONITOR_SCH
+`define AXI_MASTER_WRITE_MAIN_MONITOR_SVH
 
 //------------------------------------------------------------------------------
 //
-// CLASS: uvc_company_uvc_name_monitor
+// CLASS: uvc_company_uvc_name_component
 //
 //------------------------------------------------------------------------------
 
+class axi_master_write_main_monitor extends uvm_monitor;
 
-class axi_master_write_monitor extends uvm_monitor;
-
-	// This property is the virtual interfaced needed for this component to drive
-	// and view HDL signals.
-	protected virtual axi_if vif;
-
-	// Configuration object
-	axi_master_config config_obj;
-
-	// The following two bits are used to control whether checks and coverage are
-	// done both in the monitor class and the interface.
-	bit checks_enable = 1;
-	bit coverage_enable = 1;
-
-	// TODO definisati sta monitor salje
-	axi_frame frame;
-	axi_single_frame single_frame;
-
-	//uvm_analysis_port #(uvc_company_uvc_name_item) item_collected_port;
-
-	uvm_analysis_port#(axi_frame) axi_frame_collected_port;
-	uvm_analysis_port#(axi_single_frame) axi_signle_frame_collected_port;
-
-	// The following property holds the transaction information currently
-	// begin captured (by the collect_address_phase and data_phase methods).
-	//	protected  trans_collected;
-
-	// Transfer collected covergroup
+	static axi_master_write_main_monitor 					main_monitor_instance;
+	axi_master_write_address_collector 						address_collector;
+	axi_master_write_data_collector							data_collector;
+	axi_master_write_response_collector						response_collector;
+	axi_master_write_coverage								coverage;
+	axi_master_write_checker								checker_util;// ne moze da se zove samo checker
+	uvm_analysis_port#(axi_write_address_collector_mssg)	addr_port;
+	uvm_analysis_port#(axi_write_data_collector_mssg)		data_port;
+	uvm_analysis_port#(axi_write_response_collector_mssg) 	response_port;
 
 
-
-	covergroup cov_trans;
-		FRAME_LOCK : coverpoint frame.lock{
-			bins NORMAL = {lock_enum::NORMAL};
-			bins EXCLUSIVE = {lock_enum::EXCLUSIVE};
-		}
-
-		FRAME_ADDRESS : coverpoint frame.addr{
-			bins ADDRESS = default;
-		}
-	endgroup : cov_trans
-
-	// Provide implementations of virtual methods such as get_type_name and create
-	`uvm_component_utils_begin(axi_master_write_monitor)
-		`uvm_field_int(checks_enable, UVM_DEFAULT)
-		`uvm_field_int(coverage_enable, UVM_DEFAULT)
-	`uvm_component_utils_end
+	`uvm_component_utils(axi_master_write_main_monitor)
 
 	// new - constructor
 	function new (string name, uvm_component parent);
 		super.new(name, parent);
-		cov_trans = new();
-		cov_trans.set_inst_name({get_full_name(), ".cov_trans"});
-		frame = new();
-		single_frame = new();
-		axi_frame_collected_port = new("axi_frame_collected_port", this);
-		axi_signle_frame_collected_port = new("axi_signle_frame_collected_port", this);
+
+	address_collector 	= 	axi_master_write_address_collector::type_id::create("AxiMasterWriteAddressCollector",this);
+	data_collector 		=	axi_master_write_data_collector::type_id::create("AxiMasterWriteDateCollector", this);
+	response_collector	= 	axi_master_write_response_collector::type_id::create("AxiMasterWriteResponseCollector", this );
+	coverage	     	= 	axi_master_write_coverage::type_id::create("AxiMasterWriteCoverage", this);
+	checker_util		= 	axi_master_write_checker::type_id::create("AxiMasterWriteChecker", this);
+
+	addr_port 			= new("AddressCollectedPort",this);
+	data_port 			= new("DataCollectedPort",this);
+	response_port		= new("ResponseCollectedPodr",this);
+
 	endfunction : new
 
-	// build_phase
 	function void build_phase(uvm_phase phase);
 		super.build_phase(phase);
-		if(!uvm_config_db#(virtual axi_if)::get(this, "", "vif", vif))
-			`uvm_fatal("NOVIF",{"virtual interface must be set for: ",get_full_name(),".vif"});
-		// Propagate the configuration object
-		if(!uvm_config_db#(axi_config)::get(this, "", "config_obj", config_obj))
-			`uvm_fatal("NOCONFIG",{"Config object must be set for: ",get_full_name(),".config_obj"})
-	endfunction: build_phase
+		address_collector.setMainMonitorInstance(this);
+		data_collector.setMainMonitorInstance(this);
+		response_collector.setMainMonitorInstance(this);
 
-	// run_phase
-	virtual task run_phase(uvm_phase phase);
-		process main; // used by the reset handling mechanism
-		// Start monitoring only after an initial reset pulse
-		@(negedge vif.sig_reset);
-		do
-			@(posedge vif.clock);
-		while(vif.sig_reset!==1);
-		// Start monitoring here with reset handling mechanism
-		forever begin
-			fork
-				// Start the monitoring thread
-				begin
-					main=process::self();
-					collect_transactions();
-				end
-				// Monitor the reset signal
-				begin
-					@(negedge vif.sig_reset);
-					reset_monitor();
-					if(main) main.kill();
-				end
-			join_any
-		end
-	endtask : run_phase
+	endfunction : build_phase
 
-	// collect_transactions
-	virtual protected task collect_transactions();
-		forever begin
-			@(posedge vif.sig_clock);
-			// TODO : Fill this place with the logic for collecting the transfer data
-			// ...
-			`uvm_info(get_full_name(), $sformatf("Transfer collected :\n!s",! trans_collected.sprint()), UVM_MEDIUM)
-			if (checks_enable)
-				perform_transfer_checks();
-			if (coverage_enable)
-				perform_transfer_coverage();
-			item_collected_port.write(trans_collected);
-		end
-	endtask : collect_transactions
+	task run_phase(uvm_phase phase);
+		this.main();
+	endtask
 
-	// perform_transfer_checks
-	virtual protected function void perform_transfer_checks();
-		// TODO : Perform checks here
-		// ...
-	endfunction : perform_transfer_checks
 
-	// perform_transfer_coverage
-	virtual protected function void perform_transfer_coverage();
-		cov_trans.sample();
-		// TODO : Collect coverage here
-		// ...
-	endfunction : perform_transfer_coverage
 
-endclass : uvc_company_uvc_name_monitor
+	extern function static axi_master_write_main_monitor getMonitorMainInstance(input string name, uvm_component parent);
+
+	extern task pushAddressItem(axi_write_address_collector_mssg mssg0);
+	extern task pushDataItem(axi_write_data_collector_mssg mssg0);
+	extern task pushResponseItem(axi_write_response_collector_mssg mssg0);
+	extern task main();
+
+
+endclass : axi_master_write_main_monitor
+
+	function static axi_master_write_main_monitor axi_master_write_main_monitor::getMonitorMainInstance(input string name, input uvm_component parent);
+	    if(main_monitor_instance == null)
+		    begin
+			    main_monitor_instance = new(name, parent);
+			    $display("Creating Axi Master Main Monitor");
+		    end
+		return main_monitor_instance;
+	endfunction
+
+	task axi_master_write_main_monitor::main();
+		fork
+			address_collector.main();
+			data_collector.main();
+			response_collector.main();
+			checker_util.main();
+		join
+	endtask
+
+	task axi_master_write_main_monitor::pushAddressItem(input axi_write_address_collector_mssg mssg0);
+		axi_write_address_collector_mssg mssg1, mssg2;
+
+		mssg1 = new();
+		mssg2 = new();
+		mssg1.copyMssg(mssg0);
+		mssg2.copyMssg(mssg0);
+
+		coverage.pushAddrItem(mssg0);
+		checker_util.pushAddressItem(mssg1);
+		addr_port.write(mssg2);
+
+	endtask
+
+	task axi_master_write_main_monitor::pushDataItem(input axi_write_data_collector_mssg mssg0);
+		axi_write_data_collector_mssg mssg1, mssg2;
+
+		mssg1 = new();
+		mssg2 = new();
+		mssg1.copyMssg(mssg0);
+		mssg2.copyMssg(mssg0);
+
+		coverage.pushDatatItem(mssg0);
+		checker_util.pushDataItem(mssg1);
+		data_port.write(mssg2);
+
+	endtask
+
+	task axi_master_write_main_monitor::pushResponseItem(input axi_write_response_collector_mssg mssg0);
+		axi_write_response_collector_mssg mssg1, mssg2;
+
+
+		mssg1 = new();
+		mssg2 = new();
+		mssg1.copyMssg(mssg0);
+		mssg2.copyMssg(mssg0);
+
+		coverage.pushResponseItem(mssg0);
+		checker_util.pushResponseItem(mssg1);
+		response_port.write(mssg2);
+
+	endtask
+
+
+`endif

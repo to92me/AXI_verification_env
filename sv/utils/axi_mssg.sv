@@ -332,5 +332,230 @@ function void axi_slave_memory_response::setValid(input true_false_enum write_va
 	this.valid_data = write_valid;
 endfunction
 
+class axi_write_address_collector_mssg extends uvm_sequence_item;
+	bit[ID_WIDTH	-1 	: 0]		id;
+	bit[ADDR_WIDTH 	- 1 : 0]		addr;
+	bit [7:0]						len;
+	burst_size_enum					size;
+	burst_type_enum					burst_type;
+	lock_enum						lock;
+	bit [3:0]						cache;
+	bit [2:0]						prot;
+	bit [3:0]						qos;
+	bit [3:0]						region;
+	//								user;
+
+ 	function new();
+	 	super.new("axi_write_address_collector_mssg");
+ 	endfunction
+
+	// Get addr
+	function bit[ADDR_WIDTH-1:0] getAddr();
+		return addr;
+	endfunction
+
+	// Set addr
+	function void setAddr(bit[ADDR_WIDTH-1:0] addr);
+		this.addr = addr;
+	endfunction
+
+	// Get burst_type
+	function burst_type_enum getBurst_type();
+		return burst_type;
+	endfunction
+
+	// Set burst_type
+	function void setBurst_type(burst_type_enum burst_type);
+		this.burst_type = burst_type;
+	endfunction
+
+	// Get cache
+	function bit[3:0] getCache();
+		return cache;
+	endfunction
+
+	// Set cache
+	function void setCache(bit[3:0] cache);
+		this.cache = cache;
+	endfunction
+
+	// Get id
+	function bit[ID_WIDTH-1:0] getId();
+		return id;
+	endfunction
+
+	// Set id
+	function void setId(bit[ID_WIDTH-1:0] id);
+		this.id = id;
+	endfunction
+
+	// Get len
+	function bit[7:0] getLen();
+		return len;
+	endfunction
+
+	// Set len
+	function void setLen(bit[7:0] len);
+		this.len = len;
+	endfunction
+
+	// Get lock
+	function lock_enum getLock();
+		return lock;
+	endfunction
+
+	// Set lock
+	function void setLock(lock_enum lock);
+		this.lock = lock;
+	endfunction
+
+	// Get prot
+	function bit[2:0] getProt();
+		return prot;
+	endfunction
+
+	// Set prot
+	function void setProt(bit[2:0] prot);
+		this.prot = prot;
+	endfunction
+
+	// Get qos
+	function bit[3:0] getQos();
+		return qos;
+	endfunction
+
+	// Set qos
+	function void setQos(bit[3:0] qos);
+		this.qos = qos;
+	endfunction
+
+	// Get region
+	function bit[3:0] getRegion();
+		return region;
+	endfunction
+
+	// Set region
+	function void setRegion(bit[3:0] region);
+		this.region = region;
+	endfunction
+
+	// Get size
+	function burst_size_enum getSize();
+		return size;
+	endfunction
+
+	// Set size
+	function void setSize(burst_size_enum size);
+		this.size = size;
+	endfunction
+
+	function void copyMssg(ref axi_write_address_collector_mssg copy_mssg);
+		this.addr			= copy_mssg.getAddr();
+		this.burst_type 	= copy_mssg.getBurst_type();
+		this.cache 			= copy_mssg.getCache();
+		this.id 			= copy_mssg.getId();
+		this.len 			= copy_mssg.getLen();
+		this.lock 			= copy_mssg.getLock();
+		this.prot 			= copy_mssg.getProt();
+		this.qos 			= copy_mssg.getQos();
+		this.region 		= copy_mssg.getRegion();
+		this.size 			= copy_mssg.getSize();
+	endfunction
+endclass
+
+class axi_write_data_collector_mssg extends uvm_sequence_item;
+	bit[ID_WIDTH - 1 	: 0]		id;
+	bit[DATA_WIDTH - 1 	: 0]    	data;
+	bit[STRB_WIDTH - 1 	: 0]		strobe;
+	true_false_enum					last;
+
+	function new();
+	 	super.new("axi_write_data_collector_mssg");
+ 	endfunction
+
+	// Get data
+	function bit[DATA_WIDTH-1:0] getData();
+		return data;
+	endfunction
+
+	// Set data
+	function void setData(bit[DATA_WIDTH-1:0] data);
+		this.data = data;
+	endfunction
+
+	// Get id
+	function bit[ID_WIDTH-1:0] getId();
+		return id;
+	endfunction
+
+	// Set id
+	function void setId(bit[ID_WIDTH-1:0] id);
+		this.id = id;
+	endfunction
+
+	// Get last
+	function true_false_enum getLast();
+		return last;
+	endfunction
+
+	// Set last
+	function void setLast(true_false_enum last);
+		this.last = last;
+	endfunction
+
+	// Get strobe
+	function bit[STRB_WIDTH-1:0] getStrobe();
+		return strobe;
+	endfunction
+
+	// Set strobe
+	function void setStrobe(bit[STRB_WIDTH-1:0] strobe);
+		this.strobe = strobe;
+	endfunction
+
+	function void copyMssg(ref axi_write_data_collector_mssg copy_mssg);
+		this.data 	= copy_mssg.getData();
+		this.id 	= copy_mssg.getId();
+		this.last 	= copy_mssg.getLast();
+		this.strobe = copy_mssg.getStrobe();
+	endfunction
+endclass
+
+class axi_write_response_collector_mssg extends uvm_sequence_item;
+	bit [ID_WIDTH-1 : 0]		id;
+	bit [1:0]					bresp;
+
+	function new();
+	 	super.new("axi_write_response_collector_mssg");
+ 	endfunction
+
+
+	// Get bresp
+	function bit[1:0] getResp();
+		return bresp;
+	endfunction
+
+	// Set bresp
+	function void setResp(bit[1:0] bresp);
+		this.bresp = bresp;
+	endfunction
+
+	// Get id
+	function bit[ID_WIDTH-1:0] getId();
+		return id;
+	endfunction
+
+	// Set id
+	function void setId(bit[ID_WIDTH-1:0] id);
+		this.id = id;
+	endfunction
+
+	function void copyMssg(ref axi_write_response_collector_mssg copy_mssg);
+		this.bresp	= copy_mssg.getResp();
+		this.id 	= copy_mssg.getId();
+	endfunction
+
+endclass
+
 `endif
 

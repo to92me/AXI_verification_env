@@ -1,123 +1,126 @@
-/******************************************************************************
-	* DVT CODE TEMPLATE: monitor
-	* Created by root on Aug 2, 2015
-	* uvc_company = uvc_company, uvc_name = uvc_name
-*******************************************************************************/
+`ifndef AXI_slave_WRITE_MAIN_MONITOR_SCH
+`define AXI_slave_WRITE_MAIN_MONITOR_SVH
 
 //------------------------------------------------------------------------------
 //
-// CLASS: uvc_company_uvc_name_monitor
+// CLASS: uvc_company_uvc_name_component
 //
 //------------------------------------------------------------------------------
 
-class axi_slave_write_monitor extends uvm_monitor;
+class axi_slave_write_main_monitor extends uvm_monitor;
 
-	// This property is the virtual interfaced needed for this component to drive
-	// and view HDL signals.
-	protected virtual axi_if vif;
-
-	// Configuration object
-	axi_slave_config config_obj;
-
-	bit checks_enable = 1;
-	bit coverage_enable = 1;
-
-	protected axi_frame trans_collected;
-
-	uvm_analysis_port#(axi_frame) item_collected_port;
-
-	uvm_blocking_peek_imp#(axi_frame, axi_slave_write_monitor) addr_trans_export;
+	static axi_slave_write_main_monitor 					main_monitor_instance;
+	axi_slave_write_address_collector 						address_collector;
+	axi_slave_write_data_collector							data_collector;
+	axi_slave_write_response_collector						response_collector;
+	axi_slave_write_coverage								coverage;
+	axi_slave_write_checker								checker_util;// ne moze da se zove samo checker
+	uvm_analysis_port#(axi_write_address_collector_mssg)	addr_port;
+	uvm_analysis_port#(axi_write_data_collector_mssg)		data_port;
+	uvm_analysis_port#(axi_write_response_collector_mssg) 	response_port;
 
 
-
-	// Transfer collected covergroup
-
-	covergroup cov_trans;
-		option.per_instance = 1;
-		// TODO: Fill this place with relevant cover points
-
-	endgroup : cov_trans
-
-
-
-
-	// Provide implementations of virtual methods such as get_type_name and create
-	`uvm_component_utils_begin(uvc_company_uvc_name_monitor)
-		`uvm_field_int(checks_enable, UVM_DEFAULT)
-		`uvm_field_int(coverage_enable, UVM_DEFAULT)
-	`uvm_component_utils_end
+	`uvm_component_utils(axi_slave_write_main_monitor)
 
 	// new - constructor
 	function new (string name, uvm_component parent);
 		super.new(name, parent);
-		cov_trans = new();
-		cov_trans.set_inst_name({get_full_name(), ".cov_trans"});
-		trans_collected = new();
-		item_collected_port = new("item_collected_port", this);
+
+	address_collector 	= 	axi_slave_write_address_collector::type_id::create("AxislaveWriteAddressCollector",this);
+	data_collector 		=	axi_slave_write_data_collector::type_id::create("AxislaveWriteDateCollector", this);
+	response_collector	= 	axi_slave_write_response_collector::type_id::create("AxislaveWriteResponseCollector", this );
+	coverage	     	= 	axi_slave_write_coverage::type_id::create("AxislaveWriteCoverage", this);
+	checker_util		= 	axi_slave_write_checker::type_id::create("AxislaveWriteChecker", this);
+
+	addr_port 			= new("AddressCollectedPort",this);
+	data_port 			= new("DataCollectedPort",this);
+	response_port		= new("ResponseCollectedPodr",this);
+
 	endfunction : new
 
-	// build_phase
 	function void build_phase(uvm_phase phase);
 		super.build_phase(phase);
-		if(!uvm_config_db#(virtual axi_if)::get(this, "", "vif", vif))
-			`uvm_fatal("NOVIF",{"virtual interface must be set for: ",get_full_name(),".vif"});
-		// Propagate the configuration object
-		if(!uvm_config_db#(axi_slave_config)::get(this, "", "config_obj", config_obj))
-			`uvm_fatal("NOCONFIG",{"Config object must be set for: ",get_full_name(),".config_obj"})
-	endfunction: build_phase
+		address_collector.setMainMonitorInstance(this);
+		data_collector.setMainMonitorInstance(this);
+		response_collector.setMainMonitorInstance(this);
 
-	// run_phase
-	virtual task run_phase(uvm_phase phase);
-		process main; // used by the reset handling mechanism
-		// Start monitoring only after an initial reset pulse
-		@(negedge vif.sig_reset);
-		do
-			@(posedge vif.clock);
-		while(vif.sig_reset!==1);
-		// Start monitoring here with reset handling mechanism
-		forever begin
-			fork
-				// Start the monitoring thread
-				begin
-					main=process::self();
-					collect_transactions();
-				end
-				// Monitor the reset signal
-				begin
-					@(negedge vif.sig_reset);
-					reset_monitor();
-					if(main) main.kill();
-				end
-			join_any
-		end
-	endtask : run_phase
+	endfunction : build_phase
 
-	// collect_transactions
-	virtual protected task collect_transactions();
-		forever begin
-			@(posedge vif.sig_clock);
-			// TODO : Fill this place with the logic for collecting the transfer data
-			// ...
-			`uvm_info(get_full_name(), $sformatf("Transfer collected :\n!s",! trans_collected.sprint()), UVM_MEDIUM)
-			if (checks_enable)
-				perform_transfer_checks();
-			if (coverage_enable)
-				perform_transfer_coverage();
-			item_collected_port.write(trans_collected);
-		end
-	endtask : collect_transactions
+	task run_phase(uvm_phase phase);
+		this.main();
+	endtask
 
-	// perform_transfer_checks
-	virtual protected function void perform_transfer_checks();
-		// TODO : Perform checks here
-		// ...
-	endfunction : perform_transfer_checks
 
-	// perform_transfer_coverage
-	virtual protected function void perform_transfer_coverage();
-		cov_trans.sample();
-		// TODO : Collect coverage here
-		// ...
-	endfunction : perform_transfer_coverage
+	extern function static axi_slave_write_main_monitor getMonitorMainInstance(input string name, uvm_component parent);
 
-endclass : uvc_company_uvc_name_monitor
+	extern task pushAddressItem(axi_write_address_collector_mssg mssg0);
+	extern task pushDataItem(axi_write_data_collector_mssg mssg0);
+	extern task pushResponseItem(axi_write_response_collector_mssg mssg0);
+	extern task main();
+
+
+endclass : axi_slave_write_main_monitor
+
+	function static axi_slave_write_main_monitor axi_slave_write_main_monitor::getMonitorMainInstance(input string name, input uvm_component parent);
+	    if(main_monitor_instance == null)
+		    begin
+			    main_monitor_instance = new(name, parent);
+			    $display("Creating Axi slave Main Monitor");
+		    end
+		return main_monitor_instance;
+	endfunction
+
+	task axi_slave_write_main_monitor::main();
+		fork
+			address_collector.main();
+			data_collector.main();
+			response_collector.main();
+			checker_util.main();
+		join
+	endtask
+
+	task axi_slave_write_main_monitor::pushAddressItem(input axi_write_address_collector_mssg mssg0);
+		axi_write_address_collector_mssg mssg1, mssg2;
+
+		mssg1 = new();
+		mssg2 = new();
+		mssg1.copyMssg(mssg0);
+		mssg2.copyMssg(mssg0);
+
+		coverage.pushAddrItem(mssg0);
+		checker_util.pushAddressItem(mssg1);
+		addr_port.write(mssg2);
+
+	endtask
+
+	task axi_slave_write_main_monitor::pushDataItem(input axi_write_data_collector_mssg mssg0);
+		axi_write_data_collector_mssg mssg1, mssg2;
+
+		mssg1 = new();
+		mssg2 = new();
+		mssg1.copyMssg(mssg0);
+		mssg2.copyMssg(mssg0);
+
+		coverage.pushDatatItem(mssg0);
+		checker_util.pushDataItem(mssg1);
+		data_port.write(mssg2);
+
+	endtask
+
+	task axi_slave_write_main_monitor::pushResponseItem(input axi_write_response_collector_mssg mssg0);
+		axi_write_response_collector_mssg mssg1, mssg2;
+
+
+		mssg1 = new();
+		mssg2 = new();
+		mssg1.copyMssg(mssg0);
+		mssg2.copyMssg(mssg0);
+
+		coverage.pushResponseItem(mssg0);
+		checker_util.pushResponseItem(mssg1);
+		response_port.write(mssg2);
+
+	endtask
+
+
+`endif

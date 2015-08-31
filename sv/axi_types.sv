@@ -112,4 +112,10 @@ typedef union {
 	bit 		[7 : 0]one_bit;
 }bit_byte_union;
 
+typedef enum{
+	WAIT_WALID_TRANSACTION = 0,
+	SEND_COLLECTED_DATA = 1
+}axi_write_base_collector_state_enum;
+
+
 `endif
