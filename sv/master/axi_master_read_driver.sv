@@ -29,15 +29,14 @@
 **/
 // -----------------------------------------------------------------------------
 
+`ifndef AXI_MASTER_READ_DRIVER_SV
+`define AXI_MASTER_READ_DRIVER_SV
+
 //------------------------------------------------------------------------------
 //
 // CLASS: axi_master_read_driver
 //
 //------------------------------------------------------------------------------
-
-`ifndef AXI_MASTER_READ_DRIVER_SV
-`define AXI_MASTER_READ_DRIVER_SV
-
 class axi_master_read_driver extends uvm_driver #(axi_read_burst_frame);
 
 	// The virtual interface used to drive and view HDL signals.

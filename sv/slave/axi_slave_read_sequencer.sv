@@ -22,15 +22,15 @@
 *				2. void build_phase(uvm_phase phase)
 **/
 // -----------------------------------------------------------------------------
+
+`ifndef AXI_SLAVE_READ_SEQUENCER_SV
+`define AXI_SLAVE_READ_SEQUENCER_SV
+
 //------------------------------------------------------------------------------
 //
 // CLASS: axi_slave_read_sequencer
 //
 //------------------------------------------------------------------------------
-
-`ifndef AXI_SLAVE_READ_SEQUENCER_SV
-`define AXI_SLAVE_READ_SEQUENCER_SV
-
 class axi_slave_read_sequencer extends uvm_sequencer #(axi_read_base_frame);
 
 	// Configuration object

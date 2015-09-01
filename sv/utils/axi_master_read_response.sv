@@ -29,15 +29,14 @@
 **/
 // -----------------------------------------------------------------------------
 
+`ifndef AXI_MASTER_READ_RESPONSE_SV
+`define AXI_MASTER_READ_RESPONSE_SV
+
 //------------------------------------------------------------------------------
 //
 // CLASS: axi_master_read_response
 //
 //------------------------------------------------------------------------------
-
-`ifndef AXI_MASTER_READ_RESPONSE_SV
-`define AXI_MASTER_READ_RESPONSE_SV
-
 class axi_master_read_response extends uvm_component;
 
 	// queue that holds all the sent bursts that have not been completed

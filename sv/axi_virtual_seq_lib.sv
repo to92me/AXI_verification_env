@@ -22,7 +22,6 @@
 **/
 // -----------------------------------------------------------------------------
 
-
 `ifndef AXI_VIRTUAL_SEQUENCE_LIB_SV
 `define AXI_VIRTUAL_SEQUENCE_LIB_SV
 

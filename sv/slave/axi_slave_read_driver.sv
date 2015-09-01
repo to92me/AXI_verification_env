@@ -30,15 +30,14 @@
 **/
 // -----------------------------------------------------------------------------
 
+`ifndef AXI_SLAVE_READ_DRIVER_SV
+`define AXI_SLAVE_READ_DRIVER_SV
+
 //------------------------------------------------------------------------------
 //
 // CLASS: axi_slave_read_driver
 //
 //------------------------------------------------------------------------------
-
-`ifndef AXI_SLAVE_READ_DRIVER_SV
-`define AXI_SLAVE_READ_DRIVER_SV
-
 class axi_slave_read_driver extends uvm_driver #(axi_read_base_frame, axi_read_base_frame);
 
 	// The virtual interface used to drive and view HDL signals.
@@ -79,7 +78,14 @@ class axi_slave_read_driver extends uvm_driver #(axi_read_base_frame, axi_read_b
 
 endclass : axi_slave_read_driver
 
-	// build_phase
+//------------------------------------------------------------------------------
+/**
+* Function : build_phase
+* Purpose : build
+* Parameters :	1. phase
+* Return :	void
+**/
+//------------------------------------------------------------------------------
 	function void axi_slave_read_driver::build_phase(uvm_phase phase);
 		super.build_phase(phase);
 		// Propagate the interface
@@ -90,7 +96,15 @@ endclass : axi_slave_read_driver
 				`uvm_fatal("NOCONFIG",{"Config object must be set for: ",get_full_name(),".config_obj"})
 	endfunction: build_phase
 
-	// run_phase
+//------------------------------------------------------------------------------
+/**
+* Task : run_phase
+* Purpose : run
+* Inputs :	1. phase
+* Outputs :
+* Ref :
+**/
+//------------------------------------------------------------------------------
 	task axi_slave_read_driver::run_phase(uvm_phase phase);
 		// The driving should be triggered by an initial reset pulse
 		@(negedge vif.sig_reset);
@@ -101,7 +115,15 @@ endclass : axi_slave_read_driver
 		get_and_drive();
 	endtask : run_phase
 
-	// get_and_drive
+//------------------------------------------------------------------------------
+/**
+* Task : get_and_drive
+* Purpose : fork required tasks
+* Inputs :
+* Outputs :
+* Ref :
+**/
+//------------------------------------------------------------------------------
 	task axi_slave_read_driver::get_and_drive();
 		fork
 			forever begin

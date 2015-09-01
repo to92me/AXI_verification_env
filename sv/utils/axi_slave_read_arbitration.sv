@@ -30,15 +30,14 @@
 **/
 // -----------------------------------------------------------------------------
 
+`ifndef AXI_SLAVE_READ_ARBITRATION_SV
+`define AXI_SLAVE_READ_ARBITRATION_SV
+
 //------------------------------------------------------------------------------
 //
 // CLASS: axi_slave_read_arbitration
 //
 //------------------------------------------------------------------------------
-
-`ifndef AXI_SLAVE_READ_ARBITRATION_SV
-`define AXI_SLAVE_READ_ARBITRATION_SV
-
 class axi_slave_read_arbitration extends uvm_component;
 
 	// fields

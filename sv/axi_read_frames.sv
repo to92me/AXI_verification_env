@@ -199,8 +199,13 @@ class axi_read_burst_frame extends axi_read_base_frame;
 		}
 	}
 	constraint default_len_constraint {
+		if (default_len) {
+			len == 0;
+		}
+	}
+	constraint default_size_constraint {
 		if (default_size) {
-			size == BYTE_8;
+			size == BYTE_8;	// TODO : FIX
 		}
 	}
 	constraint default_burst_type_constraint {

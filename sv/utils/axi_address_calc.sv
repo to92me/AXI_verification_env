@@ -99,10 +99,12 @@ endtask : readMemory
 //------------------------------------------------------------------------------
 task axi_address_calc::writeMemory(input axi_slave_config config_obj, input bit[DATA_WIDTH-1 : 0] input_data);
 	mem_access write_data;	// union used for writing individual bytes
+	int tmp;
 
 	write_data.data = input_data;
 
-	for(int i = 0; i < (this.upper_byte_lane - this.lower_byte_lane + 1); i++) begin
+	tmp = this.upper_byte_lane - this.lower_byte_lane + 1;
+	for(int i = 0; i < tmp; i++) begin
 			config_obj.writeMemory(this.addr, write_data.lane[this.lower_byte_lane]);
 			lower_byte_lane++;
 			this.addr++;
