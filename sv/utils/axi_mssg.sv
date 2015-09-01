@@ -197,6 +197,10 @@ class axi_slave_write_addr_mssg ;
 		this.len = len;
 	endfunction
 
+	function void decrementLen(input int decrement_for);
+			this.len = this.len - decrement_for;
+	endfunction
+
 endclass
 
 
@@ -556,6 +560,7 @@ class axi_write_response_collector_mssg extends uvm_sequence_item;
 	endfunction
 
 endclass
+
 
 `endif
 

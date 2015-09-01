@@ -33,7 +33,7 @@ class axi_slave_write_agent extends uvm_agent;
 	// build_phase
 	function void build_phase(uvm_phase phase);
 		super.build_phase(phase);
-		monitor = axi_slave_write_main_monitor::type_id::create("monitor", this);
+		monitor = axi_slave_write_main_monitor::getMonitorMainInstance(this);
 
 		if(!uvm_config_db#(axi_slave_config)::get(this,"","axi_slave_config", config_obj))
 			`uvm_fatal("NOCONFIG",{"Config object must be set for: ",get_full_name(),".config_obj"}) // FIXME slave config fix

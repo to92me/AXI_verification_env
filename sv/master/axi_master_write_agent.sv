@@ -31,8 +31,8 @@ class axi_master_write_agent extends uvm_agent;
 	// build_phase
 	function void build_phase(uvm_phase phase);
 		super.build_phase(phase);
-		monitor = axi_master_write_main_monitor::type_id::create("monitor", this);
-
+		//monitor = axi_master_write_main_monitor::type_id::create("monitor", this);
+		monitor = axi_master_write_main_monitor::getMonitorMainInstance(this);
 //		 Propagate the configuration object
 		if(!uvm_config_db#(axi_master_config)::get(this, "", "axi_master_config", config_obj))
 			`uvm_fatal("NOCONFIG",{"Config object must be set for: ",get_full_name(),".config_obj"})

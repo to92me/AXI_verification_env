@@ -51,14 +51,28 @@ package axi_pkg;
 	typedef class axi_master_write_response_collector;				//
 	typedef class axi_master_write_base_collector;					//
 	typedef class axi_master_write_checker;							//
+	typedef class axi_master_write_coverage_base;					//
+	typedef class axi_master_write_checker_base;					//
+  	typedef class axi_master_write_checker_map;
+  	typedef class axi_master_write_coverage_map;
 	//SLAVE															//
 	typedef class axi_slave_write_main_monitor;						//
 	typedef class axi_slave_write_data_collector;					//
 	typedef class axi_slave_write_address_collector;				//
 	typedef class axi_slave_write_response_collector;				//
 	typedef class axi_slave_write_base_collector;					//
-	typedef class axi_slave_write_checker;							//
+	typedef class axi_slave_write_checker;
+	typedef class axi_slave_write_coverage_base;					//
+	typedef class axi_slave_write_checker_base;						//
+  	typedef class axi_slave_write_checker_map;
+  	typedef class axi_slave_write_coverage_map;						//
 	//==================END MONITORS================================//
+
+
+	//==================CONFIGURATIONS==============================
+	typedef class axi_depth_config;
+	//=================END CONFIGURATIONS===========================
+
 
 	//confing and frames
 	typedef class axi_master_config;
@@ -167,17 +181,33 @@ package axi_pkg;
 	`include "sv/utils/axi_master_write_monitor/data_collector.sv"
 	`include "sv/utils/axi_master_write_monitor/response_collector.sv"
 	`include "sv/utils/axi_master_write_monitor/base_collector.sv"
-	`include "sv/utils/axi_master_write_monitor/coverage.sv"
-	`include "sv/utils/axi_master_write_monitor/checker.sv"
-	// SLAVE
+	//COVERAGES
+	`include "sv/utils/axi_master_write_monitor/coverage_base.sv"
+	`include "sv/utils/axi_master_write_monitor/coverages/coverage.sv"
+	`include "sv/utils/axi_master_write_monitor/coverages/create_coverage.sv"
+	//CHECKERS
+	`include "sv/utils/axi_master_write_monitor/checker_base.sv"
+	`include "sv/utils/axi_master_write_monitor/checkers/checker.sv"
+	`include "sv/utils/axi_master_write_monitor/checkers/create_checker.sv"
+	 //SLAVE
 	`include "sv/utils/axi_slave_write_monitor/address_collector.sv"
 	`include "sv/utils/axi_slave_write_monitor/data_collector.sv"
 	`include "sv/utils/axi_slave_write_monitor/response_collector.sv"
 	`include "sv/utils/axi_slave_write_monitor/base_collector.sv"
-	`include "sv/utils/axi_slave_write_monitor/coverage.sv"
-	`include "sv/utils/axi_slave_write_monitor/checker.sv"
+	//COVERAGES
+	`include "sv/utils/axi_slave_write_monitor/coverage_base.sv"
+	`include "sv/utils/axi_slave_write_monitor/coverages/coverage.sv"
+	`include "sv/utils/axi_slave_write_monitor/coverages/create_coverage.sv"
+	//CHECKERS
+	`include "sv/utils/axi_slave_write_monitor/checker_base.sv"
+	`include "sv/utils/axi_slave_write_monitor/checkers/checker.sv"
+	`include "sv/utils/axi_slave_write_monitor/checkers/create_checker.sv"
 	//==================== END MONITOR UTILS=============================
 
+
+	//==================CONFIGURATIONS==============================
+	`include "sv/utils/configuration/configuration_objects.sv"
+	//=================END CONFIGURATIONS===========================
 
 
 	//add include for master
@@ -194,6 +224,8 @@ package axi_pkg;
 	`include "sv/slave/axi_slave_write_sequencer.sv"
 	`include "sv/slave/axi_slave_write_agent.sv"
 	`include "sv/slave/axi_slave_write_monitor.sv"
+
+
 //	`include "sv/slave/axi_slave_write_sequence_lib.sv"
 
 `ifdef testing_includes

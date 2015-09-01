@@ -1,5 +1,5 @@
-`ifndef AXI_MASTER_WRITE_COVERAGE_SVH
-`define AXI_MASTER_WRITE_COVERAGE_SVH
+`ifndef AXI_MASTER_WRITE_COVERAGE_SVH_TOME
+`define AXI_MASTER_WRITE_COVERAGE_SVH_TOME
 
 //------------------------------------------------------------------------------
 //
@@ -7,11 +7,8 @@
 //
 //------------------------------------------------------------------------------
 
-class axi_master_write_coverage extends uvm_component;
+class axi_master_write_coverage extends axi_master_write_coverage_base;
 
-	axi_write_address_collector_mssg 	addr_item;
-	axi_write_data_collector_mssg		data_item;
-	axi_write_response_collector_mssg	response_item;
 
 	`uvm_component_utils(axi_master_write_coverage)
 
@@ -54,10 +51,8 @@ class axi_master_write_coverage extends uvm_component;
 		}
 
 		LOCK:	coverpoint addr_item.lock {
-			bins NORMAL_ACCESS 		= {'b00};
-			bins EXCLUSIVE_ACCESS	= {'b01};
-			bins LOCKED_ACCESS 		= {'b10};
-			bins RESERVED_ACCESS 	= {'b11};
+			bins NORMAL_ACCESS 		= {'b0};
+			bins EXCLUSIVE_ACCESS	= {'b1};
 		}
 
 		ACCESS_PERMISION:	coverpoint addr_item.prot {
@@ -126,10 +121,6 @@ class axi_master_write_coverage extends uvm_component;
 	function new (string name, uvm_component parent);
 		super.new(name, parent);
 
-		addr_item = new();
-		data_item = new();
-		response_item = new();
-
 		axi_master_write_address_cg = new();
 		axi_master_write_data_cg = new();
 		axi_master_write_response_cg = new();
@@ -143,26 +134,24 @@ class axi_master_write_coverage extends uvm_component;
 	// build_phase
 	function void build_phase(uvm_phase phase);
 		super.build_phase(phase);
+		void'(main_monitor_instance.suscribeCoverage(this, TRUE, TRUE, TRUE));
 	endfunction : build_phase
 
-	extern task pushAddrItem(input axi_write_address_collector_mssg mssg);
-	extern task pushDatatItem(input axi_write_data_collector_mssg mssg);
-	extern task pushResponseItem(input axi_write_response_collector_mssg mssg);
+	extern task sampleAddr();
+	extern task sampleData();
+	extern task sampleResponse();
 
 endclass : axi_master_write_coverage
 
-	task axi_master_write_coverage::pushAddrItem(input axi_write_address_collector_mssg mssg);
-		addr_item = mssg;
+	task axi_master_write_coverage::sampleAddr();
 		axi_master_write_address_cg.sample();
 	endtask
 
-	task axi_master_write_coverage::pushDatatItem(input axi_write_data_collector_mssg mssg);
-		data_item = mssg;
+	task axi_master_write_coverage::sampleData();
 		axi_master_write_data_cg.sample();
 	endtask
 
-	task axi_master_write_coverage::pushResponseItem(input axi_write_response_collector_mssg mssg);
-		response_item = mssg;
+	task axi_master_write_coverage::sampleResponse();
 		axi_master_write_response_cg.sample();
 	endtask
 

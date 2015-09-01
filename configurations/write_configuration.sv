@@ -5,6 +5,11 @@ class axi_write_master_configuration extends uvm_object;
 
 
 // +++++++++++++++++++++++++++++++++++++++++GLOOBAL SETTINGS++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+//with setting do coverage axi_write uvc will collect coverage and report it
+true_false_enum			do_coverage								= TRUE;
+
+//with seeting do checks axi_write uvc will do checks
+true_false_enum			do_checks 								= TRUE;
 
 // if correct_driving_vif is setted as true then axi master write uvc will correcly ( acording to axi 3 / 4 protocol ) drive DUV
 true_false_enum			correct_driving_vif 					= TRUE;

@@ -13,4 +13,4 @@ ncsim.*
 *.diag
 *.tcl 
 *.svcf
-
+*.todo
