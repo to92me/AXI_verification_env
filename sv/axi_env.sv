@@ -1,18 +1,33 @@
-/******************************************************************************
-	* DVT CODE TEMPLATE: env
-	* Created by root on Aug 2, 2015
-	* uvc_company = uvc_company, uvc_name = uvc_name
-*******************************************************************************/
+// -----------------------------------------------------------------------------
+/**
+* Project : AXI UVC
+*
+* File : axi_env.sv
+*
+* Language : SystemVerilog
+*
+* Company : Elsys Eastern Europe
+*
+* Author : Andrea Erdeljan
+*
+* E-Mail : andrea.erdeljan@elsys-eastern.com
+*
+* Mentor : Darko Tomusilovic
+*
+* Description : read environment
+*
+* Classes : 1. axi_env
+**/
+// -----------------------------------------------------------------------------
+
+`ifndef AXI_ENV_SV
+`define AXI_ENV_SV
 
 //------------------------------------------------------------------------------
 //
 // CLASS: axi_env
 //
 //------------------------------------------------------------------------------
-
-`ifndef AXI_ENV_SV
-`define AXI_ENV_SV
-
 class axi_env extends uvm_env;
 
 	// Virtual Interface variable
@@ -24,7 +39,6 @@ class axi_env extends uvm_env;
 	// Components of the environment
 	axi_slave_read_agent read_slaves[];
 	axi_master_read_agent read_master;
-	axi_read_monitor read_monitor;
 
 	// Configuration
 	axi_config config_obj;
@@ -58,7 +72,14 @@ class axi_env extends uvm_env;
 
 endclass : axi_env
 
-	// build_phase
+//------------------------------------------------------------------------------
+/**
+* Function : build_phase
+* Purpose : build
+* Parameters :	1. phase
+* Return :	void
+**/
+//------------------------------------------------------------------------------
 	function void axi_env::build_phase(uvm_phase phase);
 
 		super.build_phase(phase);
@@ -78,7 +99,6 @@ endclass : axi_env
 			uvm_config_db#(axi_slave_config)::set(this, sname, "axi_slave_config", config_obj.slave_list[i]);
 		end
 
-		read_monitor = axi_read_monitor::type_id::create("read_monitor",this);
 		read_master = axi_master_read_agent::type_id::create("read_master",this);
 		read_slaves = new[config_obj.slave_list.size()];
 		for(int i = 0; i < config_obj.slave_list.size(); i++) begin
@@ -87,37 +107,59 @@ endclass : axi_env
 
 	endfunction : build_phase
 
+//------------------------------------------------------------------------------
+/**
+* Function : connect_phase
+* Purpose : connect vif
+* Parameters :	1. phase
+* Return :	void
+**/
+//------------------------------------------------------------------------------
 	function void axi_env::connect_phase(input uvm_phase phase);
 		super.connect_phase(phase);
 
 		if(!uvm_config_db#(virtual axi_if)::get(this, "", "vif", vif))
 			`uvm_fatal("NOVIF",{"virtual interface must be set for: ",get_full_name(),".vif"});
 
-		read_master.monitor = read_monitor;
-		foreach(read_slaves[i]) begin
-			read_slaves[i].monitor = read_monitor;
-			//if (read_slaves[i].is_active == UVM_ACTIVE)
-				//read_slaves[i].driver.burst_collected_port.connect(read_monitor.master_to_slave_port);
-		end
 	endfunction
 
-
-	// UVM start_of_simulation_phase
+//------------------------------------------------------------------------------
+/**
+* Function : start_of_simulation_phase
+* Purpose : start simulation
+* Parameters :	1. phase
+* Return :	void
+**/
+//------------------------------------------------------------------------------
 	function void axi_env::start_of_simulation_phase(uvm_phase phase);
 		set_report_id_action_hier("CFGOVR", UVM_DISPLAY);
 		set_report_id_action_hier("CFGSET", UVM_DISPLAY);
 		check_config_usage();
 	endfunction : start_of_simulation_phase
 
-// update_config() method
+//------------------------------------------------------------------------------
+/**
+* Function : update_config
+* Purpose : update configuration
+* Parameters :	1. config_obj
+* Return :	void
+**/
+//------------------------------------------------------------------------------
 function void axi_env::update_config(axi_config config_obj);
-  read_monitor.config_obj = config_obj;
   read_master.update_config(config_obj.master);
   foreach(read_slaves[i])
     read_slaves[i].update_config(config_obj.slave_list[i]);
 endfunction : update_config
 
-// update_vif_enables
+//------------------------------------------------------------------------------
+/**
+* Task : update_vif_enables
+* Purpose : update vif
+* Inputs :
+* Outputs :
+* Ref :
+**/
+//------------------------------------------------------------------------------
 task axi_env::update_vif_enables();
 	vif.has_checks <= checks_enable;
 	vif.has_coverage <= coverage_enable;
@@ -128,7 +170,15 @@ task axi_env::update_vif_enables();
 	end
 endtask : update_vif_enables
 
-//UVM run_phase()
+//------------------------------------------------------------------------------
+/**
+* Task : run_phase
+* Purpose : run
+* Inputs :	1. phase
+* Outputs :
+* Ref :
+**/
+//------------------------------------------------------------------------------
 task axi_env::run_phase(uvm_phase phase);
   fork
     update_vif_enables();

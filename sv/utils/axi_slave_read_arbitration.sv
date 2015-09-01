@@ -1,18 +1,43 @@
-/******************************************************************************
-	* DVT CODE TEMPLATE: component
-	* Created by root on Aug 5, 2015
-	* uvc_company = uvc_company, uvc_name = uvc_name
-*******************************************************************************/
+// -----------------------------------------------------------------------------
+/**
+* Project : AXI UVC
+*
+* File : axi_slave_read_arbitration.sv
+*
+* Language : SystemVerilog
+*
+* Company : Elsys Eastern Europe
+*
+* Author : Andrea Erdeljan
+*
+* E-Mail : andrea.erdeljan@elsys-eastern.com
+*
+* Mentor : Darko Tomusilovic
+*
+* Description : used by slave to determine which frame to send
+*
+* Classes :	1. axi_slave_read_arbitration
+*
+* Functions :	1. new (string name="axi_slave_read_arbitration",
+*					uvm_component parent=null);
+*				2. void build_phase(uvm_phase phase)
+*
+* Tasks :	1. get_new_burst(axi_read_whole_burst whole_burst)
+*			2. get_new_single_frames(axi_read_whole_burst whole_burst)
+*			3. dec_delay()
+*			4. burst_complete(int burst_id)
+*			5. get_single_frame(output axi_read_single_frame single_frame)
+**/
+// -----------------------------------------------------------------------------
+
+`ifndef AXI_SLAVE_READ_ARBITRATION_SV
+`define AXI_SLAVE_READ_ARBITRATION_SV
 
 //------------------------------------------------------------------------------
 //
 // CLASS: axi_slave_read_arbitration
 //
 //------------------------------------------------------------------------------
-
-`ifndef AXI_SLAVE_READ_ARBITRATION_SV
-`define AXI_SLAVE_READ_ARBITRATION_SV
-
 class axi_slave_read_arbitration extends uvm_component;
 
 	// fields
@@ -20,21 +45,18 @@ class axi_slave_read_arbitration extends uvm_component;
 	axi_read_single_addr ready_queue[$];
 	axi_read_single_addr tmp_queue[$];
 	axi_read_whole_burst burst_wait[$];
-	bit [ID_WIDTH - 1 : 0] id_in_pipe[$];
+	bit [RID_WIDTH - 1 : 0] id_in_pipe[$];
 
 	semaphore ready_sem, wait_sem, burst_sem, pipe_sem;
 
 	// Configuration object
 	axi_slave_config config_obj;
 
-	// control bit to select whether or not to read from memory
-	bit read_enable = 1;
 	// control bit to select whether early termination of bursts is supported
 	bit terminate_enable = 1;
 
 	// Provide implementations of virtual methods such as get_type_name and create
 	`uvm_component_utils_begin(axi_slave_read_arbitration)
-    	`uvm_field_int(read_enable, UVM_DEFAULT)
     	`uvm_field_int(terminate_enable, UVM_DEFAULT)
 	`uvm_component_utils_end
 
@@ -63,8 +85,16 @@ class axi_slave_read_arbitration extends uvm_component;
 
 endclass : axi_slave_read_arbitration
 
-	// called when there is a new burst - first checks if the pipe is full
-	// or if the id matches to another burst. If it does, the burst has to wait
+//------------------------------------------------------------------------------
+/**
+* Task : get_new_burst
+* Purpose : called when there is a new burst - first checks if the pipe is full
+*			or if the id matches to another burst. If it does, the burst has to wait
+* Inputs : whole_burst - burst request sent by master
+* Outputs :
+* Ref :
+**/
+//------------------------------------------------------------------------------
 	task axi_slave_read_arbitration::get_new_burst(axi_read_whole_burst whole_burst);
 		pipe_sem.get(1);
 
@@ -90,48 +120,119 @@ endclass : axi_slave_read_arbitration
 
 	endtask : get_new_burst
 
-	// put the single frames in the right queues - ready or wait, based on delay
+//------------------------------------------------------------------------------
+/**
+* Task : get_new_single_frames
+* Purpose : put the single frames in the right queues - ready or wait, based
+*			on delay and check if burst request is vaild
+* Inputs :	whole_burst - burst request + queue of single frames
+* Outputs :
+* Ref :
+**/
+//------------------------------------------------------------------------------
 	task axi_slave_read_arbitration::get_new_single_frames(axi_read_whole_burst whole_burst);
 
 		axi_read_single_addr one_frame;
 		axi_address_queue addr_queue;
 		axi_address_calc addr_frame;
+		bit slverr_flag = 0;
+
+		// checks - if the request is not following protocol, return SLVERR
+		do begin
+
+			// cache
+			if(whole_burst.cache[1] == 0)
+				if(!(whole_burst.cache[3:2] == 0)) begin
+					slverr_flag = 1;
+					break;
+				end
+
+			// burst types and various rules
+			case (whole_burst.burst_type)
+				Reserved: begin
+					slverr_flag = 1;
+					break;
+				end
+				FIXED: begin
+					if(whole_burst.len > 15) begin
+						slverr_flag = 1;
+						break;
+					end
+				end
+				WRAP: begin
+					// len can be 2, 4, 8, 16
+					if(!(whole_burst.len inside {1, 3, 7, 15})) begin
+						slverr_flag = 1;
+						break;
+					end
+					// address must be aligned
+					else if(!(whole_burst.addr == ($floor(whole_burst.addr/(2**whole_burst.size))*(2**whole_burst.size)))) begin
+						slverr_flag = 1;
+						break;
+					end
+				end
+				INCR: begin
+					if((whole_burst.len * (2**whole_burst.size)) >= 4096) begin
+						slverr_flag = 1;
+						break;
+					end					
+				end
+			endcase
+			// requested size is larger than DATA_WIDTH
+			if(whole_burst.size > ($clog2(DATA_WIDTH / 8))) begin
+				slverr_flag = 1;
+				break;
+			end
+			// various rules for EXCLUSIVE request
+			if(whole_burst.lock == EXCLUSIVE) begin
+				// address must be aligned
+				if(whole_burst.addr != ($floor(whole_burst.addr/(2**whole_burst.size))*(2**whole_burst.size))) begin
+					slverr_flag = 1;
+					break;
+				end
+				// the number of bytes must be a power of 2, max 128 bytes
+				else if(!(((2**whole_burst.size) * whole_burst.len) inside {1, 3, 7, 15, 31, 63, 127})) begin
+					slverr_flag = 1;
+					break;
+				end
+				// burst length must not exceed 16 transfers
+				else if(whole_burst.len > 15) begin
+					slverr_flag = 1;
+					break;
+				end
+				// TODO : za cache signale (str. 93)
+			end
+		end
+		while(0);
 
 		// get all adresses
-		if (read_enable) begin
-			if (whole_burst.burst_type != Reserved) begin
-				addr_queue = new();
-				addr_queue.calc_addr(whole_burst.addr, whole_burst.size, whole_burst.len, whole_burst.burst_type);
-			end
-			else
-				// PITAJ DARKA
-				`uvm_fatal("MODE_ERR",{"cannot use Reserved burst type"});
+		if (!slverr_flag) begin
+			addr_queue = new();
+			addr_queue.calc_addr(whole_burst.addr, whole_burst.size, whole_burst.len, whole_burst.burst_type);
 		end
 
 		for (int i = 0; i <= whole_burst.len; i++) begin
 
-			one_frame = axi_read_single_addr::type_id::create("one_frame",this);
-			one_frame.copy(whole_burst.single_frames.pop_front());
-
-			// if requested size is larger than DATA_WIDTH, return an error
-			if(whole_burst.size <= ($clog2(DATA_WIDTH / 8))) begin
-				one_frame.resp = SLVERR;
-				one_frame.err = ERROR;
-			end
+			one_frame = whole_burst.single_frames.pop_front();
 
 			// get addr and byte lane info.
-			if (read_enable) begin
+			if(!slverr_flag) begin
 				addr_frame = addr_queue.pop_front();
-				one_frame.addr_calc.addr = addr_frame.addr;
-				one_frame.addr_calc.upper_byte_lane = addr_frame.upper_byte_lane;
-				one_frame.addr_calc.lower_byte_lane = addr_frame.lower_byte_lane;
-
-				if (!(config_obj.check_addr_range(one_frame.addr_calc.addr - (one_frame.addr_calc.upper_byte_lane - one_frame.addr_calc.lower_byte_lane + 1)))) begin
-					// if the highest requested address is not in the address range of the
-					// given slave, return SLVERR TODO : PITAJ DARKA
-					one_frame.resp = SLVERR;
-					one_frame.err = ERROR;
+				if (one_frame.correct_lane) begin
+					one_frame.addr = addr_frame.addr;
+					one_frame.upper_byte_lane = addr_frame.upper_byte_lane;
+					one_frame.lower_byte_lane = addr_frame.lower_byte_lane;
 				end
+				if (one_frame.read_enable) begin
+					if (!(config_obj.check_addr_range(one_frame.addr + (one_frame.upper_byte_lane - one_frame.lower_byte_lane)))) begin
+						slverr_flag = 1;
+					end
+				end
+			end
+
+			if(slverr_flag) begin
+				one_frame.err = ERROR;
+				one_frame.resp = SLVERR;
 			end
 
 			if(!terminate_enable)
@@ -160,8 +261,16 @@ endclass : axi_slave_read_arbitration
 		end
 	endtask : get_new_single_frames
 
-	// decrement delay and rearrange queues - if there is a frame
-	// with 0 delay in wait queue, move it to ready queue
+//------------------------------------------------------------------------------
+/**
+* Task : dec_delay
+* Purpose : decrement delay and rearrange queues - if there is a frame with
+*			0 delay in wait queue, move it to ready queue
+* Inputs :
+* Outputs :
+* Ref :
+**/
+//------------------------------------------------------------------------------
 	task axi_slave_read_arbitration::dec_delay();
 
 		wait_sem.get(1);
@@ -216,8 +325,16 @@ endclass : axi_slave_read_arbitration
 		burst_sem.put(1);
 	endtask
 
-	// return the next ready frame (if there is none set FRAME_NOT_VALID)
-	// and if needed, read from memory
+//------------------------------------------------------------------------------
+/**
+* Task : get_single_frame
+* Purpose : return the next ready frame (if there is none set FRAME_NOT_VALID)
+*			and if needed, read from memory
+* Inputs :
+* Outputs : single_frame - next frame to be sent
+* Ref :
+**/
+//------------------------------------------------------------------------------
 	task axi_slave_read_arbitration::get_single_frame(output axi_read_single_frame single_frame);
 
 		axi_read_single_addr addr_frame;
@@ -230,12 +347,11 @@ endclass : axi_slave_read_arbitration
 			addr_frame.valid = FRAME_VALID;
 
 			// read from memory - this is done here so that the correct value will be read
-			if(read_enable && (addr_frame.resp != SLVERR)) begin
+			if(addr_frame.read_enable && (addr_frame.resp != SLVERR)) begin
 				addr_calc = new();
-				/*addr_calc.addr = addr_frame.addr;
+				addr_calc.addr = addr_frame.addr;
 				addr_calc.upper_byte_lane = addr_frame.upper_byte_lane;
-				addr_calc.lower_byte_lane = addr_frame.lower_byte_lane;*/
-				addr_calc = addr_frame.addr_calc;
+				addr_calc.lower_byte_lane = addr_frame.lower_byte_lane;
 				addr_calc.readMemory(config_obj, addr_frame.data);
 			end
 		end

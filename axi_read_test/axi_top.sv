@@ -31,6 +31,7 @@ initial begin
   /*
   `uvm_info("axi_top", "\n**** =============================================================================== ****", UVM_LOW)
    */
+
   run_test();
 
 end
@@ -39,9 +40,7 @@ initial begin
     if0.has_checks = 0;
     reset <= 1'b0;
     clock <= 1'b0;
-    #6 reset <= 1'b1;
-    #8 reset <= 1'b0;
-    #16 reset <=1'b1;
+    #3 reset <= 1'b1;
 
   end
 

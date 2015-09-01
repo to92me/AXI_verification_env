@@ -1,8 +1,27 @@
-/******************************************************************************
-	* DVT CODE TEMPLATE: sequencer
-	* Created by andrea on Aug 20, 2015
-	* uvc_company = axi, uvc_name = virtual
-*******************************************************************************/
+// -----------------------------------------------------------------------------
+/**
+* Project : AXI UVC
+*
+* File : axi_virtual_sequencer.sv
+*
+* Language : SystemVerilog
+*
+* Company : Elsys Eastern Europe
+*
+* Author : Andrea Erdeljan
+*
+* E-Mail : andrea.erdeljan@elsys-eastern.com
+*
+* Mentor : Darko Tomusilovic
+*
+* Description : virtual sequencer
+*
+* Classes :	1. axi_virtual_sequencer
+*
+* Functions :	1. new (string name, uvm_component parent)
+*				2. void build_phase(uvm_phase phase)
+**/
+// -----------------------------------------------------------------------------
 
 `ifndef AXI_VIRTUAL_SEQUENCER_SV
 `define AXI_VIRTUAL_SEQUENCER_SV

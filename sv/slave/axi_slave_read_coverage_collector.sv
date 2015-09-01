@@ -2,7 +2,7 @@
 /**
 * Project : AXI UVC
 *
-* File : axi_master_read_coverage_collector.sv
+* File : axi_slave_read_coverage_collector.sv
 *
 * Language : SystemVerilog
 *
@@ -16,7 +16,7 @@
 *
 * Description : collects coverage
 *
-* Classes :	1. axi_master_read_coverage_collector
+* Classes :	1. axi_slave_read_coverage_collector
 *
 * Functions :	1. new (string name, uvm_component parent)
 *				2. void build_phase(uvm_phase phase)
@@ -25,16 +25,16 @@
 **/
 // -----------------------------------------------------------------------------
 
-`ifndef AXI_MASTER_READ_COVERAGE_COLLECTOR_SV
-`define AXI_MASTER_READ_COVERAGE_COLLECTOR_SV
+`ifndef AXI_SLAVE_READ_COVERAGE_COLLECTOR_SV
+`define AXI_SLAVE_READ_COVERAGE_COLLECTOR_SV
 
 //------------------------------------------------------------------------------
 //
-// CLASS: axi_master_read_coverage_collector
+// CLASS: axi_slave_read_coverage_collector
 //
 //------------------------------------------------------------------------------
 
-class axi_master_read_coverage_collector extends uvm_component;
+class axi_slave_read_coverage_collector extends uvm_component;
 
 	// control bit
 	bit coverage_enable = 1;
@@ -43,19 +43,19 @@ class axi_master_read_coverage_collector extends uvm_component;
 	`uvm_analysis_imp_decl(2)
 	
 	// TLM connection to the monitor
-	uvm_analysis_imp #(axi_read_single_frame, axi_master_read_coverage_collector) data_channel_port;
-	uvm_analysis_imp1 #(axi_read_burst_frame, axi_master_read_coverage_collector) addr_channel_port;
+	uvm_analysis_imp #(axi_read_single_frame, axi_slave_read_coverage_collector) data_channel_port;
+	uvm_analysis_imp1 #(axi_read_burst_frame, axi_slave_read_coverage_collector) addr_channel_port;
 
 	// the current frames
 	axi_read_single_frame single_frame;
 	axi_read_burst_frame burst_frame;
 
-	`uvm_component_utils_begin(axi_master_read_coverage_collector)
+	`uvm_component_utils_begin(axi_slave_read_coverage_collector)
    		`uvm_field_int(coverage_enable, UVM_DEFAULT)
 	`uvm_component_utils_end
 
 	// Covergroups
-	covergroup axi_master_read_addr_channel_cg;
+	covergroup axi_slave_read_addr_channel_cg;
 
 		ADDR: coverpoint burst_frame.addr {
 			bins values = default;
@@ -128,13 +128,11 @@ class axi_master_read_coverage_collector extends uvm_component;
 			bins region_values = default;
 		}
 
-		USER: coverpoint burst_frame.user {
-			bins user_values = default;
-		}
+		// user
 	endgroup
 
 
-	covergroup axi_master_read_data_channel_cg;
+	covergroup axi_slave_read_data_channel_cg;
 
 		ID: coverpoint single_frame.id {
 			bins ZERO_ID = {0};
@@ -157,9 +155,7 @@ class axi_master_read_coverage_collector extends uvm_component;
 			bins NOT_LAST = {0};
 		}
 
-		USER: coverpoint single_frame.user {
-			bins user_values = default;
-		}
+		// user
 	endgroup
 
 	// new - constructor
@@ -171,10 +167,10 @@ class axi_master_read_coverage_collector extends uvm_component;
 		// Create covergroups if coverage is enabled
     	void'(uvm_config_int::get(this, "", "coverage_enable", coverage_enable));
 		if(coverage_enable) begin
-			axi_master_read_addr_channel_cg = new();
-			axi_master_read_addr_channel_cg.set_inst_name({get_full_name(), ".axi_master_read_addr_channel_cg"});
-			axi_master_read_data_channel_cg = new();
-			axi_master_read_data_channel_cg.set_inst_name({get_full_name(), ".axi_master_read_data_channel_cg"});
+			axi_slave_read_addr_channel_cg = new();
+			axi_slave_read_addr_channel_cg.set_inst_name({get_full_name(), ".axi_slave_read_addr_channel_cg"});
+			axi_slave_read_data_channel_cg = new();
+			axi_slave_read_data_channel_cg.set_inst_name({get_full_name(), ".axi_slave_read_data_channel_cg"});
 		end
 	endfunction
 
@@ -182,7 +178,7 @@ class axi_master_read_coverage_collector extends uvm_component;
 	extern virtual function void write(axi_read_single_frame trans);
 	extern virtual function void write1(axi_read_burst_frame trans);
 
-endclass : axi_master_read_coverage_collector
+endclass : axi_slave_read_coverage_collector
 
 //------------------------------------------------------------------------------
 /**
@@ -192,7 +188,7 @@ endclass : axi_master_read_coverage_collector
 * Return :	void
 **/
 //------------------------------------------------------------------------------
-	function void axi_master_read_coverage_collector::build_phase(uvm_phase phase);
+	function void axi_slave_read_coverage_collector::build_phase(uvm_phase phase);
 		super.build_phase(phase);
 	endfunction : build_phase
 
@@ -204,11 +200,11 @@ endclass : axi_master_read_coverage_collector
 * Return :	void
 **/
 //------------------------------------------------------------------------------
-	function void axi_master_read_coverage_collector::write(axi_read_single_frame trans);
+	function void axi_slave_read_coverage_collector::write(axi_read_single_frame trans);
 		$cast(single_frame, trans.clone());
 
 		if(coverage_enable) begin
-			axi_master_read_data_channel_cg.sample();
+			axi_slave_read_data_channel_cg.sample();
 		end
 	endfunction : write
 
@@ -220,11 +216,11 @@ endclass : axi_master_read_coverage_collector
 * Return :	void
 **/
 //------------------------------------------------------------------------------
-	function void axi_master_read_coverage_collector::write1(axi_read_burst_frame trans);
+	function void axi_slave_read_coverage_collector::write1(axi_read_burst_frame trans);
 		$cast(burst_frame, trans.clone());
 
 		if(coverage_enable) begin
-			axi_master_read_addr_channel_cg.sample();
+			axi_slave_read_addr_channel_cg.sample();
 		end
 	endfunction : write1
 

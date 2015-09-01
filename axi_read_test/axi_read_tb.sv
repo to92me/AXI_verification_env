@@ -1,12 +1,24 @@
-/*-----------------------------------------------------------------
-File name     : axi_read_tb.sv
-Developers    : Kathleen Meade
-Created       : May 16, 2010
-Description   : Simple Testbench to understand the AXI UVC
-Notes         :
--------------------------------------------------------------------
-Copyright 2010 (c) Cadence Design Systems
------------------------------------------------------------------*/
+// -----------------------------------------------------------------------------
+/**
+* Project : AXI UVC
+*
+* File : axi_read_tb.sv
+*
+* Language : SystemVerilog
+*
+* Company : Elsys Eastern Europe
+*
+* Author : Andrea Erdeljan
+*
+* E-Mail : andrea.erdeljan@elsys-eastern.com
+*
+* Mentor : Darko Tomusilovic
+*
+* Description : test bench
+*
+* Classes : 1. axi_read_tb
+**/
+// -----------------------------------------------------------------------------
 
 `ifndef AXI_READ_TB_SV
 `define AXI_READ_TB_SV

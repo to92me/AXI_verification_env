@@ -116,7 +116,6 @@ package axi_pkg;
 	// utils
 	typedef class axi_slave_read_arbitration;
 	typedef class axi_master_read_response;
-	typedef class axi_read_monitor;
 	typedef class axi_slave_response;
 	typedef class axi_slave_memory_response;
 	typedef class axi_address_calc;
@@ -126,11 +125,17 @@ package axi_pkg;
 	typedef class axi_slave_read_driver;
 	typedef class axi_slave_read_sequencer;
 	typedef class axi_slave_read_agent;
+	typedef class axi_slave_read_coverage_collector;
+	typedef class axi_slave_read_collector;
+	typedef class axi_slave_read_monitor;
 
 	// master
 	typedef class axi_master_read_driver;
 	typedef class axi_master_read_sequencer;
 	typedef class axi_master_read_agent;
+	typedef class axi_master_read_coverage_collector;
+	typedef class axi_master_read_collector;
+	typedef class axi_master_read_monitor;
 
 	// top
 	typedef class axi_env;
@@ -261,22 +266,27 @@ package axi_pkg;
 	`include "sv/master/axi_master_config.sv"
 
 	`include "sv/master/axi_master_read_driver.sv"
+	`include "sv/master/axi_master_read_coverage_collector.sv"
 	`include "sv/master/axi_master_read_sequencer.sv"
 	`include "sv/master/axi_master_read_sequence_lib.sv"
 	`include "sv/master/axi_master_read_agent.sv"
+	`include "sv/master/axi_master_read_collector.sv"
+	`include "sv/master/axi_master_read_monitor.sv"
 
 	// add include for slave
 	`include "sv/slave/axi_slave_config.sv"
 
 	`include "sv/slave/axi_slave_read_driver.sv"
+	`include "sv/slave/axi_slave_read_coverage_collector.sv"
 	`include "sv/slave/axi_slave_read_sequencer.sv"
 	`include "sv/slave/axi_slave_read_sequence_lib.sv"
 	`include "sv/slave/axi_slave_read_agent.sv"
+	`include "sv/slave/axi_slave_read_monitor.sv"
+	`include "sv/slave/axi_slave_read_collector.sv"
 
 	// utils
 	`include "sv/utils/axi_master_read_response.sv"
 	`include "sv/utils/axi_slave_read_arbitration.sv"
-	`include "sv/utils/axi_read_monitor.sv"
 	`include "sv/utils/axi_mssg.sv"
 	`include "sv/utils/axi_slave_config_memory.sv"
 	`include "sv/utils/axi_address_calc.sv"

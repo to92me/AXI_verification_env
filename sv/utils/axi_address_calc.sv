@@ -1,15 +1,42 @@
-/******************************************************************************
-	* DVT CODE TEMPLATE: component
-	* Created by andrea on Aug 24, 2015
-	* uvc_company = axi, uvc_name = address_calc
-*******************************************************************************/
+// -----------------------------------------------------------------------------
+/**
+* Project : AXI UVC
+*
+* File : axi_address_calc.sv
+*
+* Language : SystemVerilog
+*
+* Company : Elsys Eastern Europe
+*
+* Author : Andrea Erdeljan
+*
+* E-Mail : andrea.erdeljan@elsys-eastern.com
+*
+* Mentor : Darko Tomusilovic
+*
+* Description : calculation of addresses and byte lanes
+*
+* Classes :	1. axi_address_calc	
+*			2. axi_address_queue
+*
+* Functions :	1. new (string name="axi_address_calc")
+*				2. void calc_addr(bit[ADDR_WIDTH-1:0] start_addr,
+*					burst_size_enum size, bit[7:0] burst_len,
+*					burst_type_enum mode)
+*				3. axi_address_calc pop_front()
+*
+* Tasks :	1. readMemory(input axi_slave_config config_obj,
+*				output bit[DATA_WIDTH-1 : 0] return_data)
+*			2. writeMemory(input axi_slave_config config_obj,
+*				input bit[DATA_WIDTH-1 : 0] input_data)
+**/
+// -----------------------------------------------------------------------------
 
 //------------------------------------------------------------------------------
 //
 // CLASS: axi_address_calc
 //
 //------------------------------------------------------------------------------
-
 class axi_address_calc extends uvm_sequence_item;
 
 	int upper_byte_lane;	// the byte lane of the hightest addressed byte of a transfer
@@ -32,30 +59,52 @@ class axi_address_calc extends uvm_sequence_item;
 
 endclass : axi_address_calc
 
+//------------------------------------------------------------------------------
+/**
+* Task : readMemory
+* Purpose : read data from memory
+* Inputs : config_obj - contains required memory functions
+* Outputs : return_data - data read from memory
+* Ref :
+**/
+//------------------------------------------------------------------------------
 task axi_address_calc::readMemory(input axi_slave_config config_obj, output bit[DATA_WIDTH-1 : 0] return_data);
 		mem_access read_data;	// union used for reading individual bytes
 		axi_slave_memory_response rsp;
+		int tmp;
 
-		for(int i = 0; i < (this.upper_byte_lane - this.lower_byte_lane + 1); i++) begin
+		tmp = this.upper_byte_lane - this.lower_byte_lane + 1;
+		for(int i = 0; i < tmp; i++) begin
 			config_obj.readMemory(this.addr, rsp);
 			if(rsp.getValid() == TRUE) begin
 				read_data.lane[this.lower_byte_lane] = rsp.getData();
 				this.lower_byte_lane++;
 			end
+			this.lower_byte_lane++;
 			this.addr++;
-			// if nothing was written on that location, random data will be returned
 		end
 
 		return_data = read_data.data;
 endtask : readMemory
 
-// TODO : testirati write!!!!
+//------------------------------------------------------------------------------
+/**
+* Task : writeMemory
+* Purpose : write data to memory
+* Inputs :	config_obj - contains required memory functions
+*			input_data - data to be written
+* Outputs :
+* Ref :
+**/
+//------------------------------------------------------------------------------
 task axi_address_calc::writeMemory(input axi_slave_config config_obj, input bit[DATA_WIDTH-1 : 0] input_data);
 	mem_access write_data;	// union used for writing individual bytes
+	int tmp;
 
 	write_data.data = input_data;
 
-	for(int i = 0; i < (this.upper_byte_lane - this.lower_byte_lane + 1); i++) begin
+	tmp = this.upper_byte_lane - this.lower_byte_lane + 1;
+	for(int i = 0; i < tmp; i++) begin
 			config_obj.writeMemory(this.addr, write_data.lane[this.lower_byte_lane]);
 			lower_byte_lane++;
 			this.addr++;
@@ -67,7 +116,6 @@ endtask : writeMemory
 // CLASS: axi_address_queue
 //
 //------------------------------------------------------------------------------
-
 class axi_address_queue;
 
 	axi_address_calc addr_queue[$];
@@ -87,9 +135,17 @@ class axi_address_queue;
 
 endclass : axi_address_queue
 
-// calculate all addreses used by the given burst
-// start_addr : start address issued by the master
-// burst_len : total number of data transfers within a burst
+//------------------------------------------------------------------------------
+/**
+* Function : calc_addr
+* Purpose : calculate all addreses and byte lanes used by the given burst
+* Parameters :	1. start_addr - start address issued by the master
+*				2. size - size of transfer
+*				3. burst_len - total number of data transfers within a burst
+*				4. mode - burst type (FIXED, INCR or WRAP)
+* Return :	void
+**/
+//------------------------------------------------------------------------------
 function void axi_address_queue::calc_addr(bit[ADDR_WIDTH-1:0] start_addr, burst_size_enum size, bit[7:0] burst_len, burst_type_enum mode);
 
 	axi_address_calc addr_frame;
@@ -150,6 +206,14 @@ function void axi_address_queue::calc_addr(bit[ADDR_WIDTH-1:0] start_addr, burst
 	end
 endfunction : calc_addr
 
+//------------------------------------------------------------------------------
+/**
+* Function : calc_addr
+* Purpose : return the first axi_addres_calc frame in the queue
+* Parameters :
+* Return :	axi_address_calc
+**/
+//------------------------------------------------------------------------------
 function axi_address_calc axi_address_queue::pop_front();
 	return addr_queue.pop_front();
 endfunction : pop_front

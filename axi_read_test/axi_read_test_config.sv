@@ -1,3 +1,25 @@
+// -----------------------------------------------------------------------------
+/**
+* Project : AXI UVC
+*
+* File : axi_read_test_config.sv
+*
+* Language : SystemVerilog
+*
+* Company : Elsys Eastern Europe
+*
+* Author : Andrea Erdeljan
+*
+* E-Mail : andrea.erdeljan@elsys-eastern.com
+*
+* Mentor : Darko Tomusilovic
+*
+* Description : test configuration for read
+*
+* Classes : 1. axi_read_test_config
+**/
+// -----------------------------------------------------------------------------
+
 `ifndef AXI_READ_TEST_CONFIG
 `define AXI_READ_TEST_CONFIG
 

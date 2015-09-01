@@ -1,8 +1,27 @@
-/******************************************************************************
-	* DVT CODE TEMPLATE: sequencer with reset handling
-	* Created by root on Aug 4, 2015
-	* uvc_company = uvc_company, uvc_name = uvc_name
-*******************************************************************************/
+// -----------------------------------------------------------------------------
+/**
+* Project : AXI UVC
+*
+* File : axi_master_read_sequencer.sv
+*
+* Language : SystemVerilog
+*
+* Company : Elsys Eastern Europe
+*
+* Author : Andrea Erdeljan
+*
+* E-Mail : andrea.erdeljan@elsys-eastern.com
+*
+* Mentor : Darko Tomusilovic
+*
+* Description : master sequencer
+*
+* Classes :	1. axi_master_read_sequencer
+*
+* Functions :	1. new (string name, uvm_component parent)
+*				2. void build_phase(uvm_phase phase)
+**/
+// -----------------------------------------------------------------------------
 
 //------------------------------------------------------------------------------
 //

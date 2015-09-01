@@ -1,16 +1,33 @@
-/******************************************************************************
-* DVT CODE TEMPLATE: sequence library
-* Created by andrea on Aug 20, 2015
-* uvc_company = axi, uvc_name = virtual
-* uvc_trans = uvc_trans
-*******************************************************************************/
+// -----------------------------------------------------------------------------
+/**
+* Project : AXI UVC
+*
+* File : axi_virtual_seq_lib.sv
+*
+* Language : SystemVerilog
+*
+* Company : Elsys Eastern Europe
+*
+* Author : Andrea Erdeljan
+*
+* E-Mail : andrea.erdeljan@elsys-eastern.com
+*
+* Mentor : Darko Tomusilovic
+*
+* Description : contains virtual sequences
+*
+* Classes :	1. virtual_base_sequence
+*			2. virtual_transfer_seq
+*			3. virtual_transfer_multiple_addr
+**/
+// -----------------------------------------------------------------------------
 
 `ifndef AXI_VIRTUAL_SEQUENCE_LIB_SV
 `define AXI_VIRTUAL_SEQUENCE_LIB_SV
 
 //------------------------------------------------------------------------------
 //
-// CLASS: axi_virtual_base_seq
+// CLASS: virtual_base_sequence
 //
 //------------------------------------------------------------------------------
 // This sequence raises/drops objections in the pre/post_body so that root
@@ -21,7 +38,7 @@ class virtual_base_sequence extends uvm_sequence;
 	`uvm_declare_p_sequencer(axi_virtual_sequencer)
 
 	// new - constructor
-	function new(string name="virtual_base_seq");
+	function new(string name="virtual_base_sequence");
 		super.new(name);
 	endfunction
 
@@ -79,7 +96,7 @@ class virtual_transfer_multiple_addr extends virtual_base_sequence;
 
 	`uvm_object_utils(virtual_transfer_multiple_addr)
 
-	bit[ADDR_WIDTH-1 : 0] slave_addr[];	// packed array for storing addresses
+	bit[ADDR_WIDTH-1 : 0] slave_addr[];	// array for storing addresses
 
 	// new - constructor
 	function new(string name="virtual_transfer_multiple_addr");
@@ -90,41 +107,11 @@ class virtual_transfer_multiple_addr extends virtual_base_sequence;
 	axi_master_read_multiple_addr read_seq;
 
 	virtual task body();
-		slave_addr = new[34];
-		slave_addr[0] = p_sequencer.config_obj.slave_list[0].start_address;
-		slave_addr[1] = p_sequencer.config_obj.slave_list[0].start_address;
-		slave_addr[2] = p_sequencer.config_obj.slave_list[0].start_address;
-		slave_addr[3] = p_sequencer.config_obj.slave_list[0].start_address;
-		slave_addr[4] = p_sequencer.config_obj.slave_list[0].start_address;
-		slave_addr[5] = p_sequencer.config_obj.slave_list[0].start_address;
-		slave_addr[6] = p_sequencer.config_obj.slave_list[0].start_address;
-		slave_addr[7] = p_sequencer.config_obj.slave_list[0].start_address;
-		slave_addr[8] = p_sequencer.config_obj.slave_list[0].start_address;
-		slave_addr[9] = p_sequencer.config_obj.slave_list[0].start_address;
-		slave_addr[10] = p_sequencer.config_obj.slave_list[0].start_address;
-		slave_addr[11] = p_sequencer.config_obj.slave_list[0].start_address;
-		slave_addr[12] = p_sequencer.config_obj.slave_list[0].start_address;
-		slave_addr[13] = p_sequencer.config_obj.slave_list[0].start_address;
-		slave_addr[14] = p_sequencer.config_obj.slave_list[0].start_address;
-		slave_addr[15] = p_sequencer.config_obj.slave_list[0].start_address;
-		slave_addr[16] = p_sequencer.config_obj.slave_list[0].start_address;
-		slave_addr[17] = p_sequencer.config_obj.slave_list[0].start_address;
-		slave_addr[18] = p_sequencer.config_obj.slave_list[0].start_address;
-		slave_addr[19] = p_sequencer.config_obj.slave_list[0].start_address;
-		slave_addr[20] = p_sequencer.config_obj.slave_list[0].start_address;
-		slave_addr[21] = p_sequencer.config_obj.slave_list[0].start_address;
-		slave_addr[22] = p_sequencer.config_obj.slave_list[0].start_address;
-		slave_addr[23] = p_sequencer.config_obj.slave_list[0].start_address;
-		slave_addr[24] = p_sequencer.config_obj.slave_list[0].start_address;
-		slave_addr[25] = p_sequencer.config_obj.slave_list[0].start_address;
-		slave_addr[26] = p_sequencer.config_obj.slave_list[0].start_address;
-		slave_addr[27] = p_sequencer.config_obj.slave_list[0].start_address;
-		slave_addr[28] = p_sequencer.config_obj.slave_list[0].start_address;
-		slave_addr[29] = p_sequencer.config_obj.slave_list[0].start_address;
-		slave_addr[30] = p_sequencer.config_obj.slave_list[0].start_address;
-		slave_addr[31] = p_sequencer.config_obj.slave_list[0].start_address;
-		slave_addr[32] = p_sequencer.config_obj.slave_list[0].start_address;
-		slave_addr[33] = p_sequencer.config_obj.slave_list[0].start_address;
+
+		slave_addr = new[50];
+		for(int i = 0; i < 50; i++) begin
+			slave_addr[i] = p_sequencer.config_obj.slave_list[0].start_address;
+		end
 
 		`uvm_do_on_with(read_seq, p_sequencer.read_seqr, {
 				foreach (slave_addr[i])

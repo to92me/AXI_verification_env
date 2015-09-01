@@ -15,6 +15,8 @@ interface axi_if (input sig_reset, input sig_clock);
 	parameter ADDR_WIDTH = 32;
 	parameter DATA_WIDTH = 64;
 	parameter ID_WIDTH = 32;
+<<<<<<< HEAD
+=======
 	
 	//parameter ADDR_WIDTH = 32;	// Width of the address bus
 	//parameter DATA_WIDTH = 64;	// Width of the system data buses
@@ -33,6 +35,7 @@ interface axi_if (input sig_reset, input sig_clock);
 	parameter MAXWAITS = 16;	// Maximum number of cycles between VALID to READY HIGH before a warning is generated
 
 	// TODO : Disabling recommended rules - ASSERTIONS PAGE 23
+>>>>>>> cdf892ad3c1b4b73894abc084a65a816a3c5933f
 
 	parameter STRB_WIDTH = DATA_WIDTH / 8;
 

@@ -1,18 +1,36 @@
-/******************************************************************************
-	* DVT CODE TEMPLATE: sequencer with reset handling
-	* Created by root on Aug 4, 2015
-	* uvc_company = uvc_company, uvc_name = uvc_name
-*******************************************************************************/
+// -----------------------------------------------------------------------------
+/**
+* Project : AXI UVC
+*
+* File : axi_slave_read_sequencer.sv
+*
+* Language : SystemVerilog
+*
+* Company : Elsys Eastern Europe
+*
+* Author : Andrea Erdeljan
+*
+* E-Mail : andrea.erdeljan@elsys-eastern.com
+*
+* Mentor : Darko Tomusilovic
+*
+* Description : slave sequencer (contains aribtration)
+*
+* Classes :	1. axi_slave_read_sequencer
+*
+* Functions :	1. new (string name, uvm_component parent)
+*				2. void build_phase(uvm_phase phase)
+**/
+// -----------------------------------------------------------------------------
+
+`ifndef AXI_SLAVE_READ_SEQUENCER_SV
+`define AXI_SLAVE_READ_SEQUENCER_SV
 
 //------------------------------------------------------------------------------
 //
 // CLASS: axi_slave_read_sequencer
 //
 //------------------------------------------------------------------------------
-
-`ifndef AXI_SLAVE_READ_SEQUENCER_SV
-`define AXI_SLAVE_READ_SEQUENCER_SV
-
 class axi_slave_read_sequencer extends uvm_sequencer #(axi_read_base_frame);
 
 	// Configuration object
