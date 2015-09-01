@@ -1,7 +1,7 @@
 #!/bin/sh
 
-DEMO_HOME=/home/ELEA/aerdeljan/work/axi/mem
-TB_HOME=/home/ELEA/aerdeljan/work/axi/mem
+DEMO_HOME=/home/ELEA/aerdeljan/work/axi/all
+TB_HOME=/home/ELEA/aerdeljan/work/axi/all
 export TB_HOME
 
 usage() {

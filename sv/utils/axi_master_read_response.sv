@@ -26,6 +26,7 @@
 *							ref axi_read_burst_frame matching_burst)
 *			2. new_burst(axi_read_burst_frame one_burst)
 *			3. get_num_of_bursts(output int num)
+*			4. reset()
 **/
 // -----------------------------------------------------------------------------
 
@@ -70,6 +71,7 @@ class axi_master_read_response extends uvm_component;
 	extern virtual task check_response(axi_read_single_frame one_frame, ref axi_read_burst_frame matching_burst);
 	extern virtual task new_burst(axi_read_burst_frame one_burst);
 	extern virtual task get_num_of_bursts(output int num);
+	//extern virtual task reset(ref axi_read_burst_frame burst_queue);
 
 endclass : axi_master_read_response
 
@@ -179,5 +181,26 @@ task axi_master_read_response::get_num_of_bursts(output int num);
 	sem.put(1);
 
 endtask : get_num_of_bursts
+
+//------------------------------------------------------------------------------
+/**
+* Task : reset
+* Purpose : empty all queues
+* Inputs :
+* Outputs :
+* Ref :
+**/
+//------------------------------------------------------------------------------
+/*task axi_master_read_response::reset(ref axi_read_burst_frame burst_queue);
+
+	`uvm_info(get_type_name(), $sformatf("Reset"), UVM_LOW);
+
+	sem.get(1);
+		burst_queue = response_bursts;
+		sent_bursts.delete();
+		response_bursts.delete();
+	sem.put(1);
+
+endtask : reset*/
 
 `endif

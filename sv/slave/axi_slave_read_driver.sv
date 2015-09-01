@@ -199,29 +199,27 @@ endclass : axi_slave_read_driver
 **/
 //------------------------------------------------------------------------------
 	task axi_slave_read_driver::reset();
-		//forever begin
-			//@(negedge vif.sig_reset);
-			`uvm_info(get_type_name(), "Reset", UVM_MEDIUM)
-			@(posedge vif.sig_clock);	// reset can be asynchronous, but deassertion must be synchronous with clk
-			#1	// for simulation
 
-			// reset signals
-			vif.rid <= {ID_WIDTH {1'b0}};
-			vif.rdata <= {DATA_WIDTH {1'bz}};
-			vif.rresp <= 2'h0;
-			vif.rlast <= 1'b0;
-			//vif.ruser
-			vif.rvalid <= 1'b0;
-			if (slave_ready_rand_enable)
-				vif.arready <= ready_rand.getRandom();
-			else
-				vif.arready <= 1'b1;
+		`uvm_info(get_type_name(), "Reset", UVM_MEDIUM)
+		@(posedge vif.sig_clock);	// reset can be asynchronous, but deassertion must be synchronous with clk
+		#1	// for simulation
 
-			// TODO: reset queues
+		// reset signals
+		vif.rid <= {RID_WIDTH {1'b0}};
+		vif.rdata <= {DATA_WIDTH {1'bz}};
+		vif.rresp <= 2'h0;
+		vif.rlast <= 1'b0;
+		vif.ruser <= {RUSER_WIDTH {1'b0}};
+		vif.rvalid <= 1'b0;
+		if (slave_ready_rand_enable)
+			vif.arready <= ready_rand.getRandom();
+		else
+			vif.arready <= 1'b1;
 
-			// TODO: reset sequence
+		// TODO: reset queues
 
-		//end
+		// TODO: reset sequence
+
 	endtask : reset
 
 //------------------------------------------------------------------------------
@@ -254,7 +252,7 @@ endclass : axi_slave_read_driver
 					burst_collected.prot = vif.arprot;
 					burst_collected.qos = vif.arqos;
 					burst_collected.region = vif.arregion;
-					// user
+					burst_collected.user = vif.aruser;
 
 					burst_req.push_back(burst_collected);
 				end
@@ -303,7 +301,7 @@ endclass : axi_slave_read_driver
 				vif.rdata <= rsp.data;
 				vif.rresp <= rsp.resp;
 				vif.rlast <= rsp.last;
-				// user
+				vif.ruser <= rsp.user;
 				vif.rvalid <= 1'b1;
 
 				@(posedge vif.sig_clock iff vif.rready);	// wait for master

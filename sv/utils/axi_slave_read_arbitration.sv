@@ -45,7 +45,7 @@ class axi_slave_read_arbitration extends uvm_component;
 	axi_read_single_addr ready_queue[$];
 	axi_read_single_addr tmp_queue[$];
 	axi_read_whole_burst burst_wait[$];
-	bit [ID_WIDTH - 1 : 0] id_in_pipe[$];
+	bit [RID_WIDTH - 1 : 0] id_in_pipe[$];
 
 	semaphore ready_sem, wait_sem, burst_sem, pipe_sem;
 
@@ -139,6 +139,14 @@ endclass : axi_slave_read_arbitration
 
 		// checks - if the request is not following protocol, return SLVERR
 		do begin
+
+			// cache
+			if(whole_burst.cache[1] == 0)
+				if(!(whole_burst.cache[3:2] == 0)) begin
+					slverr_flag = 1;
+					break;
+				end
+
 			// burst types and various rules
 			case (whole_burst.burst_type)
 				Reserved: begin
@@ -162,6 +170,12 @@ endclass : axi_slave_read_arbitration
 						slverr_flag = 1;
 						break;
 					end
+				end
+				INCR: begin
+					if((whole_burst.len * (2**whole_burst.size)) >= 4096) begin
+						slverr_flag = 1;
+						break;
+					end					
 				end
 			endcase
 			// requested size is larger than DATA_WIDTH

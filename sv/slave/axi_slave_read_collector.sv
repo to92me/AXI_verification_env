@@ -145,7 +145,7 @@ endclass : axi_slave_read_collector
 					trans_addr_channel.prot = vif.arprot;
 					trans_addr_channel.qos = vif.arqos;
 					trans_addr_channel.region = vif.arregion;
-					// user
+					trans_addr_channel.user = vif.aruser;
 
 					addr_collected_port.write(trans_addr_channel);
 					num_burst_frames++;
@@ -160,7 +160,7 @@ endclass : axi_slave_read_collector
 					trans_data_channel.id = vif.rid;
 					trans_data_channel.resp = vif.rresp;
 					trans_data_channel.last = vif.rlast;
-					// user
+					trans_data_channel.user = vif.ruser;
 
 					data_collected_port.write(trans_data_channel);
 					num_single_frames++;
@@ -177,7 +177,7 @@ endclass : axi_slave_read_collector
 **/
 //------------------------------------------------------------------------------
 	function void axi_slave_read_collector::report_phase(uvm_phase phase);
-		`uvm_info(get_type_name(), $sformatf("Report: axi)slave_read_collector collected %0d bursts and %0d single frames", num_burst_frames, num_single_frames), UVM_LOW);
+		`uvm_info(get_type_name(), $sformatf("Report: collected %0d bursts and %0d single frames", num_burst_frames, num_single_frames), UVM_LOW);
 	endfunction : report_phase
 
 `endif

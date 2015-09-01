@@ -10,6 +10,23 @@ parameter ADDR_WIDTH = 32;
 parameter DATA_WIDTH = 64;
 parameter ID_WIDTH = 32;
 
+
+	//parameter ADDR_WIDTH = 32;	// Width of the address bus
+	//parameter DATA_WIDTH = 64;	// Width of the system data buses
+	parameter RID_WIDTH = 4;	// Number of read channel ID bits required.
+	parameter WID_WIDTH = 4;	// Number of write channel ID bits required.
+	parameter MAXRBURSTS = 16;	// Size of FIFOs for storing outstanding read bursts. This must be greater than or equal to the maximum number of outstanding read bursts that can be active at the slave interface
+	parameter MAXWBURSTS = 16;	// Size of FIFOs for storing outstanding write bursts. This must be greater than or equal to the maximum number of outstanding write bursts that can be active at the slave interface.
+	parameter EXMON_WIDTH = 4;	// Width of the exclusive access monitor required
+	parameter AWUSER_WIDTH = 32;	// Width of the user AW sideband field
+	parameter WUSER_WIDTH = 32;	// Width of the user W sideband field
+	parameter BUSER_WIDTH = 32;	// Width of the user B sideband field
+	parameter ARUSER_WIDTH = 32;	// Width of the user AR sideband field
+	parameter RUSER_WIDTH = 32;	// Width of the user R sideband field
+
+	// performance checking
+	parameter MAXWAITS = 16;	// Maximum number of cycles between VALID to READY HIGH before a warning is generated
+
 parameter STRB_WIDTH = DATA_WIDTH / 8;
 
 typedef struct {

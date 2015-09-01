@@ -35,7 +35,7 @@
 //------------------------------------------------------------------------------
 class axi_read_base_frame extends uvm_sequence_item;
 
-	rand bit [ID_WIDTH-1 : 0]	id;
+	rand bit [RID_WIDTH-1 : 0]	id;
 
 	// control
 	valid_enum 				valid;
@@ -63,7 +63,7 @@ class axi_read_single_frame extends axi_read_base_frame;
 	rand bit [DATA_WIDTH-1 : 0]	data;
 	rand response_enum			resp;
 	bit							last;
-	// user
+	rand bit [RUSER_WIDTH-1 : 0]	user;
 
 	// control
 	rand last_enum				last_mode;	// rlast signal generated correcty or not
@@ -94,7 +94,7 @@ class axi_read_single_frame extends axi_read_base_frame;
 		`uvm_field_enum(err_enum, err, UVM_DEFAULT)
 		`uvm_field_int(read_enable, UVM_DEFAULT)
 		`uvm_field_int(default_resp, UVM_DEFAULT)
-		//`uvm_field_int(user, UVM_DEFAULT)
+		`uvm_field_int(user, UVM_DEFAULT)
 	`uvm_object_utils_end
 
 	function new (string name = "axi_read_single_frame");
@@ -173,7 +173,7 @@ class axi_read_burst_frame extends axi_read_base_frame;
 	rand bit [2:0]					prot;
 	rand bit [3:0]					qos;
 	rand bit [3:0]					region;
-	// user
+	rand bit [ARUSER_WIDTH-1 : 0]	user;
 
 	// control signal - completly random burst or burst following protocol
 	rand bit valid_burst;
@@ -190,7 +190,7 @@ class axi_read_burst_frame extends axi_read_base_frame;
 
 	constraint default_id_constraint {
 		if (default_id) {
-			id == {ID_WIDTH {1'b0}};
+			id == {RID_WIDTH {1'b0}};
 		}
 	}
 	constraint default_region_constraint {
@@ -255,6 +255,13 @@ class axi_read_burst_frame extends axi_read_base_frame;
 				burst_type inside {FIXED, INCR};
 				lock == NORMAL;
 			}
+			if((len * (2**size)) >= 4096) {
+				burst_type inside {FIXED, INCR, WRAP};
+			}
+			else {
+				burst_type inside {FIXED, WRAP};
+			}
+					
 			// never use Reserved
 
 			// for an exclusive access - the number of bytes must be a power of 2, max 128 bytes
@@ -266,6 +273,11 @@ class axi_read_burst_frame extends axi_read_base_frame;
 			}
 			if(lock == EXCLUSIVE) {
 				len < 16;
+			}
+
+			// cache
+			if(cache[1] == 0) {
+				cache[3:2] == 0;
 			}
 		}
 	}
@@ -289,7 +301,7 @@ class axi_read_burst_frame extends axi_read_base_frame;
 		`uvm_field_int(prot, UVM_DEFAULT)
 		`uvm_field_int(qos, UVM_DEFAULT)
 		`uvm_field_int(region, UVM_DEFAULT)
-		// `uvm_field_int(user, UVM_DEFAULT)
+		`uvm_field_int(user, UVM_DEFAULT)
 		`uvm_field_int(valid_burst, UVM_DEFAULT)
 		`uvm_field_int(default_id, UVM_DEFAULT)
 		`uvm_field_int(default_region, UVM_DEFAULT)

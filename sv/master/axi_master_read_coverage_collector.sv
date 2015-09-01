@@ -128,7 +128,9 @@ class axi_master_read_coverage_collector extends uvm_component;
 			bins region_values = default;
 		}
 
-		// user
+		USER: coverpoint burst_frame.user {
+			bins user_values = default;
+		}
 	endgroup
 
 
@@ -155,7 +157,9 @@ class axi_master_read_coverage_collector extends uvm_component;
 			bins NOT_LAST = {0};
 		}
 
-		// user
+		USER: coverpoint single_frame.user {
+			bins user_values = default;
+		}
 	endgroup
 
 	// new - constructor
