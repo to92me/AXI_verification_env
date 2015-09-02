@@ -1,6 +1,10 @@
 `ifndef AXI_MASTER_WRITE_MAIN_MONITOR_SCH
 `define AXI_MASTER_WRITE_MAIN_MONITOR_SVH
 
+
+
+
+
 //------------------------------------------------------------------------------
 //
 // CLASS: uvc_company_uvc_name_component
@@ -100,7 +104,6 @@ endclass : axi_master_write_main_monitor
 			address_collector.main();
 			data_collector.main();
 			response_collector.main();
-//			checker_util.main();
 			this.reset();
 		join
 	endtask
@@ -109,18 +112,26 @@ endclass : axi_master_write_main_monitor
 		axi_write_address_collector_mssg mssg1, mssg2;
 		int i;
 
+//			$display("PUSH ADDR ITEM ID: %h", mssg0.getId());
+
 		foreach(checker_map[i])
 			begin
-				mssg1 = new();
-				mssg1.copyMssg(mssg0);
-				checker_map[i].suscribed_checker_base_instance.pushAddressItem(mssg1);
+				if(checker_map[i].getSuscribed_to_address_items() == TRUE)
+					begin
+						mssg1 = new();
+						mssg1.copyMssg(mssg0);
+						checker_map[i].suscribed_checker_base_instance.pushAddressItem(mssg1);
+					end
 			end
 
 		foreach(coverage_map[i])
 			begin
-				mssg1 = new();
-				mssg1.copyMssg(mssg0);
-				coverage_map[i].suscribed_coverage_instace.pushAddrItem(mssg1);
+				if(coverage_map[i].getSuscribed_to_address_sample() == TRUE)
+					begin
+						mssg1 = new();
+						mssg1.copyMssg(mssg0);
+						coverage_map[i].suscribed_coverage_instace.pushAddrItem(mssg1);
+					end
 			end
 
 		mssg2 = new();
@@ -135,16 +146,22 @@ endclass : axi_master_write_main_monitor
 
 		foreach(checker_map[i])
 			begin
-				mssg1 = new();
-				mssg1.copyMssg(mssg0);
-				checker_map[i].suscribed_checker_base_instance.pushDataItem(mssg1);
-			end
+				if(checker_map[i].getSuscribed_to_data_items() == TRUE)
+					begin
+						mssg1 = new();
+						mssg1.copyMssg(mssg0);
+						checker_map[i].suscribed_checker_base_instance.pushDataItem(mssg1);
+					end
+				end
 
 		foreach(coverage_map[i])
 			begin
-				mssg1 = new();
-				mssg1.copyMssg(mssg0);
-				coverage_map[i].suscribed_coverage_instace.pushDatatItem(mssg1);
+				if(coverage_map[i].getSuscribed_to_data_sample() == TRUE)
+					begin
+						mssg1 = new();
+						mssg1.copyMssg(mssg0);
+						coverage_map[i].suscribed_coverage_instace.pushDatatItem(mssg1);
+					end
 			end
 
 //		coverage.pushDatatItem(mssg0);
@@ -160,16 +177,22 @@ endclass : axi_master_write_main_monitor
 
 		foreach(checker_map[i])
 			begin
-				mssg1 = new();
-				mssg1.copyMssg(mssg0);
-				checker_map[i].suscribed_checker_base_instance.pushResponseItem(mssg1);
+				if(checker_map[i].getSuscrived_to_response_items() == TRUE)
+					begin
+						mssg1 = new();
+						mssg1.copyMssg(mssg0);
+						checker_map[i].suscribed_checker_base_instance.pushResponseItem(mssg1);
+					end
 			end
 
 		foreach(coverage_map[i])
 			begin
-				mssg1 = new();
-				mssg1.copyMssg(mssg0);
-				coverage_map[i].suscribed_coverage_instace.pushResponseItem(mssg1);
+				if(coverage_map[i].getSuscribed_to_response_sample == TRUE)
+					begin
+						mssg1 = new();
+						mssg1.copyMssg(mssg0);
+						coverage_map[i].suscribed_coverage_instace.pushResponseItem(mssg1);
+					end
 			end
 
 

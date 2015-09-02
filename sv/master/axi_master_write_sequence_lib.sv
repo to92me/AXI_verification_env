@@ -2,6 +2,30 @@
 `ifndef AXI_MASTER_WRITE_SEQUENCE_LIB_SVH
 `define AXI_MASTER_WRITE_SEQUENCE_LIB_SVH
 
+
+/**
+* Project : AXI UVC
+*
+* File : axi_master_write_sequence_base.sv
+*
+* Language : SystemVerilog
+*
+* Company : Elsys Eastern Europe
+*
+* Author : Tomislav Tumbas
+*
+* E-Mail : tomislav.tumbas@elsys-eastern.com
+*
+* Mentor : Darko Tomusilovic
+*
+* Description : axi_master_write_sequence_base
+*
+* Classes :	1. axi_master_write_sequence_base
+*
+**/
+
+
+
 //------------------------------------------------------------------------------
 //
 // CLASS: uvc_company_uvc_name_base_seq
@@ -48,6 +72,7 @@ endclass : axi_master_write_sequence_base
 class axi_master_write_sequence_lib_test1 extends axi_master_write_sequence_base;
 
 	// Add local random fields and constraints here
+	int send_bursts = 2;
 
 	`uvm_object_utils(axi_master_write_sequence_lib_test1)
 
@@ -56,69 +81,27 @@ class axi_master_write_sequence_lib_test1 extends axi_master_write_sequence_base
 		super.new(name);
 	endfunction
 
+	extern function void response_handler(uvm_sequence_item response);
+
 	virtual task body();
-//		`uvm_do_with(req,{req.data.size inside{[1 : 10]};})
-		`uvm_do(req);
-		`uvm_do(req);
-//		`uvm_do(req);
-//		`uvm_do(req);
-//		`uvm_do(req);
-//		`uvm_do(req);
-//		`uvm_do(req);
-//		`uvm_do(req);
-//		`uvm_do(req);
-//		`uvm_do(req);
-//		`uvm_do(req);
-//		`uvm_do(req);
-//		`uvm_do(req);
-//		`uvm_do(req);
-//		`uvm_do(req);
-//		`uvm_do(req);
-//		`uvm_do(req);
-//		`uvm_do(req);
-//		`uvm_do(req);
-//		`uvm_do(req);
-//		`uvm_do(req);
-//		`uvm_do(req);
-//		`uvm_do(req);
-//		`uvm_do(req);
-//		`uvm_do(req);
-//		`uvm_do(req);
-//		`uvm_do(req);
-//		`uvm_do(req);
-//		`uvm_do(req);
-//		`uvm_do(req);
-//		`uvm_do(req);
-//		`uvm_do(req);
-//		`uvm_do(req);
-//		`uvm_do(req);
-//		`uvm_do(req);
-//		`uvm_do(req);
-//		`uvm_do(req);
-//		`uvm_do(req);
-//		`uvm_do(req);
-//		`uvm_do(req);
-//		`uvm_do(req);
-//		`uvm_do(req);
-//		`uvm_do(req);
-//		`uvm_do(req);
-//		`uvm_do(req);
-//		`uvm_do(req);
-//		`uvm_do(req);
-//		`uvm_do(req);
-//		`uvm_do(req);
-//		`uvm_do(req);
-//		`uvm_do(req);
-//		`uvm_do(req);
-//		`uvm_do(req);
-//		`uvm_do(req);
-//		`uvm_do(req);
-//		`uvm_do(req);
+
+		use_response_handler(1);
+
+		repeat(3000)
+			begin
+				`uvm_do(req);
+			end
+
+		wait(!send_bursts);
 
 //		get_response(rsp);
 	endtask
 
 endclass : axi_master_write_sequence_lib_test1
 
+
+function void axi_master_write_sequence_lib_test1::response_handler(input uvm_sequence_item response);
+	    send_bursts--;
+endfunction
 
 `endif

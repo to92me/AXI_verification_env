@@ -1,12 +1,30 @@
-/******************************************************************************
-	* DVT CODE TEMPLATE: driver
-	* Created by root on Aug 2, 2015
-	* uvc_company = uvc_company, uvc_name = uvc_name
-*******************************************************************************/
+`ifndef AXI_SLAVE_WRITE_DRIVER_SVH
+`define AXI_SLAVE_WRITE_DRIVER_SVH
+
+/**
+* Project : AXI UVC
+*
+* File : axi_slave_write_driver.sv
+*
+* Language : SystemVerilog
+*
+* Company : Elsys Eastern Europe
+*
+* Author : Tomislav Tumbas
+*
+* E-Mail : tomislav.tumbas@elsys-eastern.com
+*
+* Mentor : Darko Tomusilovic
+*
+* Description : slave write dirver
+*
+* Classes :	1. axi_slave_write_driver
+*
+**/
 
 //------------------------------------------------------------------------------
 //
-// CLASS: uvc_company_uvc_name_driver
+// CLASS: axi_slave_write_driver
 //
 //------------------------------------------------------------------------------
 
@@ -92,5 +110,5 @@ function void axi_slave_write_driver::setSlaveConfig(input axi_slave_config cfg)
     this.config_obj = cfg;
 endfunction
 
-
+`endif
 

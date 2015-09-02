@@ -1,6 +1,28 @@
 `ifndef AXI_SLAVE_WRITE_SEAUENCE_LIB_SVH
 `define AXI_SLAVE_WRITE_SEAUENCE_LIB_SVH
 
+/**
+* Project : AXI UVC
+*
+* File : axi_slave_write_sequence_base.sv
+*
+* Language : SystemVerilog
+*
+* Company : Elsys Eastern Europe
+*
+* Author : Tomislav Tumbas
+*
+* E-Mail : tomislav.tumbas@elsys-eastern.com
+*
+* Mentor : Darko Tomusilovic
+*
+* Description : axi slave write sequence base
+*
+* Classes :	1. axi_slave_write_sequence_base
+*
+**/
+
+
 //------------------------------------------------------------------------------
 //
 // CLASS: uvc_company_uvc_name_base_seq
@@ -43,7 +65,7 @@ endclass : axi_slave_write_sequence_base
 //------------------------------------------------------------------------------
 class uvc_name_transfer_seq extends axi_slave_write_sequence_base;
 
-	
+
 
 	`uvm_object_utils(uvc_name_transfer_seq)
 

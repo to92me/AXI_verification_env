@@ -178,7 +178,7 @@ task axi_master_write_scheduler_packages::addBurst(input axi_frame frame);
 			this.wsize = frame.size;
 			this.frame_copy = frame; // keep the frame copy if recieved error repeat transaction
 			this.ID = frame.id;
-			data_queue[data_queue.size -1].last_one = TRUE;
+			data_queue[data_queue.size() -1].last_one = TRUE;
 			data_queue[0].first_one = TRUE;
 			this.address = frame.addr;
 

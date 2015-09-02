@@ -31,7 +31,7 @@ class axi_master_write_scheduler extends uvm_component;
 	axi_frame 								frame_same_id;
 	axi_mssg 								mssg;
 	axi_mssg 								send;
-	int 									response_latenes_error_rising = 100000;
+	int 									response_latenes_error_rising = 1000000000;
 	axi_slave_response						response_from_slave_queue[$];
 	axi_slave_response						single_response_from_slave;
 	int 									error_before_delte_item = 4;
@@ -180,7 +180,9 @@ endclass : axi_master_write_scheduler
 				burst_queue[i].getNextSingleFrame(mssg);
 				if(mssg.state == READY)
 					begin
+						sem.get(1);
 						next_frame_for_sending.push_front(mssg.frame);
+						sem.put(1);
 //						$display("+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++Scheduler ready frame ");
 						if(burst_queue[i+1] != null)
 							burst_queue[i+1].lock_state = QUEUE_UNLOCKED;
@@ -202,7 +204,7 @@ endclass : axi_master_write_scheduler
 	task axi_master_write_scheduler::getFrameForDrivingVif(output axi_mssg mssg);
 		int tmp;
 		send = new();
-//		sem.get(1);
+		sem.get(1);
 		tmp = next_frame_for_sending.size();
 //		sem.put(1);
 	    if(tmp > 0)
@@ -219,7 +221,7 @@ endclass : axi_master_write_scheduler
 			    send.frame = null;
 //			    sem.put(1);
 		    end
-
+		 sem.put(1);
 		mssg = send;
 	endtask
 
@@ -252,7 +254,7 @@ endclass : axi_master_write_scheduler
 
 // reset all queues and
 	task axi_master_write_scheduler::resetAll();
-//		sem.get(1);
+		sem.get(1);
 		for(int  i = 0; i < burst_queue.size(); i++ )
 			void'(burst_queue.pop_front());
 		for(int i = 0; i< next_frame_for_sending.size(); i++ )
@@ -260,7 +262,7 @@ endclass : axi_master_write_scheduler
 		for(int i = 0; i<burst_existing_id.size(); i++)
 			void'(burst_existing_id.pop_front());
 		`uvm_info("AXI MASTER WRITE SCHEDULER", "recived reset signal, deleting all bursts and items",UVM_HIGH);
-//		sem.put(1);
+		sem.put(1);
 	endtask
 
 
@@ -361,7 +363,7 @@ task axi_master_write_scheduler::calculateRepsonseLatenes();
 	int foreach_i;
 	int tmp_i[$];
 
-//	sem.get(1);
+	sem.get(1);
 	if(waiting_for_resp_queue.size != 0)
 		begin
 			foreach(waiting_for_resp_queue[foreach_i])
@@ -369,8 +371,8 @@ task axi_master_write_scheduler::calculateRepsonseLatenes();
 					waiting_for_resp_queue[foreach_i].counter++;
 					if(	waiting_for_resp_queue[foreach_i].counter > response_latenes_error_rising)
 						begin
-							`uvm_info(get_name(),$sformatf("for burst ID: %d response did not come after %d",
-								waiting_for_resp_queue[foreach_i].frame.id, response_latenes_error_rising), UVM_HIGH)
+							`uvm_warning(get_name(),$sformatf("for burst ID: %h response did not come after %d",
+								waiting_for_resp_queue[foreach_i].frame.id, response_latenes_error_rising))
 							tmp_i.push_front(foreach_i);
 						end
 				end
@@ -380,9 +382,10 @@ task axi_master_write_scheduler::calculateRepsonseLatenes();
 			begin
 				waiting_for_resp_queue.delete(foreach_i);
 			end
+	sem.put(1);
 
 		this.checkForDone();
-//	sem.put(1);
+
 
 endtask
 
@@ -453,7 +456,7 @@ task axi_master_write_scheduler::putOkResp(input bit[ID_WIDTH-1:0] rsp_id);
 //			sem.get(1);
 			if(waiting_for_resp_queue[i].frame.id == rsp_id)
 				begin
-					`uvm_info(get_name(),$sformatf("burst ID: %d recivede OK or EXOKAY from slave,\
+					`uvm_info(get_name(),$sformatf("burst ID: %h recivede OK or EXOKAY from slave,\
 						 completeing transaction and deleteing frame",rsp_id), UVM_MEDIUM)
 					waiting_for_resp_queue.delete(i);
 					sem.put(1);
@@ -517,12 +520,12 @@ task axi_master_write_scheduler::checkForDone();
 
    if(burst_queue.size() == 0 && burst_existing_id.size() == 0 && waiting_for_resp_queue.size() == 0)
 	  begin
-		  if(testing_completed == TRUE)
-			   begin
-				testing_completed = TRUE;
-			   	$display("  ============================= THE END =====================================");
-			   	top_driver.putResponseToSequencer();
-			   end
+		  top_driver.putResponseToSequencer();
+//		  if(testing_completed == TRUE)
+//			   begin
+//				testing_completed = TRUE;
+//			   	$display("  ============================= THE END =====================================");
+//			   end
 		   end
    else
 	   begin

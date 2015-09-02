@@ -1,22 +1,32 @@
 `ifndef AXI_MASTER_WRITE_BASE_DRIVER_SVH
 `define AXI_MASTER_WRITE_BASE_DRIVER_SVH
 
-//------------------------------------------------------------------------------
-//
-// CLASS: uvc_company_uvc_name_component
-//
-//------------------------------------------------------------------------------
+
+/****************************************************************
+* Project : AXI UVC
+*
+* File : base_driver.sv
+*
+* Language : SystemVerilog
+*
+* Company : Elsys Eastern Europe
+*
+* Author : Tomislav Tumbas
+*
+* E-Mail : tomislav.tumbas@elsys-eastern.com
+*
+* Mentor : Darko Tomusilovic
+*
+* Description : base bus driver with radnomization classes
+*
+* Classes :	1. axi_master_write_base_driver_delays
+* 			2. axi_master_write_base_driver_ready_default_value
+*			3. axi_master_write_base_driver ( abstract class )
+******************************************************************/
 
 
-//typedef enum{
-//	GET_FRAME = 1,
-//	DRIVE_VIF = 2,
-//	WAIT_READY = 3,
-//	WAIT_CLK = 4,
-//	WAIT_READY_DELAY = 6,
-//	COMPLETE_TRANSACTION = 5
-//	STATE_CALCULATOR = 6
-//}write_states_enum;
+
+
 
 typedef enum{
 	GET_FRAME = 0,
@@ -38,28 +48,140 @@ typedef enum{
 	INFOR_TRIGER = 2
 }axi_master_write_driver_data_enum;
 
+//-------------------------------------------------------------------------------------
+//
+// CLASS: axi_master_write_base_driver_delays  ( RANDOMIZATION CLASS )
+//
+//--------------------------------------------------------------------------------------
+// DESCRIPTION:
+//			class axi_master_write_base_driver_delays is randomization class.
+//			it it radomizes one int value in given constraints
+//
+// API:
+//		1. setConst_delay(true_false_enum const_delay);
+//
+//			- if this is set random delay will be constant and equal to
+//			cosnt_delay_value
+//
+//		2. setCosnt_delay(int cosnt_delay_value);
+//
+//			-this methode sets constant_delay_value
+//
+//		3. setDelay_exist(true_false_enum delay_exist);
+//
+//			-this methode sets if delay exists. If this methode is called
+//			with FALSE then random delay will be always 0
+//
+//		4. setDelay_max(int delay_max);
+//
+//			-this methode sets value of delay_max. If radnom delay exist
+//			and is not constant then delay will be inside delay_min and
+//			delay_max.
+//
+//		5. setDelay_min(int delay_min);
+//
+//			-this methode sets value of delay_min.If radnom delay exist
+//			and is not constant then delay will be inside delay_min and
+//			delay_max.
+//
+//		6. int getRandomDelay();
+//			this methode returns random delay
+//
+//------------------------------------------------------------------------------
+
 class axi_master_write_base_driver_delays;
 	rand int 			delay;
 
 	int 				delay_max = 5;
 	int 				delay_min = 0;
-	int 				cosnt_delay = 2;
+	int 				cosnt_delay_value = 2;
 	true_false_enum 	const_delay = FALSE ;
 	true_false_enum		delay_exist = TRUE;
 
 	constraint ready_delay_csr{ // FIXME CSR NO!
 		if(delay_exist == TRUE){
 			if(const_delay == TRUE){
-				delay == const_delay;
+				delay == cosnt_delay_value;
 			}else{
 				delay inside {[delay_min : delay_max]};
 			}
 		}else{
 				delay == 0;
 			}
-		}
+	}
+
+
+	// Set const_delay
+	function void setConst_delay(true_false_enum const_delay);
+		this.const_delay = const_delay;
+	endfunction
+
+	// Set cosnt_delay
+	function void setCosnt_delay(int cosnt_delay_value);
+		this.cosnt_delay_value = cosnt_delay_value;
+	endfunction
+
+	// Get delay
+	function int getRandomDelay();
+		return delay;
+	endfunction
+
+	// Set delay_exist
+	function void setDelay_exist(true_false_enum delay_exist);
+		this.delay_exist = delay_exist;
+	endfunction
+
+	// Set delay_max
+	function void setDelay_max(int delay_max);
+		this.delay_max = delay_max;
+	endfunction
+
+	// Set delay_min
+	function void setDelay_min(int delay_min);
+		this.delay_min = delay_min;
+	endfunction
+
+
+
+
 endclass
 
+//-------------------------------------------------------------------------------------
+//
+// CLASS: axi_master_write_base_driver_ready_default_value  ( RANDOMIZATION CLASS )
+//
+//--------------------------------------------------------------------------------------
+// DESCRIPTION:
+//			class axi_master_write_base_driver_ready_default_value is randomization class.
+//			it it radomizes ready_default_enum value ( it can be READY_DEFAULT_0 and
+//			READY_DEFAULT_1) and returns ready value in given constraints
+//
+// API:
+//		1. setReady_random(true_false_enum ready_random);
+//
+//			- if this is set random ready will have random value
+//			or default value
+//
+//		2. setReady_default(ready_default_enum ready_default);
+//
+//			-set default value of ready
+//
+//		3. setReady_1_dist(int ready_1_dist);
+//
+//			-this methode sets distribution value for ready_1_dist. If this class
+//			is in random mode, it will chose between READY_DEFAULT_0 and READY_DEFAULT_1
+//			in distribution ( ready_0_dist and ready_1_dist)
+//
+//		4. setReady_0_dist(int ready_0_dist);
+//			-this methode sets distribution value for ready_0_dist. If this class
+//			is in random mode, it will chose between READY_DEFAULT_0 and READY_DEFAULT_1
+//			in distribution ( ready_0_dist and ready_1_dist)
+//
+//		5. ready_default_enum getRandomReady()
+//
+//			-this methode returns radnom ready
+//
+//------------------------------------------------------------------------------
 
 class axi_master_write_base_driver_ready_default_value;
 	rand ready_default_enum ready;
@@ -81,8 +203,62 @@ class axi_master_write_base_driver_ready_default_value;
 			 }
 	}
 
+	// Get ready
+	function ready_default_enum getRandomReady();
+		return ready;
+	endfunction
+
+	// Set ready_0_dist
+	function void setReady_0_dist(int ready_0_dist);
+		this.ready_0_dist = ready_0_dist;
+	endfunction
+
+	// Set ready_1_dist
+	function void setReady_1_dist(int ready_1_dist);
+		this.ready_1_dist = ready_1_dist;
+	endfunction
+
+	// Set ready_default
+	function void setReady_default(ready_default_enum ready_default);
+		this.ready_default = ready_default;
+	endfunction
+
+	// Set ready_random
+	function void setReady_random(true_false_enum ready_random);
+		this.ready_random = ready_random;
+	endfunction
+
+
+
 endclass
 
+
+//-------------------------------------------------------------------------------------
+//
+// CLASS: axi_master_write_base_driver  ( ABSTRACT )
+//
+//--------------------------------------------------------------------------------------
+// DESCRIPTION:
+//		axi_master_write_base_driver is class with virtual methodes and this class should
+//		be extended in drivers that drive axi bus
+//
+//VIRTUAL API:
+//			virtual task getNextFrame();
+//			virtual task driverVif();
+//			virtual task completeTransaction();
+//			virtual task main();
+//			virtual task init();
+//			virtual task reset();
+//
+// REQUIREMENTS:
+//		1. axi virtual interface - axi_if must be properli set in uvm_database
+//
+//		2. main_driver - main driver isntance - main driver should be implemented and
+//		setted to this variable
+//
+//		3. scheduler - scheduler instance - scheduler sholud be implemented and setted
+//		to this variable
+//------------------------------------------------------------------------------
 
 class axi_master_write_base_driver extends uvm_component;
 

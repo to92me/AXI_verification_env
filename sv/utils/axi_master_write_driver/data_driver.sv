@@ -1,12 +1,55 @@
 `ifndef AXI_MASTER_WRITE_DATA_DRIVER_SVH
 `define AXI_MASTER_WRITE_DATA_DRIVER_SVH
 
-//------------------------------------------------------------------------------
-//
-// CLASS: uvc_company_uvc_name_component
-//
-//------------------------------------------------------------------------------
+/**
+* Project : AXI UVC
+*
+* File : data_driver.sv
+*
+* Language : SystemVerilog
+*
+* Company : Elsys Eastern Europe
+*
+* Author : Tomislav Tumbas
+*
+* E-Mail : tomislav.tumbas@elsys-eastern.com
+*
+* Mentor : Darko Tomusilovic
+*
+* Description : data bus driver
+*
+* Classes :	1. axi_master_write_data_driver
+*
+**/
 
+
+//-------------------------------------------------------------------------------------
+//
+// CLASS: axi_master_write_data_driver
+//
+//--------------------------------------------------------------------------------------
+// DESCRIPTION:
+//			class axi_master_write_data_driver gets items for driving axi address bus and
+//			and when one item is sent it gets next.
+//
+// API:
+//		1. getNextFrame();
+//
+//			- this methode is called when driver is ready to drive next item to buss
+//			- gotten item should be set to current frame
+//
+//		2.main()
+//
+//			-this methode is main loop of driver and should be forked in module
+//			where is driver instaced
+//
+// CONFIGURATIONS:
+//		1. delay bewfore setting wvalid - it shoul be set in axi_single_frame
+//
+//
+// REQUIREMENTS:
+//		1. axi virtual interface - axi_if must be properli set in uvm_database
+//------------------------------------------------------------------------------
 
 
 class axi_master_write_data_driver extends axi_master_write_base_driver;
@@ -70,7 +113,7 @@ endtask
 
 task axi_master_write_data_driver::driverVif();
 		#2
-		$display(" MASTER SEND current frame: %h %d %h, strobe: %b, count: %d",current_frame.id, current_frame.last_one, current_frame.data, current_frame.strobe,  send_items );
+//		$display(" MASTER SEND DATA current frame: %h %d %h, strobe: %b, count: %d",current_frame.id, current_frame.last_one, current_frame.data, current_frame.strobe,  send_items );
 		send_items++;
 		calculateStrobe(current_frame);
 		vif.wid 	<= 	current_frame.id;

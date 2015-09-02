@@ -1,13 +1,57 @@
 `ifndef AXI_MASTER_WRITE_ADDRESS_DRIVER_SVH
 `define AXI_MASTER_WRITE_ADDRESS_DRIVER_SVH
 `define tome
-//------------------------------------------------------------------------------
-//
-// CLASS: uvc_company_uvc_name_component
-//
-//------------------------------------------------------------------------------
+
+/**
+* Project : AXI UVC
+*
+* File : address_driver.sv
+*
+* Language : SystemVerilog
+*
+* Company : Elsys Eastern Europe
+*
+* Author : Tomislav Tumbas
+*
+* E-Mail : tomislav.tumbas@elsys-eastern.com
+*
+* Mentor : Darko Tomusilovic
+*
+* Description : address bus driver
+*
+* Classes :	1. axi_master_write_address_driver
+*
+**/
 
 
+
+//-------------------------------------------------------------------------------------
+//
+// CLASS: axi_master_write_address_driver
+//
+//--------------------------------------------------------------------------------------
+// DESCRIPTION:
+//			class axi_master_write_data_driver gets items for driving axi data bus and
+//			and when one item is sent it gets next.
+//
+// API:
+//		1. getNextFrame();
+//
+//			- this methode is called when driver is ready to drive next item to buss
+//			- gotten item should be set to current frame
+//
+//		2.main()
+//
+//			-this methode is main loop of driver and should be forked in module
+//			where is driver instaced
+//
+// CONFIGURATIONS:
+//		1. delay bewfore setting awvalid - it shoul be set in axi_single_frame
+//
+//
+// REQUIREMENTS:
+//		1. axi virtual interface - axi_if must be properli set in uvm_database
+//------------------------------------------------------------------------------
 
 
 `ifdef tome
@@ -74,7 +118,7 @@ endtask
 
 task axi_master_write_address_driver::driverVif();
 		#2
-		$display(" MASTER SEND current frame: %h %d %h, count: %d",current_frame.id,current_frame.len, current_frame.data, send_items );
+		$display(" 		MASTER SEND ADDR current frame: %h %d %h, count: %d",current_frame.id,current_frame.len, current_frame.data, send_items );
 		send_items++;
 		vif.awid	<= current_frame.id;
 		vif.awaddr	<= current_frame.addr;
@@ -86,7 +130,7 @@ task axi_master_write_address_driver::driverVif();
 		vif.awprot 	<= current_frame.prot;
 		vif.awqos 	<= current_frame.qos;
 		vif.awregion<= current_frame.region;
-		vif.awvalid <= 1'b1;
+//		vif.awvalid <= 1'b1;
 endtask
 
 task axi_master_write_address_driver::completeTransaction();
@@ -110,7 +154,6 @@ task axi_master_write_address_driver::init();
 endtask
 
 task axi_master_write_address_driver::reset();
-		#2
 		vif.awid	<= 0;
 		vif.awaddr	<= 0;
 		vif.awlen 	<= 0;
@@ -215,6 +258,7 @@ task axi_master_write_address_driver::dataDriver();
 		    INFORM_VALID_CORE:
 		    begin
 			    ->frame_collected;
+			    main_driver.pushAddrResponse();
 			    state = WAIT_TO_COLLECT;
 		    end
 

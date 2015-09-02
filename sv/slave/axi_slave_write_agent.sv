@@ -1,6 +1,30 @@
 `ifndef AXI_SLAVE_WRITE_AGENT
 `define AXI_SLAVE_WRITE_AGENT
 
+// -----------------------------------------------------------------------------
+/**
+* Project : AXI UVC
+*
+* File : axi_slave_write_agent.sv
+*
+* Language : SystemVerilog
+*
+* Company : Elsys Eastern Europe
+*
+* Author : Tomislav Tumbas
+*
+* E-Mail : tomislav.tumbas@elsys-eastern.com
+*
+* Mentor : Darko Tomusilovic
+*
+* Description : slave write dirver
+*
+* Classes :	1. axi_slave_write_agent
+*
+**/
+// -----------------------------------------------------------------------------
+
+
 //------------------------------------------------------------------------------
 //
 // CLASS: uvc_company_uvc_name_agent
