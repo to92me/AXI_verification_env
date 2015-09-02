@@ -36,6 +36,8 @@ class axi_master_write_scheduler extends uvm_component;
 	axi_slave_response						single_response_from_slave;
 	int 									error_before_delte_item = 4;
 	true_false_enum							testing_completed = FALSE;
+	int 									burst_deepth = 4;
+	int 									active_bursts = 0;
 //	mailbox 								mbx;
 
 
@@ -135,10 +137,15 @@ endclass : axi_master_write_scheduler
 			single_burst.data_queue[0].first_one 						= TRUE;
 
 			if(burst_queue.size() == 0)
-				single_burst.lock_state = QUEUE_UNLOCKED;
-			else if(burst_queue[burst_queue.size()-1].first_status == FIRST_SENT)
-				single_burst.lock_state = QUEUE_UNLOCKED;
-
+				begin
+					single_burst.lock_state = QUEUE_UNLOCKED;
+					active_bursts = 1;
+				end
+			else if(burst_queue[burst_queue.size()-1].first_status == FIRST_SENT && active_bursts <= burst_deepth)
+				begin
+					single_burst.lock_state = QUEUE_UNLOCKED;
+					active_bursts++;
+				end
 
 			single_burst.calculateStrobe();
 
@@ -184,8 +191,11 @@ endclass : axi_master_write_scheduler
 						next_frame_for_sending.push_front(mssg.frame);
 						sem.put(1);
 //						$display("+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++Scheduler ready frame ");
-						if(burst_queue[i+1] != null)
-							burst_queue[i+1].lock_state = QUEUE_UNLOCKED;
+						if(burst_queue[i+1] != null && active_bursts <= burst_deepth)
+							begin
+								burst_queue[i+1].lock_state = QUEUE_UNLOCKED;
+								active_bursts++;
+							end
 					end
 				else if(mssg.state == QUEUE_EMPTY)
 					begin
@@ -322,6 +332,16 @@ endclass : axi_master_write_scheduler
 								end
 						end
 					waiting_for_resp_queue.push_back(single_waiting_for_resp);
+					if(burst_queue[burst_deepth+1] != null)
+						begin
+							if(burst_queue[burst_deepth].first_status == FIRST_SENT && active_bursts <= burst_deepth)
+								burst_queue[burst_deepth+1].lock_state = QUEUE_UNLOCKED;
+							else
+								active_bursts--;
+						end
+					else
+						active_bursts--;
+
 					burst_queue.delete(tmp_iterator);
 					state_check_ID = NEXT_CHECK;
 //

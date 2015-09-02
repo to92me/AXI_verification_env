@@ -115,6 +115,8 @@ class axi_slave_write_coverage extends axi_slave_write_coverage_base;
 			bins DECERR = {DECERR};
 		}
 
+		// TODO CROSS FIXME
+
 	endgroup
 
 	// new - constructor

@@ -92,9 +92,16 @@ endclass : axi_master_write_scheduler_packages
 task axi_master_write_scheduler_packages::getNextSingleFrame(output axi_mssg rps_mssg);
 	mssg = new();
 	// if queue is empty then return QUEUE_EMPTY
-	if(data_queue.size == 0)
+	if(data_queue.size == 0 )
 		begin
 			mssg.state = QUEUE_EMPTY;
+			mssg.frame = null;
+			rps_mssg = mssg;
+			return;
+		end
+	if(this.lock_state == QUEUE_LOCKED)
+		begin
+			mssg.state = NOT_READY;
 			mssg.frame = null;
 			rps_mssg = mssg;
 			return;

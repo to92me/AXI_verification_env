@@ -1,10 +1,29 @@
 `ifndef AXI_SLAVE_WRITE_BASE_DRIVER_SVH
 `define AXI_SLAVE_WRITE_BASE_DRIVER_SVH
-//------------------------------------------------------------------------------
-//
-// CLASS: uvc_company_uvc_name_component
-//
-//------------------------------------------------------------------------------
+
+
+/****************************************************************
+* Project : AXI UVC
+*
+* File : base_driver.sv
+*
+* Language : SystemVerilog
+*
+* Company : Elsys Eastern Europe
+*
+* Author : Tomislav Tumbas
+*
+* E-Mail : tomislav.tumbas@elsys-eastern.com
+*
+* Mentor : Darko Tomusilovic
+*
+* Description : base bus driver with radnomization classes
+*
+* Classes :	1. axi_slave_write_base_driver_delays
+* 			2. axi_slave_write_base_driver_ready_default_value
+*			3. axi_slave_write_base_driver
+******************************************************************/
+
 
 typedef enum {
 	WAIT_VALID = 0,
@@ -19,6 +38,48 @@ typedef enum{
 	CHECK_ID_ADDR = 2,
 	SEND_FRAME = 3
 } write_slave_get_frame_enum;
+
+
+//-------------------------------------------------------------------------------------
+//
+// CLASS: axi_slave_write_base_driver_delays  ( RANDOMIZATION CLASS )
+//
+//--------------------------------------------------------------------------------------
+// DESCRIPTION:
+//			class axi_slave_write_base_driver_delays is randomization class.
+//			it it radomizes one int value in given constraints
+//
+// API:
+//		1. setConst_delay(true_false_enum const_delay);
+//
+//			- if this is set random delay will be constant and equal to
+//			cosnt_delay_value
+//
+//		2. setCosnt_delay(int cosnt_delay_value);
+//
+//			-this methode sets constant_delay_value
+//
+//		3. setDelay_exist(true_false_enum delay_exist);
+//
+//			-this methode sets if delay exists. If this methode is called
+//			with FALSE then random delay will be always 0
+//
+//		4. setDelay_max(int delay_max);
+//
+//			-this methode sets value of delay_max. If radnom delay exist
+//			and is not constant then delay will be inside delay_min and
+//			delay_max.
+//
+//		5. setDelay_min(int delay_min);
+//
+//			-this methode sets value of delay_min.If radnom delay exist
+//			and is not constant then delay will be inside delay_min and
+//			delay_max.
+//
+//		6. int getRandomDelay();
+//			this methode returns random delay
+//
+//------------------------------------------------------------------------------
 
 class axi_slave_write_base_driver_delays;
 	rand int 			delay;
@@ -39,9 +100,80 @@ class axi_slave_write_base_driver_delays;
 		}else{
 				delay == 0;
 			}
-		}
+	}
+
+	// Set const_delay
+	function void setConst_delay(true_false_enum const_delay);
+		this.const_delay = const_delay;
+	endfunction
+
+	// Set cosnt_delay
+	function void setCosnt_delay(int cosnt_delay);
+		this.cosnt_delay = cosnt_delay;
+	endfunction
+
+	// Get delay
+	function int getRandomDelay();
+		return delay;
+	endfunction
+
+	// Set delay_exist
+	function void setDelay_exist(true_false_enum delay_exist);
+		this.delay_exist = delay_exist;
+	endfunction
+
+	// Set delay_max
+	function void setDelay_max(int delay_max);
+		this.delay_max = delay_max;
+	endfunction
+
+	// Set delay_min
+	function void setDelay_min(int delay_min);
+		this.delay_min = delay_min;
+	endfunction
+
+
 
 endclass
+
+
+//-------------------------------------------------------------------------------------
+//
+// CLASS: axi_slave_write_base_driver_ready_default_value  ( RANDOMIZATION CLASS )
+//
+//--------------------------------------------------------------------------------------
+// DESCRIPTION:
+//			class axi_slave_write_base_driver_ready_default_value is randomization class.
+//			it it radomizes ready_default_enum value ( it can be READY_DEFAULT_0 and
+//			READY_DEFAULT_1) and returns ready value in given constraints
+//
+// API:
+//		1. setReady_random(true_false_enum ready_random);
+//
+//			- if this is set random ready will have random value
+//			or default value
+//
+//		2. setReady_default(ready_default_enum ready_default);
+//
+//			-set default value of ready
+//
+//		3. setReady_1_dist(int ready_1_dist);
+//
+//			-this methode sets distribution value for ready_1_dist. If this class
+//			is in random mode, it will chose between READY_DEFAULT_0 and READY_DEFAULT_1
+//			in distribution ( ready_0_dist and ready_1_dist)
+//
+//		4. setReady_0_dist(int ready_0_dist);
+//			-this methode sets distribution value for ready_0_dist. If this class
+//			is in random mode, it will chose between READY_DEFAULT_0 and READY_DEFAULT_1
+//			in distribution ( ready_0_dist and ready_1_dist)
+//
+//		5. ready_default_enum getRandomReady()
+//
+//			-this methode returns radnom ready
+//
+//------------------------------------------------------------------------------
+
 
 class axi_slave_write_base_driver_ready_default_value;
 	rand ready_default_enum ready;
@@ -63,7 +195,121 @@ class axi_slave_write_base_driver_ready_default_value;
 			 }
 	}
 
+	// Get ready
+	function ready_default_enum getRandomReady();
+		return ready;
+	endfunction
+
+	// Set ready_0_dist
+	function void setReady_0_dist(int ready_0_dist);
+		this.ready_0_dist = ready_0_dist;
+	endfunction
+
+	// Set ready_1_dist
+	function void setReady_1_dist(int ready_1_dist);
+		this.ready_1_dist = ready_1_dist;
+	endfunction
+
+	// Set ready_default
+	function void setReady_default(ready_default_enum ready_default);
+		this.ready_default = ready_default;
+	endfunction
+
+	// Set ready_random
+	function void setReady_random(true_false_enum ready_random);
+		this.ready_random = ready_random;
+	endfunction
+
+
+
 endclass
+
+//-------------------------------------------------------------------------------------
+//
+// CLASS: axi_slave_write_base_driver
+//
+//--------------------------------------------------------------------------------------
+// DESCRIPTION:
+//		axi_slave_write_base_driver is base class with main state machies for recordeing
+//		axi packages. In class who extends this class virtual methodes should be overrided
+//		and they are colled in coresponding states of state machine
+//
+//VIRTUAL API:
+//		1. virtual task init();
+//
+//			-at this methode all driving data signlas shold be setted on default value
+//			except valid adn ready signal
+//
+//		2. virtual task send();
+//
+//			-in this methode recorded data in task getData() should be sent
+//
+//		3. virtual task waitOnValid(ref true_false_enum ready);
+//
+//			-in this methode should be checked if valid is active
+//
+//		4. virtual task getData();
+//
+//			-when this methode is called data is valid and should be collected
+//			from virtual inteface
+//
+//		5. virtual task completeRecieve();
+//
+//			-in this methode ready should be setted to corespoing state
+// 			(it can be eather active or inactive state)
+//
+//		6. virtual task setReady();
+//
+//			-in this task ready should be setted to active state
+//
+//		7. virtual task getDelay(ref int delay);
+//
+//			-this methode gets delay between nioticeing valid and seeting
+//			ready to actice if it is'n already on active state
+//
+//		8. virtual task checkIDAddr(ref true_false_enum correct_slave);
+//
+//			-in this methode should be checked if collected id is coresponding
+//			to slave confguration
+//
+//		9. virtual task waitFrame(ref true_false_enum detected_frame);
+//
+//			-in this methode should be checked if valid and ready on active
+//			if they are thes return TRUE othervise FALSE
+//
+// API:
+//
+//		1. extern task setDefaultReady(input ready_default_enum cosnt_ready );
+//
+//			-this methode sets default ready value
+//
+//		2. extern task setRandomReady(input int ready_0_ratio, int ready_1_ratio);
+//
+//			-this methode sets RandomReady with distribution ratios
+//
+//		3. extern task setReadyDelayRandom(input int deleay_minimum, int delay_maximum);
+//
+//			-this methode sets delay before calling methode setReady() to  radnom and
+//			sets radnom limits ( maximum and minimum )
+//
+//		4. extern task setReadyDelayConst(input int delay_const);
+//
+//			-this methode sets delay before calling setReady() methode to constatn value
+//			and sets constant value
+//
+//		5. task setReadyZeroDelay();
+//
+//			-this methode sets delay before calling setReady() methode to zero delay
+//
+// REQUIREMENTS:
+//		1. axi virtual interface - axi_if must be properli set in uvm_database
+//
+//		2. main_driver - main driver isntance - main driver should be implemented and
+//		setted to this variable
+//
+//		3. scheduler - scheduler instance - scheduler sholud be implemented and setted
+//		to this variable
+//------------------------------------------------------------------------------
 
 
 class axi_slave_write_base_driver extends uvm_component;

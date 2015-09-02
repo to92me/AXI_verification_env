@@ -1,11 +1,25 @@
 `ifndef AXI_SLAVE_WRITE_DATA_DRIVER_SVH
 `define AXI_SLAVE_WRITE_DATA_DRIVER_SVH
 
-//------------------------------------------------------------------------------
-//
-// CLASS: uvc_company_uvc_name_component
-//
-//------------------------------------------------------------------------------
+/****************************************************************
+* Project : AXI UVC
+*
+* File : data_driver.sv
+*
+* Language : SystemVerilog
+*
+* Company : Elsys Eastern Europe
+*
+* Author : Tomislav Tumbas
+*
+* E-Mail : tomislav.tumbas@elsys-eastern.com
+*
+* Mentor : Darko Tomusilovic
+*
+* Description : data bus driving util
+*
+* Classes :	1.axi_slave_write_data_driver
+******************************************************************/
 
 class axi_slave_write_data_driver extends axi_slave_write_base_driver;
 

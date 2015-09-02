@@ -1,8 +1,4 @@
-/******************************************************************************
-	* DVT CODE TEMPLATE: component
-	* Created by root on Sep 2, 2015
-	* uvc_company = uvc_company, uvc_name = uvc_name
-*******************************************************************************/
+
 
 //------------------------------------------------------------------------------
 //
@@ -13,7 +9,7 @@
 class uvc_company_uvc_name_component extends uvm_component;
 
 	// TODO: Add fields here
-	
+
 
 	// Provide implementations of virtual methods such as get_type_name and create
 	`uvm_component_utils(uvc_company_uvc_name_component)
