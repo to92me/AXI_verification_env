@@ -1,11 +1,26 @@
 `ifndef AXI_MASTER_WRITE_RESPONS_DRIVER_SVH
 `define AXI_MASTER_WRITE_RESPONS_DRIVER_SVH
 
-//------------------------------------------------------------------------------
-//
-// CLASS: uvc_company_uvc_name_component
-//
-//------------------------------------------------------------------------------
+/****************************************************************
+* Project : AXI UVC
+*
+* File : response_driver.sv
+*
+* Language : SystemVerilog
+*
+* Company : Elsys Eastern Europe
+*
+* Author : Tomislav Tumbas
+*
+* E-Mail : tomislav.tumbas@elsys-eastern.com
+*
+* Mentor : Darko Tomusilovic
+*
+* Description : axi master write response bus driver
+*
+* Classes :	1. axi_master_write_response_driver
+******************************************************************/
+
 
 typedef enum{
 	WAIT_RSP_VALID = 0 ,
@@ -19,6 +34,35 @@ typedef enum{
 	COLLECT_RSP_FRAME = 1,
 	SEND_RSP_FRAME = 2
 } master_write_respons_driver_package_record_enum;
+
+
+//-------------------------------------------------------------------------------------
+//
+// CLASS: axi_master_write_response_driver
+//
+//--------------------------------------------------------------------------------------
+// DESCRIPTION:
+//			class axi_master_write_response_driver gets items from response bus
+//			from slave and sends it to scheduler
+//
+//	API:
+//		1.main()
+//
+//			-this methode is main loop of driver and should be forked in module
+//			where is driver instaced
+//
+// CONFIGURATIONS:
+//
+//
+//
+// REQUIREMENTS:
+//		1. axi virtual interface - axi_if must be properli set in uvm_database
+//
+//		2. scheculer instance - sheduler must be implemented with methode
+//		putResponseFromSlave(axi_slave_response) to push collected response
+//		from slave
+//
+//------------------------------------------------------------------------------
 
 class axi_master_write_response_driver extends axi_master_write_base_driver;
 

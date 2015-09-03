@@ -3,10 +3,57 @@
 
 
 `define data_before_addr
-//------------------------------------------------------------------------------
+
+
+/**
+* Project : AXI UVC
+*
+* File : main_driver.sv
+*
+* Language : SystemVerilog
+*
+* Company : Elsys Eastern Europe
+*
+* Author : Tomislav Tumbas
+*
+* E-Mail : tomislav.tumbas@elsys-eastern.com
+*
+* Mentor : Darko Tomusilovic
+*
+* Description : data bus driver
+*
+* Classes :	1. axi_master_write_main_driver
+*
+**/
+
+
+
+//-------------------------------------------------------------------------------------
 //
 // CLASS: axi_master_write_main_driver
 //
+//--------------------------------------------------------------------------------------
+// DESCRIPTION:
+//			class axi_master_write_main_driver gets items from scheduler and creates
+//			delays between addres and data item.
+//			driver can work in corect order ( first addres then data ) or in random
+//			order.
+//
+// API:
+//		1. getAddrFrame(output axi_mssg rsp_mssg);
+//
+//			- get ready address item from driver
+//			- returns axi_mssg with status READY if there is ready frame, otherwise NOT_READY
+//
+//		2. getDataFrame(output axi_mssg rsp_mssg);
+//
+//			-get ready data item from driver
+//			-returns axi_mssg with status READY if there is ready frame, otherwise NOT_READY
+//
+//		3. extern task pushAddrResponse();
+//
+//			-this methode should be called when addres item is sent, this infomration is used
+//			for correct odrdering packages
 //------------------------------------------------------------------------------
 
 
@@ -29,8 +76,9 @@ class axi_master_write_main_driver extends uvm_component;
 	axi_mssg 							addr_mssg;
 	axi_mssg 							inbox_mssg;
 	virtual interface axi_if 			vif;
+	event 								address_sent;
 
-	axi_master_write_address_driver 	address_driver; // FIXME
+	axi_master_write_address_driver 	address_driver;
 	axi_master_write_data_driver		data_driver;
 	true_false_enum						correct_order = TRUE;
 
@@ -45,9 +93,9 @@ class axi_master_write_main_driver extends uvm_component;
 	// build_phase
 	function void build();
 		scheduler = axi_master_write_scheduler::getSchedulerInstance(this);
-		address_driver = axi_master_write_address_driver::getDriverInstance(this); // FIXME
+		address_driver = axi_master_write_address_driver::getDriverInstance(this);
 		data_driver = axi_master_write_data_driver::getDriverInstance(this);
-		address_driver.build(); // FIXME
+		address_driver.build();
 		data_driver.build();
 		sem = new(10);
 	endfunction
@@ -60,6 +108,7 @@ class axi_master_write_main_driver extends uvm_component;
 	extern task getFramesFromScheduler();
 	extern task decrementDelay();
 	extern task reset();
+	extern task pushAddrResponse();
 
 	extern function void setCorrectAddressDataOrder(true_false_enum correct);
 
@@ -147,7 +196,10 @@ task axi_master_write_main_driver::getFramesFromScheduler();
 				   addr_frame = inbox_mssg.frame;
 				   sem.get(1);
 				   if(correct_order == TRUE)
-					   addr_ready_queue.push_back(addr_frame);
+					   begin
+					   	addr_ready_queue.push_back(addr_frame);
+				   		@address_sent;
+					   end
 				   else
 					   addr_inbox_queue.push_back(addr_frame);
 				   sem.put(1);
@@ -203,6 +255,13 @@ function void axi_master_write_main_driver::setCorrectAddressDataOrder(input tru
  		correct_order = correct;
 	`uvm_info("axi_master_write_main_driver","correct_order == TRUE", UVM_LOW);
 endfunction
+
+task axi_master_write_main_driver::pushAddrResponse();
+	if(correct_order == TRUE)
+		begin
+			->address_sent;
+		end
+endtask
 
 `endif
 

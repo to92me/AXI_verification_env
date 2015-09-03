@@ -1,6 +1,28 @@
 `ifndef AXI_MASTER_DRIVER_SVH
 `define AXI_MASTER_DRIVER_SVH
 
+/**
+* Project : AXI UVC
+*
+* File : axi_master_write_driver.sv
+*
+* Language : SystemVerilog
+*
+* Company : Elsys Eastern Europe
+*
+* Author : Tomislav Tumbas
+*
+* E-Mail : tomislav.tumbas@elsys-eastern.com
+*
+* Mentor : Darko Tomusilovic
+*
+* Description : master write main driver
+*
+* Classes :	1. axi_master_write_driver
+*
+**/
+
+
 //------------------------------------------------------------------------------
 //
 // CLASS: uvc_company_uvc_name_driver
@@ -123,7 +145,7 @@ task axi_master_write_driver::resetDrivers();
 endtask
 
 task axi_master_write_driver::putResponseToSequencer();
-//	seq_item_port.put_response(rsp);
+	seq_item_port.put_response(rsp);
 endtask
 
 `endif

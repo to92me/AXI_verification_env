@@ -52,7 +52,7 @@ endclass : axi_master_write_checker
 				if(current_burst_queue[i].getID() == mssg.getId())
 					begin
 						sem.put(1);
-						`uvm_info(get_name(),$sformatf("Recived already existing ID, monitor is REJECTING ID: %h",mssg.id), UVM_WARNING)
+						`uvm_warning(get_name(),$sformatf("Recived already existing ID, monitor is REJECTING ID: %h",mssg.id))
 						return;
 					end
 			end
@@ -63,7 +63,7 @@ endclass : axi_master_write_checker
 			if(depth.depth <= current_burst_queue.size())
 				begin
 					sem.put(1);
-					`uvm_info(get_name(),$sformatf("Recived more active IDs then is allowd by depth configuration, depth: %d, REJECTING ID", depth.getdepth()), UVM_WARNING)
+					`uvm_warning(get_name(),$sformatf("Recived more active IDs then is allowd by depth configuration, depth: %d, REJECTING ID", depth.getdepth()))
 					return;
 				end
 			end
@@ -75,7 +75,7 @@ endclass : axi_master_write_checker
 		status.setLast_one(FALSE);
 		status.setLen(mssg.getLen());
 
-		`uvm_info(get_name(), $sformatf("Adding new ID from Address bus, ID: %h, start address: %h ", mssg.getId(), mssg.getAddr()), UVM_INFO)
+//		`uvm_info(get_name(), $sformatf("Adding new ID from Address bus, ID: %h, start address: %h ", mssg.getId(), mssg.getAddr()), UVM_INFO)
 
 		sem.get(1);
 		current_burst_queue.push_front(status);
@@ -110,7 +110,7 @@ endclass : axi_master_write_checker
 
 		if(found_ID == FALSE)
 			begin
-				`uvm_info(get_name(), $sformatf(" Recieived data with not registred ID: %h, monitor is REJECTING DATA PACKAGE",mssg.getId() ), UVM_WARNING)
+				`uvm_warning(get_name(), $sformatf(" Recieived data with not registred ID: %h, monitor is REJECTING DATA PACKAGE",mssg.getId()))
 			end
 
 	endtask
@@ -151,7 +151,7 @@ endclass : axi_master_write_checker
 
 		if(found_ID == FALSE)
 			begin
-				`uvm_info(get_name(), $sformatf(" Recieived response with not registred ID: %h, monitor is REJECTING DATA PACKAGE",mssg.getId()), UVM_WARNING)
+				`uvm_warning(get_name(), $sformatf(" Recieived response with not registred ID: %h, monitor is REJECTING DATA PACKAGE",mssg.getId()))
 			end
 	endtask
 

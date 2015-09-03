@@ -15,7 +15,7 @@ interface axi_if (input sig_reset, input sig_clock);
 	parameter ADDR_WIDTH = 32;
 	parameter DATA_WIDTH = 64;
 	parameter ID_WIDTH = 32;
-	
+
 	//parameter ADDR_WIDTH = 32;	// Width of the address bus
 	//parameter DATA_WIDTH = 64;	// Width of the system data buses
 	parameter RID_WIDTH = 4;	// Number of read channel ID bits required.
@@ -37,7 +37,7 @@ interface axi_if (input sig_reset, input sig_clock);
 	parameter STRB_WIDTH = DATA_WIDTH / 8;
 
 	// write address channel signals
-	logic [WID_WIDTH - 1 : 0]	awid;
+	logic [ID_WIDTH - 1 : 0]	awid;
 	logic [ADDR_WIDTH-1 : 0]	awaddr;
 	logic [7:0]					awlen;
 	logic [2:0]					awsize;
@@ -52,7 +52,7 @@ interface axi_if (input sig_reset, input sig_clock);
 	logic 						awready;
 
 	// write data channel signals
-	logic [WID_WIDTH-1 : 0]		wid;
+	logic [ID_WIDTH-1 : 0]		wid;
 	logic [DATA_WIDTH-1 : 0]	wdata;
 	logic [STRB_WIDTH-1 : 0]	wstrb;
 	logic						wlast;
@@ -61,7 +61,7 @@ interface axi_if (input sig_reset, input sig_clock);
 	logic						wready;
 
 	// write response channel signals
-	logic [WID_WIDTH-1 : 0]		bid;
+	logic [ID_WIDTH-1 : 0]		bid;
 	logic [1:0]					bresp;
 	logic [BUSER_WIDTH-1 : 0]	buser;
 	logic						bready;
@@ -468,5 +468,3 @@ interface axi_if (input sig_reset, input sig_clock);
 endinterface : axi_if
 
 `endif
-
-

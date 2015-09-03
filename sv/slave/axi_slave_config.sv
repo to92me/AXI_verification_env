@@ -72,7 +72,7 @@ class axi_slave_config extends uvm_object;
 
 		constraint active_cst{
 			is_active dist{
-				UVM_ACTIVE := 9,
+				UVM_ACTIVE := 999999,
 				UVM_PASSIVE := 1
 			};
 		}

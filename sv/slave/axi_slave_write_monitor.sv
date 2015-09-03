@@ -1,9 +1,31 @@
 `ifndef AXI_slave_WRITE_MAIN_MONITOR_SCH
 `define AXI_slave_WRITE_MAIN_MONITOR_SVH
 
+/**
+* Project : AXI UVC
+*
+* File : axi_slave_write_main_monitor.sv
+*
+* Language : SystemVerilog
+*
+* Company : Elsys Eastern Europe
+*
+* Author : Tomislav Tumbas
+*
+* E-Mail : tomislav.tumbas@elsys-eastern.com
+*
+* Mentor : Darko Tomusilovic
+*
+* Description : slave write monitor core
+*
+* Classes :	1. axi_slave_write_main_monitor
+*
+**/
+
+
 //------------------------------------------------------------------------------
 //
-// CLASS: uvc_company_uvc_name_component
+// CLASS: axi_slave_write_main_monitor
 //
 //------------------------------------------------------------------------------
 

@@ -1,10 +1,41 @@
 `ifndef AXI_SLAVE_WRITE_ADDRESS_DRIVER_SVH
 `define AXI_SLAVE_WRITE_ADDRESS_DRIVER_SVH
-//------------------------------------------------------------------------------
+
+/****************************************************************
+* Project : AXI UVC
+*
+* File : data_driver.sv
+*
+* Language : SystemVerilog
+*
+* Company : Elsys Eastern Europe
+*
+* Author : Tomislav Tumbas
+*
+* E-Mail : tomislav.tumbas@elsys-eastern.com
+*
+* Mentor : Darko Tomusilovic
+*
+* Description : data bus driving util
+*
+* Classes :	1.axi_slave_write_data_driver
+******************************************************************/
+
+//-------------------------------------------------------------------------------------
 //
-// CLASS: uvc_company_uvc_name_component
+// CLASS: axi_slave_write_address_driver
+//
+//--------------------------------------------------------------------------------------
+// DESCRIPTION:
+//  		this class extends axi_slave_write_base_driver and overrides all virtual
+//			methodes so it collects data from axi address vif and sends to data driver
+//			ids for this slave
+//
+// API:
+//
 //
 //------------------------------------------------------------------------------
+
 
 class axi_slave_write_address_driver extends axi_slave_write_base_driver;
 
@@ -64,7 +95,7 @@ endtask
 
 task axi_slave_write_address_driver::getData();
 //   $display("SLAVE: ADDR recived and collected data");
-	$display("           									COLLECT ADDR ID: %h, count: %d", vif.awid, item_counter);
+	$display("           																			COLLECT ADDR ID: %h, count: %d", vif.awid, item_counter);
 	item_counter++;
    	mssg = new();
    	mssg.setID(vif.awid);

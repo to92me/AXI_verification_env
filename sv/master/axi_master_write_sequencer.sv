@@ -1,9 +1,30 @@
 `ifndef AXI_MASTER_WRITE_SEQUENCER_SVH
 `define AXI_MASTER_WRITE_SEQUENCER_SVH
 
+/**
+* Project : AXI UVC
+*
+* File : axi_master_write_sequencer.sv
+*
+* Language : SystemVerilog
+*
+* Company : Elsys Eastern Europe
+*
+* Author : Tomislav Tumbas
+*
+* E-Mail : tomislav.tumbas@elsys-eastern.com
+*
+* Mentor : Darko Tomusilovic
+*
+* Description : axi_master_write_sequencer
+*
+* Classes :	1. axi_master_write_sequencer
+*
+**/
+
 //------------------------------------------------------------------------------
 //
-// CLASS: uvc_company_uvc_name_sequencer
+// CLASS: axi_master_write_sequencer
 //
 //------------------------------------------------------------------------------
 

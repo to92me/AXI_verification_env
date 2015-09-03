@@ -1,7 +1,7 @@
-`ifndef AXI_WRITE_CONFIGUARION_SVH
-`define AXI_WRITE_CONFIGUARION_SVH
+`ifndef AXI_WRITE_USER_CONFIGUARION_SVH
+`define AXI_WRITE_USER_CONFIGUARION_SVH
 
-class axi_write_master_configuration extends uvm_object;
+class axi_write_master_user_configuration extends uvm_object;
 
 
 // +++++++++++++++++++++++++++++++++++++++++GLOOBAL SETTINGS++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++

@@ -8,8 +8,8 @@
 //------------------------------------------------------------------------------
 
 class axi_depth_config;
-	int 				depth = 1;
-	true_false_enum		deept_exists = FALSE;
+	int 				depth = 5;
+	true_false_enum		deept_exists = TRUE;
 
 	// Get deept_exists
 	function true_false_enum getDeept_exists();

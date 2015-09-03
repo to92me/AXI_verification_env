@@ -49,6 +49,8 @@ task axi_master_write_address_collector::sendData();
 	mssg.setRegion(vif.awregion);
 	mssg.setSize(vif.awsize);
 
+	$display("		MONITOR ADDR: ID: %h",vif.awid);
+
 	main_monitor.pushAddressItem(mssg);
 
 endtask

@@ -92,9 +92,16 @@ endclass : axi_master_write_scheduler_packages
 task axi_master_write_scheduler_packages::getNextSingleFrame(output axi_mssg rps_mssg);
 	mssg = new();
 	// if queue is empty then return QUEUE_EMPTY
-	if(data_queue.size == 0)
+	if(data_queue.size == 0 )
 		begin
 			mssg.state = QUEUE_EMPTY;
+			mssg.frame = null;
+			rps_mssg = mssg;
+			return;
+		end
+	if(this.lock_state == QUEUE_LOCKED)
+		begin
+			mssg.state = NOT_READY;
 			mssg.frame = null;
 			rps_mssg = mssg;
 			return;
@@ -178,7 +185,7 @@ task axi_master_write_scheduler_packages::addBurst(input axi_frame frame);
 			this.wsize = frame.size;
 			this.frame_copy = frame; // keep the frame copy if recieved error repeat transaction
 			this.ID = frame.id;
-			data_queue[data_queue.size -1].last_one = TRUE;
+			data_queue[data_queue.size() -1].last_one = TRUE;
 			data_queue[0].first_one = TRUE;
 			this.address = frame.addr;
 
