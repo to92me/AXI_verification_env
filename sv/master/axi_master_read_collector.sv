@@ -14,16 +14,9 @@
 *
 * Mentor : Darko Tomusilovic
 *
-* Description : collects transactions on data and address channels
+* Description : collector for read master
 *
-* Classes :	1. axi_master_read_collector
-*
-* Functions :	1. new (string name, uvm_component parent)
-*				2. void build_phase(uvm_phase phase)
-*				3. report_phase(uvm_phase phase)
-*
-* Tasks :	1. run_phase(uvm_phase phase)
-*			2. collect_transactions()
+* Classes :	axi_master_read_collector
 **/
 // -----------------------------------------------------------------------------
 
@@ -35,13 +28,25 @@
 // CLASS: axi_master_read_collector
 //
 //------------------------------------------------------------------------------
+/**
+* Description : collects transactions from the interface and sends them to the
+*				monitor
+*
+* Functions :	1. new (string name, uvm_component parent)
+*				2. void build_phase(uvm_phase phase)
+*				3. report_phase(uvm_phase phase)
+*
+* Tasks :	1. run_phase(uvm_phase phase)
+*			2. collect_transactions()
+**/
+// -----------------------------------------------------------------------------
 class axi_master_read_collector extends uvm_monitor;
 
 	// This property is the virtual interfaced needed for this component to drive
 	// and view HDL signals.
 	virtual axi_if vif;
 
-	// Configuratin information
+	// configuration information
 	axi_master_config config_obj;
 
 	// TLM Ports
@@ -83,8 +88,8 @@ endclass : axi_master_read_collector
 //------------------------------------------------------------------------------
 /**
 * Function : build_phase
-* Purpose : build
-* Parameters :	1. phase
+* Purpose : build - propagate the virtual interface and configuration object
+* Parameters :	phase - uvm phase
 * Return :	void
 **/
 //------------------------------------------------------------------------------
@@ -92,7 +97,7 @@ endclass : axi_master_read_collector
 		super.build_phase(phase);
 		if(!uvm_config_db#(virtual axi_if)::get(this, "", "vif", vif))
 			`uvm_fatal("NOVIF",{"virtual interface must be set for: ",get_full_name(),".vif"});
-		
+
 		// Propagate the configuration object
 		if(!uvm_config_db#(axi_master_config)::get(this, "", "axi_master_config", config_obj))
 			`uvm_fatal("NOCONFIG",{"Config object must be set for: ",get_full_name(),".config_obj"})
@@ -102,8 +107,8 @@ endclass : axi_master_read_collector
 //------------------------------------------------------------------------------
 /**
 * Task : run_phase
-* Purpose : run
-* Inputs : 1. phase
+* Purpose : wait for reset and then collect transactions
+* Inputs : phase - uvm phase
 * Outputs :
 * Ref :
 **/
@@ -115,13 +120,26 @@ endclass : axi_master_read_collector
 		while(vif.sig_reset!==1);
     	`uvm_info(get_type_name(), "Detected Reset Done", UVM_LOW)
 
-    	collect_transactions();
+    	fork
+    		collect_transactions();
+
+    		// reset
+    		forever begin
+				@(negedge vif.sig_reset);
+				do
+					@(posedge vif.sig_clock);
+				while(vif.sig_reset!==1);
+		    	num_single_frames = 0;
+		    	num_burst_frames = 0;
+    		end
+    	join
 	endtask : run_phase
 
 //------------------------------------------------------------------------------
 /**
 * Task : collect_transactions
-* Purpose : collects transactions on data and address channels
+* Purpose : collects transactions on data and address channels when both valid
+*			and ready signals are up
 * Inputs :
 * Outputs :
 * Ref :
@@ -151,7 +169,6 @@ endclass : axi_master_read_collector
 					num_burst_frames++;
 				end
 
-
 			// monitor data channel
 			if (vif.rvalid && vif.rready)
 				begin
@@ -171,8 +188,8 @@ endclass : axi_master_read_collector
 //------------------------------------------------------------------------------
 /**
 * Function : report_phase
-* Purpose : repost status
-* Parameters :	1. phase
+* Purpose : repost status - number of collected transactions
+* Parameters :	phase - uvm phase
 * Return :	void
 **/
 //------------------------------------------------------------------------------

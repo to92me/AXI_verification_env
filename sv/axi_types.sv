@@ -134,5 +134,14 @@ typedef enum{
 	SEND_COLLECTED_DATA = 1
 }axi_write_base_collector_state_enum;
 
+typedef enum {
+	GOOD_RESP,
+	BAD_RESP
+} resp_mode_enum;
+
+typedef enum {
+	GOOD_ID,
+	BAD_ID
+}	id_enum;
 
 `endif

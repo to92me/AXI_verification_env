@@ -14,14 +14,9 @@
 *
 * Mentor : Darko Tomusilovic
 *
-* Description : collects coverage
+* Description : coverage collector for read master
 *
-* Classes :	1. axi_master_read_coverage_collector
-*
-* Functions :	1. new (string name, uvm_component parent)
-*				2. void build_phase(uvm_phase phase)
-*				3. void write(axi_read_single_frame trans)
-*				4. void write1(axi_read_burst_frame trans)
+* Classes :	axi_master_read_coverage_collector
 **/
 // -----------------------------------------------------------------------------
 
@@ -33,11 +28,16 @@
 // CLASS: axi_master_read_coverage_collector
 //
 //------------------------------------------------------------------------------
-
+/**
+* Description : collects coverage for both address and data signals
+*
+* Functions :	1. new (string name, uvm_component parent)
+*				2. void build_phase(uvm_phase phase)
+*				3. void write(axi_read_single_frame trans)
+*				4. void write1(axi_read_burst_frame trans)
+**/
+// -----------------------------------------------------------------------------
 class axi_master_read_coverage_collector extends uvm_component;
-
-	// control bit
-	bit coverage_enable = 1;
 
 	`uvm_analysis_imp_decl(1)
 	`uvm_analysis_imp_decl(2)
@@ -50,9 +50,7 @@ class axi_master_read_coverage_collector extends uvm_component;
 	axi_read_single_frame single_frame;
 	axi_read_burst_frame burst_frame;
 
-	`uvm_component_utils_begin(axi_master_read_coverage_collector)
-   		`uvm_field_int(coverage_enable, UVM_DEFAULT)
-	`uvm_component_utils_end
+	`uvm_component_utils(axi_master_read_coverage_collector)
 
 	// Covergroups
 	covergroup axi_master_read_addr_channel_cg;
@@ -85,10 +83,10 @@ class axi_master_read_coverage_collector extends uvm_component;
 		}
 
 		BURST_TYPE:	coverpoint burst_frame.burst_type {
-			bins INC_BURST 		= {INCR};
-			bins FIXED_BURST 	= {FIXED};
-			bins WRAP_BURST 	= {WRAP};
-			bins RESERVED		= {Reserved};
+			bins INC_BURST 				= {INCR};
+			bins FIXED_BURST 			= {FIXED};
+			bins WRAP_BURST 			= {WRAP};
+			illegal_bins RESERVED		= {Reserved};
 		}
 
 		LOCK:	coverpoint burst_frame.lock {
@@ -131,6 +129,13 @@ class axi_master_read_coverage_collector extends uvm_component;
 		USER: coverpoint burst_frame.user {
 			bins user_values = default;
 		}
+
+		cross BURST_TYPE, LEN {
+			ignore_bins Reserved_LEN = binsof(BURST_TYPE) intersect {Reserved};	// exclude bins where burst_type is Reserved and any value of len
+			ignore_bins FIXED_LEN = binsof(BURST_TYPE) intersect {FIXED} && binsof(LEN) intersect {[16:$]};	// exclude bins with FIXED type and burst length > 16 transfers
+			ignore_bins WRAP_LEN= binsof(BURST_TYPE) intersect {WRAP} && binsof(LEN) intersect {2, [4:6], [8:14], [16:$]};	// exclude bins with WRAP type and burst length not 2, 4, 8 or 16 transfers
+		}
+
 	endgroup
 
 
@@ -160,6 +165,7 @@ class axi_master_read_coverage_collector extends uvm_component;
 		USER: coverpoint single_frame.user {
 			bins user_values = default;
 		}
+		
 	endgroup
 
 	// new - constructor
@@ -168,14 +174,11 @@ class axi_master_read_coverage_collector extends uvm_component;
 		// Create TLM ports
 		data_channel_port = new("data_channel_port", this);
 		addr_channel_port = new("addr_channel_port", this);
-		// Create covergroups if coverage is enabled
-    	void'(uvm_config_int::get(this, "", "coverage_enable", coverage_enable));
-		if(coverage_enable) begin
-			axi_master_read_addr_channel_cg = new();
-			axi_master_read_addr_channel_cg.set_inst_name({get_full_name(), ".axi_master_read_addr_channel_cg"});
-			axi_master_read_data_channel_cg = new();
-			axi_master_read_data_channel_cg.set_inst_name({get_full_name(), ".axi_master_read_data_channel_cg"});
-		end
+		// Create covergroups
+		axi_master_read_addr_channel_cg = new();
+		axi_master_read_addr_channel_cg.set_inst_name({get_full_name(), ".axi_master_read_addr_channel_cg"});
+		axi_master_read_data_channel_cg = new();
+		axi_master_read_data_channel_cg.set_inst_name({get_full_name(), ".axi_master_read_data_channel_cg"});
 	endfunction
 
 	extern virtual function void build_phase(uvm_phase phase);
@@ -188,7 +191,7 @@ endclass : axi_master_read_coverage_collector
 /**
 * Function : build_phase
 * Purpose : build
-* Parameters :	1. phase
+* Parameters :	phase - uvm phase
 * Return :	void
 **/
 //------------------------------------------------------------------------------
@@ -199,33 +202,31 @@ endclass : axi_master_read_coverage_collector
 //------------------------------------------------------------------------------
 /**
 * Function : write
-* Purpose : sample transaction after the monitor collects the frame
-* Parameters :	1. trans - frame collected by monitor
+* Purpose : called by monitor when it collects a frame and then samples coverage
+* Parameters :	trans - frame collected by monitor
 * Return :	void
 **/
 //------------------------------------------------------------------------------
 	function void axi_master_read_coverage_collector::write(axi_read_single_frame trans);
 		$cast(single_frame, trans.clone());
 
-		if(coverage_enable) begin
-			axi_master_read_data_channel_cg.sample();
-		end
+		axi_master_read_data_channel_cg.sample();
+
 	endfunction : write
 
 //------------------------------------------------------------------------------
 /**
 * Function : write1
-* Purpose : sample transaction after the monitor collects the frame
-* Parameters :	1. trans - frame collected by monitor
+* Purpose : called by monitor when it collects a frame and then samples coverage
+* Parameters :	trans - frame collected by monitor
 * Return :	void
 **/
 //------------------------------------------------------------------------------
 	function void axi_master_read_coverage_collector::write1(axi_read_burst_frame trans);
 		$cast(burst_frame, trans.clone());
 
-		if(coverage_enable) begin
-			axi_master_read_addr_channel_cg.sample();
-		end
+		axi_master_read_addr_channel_cg.sample();
+
 	endfunction : write1
 
 `endif

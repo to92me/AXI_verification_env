@@ -14,18 +14,9 @@
 *
 * Mentor : Darko Tomusilovic
 *
-* Description : drives read requests to slave
+* Description : driver for read master
 *
-* Classes :	1. axi_master_read_driver
-*
-* Functions :	1. new (string name, uvm_component parent);
-*				2. void build_phase(uvm_phase phase)
-*
-* Tasks :	1. run_phase(uvm_phase phase)
-*			2. get_and_drive()
-*			3. read_data_channel()
-*			4. drive_addr_channel()
-*			5. reset()
+* Classes :	axi_master_read_driver
 **/
 // -----------------------------------------------------------------------------
 
@@ -37,6 +28,20 @@
 // CLASS: axi_master_read_driver
 //
 //------------------------------------------------------------------------------
+/**
+* Description : drives new burst requests to the address channel and gets
+*				responses on the data channel (which it sends to the seq.)
+*
+* Functions :	1. new (string name, uvm_component parent);
+*				2. void build_phase(uvm_phase phase)
+*
+* Tasks :	1. run_phase(uvm_phase phase)
+*			2. get_and_drive()
+*			3. read_data_channel()
+*			4. drive_addr_channel()
+*			5. reset()
+**/
+// -----------------------------------------------------------------------------
 class axi_master_read_driver extends uvm_driver #(axi_read_burst_frame);
 
 	// The virtual interface used to drive and view HDL signals.
@@ -66,8 +71,24 @@ class axi_master_read_driver extends uvm_driver #(axi_read_burst_frame);
 			ready_rand = new();
 	endfunction : new
 
-	// build_phase
-	function void build_phase(uvm_phase phase);
+	extern virtual function void build_phase(uvm_phase phase);
+	extern virtual task run_phase(uvm_phase phase);
+	extern virtual task get_and_drive();
+	extern virtual task read_data_channel();
+	extern virtual task drive_addr_channel();
+	extern virtual task reset();
+
+endclass : axi_master_read_driver
+
+//------------------------------------------------------------------------------
+/**
+* Function : build_phase
+* Purpose : build - propagate the virtual interface and configuration object
+* Parameters :	phase - uvm phase
+* Return :	void
+**/
+//------------------------------------------------------------------------------
+	function void axi_master_read_driver::build_phase(uvm_phase phase);
 		super.build_phase(phase);
 		// Propagate the interface
 		if(!uvm_config_db#(virtual axi_if)::get(this, "", "vif", vif))
@@ -77,8 +98,16 @@ class axi_master_read_driver extends uvm_driver #(axi_read_burst_frame);
 				`uvm_fatal("NOCONFIG",{"Config object must be set for: ",get_full_name(),".config_obj"})
 	endfunction: build_phase
 
-	// run_phase
-	virtual task run_phase(uvm_phase phase);
+//------------------------------------------------------------------------------
+/**
+* Task : run_phase
+* Purpose : wait for reset and then drive transactions
+* Inputs : phase - uvm phase
+* Outputs :
+* Ref :
+**/
+//------------------------------------------------------------------------------
+	task axi_master_read_driver::run_phase(uvm_phase phase);
 		// The driving should be triggered by an initial reset pulse
 		@(negedge vif.sig_reset);
 		do
@@ -89,8 +118,16 @@ class axi_master_read_driver extends uvm_driver #(axi_read_burst_frame);
 		get_and_drive();
 	endtask : run_phase
 
-	// get_and_drive
-	virtual protected task get_and_drive();
+//------------------------------------------------------------------------------
+/**
+* Task : get_and_drive
+* Purpose : create tasks for reset, address channel and data channel
+* Inputs :
+* Outputs :
+* Ref :
+**/
+//------------------------------------------------------------------------------
+	task axi_master_read_driver::get_and_drive();
 		fork
 			forever begin
 				@(negedge vif.sig_reset);
@@ -100,12 +137,6 @@ class axi_master_read_driver extends uvm_driver #(axi_read_burst_frame);
 			read_data_channel();
 		join
 	endtask : get_and_drive
-
-	extern virtual task read_data_channel();
-	extern virtual task drive_addr_channel();
-	extern virtual task reset();
-
-endclass : axi_master_read_driver
 
 //------------------------------------------------------------------------------
 /**
@@ -144,19 +175,20 @@ endclass : axi_master_read_driver
 		else
 			vif.rready <= 1'b1;
 		
-		/*resp.reset(burst_queue);
-		while(burst_queue != null) begin
+		// send responses to seq. for all outstanding bursts
+		resp.reset(burst_queue);
+		while(burst_queue.size()) begin
 			single_burst = burst_queue.pop_front();
 			single_burst.valid = FRAME_VALID;
 			seq_item_port.put(single_burst);
-		end*/
+		end
 
 	endtask : reset
 
 //------------------------------------------------------------------------------
 /**
 * Task : read_data_channel
-* Purpose : monitoring the data channel and sending responses back to the seq.
+* Purpose : monitors the data channel and sends responses back to the seq.
 * Inputs :
 * Outputs :
 * Ref :
@@ -203,7 +235,8 @@ endclass : axi_master_read_driver
 //------------------------------------------------------------------------------
 /**
 * Task : drive_addr_channel
-* Purpose : get from seq. and drive signals to the address channel
+* Purpose : gets items from seq., checks delay and pipe and then drives signals
+*			to the address channel
 * Inputs :
 * Outputs :
 * Ref :

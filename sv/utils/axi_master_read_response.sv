@@ -14,9 +14,22 @@
 *
 * Mentor : Darko Tomusilovic
 *
-* Description : used by master for interpreting slave responses
+* Description : response calculation
 *
-* Classes :	1. axi_master_read_response
+* Classes :	axi_master_read_response
+**/
+// -----------------------------------------------------------------------------
+
+`ifndef AXI_MASTER_READ_RESPONSE_SV
+`define AXI_MASTER_READ_RESPONSE_SV
+
+//------------------------------------------------------------------------------
+//
+// CLASS: axi_master_read_response
+//
+//------------------------------------------------------------------------------
+/**
+* Description : used by master for interpreting slave responses
 *
 * Functions :	1. new (string name = "axi_master_read_response",
 *						uvm_component parent = null)
@@ -29,15 +42,6 @@
 *			4. reset()
 **/
 // -----------------------------------------------------------------------------
-
-`ifndef AXI_MASTER_READ_RESPONSE_SV
-`define AXI_MASTER_READ_RESPONSE_SV
-
-//------------------------------------------------------------------------------
-//
-// CLASS: axi_master_read_response
-//
-//------------------------------------------------------------------------------
 class axi_master_read_response extends uvm_component;
 
 	// queue that holds all the sent bursts that have not been completed
@@ -71,7 +75,7 @@ class axi_master_read_response extends uvm_component;
 	extern virtual task check_response(axi_read_single_frame one_frame, ref axi_read_burst_frame matching_burst);
 	extern virtual task new_burst(axi_read_burst_frame one_burst);
 	extern virtual task get_num_of_bursts(output int num);
-	//extern virtual task reset(ref axi_read_burst_frame burst_queue);
+	extern virtual task reset(ref axi_read_burst_frame burst_queue[$]);
 
 endclass : axi_master_read_response
 
@@ -191,16 +195,17 @@ endtask : get_num_of_bursts
 * Ref :
 **/
 //------------------------------------------------------------------------------
-/*task axi_master_read_response::reset(ref axi_read_burst_frame burst_queue);
+task axi_master_read_response::reset(ref axi_read_burst_frame burst_queue[$]);
 
 	`uvm_info(get_type_name(), $sformatf("Reset"), UVM_LOW);
 
 	sem.get(1);
+	// TODO : sta bude sa error-ima posle reseta tj da li da salje ponovo ili ne
 		burst_queue = response_bursts;
 		sent_bursts.delete();
 		response_bursts.delete();
 	sem.put(1);
 
-endtask : reset*/
+endtask : reset
 
 `endif

@@ -14,9 +14,23 @@
 *
 * Mentor : Darko Tomusilovic
 *
-* Description : drives responses from slave to master
+* Description : driver for read slave
 *
-* Classes :	1. axi_slave_read_driver
+* Classes :	axi_slave_read_driver
+**/
+// -----------------------------------------------------------------------------
+
+`ifndef AXI_SLAVE_READ_DRIVER_SV
+`define AXI_SLAVE_READ_DRIVER_SV
+
+//------------------------------------------------------------------------------
+//
+// CLASS: axi_slave_read_driver
+//
+//------------------------------------------------------------------------------
+/**
+* Description : drives single frame responses to the data channel and gets
+*				burst requests on the address channel
 *
 * Functions :	1. new (string name, uvm_component parent);
 *				2. void build_phase(uvm_phase phase)
@@ -29,15 +43,6 @@
 *			6. drive_data_channel()
 **/
 // -----------------------------------------------------------------------------
-
-`ifndef AXI_SLAVE_READ_DRIVER_SV
-`define AXI_SLAVE_READ_DRIVER_SV
-
-//------------------------------------------------------------------------------
-//
-// CLASS: axi_slave_read_driver
-//
-//------------------------------------------------------------------------------
 class axi_slave_read_driver extends uvm_driver #(axi_read_base_frame, axi_read_base_frame);
 
 	// The virtual interface used to drive and view HDL signals.
@@ -50,6 +55,8 @@ class axi_slave_read_driver extends uvm_driver #(axi_read_base_frame, axi_read_b
 	axi_read_whole_burst burst_req[$];
 	// queue that holds single frames that are ready to be sent
 	axi_read_single_frame ready_queue[$];
+
+	semaphore burst_sem, ready_sem;
 
 	// control bit for enabling ready randomization
 	bit slave_ready_rand_enable = 1;
@@ -65,6 +72,8 @@ class axi_slave_read_driver extends uvm_driver #(axi_read_base_frame, axi_read_b
 		super.new(name, parent);
 		if(slave_ready_rand_enable)
 			ready_rand = new();
+		burst_sem = new(1);
+		ready_sem = new(1);
 	endfunction : new
 
 	// class methods
@@ -81,8 +90,8 @@ endclass : axi_slave_read_driver
 //------------------------------------------------------------------------------
 /**
 * Function : build_phase
-* Purpose : build
-* Parameters :	1. phase
+* Purpose : propagate the interface and configuration object
+* Parameters :	phase - umv phase
 * Return :	void
 **/
 //------------------------------------------------------------------------------
@@ -99,8 +108,8 @@ endclass : axi_slave_read_driver
 //------------------------------------------------------------------------------
 /**
 * Task : run_phase
-* Purpose : run
-* Inputs :	1. phase
+* Purpose : start driving after reset
+* Inputs :	phase - uvm phase
 * Outputs :
 * Ref :
 **/
@@ -118,7 +127,8 @@ endclass : axi_slave_read_driver
 //------------------------------------------------------------------------------
 /**
 * Task : get_and_drive
-* Purpose : fork required tasks
+* Purpose : create threads for reset, getting frames from seq., data channel
+*			and address channel driving
 * Inputs :
 * Outputs :
 * Ref :
@@ -162,6 +172,7 @@ endclass : axi_slave_read_driver
 			seq_item_port.get_next_item(item);
 			if ($cast(req, item))
 				begin
+					burst_sem.get(1);
 					if (burst_req.size()) begin
 						req.copy(burst_req.pop_front());
 						req.valid = FRAME_VALID;
@@ -169,6 +180,7 @@ endclass : axi_slave_read_driver
 					else begin
 						req.valid = FRAME_NOT_VALID;
 					end
+					burst_sem.put(1);
 				end
 			else
 				`uvm_error("CASTFAIL", "The recieved seq. item is not a request seq. item");
@@ -180,7 +192,9 @@ endclass : axi_slave_read_driver
 				begin
 					// put the frame in the ready queue
 					if(rsp.valid == FRAME_VALID) begin
+						ready_sem.get(1);
 						ready_queue.push_back(rsp);
+						ready_sem.put(1);
 					end
 				end
 			else
@@ -216,7 +230,14 @@ endclass : axi_slave_read_driver
 		else
 			vif.arready <= 1'b1;
 
-		// TODO: reset queues
+		// reset queues
+		burst_sem.get(1);
+		burst_req.delete();
+		burst_sem.put(1);
+
+		ready_sem.get(1);
+		ready_queue.delete();
+		ready_sem.put(1);
 
 		// TODO: reset sequence
 
@@ -225,7 +246,7 @@ endclass : axi_slave_read_driver
 //------------------------------------------------------------------------------
 /**
 * Task : drive_addr_channel
-* Purpose : address channel signals - collect burst request
+* Purpose : collects burst requests from master (address channel)
 * Inputs :
 * Outputs :
 * Ref :
@@ -254,7 +275,9 @@ endclass : axi_slave_read_driver
 					burst_collected.region = vif.arregion;
 					burst_collected.user = vif.aruser;
 
+					burst_sem.get(1);
 					burst_req.push_back(burst_collected);
+					burst_sem.put(1);
 				end
 
 				// randomize ready
@@ -277,7 +300,7 @@ endclass : axi_slave_read_driver
 //------------------------------------------------------------------------------
 /**
 * Task : drive_data_channel
-* Purpose : data channel signals - drive responses
+* Purpose : drives responses to master (on data channel), when they are ready
 * Inputs :
 * Outputs :
 * Ref :
@@ -292,8 +315,10 @@ endclass : axi_slave_read_driver
 		#1	// for simulation
 		forever begin
 			// is there a frame waiting to be sent
+			ready_sem.get(1);
 			if (ready_queue.size()) begin
 				rsp = ready_queue.pop_front();
+				ready_sem.put(1);
 
 				#1	// for simulation
 				// vif signals
@@ -307,6 +332,7 @@ endclass : axi_slave_read_driver
 				@(posedge vif.sig_clock iff vif.rready);	// wait for master
 			end
 			else begin
+				ready_sem.put(1);
 				#1	// for simulation
 				vif.rvalid <= 1'b0;
 
