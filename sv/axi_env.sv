@@ -14,9 +14,9 @@
 *
 * Mentor : Darko Tomusilovic
 *
-* Description : read environment
+* Description : environment for read
 *
-* Classes : 1. axi_env
+* Classes : axi_env
 **/
 // -----------------------------------------------------------------------------
 
@@ -28,6 +28,19 @@
 // CLASS: axi_env
 //
 //------------------------------------------------------------------------------
+/**
+* Description : read environment - contains master and slave agents
+*
+* Functions :	1. new(string name, uvm_component parent)
+*				2. void build_phase(uvm_phase phase)
+*				3. connect_phase(uvm_phase phase)
+*				4. start_of_simulation_phase(uvm_phase phase)
+*				5. update_config(axi_config config_obj)
+*
+* Tasks :	1. run_phase(uvm_phase phase)
+*			2. update_vif_enables()
+**/
+// -----------------------------------------------------------------------------
 class axi_env extends uvm_env;
 
 	// Virtual Interface variable
@@ -75,8 +88,9 @@ endclass : axi_env
 //------------------------------------------------------------------------------
 /**
 * Function : build_phase
-* Purpose : build
-* Parameters :	1. phase
+* Purpose : propagate configuration object, set config for master and slave
+*			and create master and slave agents
+* Parameters :	phase - uvm phase
 * Return :	void
 **/
 //------------------------------------------------------------------------------
@@ -110,8 +124,8 @@ endclass : axi_env
 //------------------------------------------------------------------------------
 /**
 * Function : connect_phase
-* Purpose : connect vif
-* Parameters :	1. phase
+* Purpose : propagate virtual interface
+* Parameters :	phase - uvm phase
 * Return :	void
 **/
 //------------------------------------------------------------------------------
@@ -127,7 +141,7 @@ endclass : axi_env
 /**
 * Function : start_of_simulation_phase
 * Purpose : start simulation
-* Parameters :	1. phase
+* Parameters :	phase - uvm phase
 * Return :	void
 **/
 //------------------------------------------------------------------------------
@@ -141,7 +155,7 @@ endclass : axi_env
 /**
 * Function : update_config
 * Purpose : update configuration
-* Parameters :	1. config_obj
+* Parameters :	config_obj
 * Return :	void
 **/
 //------------------------------------------------------------------------------
@@ -173,8 +187,8 @@ endtask : update_vif_enables
 //------------------------------------------------------------------------------
 /**
 * Task : run_phase
-* Purpose : run
-* Inputs :	1. phase
+* Purpose : create thread for update_vif_enables
+* Inputs :	phase - uvm phase
 * Outputs :
 * Ref :
 **/

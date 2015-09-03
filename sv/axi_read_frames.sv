@@ -33,6 +33,12 @@
 // CLASS: axi_read_base_frame
 //
 //------------------------------------------------------------------------------
+/**
+* Description : base frame
+*
+* Functions :	1. new (string name = "axi_read_base_frame")
+**/
+// -----------------------------------------------------------------------------
 class axi_read_base_frame extends uvm_sequence_item;
 
 	rand bit [RID_WIDTH-1 : 0]	id;
@@ -47,7 +53,7 @@ class axi_read_base_frame extends uvm_sequence_item;
 		`uvm_field_int(delay, UVM_DEFAULT)
 	`uvm_object_utils_end
 
-	function new (string name = "axi_read_single_frame");
+	function new (string name = "axi_read_base_frame");
 		super.new(name);
 	endfunction
 
@@ -58,26 +64,39 @@ endclass : axi_read_base_frame
 // CLASS: axi_read_single_frame
 //
 //------------------------------------------------------------------------------
+/**
+* Description : single frame - fields correspond to signals on the data channel
+*				and control bits
+*
+* Functions :	1. new (string name = "axi_read_single_frame")
+*				2. void calc_resp(lock_enum slave_lock, lock_enum burst_lock)
+*				3. calc_last_bit(bit last, last_enum mode)
+**/
+// -----------------------------------------------------------------------------
 class axi_read_single_frame extends axi_read_base_frame;
 
-	rand bit [DATA_WIDTH-1 : 0]	data;
-	rand response_enum			resp;
-	bit							last;
+	rand bit [DATA_WIDTH-1 : 0]		data;
+	rand response_enum				resp;
+	bit								last;
 	rand bit [RUSER_WIDTH-1 : 0]	user;
 
 	// control
 	rand last_enum				last_mode;	// rlast signal generated correcty or not
 	err_enum					err;	// used for early termination and bad last bit for last frame in burst
 	rand bit 					read_enable;	// read from memory or return random data
+	rand resp_mode_enum			resp_mode;	// response generated correctly or not
+	rand id_enum				id_mode;
 
 	// control bit for default value of rresp signal
 	rand bit default_resp;	// if set use default value for resp (OKAY)
 
 	constraint default_last_bit {last_mode dist {GOOD_LAST_BIT := 90, BAD_LAST_BIT := 10};}
-	//constraint default_last_bit {last_mode == GOOD_LAST_BIT;}	// TODO : put back to dist
+	
+	constraint default_resp_mode {resp_mode dist {GOOD_RESP := 90, BAD_RESP := 10};}
 
 	constraint default_read_enable {read_enable dist {1 := 90, 0 := 10};}
-	//constraint default_read_enable {read_enable == 1;}
+
+	constraint default_id {id_mode dist {1 := 90, 0 := 10};}
 
 	constraint default_resp_constraint {
 		if (default_resp) {
@@ -91,6 +110,8 @@ class axi_read_single_frame extends axi_read_base_frame;
 		`uvm_field_enum(response_enum, resp, UVM_DEFAULT)
 		`uvm_field_int(last, UVM_DEFAULT)
 		`uvm_field_enum(last_enum, last_mode, UVM_DEFAULT)
+		`uvm_field_enum(resp_mode_enum, resp_mode, UVM_DEFAULT)
+		`uvm_field_enum(id_enum, id_mode, UVM_DEFAULT)
 		`uvm_field_enum(err_enum, err, UVM_DEFAULT)
 		`uvm_field_int(read_enable, UVM_DEFAULT)
 		`uvm_field_int(default_resp, UVM_DEFAULT)
@@ -101,27 +122,69 @@ class axi_read_single_frame extends axi_read_base_frame;
 		super.new(name);
 	endfunction
 
-	function void calc_resp(lock_enum slave_lock, lock_enum burst_lock);
-		if ((burst_lock == EXCLUSIVE) && (slave_lock == NORMAL)) begin
-			this.resp = OKAY;
-			this.err = ERROR;
+	//------------------------------------------------------------------------------
+	/**
+	* Function : calc_resp
+	* Purpose : calculates response for exclusive and normal access
+	* Parameters :	slave_lock - does the slave support exclusive access
+	*				burst_lock - was the request normal or exclusive
+	* Return :	void
+	**/
+	//------------------------------------------------------------------------------
+	function void calc_resp(lock_enum slave_lock, lock_enum burst_lock, resp_mode_enum mode);
+		if(mode == GOOD_RESP) begin
+			if ((burst_lock == EXCLUSIVE) && (slave_lock == NORMAL)) begin
+				this.resp = OKAY;
+				this.err = ERROR;
+			end
+			else if (burst_lock == EXCLUSIVE) begin
+				this.resp = EXOKAY;
+				this.err = NO_ERROR;
+			end
+			else begin
+				this.resp = OKAY;
+				this.err = NO_ERROR;
+			end
 		end
-		else if (burst_lock == EXCLUSIVE) begin
-			this.resp = EXOKAY;
-			this.err = NO_ERROR;
+		else begin 	// resp is random
+			if ((this.resp == SLVERR) || (this.resp == DECERR) || ((this.resp == OKAY) && (burst_lock == EXCLUSIVE)))
+				this.err = ERROR;
+			else
+				this.err = NO_ERROR;
 		end
-		else begin
-			this.resp = OKAY;
-			this.err = NO_ERROR;
-		end
-	endfunction : calc_resp
 
+		endfunction : calc_resp
+
+	//------------------------------------------------------------------------------
+	/**
+	* Function : calc_last_bit
+	* Purpose : calculates last bit based on mode
+	* Parameters :	last - is the frame last in burst
+	*				mode - GOOD_LAST_BIT or BAD_LAST_BIT
+	* Return :	bit - calculated value
+	**/
+	//------------------------------------------------------------------------------
 	function bit calc_last_bit(bit last, last_enum mode);
 		if(mode == BAD_LAST_BIT)
 			return ~last;
 		else
 			return last;
 	endfunction : calc_last_bit
+
+	//------------------------------------------------------------------------------
+	/**
+	* Function : get_id
+	* Purpose : calculates id based on mode
+	* Parameters :	mode - GOOD_ID or BAD_ID
+	*				burst_id - id of the corresponding burst
+	* Return :	bit - calculated value
+	**/
+	//------------------------------------------------------------------------------
+	function void get_id(id_enum mode, bit[RID_WIDTH-1:0] burst_id);
+		if(mode == GOOD_ID)
+			this.id = burst_id;
+		// else it is random
+	endfunction : get_id
 
 endclass :  axi_read_single_frame
 
@@ -130,6 +193,12 @@ endclass :  axi_read_single_frame
 // CLASS: axi_read_single_addr
 //
 //------------------------------------------------------------------------------
+/**
+* Description : contains single frame + information about address
+*
+* Functions :	1. new (string name = "axi_read_single_addr")
+**/
+// -----------------------------------------------------------------------------
 class axi_read_single_addr extends axi_read_single_frame;
 
 	rand bit [DATA_WIDTH/8 - 1 : 0] upper_byte_lane;	// the byte lane of the hightest addressed byte of a transfer
@@ -162,6 +231,13 @@ endclass : axi_read_single_addr
 // CLASS: axi_read_burst_frame
 //
 //------------------------------------------------------------------------------
+/**
+* Description : burst frame - fields correspond to signals on the address channel
+*				and control bits
+*
+* Functions :	1. new (string name = "axi_read_burst_frame")
+**/
+// -----------------------------------------------------------------------------
 class axi_read_burst_frame extends axi_read_base_frame;
 
 	rand bit [ADDR_WIDTH-1 : 0]		addr;
@@ -324,6 +400,12 @@ endclass : axi_read_burst_frame
 // CLASS: axi_read_whole_burst
 //
 //------------------------------------------------------------------------------
+/**
+* Description : contains burst frame + queue holding all single frames
+*
+* Functions :	1. new (string name = "axi_read_whole_burst")
+**/
+// -----------------------------------------------------------------------------
 class axi_read_whole_burst extends axi_read_burst_frame;
 
 	axi_read_single_addr single_frames[$];
@@ -338,7 +420,18 @@ class axi_read_whole_burst extends axi_read_burst_frame;
 
 endclass : axi_read_whole_burst
 
-// TODO : premesti negde drugde
+// TODO : premesti negde drugde'
+//------------------------------------------------------------------------------
+//
+// CLASS: ready_randomization
+//
+//------------------------------------------------------------------------------
+/**
+* Description : randomization for ready signal
+*
+* Functions :	1. bit getRandom()
+**/
+// -----------------------------------------------------------------------------
 class ready_randomization;
 
 	rand bit ready;
@@ -350,6 +443,14 @@ class ready_randomization;
 		};
 	}
 
+	//------------------------------------------------------------------------------
+	/**
+	* Function : getRandom
+	* Purpose : return random value
+	* Parameters :
+	* Return :	bit - random value
+	**/
+	//------------------------------------------------------------------------------
 	function bit getRandom();
 		assert(this.randomize());
 		return this.ready;

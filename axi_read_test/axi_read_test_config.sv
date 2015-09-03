@@ -16,7 +16,7 @@
 *
 * Description : test configuration for read
 *
-* Classes : 1. axi_read_test_config
+* Classes :	axi_read_test_config
 **/
 // -----------------------------------------------------------------------------
 

@@ -15,7 +15,7 @@ import uvm_pkg::*;            // import the UVM library
 
 import axi_pkg::*;
 
-  `include "test_lib.sv"
+  `include "tests/axi_test_lib.sv"
 
   reg clock;
   reg reset;

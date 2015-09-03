@@ -14,9 +14,24 @@
 *
 * Mentor : Darko Tomusilovic
 *
-* Description : monitors data and address channels
+* Description : monitor for read slave
 *
-* Classes :	1. axi_slave_read_monitor
+* Classes :	axi_slave_read_monitor
+**/
+// -----------------------------------------------------------------------------
+
+`ifndef AXI_SLAVE_READ_MONITOR_SV
+`define AXI_SLAVE_READ_MONITOR_SV
+
+//------------------------------------------------------------------------------
+//
+// CLASS: axi_slave_read_monitor
+//
+//------------------------------------------------------------------------------
+/**
+* Description : gets collected frames from collector, sends them to coverage
+*				collector, performs functional checks if needed and keeps track
+*				of all transactions
 *
 * Functions :	1. new (string name, uvm_component parent)
 *				2. void build_phase(uvm_phase phase)
@@ -33,15 +48,6 @@
 *			4. reset()
 **/
 // -----------------------------------------------------------------------------
-
-`ifndef AXI_SLAVE_READ_MONITOR_SV
-`define AXI_SLAVE_READ_MONITOR_SV
-
-//------------------------------------------------------------------------------
-//
-// CLASS: axi_slave_read_monitor
-//
-//------------------------------------------------------------------------------
 class axi_slave_read_monitor extends uvm_monitor;
 
 	// This property is the virtual interfaced needed for this component to drive
@@ -57,6 +63,9 @@ class axi_slave_read_monitor extends uvm_monitor;
 	bit coverage_enable = 1;
 	// contorl bit - is early termination of bursts allowed
 	bit terminate_enable = 1;
+
+	// for finishing simulation by force
+	int end_simulation = 0;
 
 	int unsigned num_single_frames = 0;
 	axi_read_single_frame error_frames[$];
@@ -116,8 +125,9 @@ endclass : axi_slave_read_monitor
 //------------------------------------------------------------------------------
 /**
 * Task : run_phase
-* Purpose : end simulation, if the nothing happens
-* Inputs :	1. phase
+* Purpose : create threads for new frame and burst, reset and end simulation
+*			if needed
+* Inputs :	phase - uvm phase
 * Outputs :
 * Ref :
 **/
@@ -127,20 +137,23 @@ endclass : axi_slave_read_monitor
 			new_frame();
 			new_burst();
 
-			begin
+			// reset
+			forever begin
 				@(negedge vif.sig_reset);
-				do
-					@(posedge vif.sig_clock);
-				while(vif.sig_reset!==1);
 		    	reset();
     		end
 
-			begin
-				#100000
-				`uvm_info(get_type_name(), $sformatf("Force end simulation"), UVM_LOW);
-				check_phase(phase);
-				report_phase(phase);
-				$finish(2);
+    		// end simulation
+			forever begin
+				@(posedge vif.sig_clock);
+				end_simulation++;
+				// if nothing happens for 10.000 clk cycles, end simulation
+				if(end_simulation == 10000) begin
+					`uvm_info(get_type_name(), $sformatf("Force end simulation"), UVM_LOW);
+					check_phase(phase);
+					report_phase(phase);
+					$finish(2);
+				end
 			end
 		join
 	endtask : run_phase
@@ -148,8 +161,8 @@ endclass : axi_slave_read_monitor
 //------------------------------------------------------------------------------
 /**
 * Function : build_phase
-* Purpose : build
-* Parameters :	1. phase
+* Purpose : build - propagate the virtual interface and configuration object
+* Parameters :	phase - uvm phase
 * Return :	void
 **/
 //------------------------------------------------------------------------------
@@ -165,8 +178,9 @@ endclass : axi_slave_read_monitor
 //------------------------------------------------------------------------------
 /**
 * Function : write
-* Purpose : sample transaction after the monitor collects the frame
-* Parameters :	1. trans - frame collected by monitor
+* Purpose : called by collector when it gets a new frame; sends the frame to
+*			coverage collector and signalizes that there is a new frame
+* Parameters :	trans - frame collected by monitor
 * Return :	void
 **/
 //------------------------------------------------------------------------------
@@ -176,14 +190,17 @@ endclass : axi_slave_read_monitor
 
 		data_collected_port.write(collected_frame);	// to coverage collector
 
+		end_simulation = 0;	// there was a new frame, restart counter for end simulation
+
 		->frame_event;	// signalize new frame
 	endfunction : write
 
 //------------------------------------------------------------------------------
 /**
 * Function : write1
-* Purpose : sample transaction after the monitor collects the frame
-* Parameters :	1. trans - frame collected by monitor
+* Purpose : called by collector when it gets a new frame; sends the frame to
+*			coverage collector and signalizes that there is a new frame
+* Parameters :	trans - frame collected by monitor
 * Return :	void
 **/
 //------------------------------------------------------------------------------
@@ -193,13 +210,16 @@ endclass : axi_slave_read_monitor
 
 		addr_collected_port.write(collected_burst);	// to coverage collector
 
+		end_simulation = 0;	// there was a new frame, restart counter for end simulation
+
 		->burst_event;	// signalize new burst
 	endfunction : write1
 
 //------------------------------------------------------------------------------
 /**
 * Task : new_frame
-* Purpose : to process a new frame
+* Purpose : process a new frame - perform checks if needed, put it in the queue
+*			and finish burst when last frame arrives
 * Inputs :
 * Outputs :
 * Ref :
@@ -247,7 +267,8 @@ endclass : axi_slave_read_monitor
 //------------------------------------------------------------------------------
 /**
 * Task : new_burst
-* Purpose : to process a new burst
+* Purpose : process a new burst request - performs checks if needed and put it
+*			in the queue
 * Inputs :
 * Outputs :
 * Ref :
@@ -277,8 +298,8 @@ endclass : axi_slave_read_monitor
 //------------------------------------------------------------------------------
 /**
 * Function : report_phase
-* Purpose : report
-* Parameters :	1. phase
+* Purpose : report on number of collected frames
+* Parameters :	phase - uvm phase
 * Return :	void
 **/
 //------------------------------------------------------------------------------
@@ -289,8 +310,9 @@ endclass : axi_slave_read_monitor
 //------------------------------------------------------------------------------
 /**
 * Function : check_data_channel
-* Purpose : performs checks on single frames
-* Parameters :	1. collected_frame
+* Purpose : performs checks on single frames, displays an error if needed and
+*			returns information about last frame (termination of burst)
+* Parameters :	collected_frame - frame beeing checked
 * Return :	bit - last frame in burst / termination signal
 **/
 //------------------------------------------------------------------------------
@@ -305,13 +327,13 @@ endclass : axi_slave_read_monitor
 
 		// check response
 		if(collected_frame.resp == SLVERR) begin
-			`uvm_error(get_type_name(), "Collected frame with SLVERR response")
+			`uvm_warning(get_type_name(), "Collected frame with SLVERR response")
 			error_frames.push_back(collected_frame);
 			if(terminate_enable)
 				last = 1;
 		end
 		else if (collected_frame.resp == DECERR) begin
-			`uvm_error(get_type_name(), "Collected frame with DECERR response")
+			`uvm_warning(get_type_name(), "Collected frame with DECERR response")
 			error_frames.push_back(collected_frame);
 			if(terminate_enable)
 				last = 1;
@@ -322,19 +344,19 @@ endclass : axi_slave_read_monitor
 				// check last
 				if(burst_queue[i].single_frames.size() == (burst_queue[i].len)) begin
 					if (!collected_frame.last) begin
-						`uvm_error(get_type_name(), "Last bit not set for last frame in burst")
+						`uvm_warning(get_type_name(), "Last bit not set for last frame in burst")
 						error_frames.push_back(collected_frame);
 						last = 1;
 					end
 				end
 				else if(collected_frame.last) begin
-					`uvm_error(get_type_name(), "Last bit set for frame that is not last in burst")
+					`uvm_warning(get_type_name(), "Last bit set for frame that is not last in burst")
 					error_frames.push_back(collected_frame);
 				end
 
 				// check response
 				if((burst_queue[i].lock == EXCLUSIVE) && (collected_frame.resp == OKAY)) begin
-					`uvm_error(get_type_name(), "Recieved OKAY response for EXCLUSIVE request")
+					`uvm_warning(get_type_name(), "Recived OKAY response for EXCLUSIVE request")
 					error_frames.push_back(collected_frame);
 					if(terminate_enable)
 						last = 1;
@@ -343,7 +365,7 @@ endclass : axi_slave_read_monitor
 				// AXI4_ERRS_RRESP_EXOKAY
 				// An EXOKAY read response can only be given to an exclusive read access
 				if((burst_queue[i].lock != EXCLUSIVE) && (collected_frame.resp == EXOKAY)) begin
-					`uvm_error(get_type_name(), "EXOKAY response for a read that was not exclusive")
+					`uvm_error(get_type_name(), "AXI4_ERRS_RRESP_EXOKAY: Recieved EXOKAY response for a read that was not exclusive")
 					error_frames.push_back(collected_frame);
 				end
 
@@ -355,8 +377,9 @@ endclass : axi_slave_read_monitor
 		// Assertion AXI4_ERRS_RID
 		// The read data must always follow the address that it relates to. Therefore, a slave can only give read data with an ID to match an outstanding read transaction.
 		if (i >= burst_queue.size()) begin
-			`uvm_error(get_type_name(), "Collected frame with id that was not requested")
+			`uvm_error(get_type_name(), "AXI4_ERRS_RID: Collected frame with id that was not requested")
 			error_frames.push_back(collected_frame);
+			last = 0;	// because there is no burst with this id, there is no need to end it
 		end
 
 		return last;
@@ -365,8 +388,8 @@ endclass : axi_slave_read_monitor
 //------------------------------------------------------------------------------
 /**
 * Function : check_addr_channel
-* Purpose : performs checks on burst requests
-* Parameters :	1. collected_burst
+* Purpose : performs checks on burst requests and displays an error if needed
+* Parameters :	collected_burst - burst beeing checked
 * Return :	void
 **/
 //------------------------------------------------------------------------------
@@ -376,7 +399,7 @@ endclass : axi_slave_read_monitor
 		// When ARVALID is HIGH, if ARCACHE[1] is LOW, then ARCACHE[3:2] must also be LOW
 		if(collected_burst.cache[1] == 0)
 			if(!(collected_burst.cache[3:2] == 0))
-				`uvm_error(get_type_name(), "ARCACHE[1] is LOW, but ARCACHE[3:2] is not LOW")
+				`uvm_error(get_type_name(), "AXI4_ERRM_ARCACHE: ARCACHE[1] is LOW, but ARCACHE[3:2] is not LOW")
 
 		// check type, len and addr
 		case (collected_burst.burst_type)
@@ -384,59 +407,59 @@ endclass : axi_slave_read_monitor
 				// Assertion AXI4_ERRM_ARLEN_FIXED
 				// Transactions of burst type FIXED cannot have a length greater than 16 beats
 				if(collected_burst.len >= 16)
-					`uvm_error(get_type_name(), "Unsuported burst length for FIXED burst type")
+					`uvm_error(get_type_name(), "AXI4_ERRM_ARLEN_FIXED: Unsuported burst length for FIXED burst type")
 			end
 			INCR : begin
 				// Assertion AXI4_ERRM_ARADDR_BOUNDARY
        			// A read burst cannot cross a 4KB boundary
 				if((collected_burst.len * (2**collected_burst.size)) >= 4096)
-					`uvm_error(get_type_name(), "Burst crossed 4KB boundary")
+					`uvm_error(get_type_name(), "AXI4_ERRM_ARADDR_BOUNDARY: Burst crossed 4KB boundary")
 			end
 			WRAP : begin
 				// Assertion AXI4_ERRM_ARLEN_WRAP
 				// A read transaction with burst type of WRAP must have a length of 2, 4, 8, or 16
 				if(!(collected_burst.len inside {1, 3, 7, 15})) begin
-					`uvm_error(get_type_name(), "Unsuported burst length for WRAP burst type")
+					`uvm_error(get_type_name(), "AXI4_ERRM_ARLEN_WRAP: Unsuported burst length for WRAP burst type")
 				end
 
 				// Assertion AXI4_ERRM_ARADDR_WRAP_ALIGN
 				// A read transaction with a burst type of WRAP must have an aligned address
 				if(collected_burst.addr != ($floor(collected_burst.addr/(2**collected_burst.size))*(2**collected_burst.size)))
-					`uvm_error(get_type_name(), "Start address must be aligned for WRAP burst type")
+					`uvm_error(get_type_name(), "AXI4_ERRM_ARADDR_WRAP_ALIGN: Start address must be aligned for WRAP burst type")
 			end
 			Reserved : begin
 				// Assertion AXI4_ERRM_ARBURST
 				// A value of 2'b11 on ARBURST is not permitted when ARVALID is HIGH
-				`uvm_error(get_type_name(), "Reserved burt type not supported")
+				`uvm_error(get_type_name(), "AXI4_ERRM_ARBURST: Reserved burt type not permitted")
 			end
 		endcase
 
 		// Assertion AXI4_ERRM_ARSIZE
 		// The size of a read transfer must not exceed the width of the data interface
 		if(collected_burst.size > $clog2(DATA_WIDTH / 8))
-			`uvm_error(get_type_name(), "Requested size larger than DATA_WIDTH")
+			`uvm_error(get_type_name(), "AXI4_ERRM_ARSIZE: Requested size larger than DATA_WIDTH")
 
 		// check exclusive access restrictions
 		if(collected_burst.lock == EXCLUSIVE) begin
 			// Assertion AXI4_ERRM_EXCL_ALIGN
 			// The address of an exclusive access is aligned to the total number of bytes in the transaction
 			if(collected_burst.addr != ($floor(collected_burst.addr/(2**collected_burst.size))*(2**collected_burst.size)))
-				`uvm_error(get_type_name(), "Start address must be aligned for EXCLUSIVE access")
+				`uvm_error(get_type_name(), "AXI4_ERRM_EXCL_ALIGN: Start address must be aligned for EXCLUSIVE access")
 
 			// Assertion AXI4_ERRM_EXCL_LEN
 			// The number of bytes to be transferred in an exclusive access burst is a power of 2, that is, 1, 2, 4, 8, 16, 32, 64, or 128 bytes
 			if(!(((2**collected_burst.size) * collected_burst.len) inside {1, 3, 7, 15, 31, 63, 127}))
-				`uvm_error(get_type_name(), "The number of bytes to be transferred in an exclusive access burst must be a power of 2")
+				`uvm_error(get_type_name(), "AXI4_ERRM_EXCL_LEN: The number of bytes to be transferred in an exclusive access burst must be a power of 2")
 
 			// Assertion AXI4_ERRM_EXCL_MAX
 			// The maximum number of bytes that can be transferred in an exclusive burst is 128
 			if(((2**collected_burst.size) * collected_burst.len) > 128)
-				`uvm_error(get_type_name(), "max number of bytes to be transferred in an exclusive burst is 128")
+				`uvm_error(get_type_name(), "AXI4_ERRM_EXCL_MAX: Exceeded max number of bytes that can be transferred in an exclusive burst")
 			
 			// Assertion AXI4_ERRM_ARLEN_LOCK
 			// Exclusive access transactions cannot have a length greater than 16 beats
 			if(collected_burst.len >= 16)
-				`uvm_error(get_type_name(), "Unsuported burst length for exclusive access")
+				`uvm_error(get_type_name(), "AXI4_ERRM_ARLEN_LOCK: Unsuported burst length for exclusive access")
 		end
 
 	endfunction : check_addr_channel
@@ -467,8 +490,8 @@ endclass : axi_slave_read_monitor
 //------------------------------------------------------------------------------
 /**
 * Function : check_phase
-* Purpose : final checks
-* Parameters :	1. phase
+* Purpose : final checks - are all bursts completed
+* Parameters :	phase - uvm phase
 * Return :	void
 **/
 //------------------------------------------------------------------------------
@@ -478,7 +501,7 @@ endclass : axi_slave_read_monitor
 			// Assertion AXI4_ERRS_RLAST_ALL_DONE_EOS
 			// All outstanding read bursts must have completed
 			if(burst_queue.size() > 0)
-				`uvm_error(get_type_name(), "Not all outstanding bursts have completed")
+				`uvm_error(get_type_name(), "AXI4_ERRS_RLAST_ALL_DONE_EOS: Not all outstanding bursts have completed")
 		end
 	endfunction : check_phase
 

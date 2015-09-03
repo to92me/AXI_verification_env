@@ -17,8 +17,7 @@
 * Description : contains virtual sequences
 *
 * Classes :	1. virtual_base_sequence
-*			2. virtual_transfer_seq
-*			3. virtual_transfer_multiple_addr
+*			2. virtual_transfer_multiple_addr
 **/
 // -----------------------------------------------------------------------------
 
@@ -30,8 +29,16 @@
 // CLASS: virtual_base_sequence
 //
 //------------------------------------------------------------------------------
-// This sequence raises/drops objections in the pre/post_body so that root
-// sequences raise objections but subsequences do not.
+/**
+* Description : raises/drops objections in the pre/post_body so that root
+*				sequences raise objections but subsequences do not
+*
+* Functions :	1. new(string name="virtual_base_sequence")
+*
+* Tasks :	1. pre_body()
+*			2. post_body()
+**/
+// -----------------------------------------------------------------------------
 class virtual_base_sequence extends uvm_sequence;
 
 	`uvm_object_utils(virtual_base_sequence)
@@ -63,35 +70,18 @@ endclass : virtual_base_sequence
 
 //------------------------------------------------------------------------------
 //
-// SEQUENCE: virtual_transfer_seq
-//
-//------------------------------------------------------------------------------
-class virtual_transfer_seq extends virtual_base_sequence;
-
-	`uvm_object_utils(virtual_transfer_seq)
-
-	bit[ADDR_WIDTH-1 : 0] dummy;
-
-	// new - constructor
-	function new(string name="virtual_transfer_seq");
-		super.new(name);
-	endfunction
-
-	// axi read master
-	axi_master_read_transfer_seq read_seq;
-
-	virtual task body();
-		dummy = p_sequencer.config_obj.slave_list[0].start_address;
-		`uvm_do_on_with(read_seq, p_sequencer.read_seqr, {addr_rand == dummy;})
-	endtask
-
-endclass : virtual_transfer_seq
-
-//------------------------------------------------------------------------------
-//
 // SEQUENCE: virtual_transfer_multiple_addr
 //
 //------------------------------------------------------------------------------
+/**
+* Description : gets address information from configuration and send it to
+*				master seq.
+*
+* Functions :	1. new(string name="virtual_transfer_multiple_addr")
+*
+* Tasks :	1. body()
+**/
+// -----------------------------------------------------------------------------
 class virtual_transfer_multiple_addr extends virtual_base_sequence;
 
 	`uvm_object_utils(virtual_transfer_multiple_addr)

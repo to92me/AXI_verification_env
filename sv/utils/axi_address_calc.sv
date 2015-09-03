@@ -14,21 +14,10 @@
 *
 * Mentor : Darko Tomusilovic
 *
-* Description : calculation of addresses and byte lanes
+* Description : calculation of addresses and byte lanes, memory read and write
 *
 * Classes :	1. axi_address_calc	
 *			2. axi_address_queue
-*
-* Functions :	1. new (string name="axi_address_calc")
-*				2. void calc_addr(bit[ADDR_WIDTH-1:0] start_addr,
-*					burst_size_enum size, bit[7:0] burst_len,
-*					burst_type_enum mode)
-*				3. axi_address_calc pop_front()
-*
-* Tasks :	1. readMemory(input axi_slave_config config_obj,
-*				output bit[DATA_WIDTH-1 : 0] return_data)
-*			2. writeMemory(input axi_slave_config config_obj,
-*				input bit[DATA_WIDTH-1 : 0] input_data)
 **/
 // -----------------------------------------------------------------------------
 
@@ -37,6 +26,17 @@
 // CLASS: axi_address_calc
 //
 //------------------------------------------------------------------------------
+/**
+* Description : item containing address, upper byte lane and lower byte lane
+*
+* Functions :	1. new (string name="axi_address_calc")
+*
+* Tasks :	1. readMemory(input axi_slave_config config_obj,
+*				output bit[DATA_WIDTH-1 : 0] return_data)
+*			2. writeMemory(input axi_slave_config config_obj,
+*				input bit[DATA_WIDTH-1 : 0] input_d
+**/
+// -----------------------------------------------------------------------------
 class axi_address_calc extends uvm_sequence_item;
 
 	int upper_byte_lane;	// the byte lane of the hightest addressed byte of a transfer
@@ -116,6 +116,17 @@ endtask : writeMemory
 // CLASS: axi_address_queue
 //
 //------------------------------------------------------------------------------
+/**
+* Description : calculation of addresses and byte lanes - stored in a queue
+*
+* Functions :	1. new (string name = "axi_address_queue",
+*					uvm_component parent = null)
+*				2. void calc_addr(bit[ADDR_WIDTH-1:0] start_addr,
+*					burst_size_enum size, bit[7:0] burst_len,
+*					burst_type_enum mode)
+*				3. axi_address_calc pop_front()
+**/
+// -----------------------------------------------------------------------------
 class axi_address_queue;
 
 	axi_address_calc addr_queue[$];
@@ -124,11 +135,6 @@ class axi_address_queue;
 	function new (string name = "axi_address_queue", uvm_component parent = null);
 		//super.new(name, parent);
 	endfunction : new
-
-	// build_phase
-	function void build_phase(uvm_phase phase);
-		//super.build_phase(phase);
-	endfunction : build_phase
 
 	extern virtual function void calc_addr(bit[ADDR_WIDTH-1:0] start_addr, burst_size_enum size, bit[7:0] burst_len, burst_type_enum mode);
 	extern virtual function axi_address_calc pop_front();
