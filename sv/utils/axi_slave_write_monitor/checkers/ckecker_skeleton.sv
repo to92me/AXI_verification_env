@@ -7,7 +7,7 @@
 //
 //------------------------------------------------------------------------------
 
-class axi_slave_write_checker_skeleton extends uvm_component;
+class axi_slave_write_checker_skeleton extends axi_slave_write_checker_base;
 
 
 	`uvm_component_utils(axi_slave_write_checker_skeleton)
@@ -20,6 +20,7 @@ class axi_slave_write_checker_skeleton extends uvm_component;
 	// build_phase
 	function void build_phase(uvm_phase phase);
 		super.build_phase(phase);
+		void'(main_monitor_instance.suscribeChecker(this, TRUE, TRUE, TRUE, TRUE, TRUE));
 	endfunction : build_phase
 
 	extern task main();
@@ -50,7 +51,7 @@ endclass : axi_slave_write_checker_skeleton
 	endtask
 
 	task axi_slave_write_checker_skeleton::main();
-		// this methode will be forked in build phase 
+		// this methode will be forked in build phase
 		// here should be implemented functionaliti for this methode
 	endtask
 
@@ -60,7 +61,7 @@ endclass : axi_slave_write_checker_skeleton
 	endtask
 
 	task axi_slave_write_checker_skeleton::printState();
-		
+
 	endtask
 
 `endif
