@@ -133,7 +133,7 @@ class axi_master_read_coverage_collector extends uvm_component;
 		cross BURST_TYPE, LEN {
 			ignore_bins Reserved_LEN = binsof(BURST_TYPE) intersect {Reserved};	// exclude bins where burst_type is Reserved and any value of len
 			ignore_bins FIXED_LEN = binsof(BURST_TYPE) intersect {FIXED} && binsof(LEN) intersect {[16:$]};	// exclude bins with FIXED type and burst length > 16 transfers
-			ignore_bins WRAP_LEN= binsof(BURST_TYPE) intersect {WRAP} && binsof(LEN) intersect {2, [4:6], [8:14], [16:$]};	// exclude bins with WRAP type and burst length not 2, 4, 8 or 16 transfers
+			ignore_bins WRAP_LEN= binsof(BURST_TYPE) intersect {WRAP} && binsof(LEN) intersect {0, 2, [4:6], [8:14], [16:$]};	// exclude bins with WRAP type and burst length not 2, 4, 8 or 16 transfers
 		}
 
 	endgroup

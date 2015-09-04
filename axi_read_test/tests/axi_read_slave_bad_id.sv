@@ -44,7 +44,7 @@ endclass : axi_read_single_frame_bad_id
 //
 //------------------------------------------------------------------------------
 /**
-* Description : test with where all the single frames send bad last signal
+* Description : test where slave responds with random id
 **/
 // -----------------------------------------------------------------------------
 class axi_read_slave_bad_id extends axi_read_base_test;

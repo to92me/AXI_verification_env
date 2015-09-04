@@ -57,10 +57,8 @@ class axi_slave_read_monitor extends uvm_monitor;
 	// Configuration object
 	axi_config config_obj;
 
-	// The following two bits are used to control whether checks and coverage are
-	// done both in the monitor class and the interface.
+	// The following bit is used to control whether checks are done
 	bit checks_enable = 1;
-	bit coverage_enable = 1;
 	// contorl bit - is early termination of bursts allowed
 	bit terminate_enable = 1;
 
@@ -93,7 +91,6 @@ class axi_slave_read_monitor extends uvm_monitor;
 	`uvm_component_utils_begin(axi_slave_read_monitor)
 		`uvm_field_object(config_obj, UVM_DEFAULT)
 		`uvm_field_int(checks_enable, UVM_DEFAULT)
-		`uvm_field_int(coverage_enable, UVM_DEFAULT)
 		`uvm_field_int(terminate_enable, UVM_DEFAULT)
 		`uvm_field_int(num_single_frames, UVM_DEFAULT)
 	`uvm_component_utils_end
@@ -147,8 +144,8 @@ endclass : axi_slave_read_monitor
 			forever begin
 				@(posedge vif.sig_clock);
 				end_simulation++;
-				// if nothing happens for 10.000 clk cycles, end simulation
-				if(end_simulation == 10000) begin
+				// if nothing happens for 1000 clk cycles, end simulation
+				if(end_simulation == 1000) begin
 					`uvm_info(get_type_name(), $sformatf("Force end simulation"), UVM_LOW);
 					check_phase(phase);
 					report_phase(phase);
@@ -304,7 +301,7 @@ endclass : axi_slave_read_monitor
 **/
 //------------------------------------------------------------------------------
 	function void axi_slave_read_monitor::report_phase(uvm_phase phase);
-		`uvm_info(get_type_name(), $sformatf("Report: AXI monitor collected: %0d bursts, %0d single frames, of which %0d bursts were finished and %0d were not and %0d frames had an error", burst_queue.size()+finished_bursts.size(), num_single_frames, finished_bursts.size(), burst_queue.size(), error_frames.size()), UVM_LOW);
+		`uvm_info(get_type_name(), $sformatf("Report: AXI monitor collected: %0d bursts, %0d single frames, of which %0d bursts were finished and %0d were not and %0d frames had an error/warning", burst_queue.size()+finished_bursts.size(), num_single_frames, finished_bursts.size(), burst_queue.size(), error_frames.size()), UVM_LOW);
 	endfunction : report_phase
 
 //------------------------------------------------------------------------------
@@ -319,6 +316,7 @@ endclass : axi_slave_read_monitor
 	function bit axi_slave_read_monitor::check_data_channel(axi_read_single_frame collected_frame);
 		bit last = 0;
 		int i = 0;
+		bit err_flag = 0;	// to ensure that a frame only gets pushed to the queue once (even if there are multiple errors in it)
 
 		// AXI4_ERRS_RDATA_NUM
 		// The number of read data items must match the corresponding ARLEN
@@ -328,13 +326,19 @@ endclass : axi_slave_read_monitor
 		// check response
 		if(collected_frame.resp == SLVERR) begin
 			`uvm_warning(get_type_name(), "Collected frame with SLVERR response")
-			error_frames.push_back(collected_frame);
+			if (!err_flag) begin
+				error_frames.push_back(collected_frame);
+				err_flag = 1;
+			end
 			if(terminate_enable)
 				last = 1;
 		end
 		else if (collected_frame.resp == DECERR) begin
 			`uvm_warning(get_type_name(), "Collected frame with DECERR response")
-			error_frames.push_back(collected_frame);
+			if (!err_flag) begin
+				error_frames.push_back(collected_frame);
+				err_flag = 1;
+			end
 			if(terminate_enable)
 				last = 1;
 		end
@@ -345,19 +349,28 @@ endclass : axi_slave_read_monitor
 				if(burst_queue[i].single_frames.size() == (burst_queue[i].len)) begin
 					if (!collected_frame.last) begin
 						`uvm_warning(get_type_name(), "Last bit not set for last frame in burst")
-						error_frames.push_back(collected_frame);
+						if (!err_flag) begin
+							error_frames.push_back(collected_frame);
+							err_flag = 1;
+						end
 						last = 1;
 					end
 				end
 				else if(collected_frame.last) begin
 					`uvm_warning(get_type_name(), "Last bit set for frame that is not last in burst")
-					error_frames.push_back(collected_frame);
+					if (!err_flag) begin
+						error_frames.push_back(collected_frame);
+						err_flag = 1;
+					end
 				end
 
 				// check response
 				if((burst_queue[i].lock == EXCLUSIVE) && (collected_frame.resp == OKAY)) begin
 					`uvm_warning(get_type_name(), "Recived OKAY response for EXCLUSIVE request")
-					error_frames.push_back(collected_frame);
+					if (!err_flag) begin
+						error_frames.push_back(collected_frame);
+						err_flag = 1;
+					end
 					if(terminate_enable)
 						last = 1;
 				end
@@ -366,7 +379,10 @@ endclass : axi_slave_read_monitor
 				// An EXOKAY read response can only be given to an exclusive read access
 				if((burst_queue[i].lock != EXCLUSIVE) && (collected_frame.resp == EXOKAY)) begin
 					`uvm_error(get_type_name(), "AXI4_ERRS_RRESP_EXOKAY: Recieved EXOKAY response for a read that was not exclusive")
-					error_frames.push_back(collected_frame);
+					if (!err_flag) begin
+						error_frames.push_back(collected_frame);
+						err_flag = 1;
+					end
 				end
 
 				// checks id
@@ -378,7 +394,10 @@ endclass : axi_slave_read_monitor
 		// The read data must always follow the address that it relates to. Therefore, a slave can only give read data with an ID to match an outstanding read transaction.
 		if (i >= burst_queue.size()) begin
 			`uvm_error(get_type_name(), "AXI4_ERRS_RID: Collected frame with id that was not requested")
-			error_frames.push_back(collected_frame);
+			if (!err_flag) begin
+				error_frames.push_back(collected_frame);
+				err_flag = 1;
+			end
 			last = 0;	// because there is no burst with this id, there is no need to end it
 		end
 
@@ -476,7 +495,7 @@ endclass : axi_slave_read_monitor
 	task axi_slave_read_monitor::reset();
 
 		`uvm_info(get_type_name(), $sformatf("Monitor reset"), UVM_LOW);
-		`uvm_info(get_type_name(), $sformatf("Report: AXI monitor collected: %0d bursts, %0d single frames, of which %0d bursts were finished and %0d were not and %0d frames had an error", burst_queue.size()+finished_bursts.size(), num_single_frames, finished_bursts.size(), burst_queue.size(), error_frames.size()), UVM_LOW);
+		`uvm_info(get_type_name(), $sformatf("Report: AXI monitor collected: %0d bursts, %0d single frames, of which %0d bursts were finished and %0d were not and %0d frames had an error/warning", burst_queue.size()+finished_bursts.size(), num_single_frames, finished_bursts.size(), burst_queue.size(), error_frames.size()), UVM_LOW);
 
 		sem.get(1);
 			num_single_frames = 0;

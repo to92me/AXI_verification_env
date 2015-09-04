@@ -16,45 +16,9 @@
 *
 * Description : one test case
 *
-* Classes : 1. axi_read_all_valid_frames
-*           2. axi_read_valid_burst_frame
-*           3. axi_read_valid_single_frame
+* Classes : axi_read_all_valid_frames
 **/
 // -----------------------------------------------------------------------------
-
-//------------------------------------------------------------------------------
-//
-// Class: axi_read_valid_burst_frame
-//
-//------------------------------------------------------------------------------
-/**
-* Description : burst frame following protocol
-**/
-// -----------------------------------------------------------------------------
-class axi_read_valid_burst_frame extends axi_pkg::axi_read_burst_frame;
-
-    `uvm_object_utils(axi_read_valid_burst_frame)
-
-    constraint valid_ct {valid_burst == 1;}
-    
-endclass : axi_read_valid_burst_frame
-
-//------------------------------------------------------------------------------
-//
-// Class: axi_read_valid_single_frame
-//
-//------------------------------------------------------------------------------
-/**
-* Description : single frame following protocol
-**/
-// -----------------------------------------------------------------------------
-class axi_read_valid_single_frame extends axi_pkg::axi_read_single_addr;
-
-    `uvm_object_utils(axi_read_valid_single_frame)
-
-    constraint valid_ct {id_mode == GOOD_ID; resp_mode == GOOD_RESP; last_mode == GOOD_LAST_BIT; correct_lane == 1; read_enable == 0;}
-    
-endclass : axi_read_valid_single_frame
 
 //------------------------------------------------------------------------------
 //

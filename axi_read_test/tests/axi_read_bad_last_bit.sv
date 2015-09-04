@@ -17,8 +17,7 @@
 * Description : one test case
 *
 * Classes : 1. axi_read_bad_last_bit
-*           2. axi_read_valid_burst_frame
-*           3. axi_read_single_frame_bad_last_bit
+*           2. axi_read_single_frame_bad_last_bit
 **/
 // -----------------------------------------------------------------------------
 

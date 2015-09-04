@@ -18,6 +18,7 @@
 *
 * Classes :	1. virtual_base_sequence
 *			2. virtual_transfer_multiple_addr
+*			3. virtual_transfer_single_burst
 **/
 // -----------------------------------------------------------------------------
 
@@ -111,5 +112,47 @@ class virtual_transfer_multiple_addr extends virtual_base_sequence;
 	endtask
 
 endclass : virtual_transfer_multiple_addr
+
+//------------------------------------------------------------------------------
+//
+// SEQUENCE: virtual_transfer_single_burst
+//
+//------------------------------------------------------------------------------
+/**
+* Description : gets address information from configuration and send it to
+*				master seq.
+*
+* Functions :	1. new(string name="virtual_transfer_single_burst")
+*
+* Tasks :	1. body()
+**/
+// -----------------------------------------------------------------------------
+class virtual_transfer_single_burst extends virtual_base_sequence;
+
+	`uvm_object_utils(virtual_transfer_single_burst)
+
+	bit[ADDR_WIDTH-1 : 0] slave_addr[];	// array for storing addresses
+
+	// new - constructor
+	function new(string name="virtual_transfer_single_burst");
+		super.new(name);
+	endfunction
+
+	// axi read master
+	axi_master_read_multiple_addr read_seq;
+
+	virtual task body();
+
+		slave_addr = new[1];
+		slave_addr[0] = p_sequencer.config_obj.slave_list[0].start_address;
+
+		`uvm_do_on_with(read_seq, p_sequencer.read_seqr, {
+				foreach (slave_addr[i])
+					address[i] == slave_addr[i];
+				address.size() == slave_addr.size();
+		})
+	endtask
+
+endclass : virtual_transfer_single_burst
 
 `endif
