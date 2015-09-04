@@ -309,7 +309,7 @@ endclass : axi_master_read_monitor
 * Function : check_data_channel
 * Purpose : performs checks on single frames, displays an error if needed and
 *			returns information about last frame (termination of burst)
-* Parameters :	collected_frame - frame beeing checked
+* Parameters :	collected_frame - frame being checked
 * Return :	bit - last frame in burst / termination signal
 **/
 //------------------------------------------------------------------------------
@@ -408,7 +408,7 @@ endclass : axi_master_read_monitor
 /**
 * Function : check_addr_channel
 * Purpose : performs checks on burst requests and displays an error if needed
-* Parameters :	collected_burst - burst beeing checked
+* Parameters :	collected_burst - burst being checked
 * Return :	void
 **/
 //------------------------------------------------------------------------------

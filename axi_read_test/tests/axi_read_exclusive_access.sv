@@ -34,7 +34,7 @@ class axi_read_burst_frame_bad_exclusive_access extends axi_pkg::axi_read_burst_
 
     `uvm_object_utils(axi_read_burst_frame_bad_exclusive_access)
 
-    constraint delay_ct {lock == EXCLUSIVE; !(addr == ((int'(addr/(2**size)))*(2**size))); ((2**size) * len) > 128; len >= 16; !(((2**size) * len) inside {1, 3, 7, 15, 31, 63, 127});}
+    constraint exclusive_ct {lock == EXCLUSIVE; !(addr == ((int'(addr/(2**size)))*(2**size))); ((2**size) * len) > 128; len >= 16; !(((2**size) * len) inside {1, 3, 7, 15, 31, 63, 127});}
 
 endclass : axi_read_burst_frame_bad_exclusive_access
 

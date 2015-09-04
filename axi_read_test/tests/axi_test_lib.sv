@@ -31,3 +31,4 @@
 `include "tests/axi_read_large_size.sv"
 `include "tests/axi_read_exclusive_access.sv"
 `include "tests/axi_read_bad_cache.sv"
+`include "tests/axi_read_default_values.sv"

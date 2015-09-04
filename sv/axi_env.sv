@@ -113,6 +113,7 @@ endclass : axi_env
 			uvm_config_db#(axi_slave_config)::set(this, sname, "axi_slave_config", config_obj.slave_list[i]);
 		end
 
+		// create agents
 		read_master = axi_master_read_agent::type_id::create("read_master",this);
 		read_slaves = new[config_obj.slave_list.size()];
 		for(int i = 0; i < config_obj.slave_list.size(); i++) begin

@@ -34,7 +34,7 @@ class axi_read_burst_frame_reserved_type extends axi_pkg::axi_read_burst_frame;
 
     `uvm_object_utils(axi_read_burst_frame_reserved_type)
 
-    constraint delay_ct {burst_type == Reserved;}
+    constraint reserved_ct {burst_type == Reserved;}
 
 endclass : axi_read_burst_frame_reserved_type
 

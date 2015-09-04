@@ -34,7 +34,7 @@ class axi_read_burst_frame_large_size extends axi_pkg::axi_read_burst_frame;
 
     `uvm_object_utils(axi_read_burst_frame_large_size)
 
-    constraint delay_ct {size > $clog2(DATA_WIDTH / 8);}
+    constraint size_ct {size > $clog2(DATA_WIDTH / 8);}
 
 endclass : axi_read_burst_frame_large_size
 

@@ -90,6 +90,7 @@ class axi_read_single_frame extends axi_read_base_frame;
 	// control bit for default value of rresp signal
 	rand bit default_resp;	// if set use default value for resp (OKAY)
 
+	// constraints
 	constraint default_last_bit {last_mode dist {GOOD_LAST_BIT := 90, BAD_LAST_BIT := 10};}
 	
 	constraint default_resp_mode {resp_mode dist {GOOD_RESP := 90, BAD_RESP := 10};}
@@ -101,6 +102,7 @@ class axi_read_single_frame extends axi_read_base_frame;
 	constraint default_resp_constraint {
 		if (default_resp) {
 			resp == OKAY;
+			resp_mode == BAD_RESP;
 		}
 	}
 
@@ -208,8 +210,8 @@ class axi_read_single_addr extends axi_read_single_frame;
 	// control bit to enable use of wrong byte lanes
 	rand bit correct_lane;
 
+	// constraints
 	constraint default_correct_lane {correct_lane dist {1 := 90, 0 := 10};}
-	//constraint default_correct_lane {correct_lane == 0;}	// TODO : for testing
 
 	constraint lane_constraint {upper_byte_lane >= lower_byte_lane;}
 
@@ -281,7 +283,7 @@ class axi_read_burst_frame extends axi_read_base_frame;
 	}
 	constraint default_size_constraint {
 		if (default_size) {
-			size == BYTE_8;	// TODO : FIX
+			size == $clog2(DATA_WIDTH / 8);
 		}
 	}
 	constraint default_burst_type_constraint {

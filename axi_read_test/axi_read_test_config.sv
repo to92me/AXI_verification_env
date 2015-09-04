@@ -28,7 +28,12 @@
 // CLASS: axi_read_test_config
 //
 //------------------------------------------------------------------------------
-
+/**
+* Description : test configuration - one slave
+*
+* Functions : 1. new (string name, uvm_component parent)
+**/
+// -----------------------------------------------------------------------------
 class axi_read_test_config extends axi_config;
 
 	`uvm_object_utils(axi_read_test_config)

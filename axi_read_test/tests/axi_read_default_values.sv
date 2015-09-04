@@ -2,7 +2,7 @@
 /**
 * Project : AXI UVC
 *
-* File : axi_read_wrap_type_bad_len_bad_addr.sv
+* File : axi_read_default_values.sv
 *
 * Language : SystemVerilog
 *
@@ -16,42 +16,60 @@
 *
 * Description : one test case
 *
-* Classes : 1. axi_read_wrap_type_bad_len_bad_addr
-*           2. axi_read_burst_frame_wrap_type
+* Classes : 1. axi_axi_read_default_values
+*           2. axi_read_burst_frame_default_values
+*           3. axi_read_single_frame_default_values
 **/
 // -----------------------------------------------------------------------------
 
 //------------------------------------------------------------------------------
 //
-// Class: axi_read_burst_frame_wrap_type
+// Class: axi_read_burst_frame_default_values
 //
 //------------------------------------------------------------------------------
 /**
-* Description : burst frame wrap burst type and bad address and length
+* Description : burst frame with default values for all possible signals
 **/
 // -----------------------------------------------------------------------------
-class axi_read_burst_frame_wrap_type extends axi_pkg::axi_read_burst_frame;
+class axi_read_burst_frame_default_values extends axi_pkg::axi_read_burst_frame;
 
-    `uvm_object_utils(axi_read_burst_frame_wrap_type)
+    `uvm_object_utils(axi_read_burst_frame_default_values)
 
-    constraint wrap_ct {burst_type == WRAP; len inside {0, 2, [4:6], [8:14], [16:255]}; !(addr == ((int'(addr/(2**size)))*(2**size)));}
+    constraint default_ct {default_id == 1; default_region == 1; default_len == 1; default_size == 1; default_burst_type == 1; default_lock == 1; default_cache == 1; default_qos == 1;}
 
-endclass : axi_read_burst_frame_wrap_type
+endclass : axi_read_burst_frame_default_values
 
 //------------------------------------------------------------------------------
 //
-// TEST: axi_read_wrap_type_bad_len_bad_addr
+// Class: axi_read_single_frame_default_values
 //
 //------------------------------------------------------------------------------
 /**
-* Description : test wrap burst type
+* Description : single frame with default values for all possible signals
 **/
 // -----------------------------------------------------------------------------
-class axi_read_wrap_type_bad_len_bad_addr extends axi_read_base_test;
+class axi_read_single_frame_default_values extends axi_pkg::axi_read_single_addr;
 
-    `uvm_component_utils(axi_read_wrap_type_bad_len_bad_addr)
+    `uvm_object_utils(axi_read_single_frame_default_values)
 
-    function new(string name = "axi_read_wrap_type_bad_len_bad_addr", uvm_component parent);
+    constraint default_ct {default_resp == 1; id_mode == GOOD_ID; last_mode == GOOD_LAST_BIT; correct_lane == 1; read_enable == 0;}
+
+endclass : axi_read_single_frame_default_values
+
+//------------------------------------------------------------------------------
+//
+// TEST: axi_read_default_values
+//
+//------------------------------------------------------------------------------
+/**
+* Description : test using default values for all possible signals
+**/
+// -----------------------------------------------------------------------------
+class axi_read_default_values extends axi_read_base_test;
+
+    `uvm_component_utils(axi_read_default_values)
+
+    function new(string name = "axi_read_default_values", uvm_component parent);
         super.new(name,parent);
     endfunction : new
 
@@ -72,12 +90,12 @@ class axi_read_wrap_type_bad_len_bad_addr extends axi_read_base_test;
         uvm_config_int::set(this, "tb0.axi0.read_slave*.sequencer.arbit", "region_enable", 1);
 
         // type overrides
-        set_type_override_by_type(axi_pkg::axi_read_burst_frame::get_type(), axi_read_burst_frame_wrap_type::get_type());
-        set_type_override_by_type(axi_pkg::axi_read_single_addr::get_type(), axi_read_valid_single_frame::get_type());
+        set_type_override_by_type(axi_pkg::axi_read_burst_frame::get_type(), axi_read_burst_frame_default_values::get_type());
+        set_type_override_by_type(axi_pkg::axi_read_single_addr::get_type(), axi_read_single_frame_default_values::get_type());
 
         // sequences
         uvm_config_wrapper::set(this, "tb0.virtual_seqr.run_phase", "default_sequence",
-                                                     virtual_transfer_single_burst::get_type());
+                                                     virtual_transfer_multiple_addr::get_type());
         uvm_config_wrapper::set(this, "tb0.axi0.read_slave*.sequencer.run_phase", "default_sequence",
                                                      axi_slave_read_simple_two_phase_seq::get_type());
 
@@ -85,4 +103,4 @@ class axi_read_wrap_type_bad_len_bad_addr extends axi_read_base_test;
 
     endfunction : build_phase
 
-endclass : axi_read_wrap_type_bad_len_bad_addr
+endclass : axi_read_default_values

@@ -61,7 +61,7 @@ class axi_slave_read_arbitration extends uvm_component;
 
 	// control bit to select whether early termination of bursts is supported
 	bit terminate_enable = 1;
-	// control bit to select whether to use the region signal TODO : AS DARKO COMMANDS
+	// control bit to select whether to use the region signal
 	bit region_enable = 1;
 
 	// Provide implementations of virtual methods such as get_type_name and create
@@ -226,7 +226,7 @@ endclass : axi_slave_read_arbitration
 * Function : check_burst
 * Purpose : check validity of the burst requeset and if the slave needs to
 *			return an error
-* Parameters :	whole_burst - burst info. beeing checked
+* Parameters :	whole_burst - burst info. being checked
 * Return :	bit - flag (if set the slave should return SLVERR)
 **/
 //------------------------------------------------------------------------------
@@ -288,7 +288,7 @@ endclass : axi_slave_read_arbitration
 		end
 
 		// check region signal if needed
-		if (region_enable && (whole_burst.region == 2)) begin 	// TODO : 2 ILI ?
+		if (region_enable && (whole_burst.region == 2)) begin
 			for (int i = 0; i <= whole_burst.len; i++) begin
 				whole_burst.single_frames[i].read_enable = 0;	// don't read from memory
 				whole_burst.single_frames[i].data = 0;	// return reset value

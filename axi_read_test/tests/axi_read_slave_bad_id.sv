@@ -34,7 +34,7 @@ class axi_read_single_frame_bad_id extends axi_pkg::axi_read_single_addr;
 
     `uvm_object_utils(axi_read_single_frame_bad_id)
 
-    constraint valid_ct {id_mode == BAD_ID; resp_mode == GOOD_RESP; last_mode == GOOD_LAST_BIT; correct_lane == 1; read_enable == 0;}
+    constraint id_ct {id_mode == BAD_ID; resp_mode == GOOD_RESP; last_mode == GOOD_LAST_BIT; correct_lane == 1; read_enable == 0;}
     
 endclass : axi_read_single_frame_bad_id
 

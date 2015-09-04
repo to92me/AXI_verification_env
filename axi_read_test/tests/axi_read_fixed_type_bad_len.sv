@@ -34,7 +34,7 @@ class axi_read_burst_frame_fixed_type_bad_len extends axi_pkg::axi_read_burst_fr
 
     `uvm_object_utils(axi_read_burst_frame_fixed_type_bad_len)
 
-    constraint delay_ct {burst_type == FIXED; len > 15;}
+    constraint fixed_ct {burst_type == FIXED; len > 15;}
 
 endclass : axi_read_burst_frame_fixed_type_bad_len
 

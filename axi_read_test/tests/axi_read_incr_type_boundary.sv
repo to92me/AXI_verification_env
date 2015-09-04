@@ -34,7 +34,7 @@ class axi_read_burst_frame_incr_type_bad_boundary extends axi_pkg::axi_read_burs
 
     `uvm_object_utils(axi_read_burst_frame_incr_type_bad_boundary)
 
-    constraint delay_ct {burst_type == INCR; (len * (2**size)) >= 4096;}
+    constraint incr_ct {burst_type == INCR; (len * (2**size)) >= 4096;}
 
 endclass : axi_read_burst_frame_incr_type_bad_boundary
 

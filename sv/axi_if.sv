@@ -32,8 +32,6 @@ interface axi_if (input sig_reset, input sig_clock);
 	// performance checking
 	parameter MAXWAITS = 16;	// Maximum number of cycles between VALID to READY HIGH before a warning is generated
 
-// TODO : Disabling recommended rules - ASSERTIONS PAGE 23
-
 	parameter STRB_WIDTH = DATA_WIDTH / 8;
 
 	// write address channel signals
@@ -97,6 +95,26 @@ interface axi_if (input sig_reset, input sig_clock);
 	bit							has_coverage = 1;
 
 	// vif assertions
+
+    // TODO : ASK DARKO
+    always @(posedge sig_reset) begin
+        // Assertion AXI4_ERRM_ARVALID_RESET
+        // ARVALID is low for the first cycle after ARESETn goes HIGH
+        assert_AXI4_ERRM_ARVALID_RESET : assert property (
+            disable iff(!has_checks || !sig_reset)
+            ($rose(sig_reset) |=> (arvalid == 0)))
+            else
+                `uvm_error("ASSERTION_ERR", "AXI4_ERRM_ARVALID_RESET: ARVALID not low for the first cycle after ARESETn goes HIGH")
+
+        // Assertion AXI4_ERRS_RVALID_RESET
+        // RVALID is low for the first cycle after ARESETn goes HIGH
+        assert_AXI4_ERRS_RVALID_RESET : assert property (
+            disable iff(!has_checks || !sig_reset)
+            ($rose(sig_clock) |=> (rvalid == 0)))
+            else
+                `uvm_error("ASSERTION_ERR", "AXI4_ERRS_RVALID_RESET: RVALID not low for the first cycle after ARESETn goes HIGH")
+    end
+
 	always @(posedge sig_clock)
 	begin
 		// Assertion AXI4_ERRM_ARID_STABLE
@@ -228,13 +246,13 @@ interface axi_if (input sig_reset, input sig_clock);
             	`uvm_error("ASSERTION_ERR", "AXI4_ERRM_ARPROT_X: ARPROT went to X or Z when ARVALID is HIGH")
 
 // TODO : ??
-        // Assertion AXI4_ERRM_ARVALID_RESET
+/*        // Assertion AXI4_ERRM_ARVALID_RESET
         // ARVALID is low for the first cycle after ARESETn goes HIGH
         assert_AXI4_ERRM_ARVALID_RESET : assert property (
         	disable iff(!has_checks || !sig_reset)
         	($fell(sig_reset) |=> (arvalid == 0)))
         	else
-        		`uvm_error("ASSERTION_ERR", "AXI4_ERRM_ARVALID_RESET: ARVALID not low for the first cycle after ARESETn goes HIGH")
+        		`uvm_error("ASSERTION_ERR", "AXI4_ERRM_ARVALID_RESET: ARVALID not low for the first cycle after ARESETn goes HIGH")*/
 
         // Assertion AXI4_ERRM_ARVALID_STABLE
         // When ARVALID is asserted, then it remains asserted until ARREADY is HIGH
@@ -263,7 +281,11 @@ interface axi_if (input sig_reset, input sig_clock);
 
         // Assertion AXI4_RECS_ARREADY_MAX_WAIT
        	// Recommended that ARREADY is asserted within MAXWAITS cycles of ARVALID being asserted
-// TODO : ??
+        assert_AXI4_RECS_ARREADY_MAX_WAIT : assert property (
+            disable iff(!has_checks || !sig_reset)
+            (arvalid |-> ##[0:MAXWAITS]arready))
+            else
+                `uvm_warning("ASSERTION_WARNING", "AXI4_RECS_ARREADY_MAX_WAIT: ARREADY is not asserted within MAXWAITS cycles of ARVALID being asserted")
 
         // Assertion AXI4_ERRM_ARUSER_STABLE
         // ARUSER remains stable when ARVALID is asserted, and ARREADY is LOW
@@ -429,7 +451,11 @@ interface axi_if (input sig_reset, input sig_clock);
 
         // Assertion AXI4_RECM_RREADY_MAX_WAIT
        	// Recommended that RREADY is asserted within MAXWAITS cycles of RVALID being asserted
-// TODO : ??
+        assert_AXI4_RECM_RREADY_MAX_WAIT : assert property (
+            disable iff(!has_checks || !sig_reset)
+            (rvalid |-> ##[0:MAXWAITS]rready))
+            else
+                `uvm_warning("ASSERTION_WARNING", "AXI4_RECM_RREADY_MAX_WAIT: RREADY is not asserted within MAXWAITS cycles of RVALID being asserted")
 
        	// Assertion AXI4_ERRS_RUSER_X
        	// A value of X on RUSER is not permitted when RVALID is HIGH

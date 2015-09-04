@@ -41,7 +41,6 @@ class axi_virtual_sequencer extends uvm_sequencer;
 	axi_config config_obj;
 
 	axi_master_read_sequencer read_seqr;
-	// TODO : add master write
 
 	`uvm_component_utils(axi_virtual_sequencer)
 
