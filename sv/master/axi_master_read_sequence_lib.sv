@@ -141,15 +141,22 @@ endclass : axi_master_read_multiple_addr
 //------------------------------------------------------------------------------
 	function void axi_master_read_multiple_addr::response_handler(uvm_sequence_item response);
 
-				if(!($cast(rsp, response)))
-					`uvm_error("CASTFAIL", "The recieved response item is not a burst frame");
+		if(!($cast(rsp, response)))
+			`uvm_error("CASTFAIL", "The recieved response item is not a burst frame");
 
-				count--;	// keep track of number of responses
+		count--;	// keep track of number of responses
 
-				// if there was an error put the burst in the error queue so it will be sent agian
-				if (rsp.valid == FRAME_NOT_VALID) begin
-					error_bursts.push_back(rsp);
-				end
+		// if there was an error put the burst in the error queue so it will be sent agian
+		if (rsp.valid == FRAME_NOT_VALID) begin
+			error_bursts.push_back(rsp);
+		end
+
+		// check if there was a reset
+		if(rsp.status == UVM_TLM_INCOMPLETE_RESPONSE) begin
+			`uvm_info(get_type_name(), "Reset detected", UVM_MEDIUM)
+			count = 0;	// do not wait for any more responses
+			error_bursts.delete();	// do not try to send bursts again 	ASK DARKO!!!
+		end
 
 	endfunction: response_handler
 
@@ -211,9 +218,15 @@ endclass : axi_master_read_no_err_count
 //------------------------------------------------------------------------------
 	function void axi_master_read_no_err_count::response_handler(uvm_sequence_item response);
 
-				if(!($cast(rsp, response)))
-					`uvm_error("CASTFAIL", "The recieved response item is not a burst frame");
+		if(!($cast(rsp, response)))
+			`uvm_error("CASTFAIL", "The recieved response item is not a burst frame");
 
-				count--;	// keep track of number of responses
+		count--;	// keep track of number of responses
 
+		// check if there was a reset
+		if(rsp.status == UVM_TLM_INCOMPLETE_RESPONSE) begin
+			`uvm_info(get_type_name(), "Reset detected", UVM_MEDIUM)
+			count = 0;	// do not wait for any more responses
+		end
+		
 	endfunction: response_handler

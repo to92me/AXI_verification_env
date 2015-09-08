@@ -2,7 +2,7 @@
 /**
 * Project : AXI UVC
 *
-* File : axi_read_slave_bad_id.sv
+* File : axi_read_default_values.sv
 *
 * Language : SystemVerilog
 *
@@ -16,42 +16,60 @@
 *
 * Description : one test case
 *
-* Classes : 1. axi_read_slave_bad_id
-*           2. axi_read_single_frame_bad_id
+* Classes : 1. axi_axi_read_default_values
+*           2. axi_read_burst_frame_default_values
+*           3. axi_read_single_frame_default_values
 **/
 // -----------------------------------------------------------------------------
 
 //------------------------------------------------------------------------------
 //
-// Class: axi_read_single_frame_bad_id
+// Class: axi_read_burst_frame_default_values
 //
 //------------------------------------------------------------------------------
 /**
-* Description : single frame with bad id
+* Description : burst frame with default values for all possible signals
 **/
 // -----------------------------------------------------------------------------
-class axi_read_single_frame_bad_id extends axi_pkg::axi_read_single_addr;
+class axi_read_burst_frame_default_values extends axi_pkg::axi_read_burst_frame;
 
-    `uvm_object_utils(axi_read_single_frame_bad_id)
+    `uvm_object_utils(axi_read_burst_frame_default_values)
 
-    constraint id_ct {id_mode == BAD_ID; resp_mode == GOOD_RESP; last_mode == GOOD_LAST_BIT; correct_lane == 1; read_enable == 0;}
-    
-endclass : axi_read_single_frame_bad_id
+    constraint default_ct {default_id == 1; default_region == 1; default_len == 1; default_size == 1; default_burst_type == 1; default_lock == 1; default_cache == 1; default_qos == 1;}
+
+endclass : axi_read_burst_frame_default_values
 
 //------------------------------------------------------------------------------
 //
-// TEST: axi_read_slave_bad_id
+// Class: axi_read_single_frame_default_values
 //
 //------------------------------------------------------------------------------
 /**
-* Description : test where slave responds with random id
+* Description : single frame with default values for all possible signals
 **/
 // -----------------------------------------------------------------------------
-class axi_read_slave_bad_id extends axi_read_base_test;
+class axi_read_single_frame_default_values extends axi_pkg::axi_read_single_addr;
 
-    `uvm_component_utils(axi_read_slave_bad_id)
+    `uvm_object_utils(axi_read_single_frame_default_values)
 
-    function new(string name = "axi_read_slave_bad_id", uvm_component parent);
+    constraint default_ct {default_resp == 1; id_mode == GOOD_ID; last_mode == GOOD_LAST_BIT; correct_lane == 1; read_enable == 0;}
+
+endclass : axi_read_single_frame_default_values
+
+//------------------------------------------------------------------------------
+//
+// TEST: axi_read_default_values
+//
+//------------------------------------------------------------------------------
+/**
+* Description : test using default values for all possible signals
+**/
+// -----------------------------------------------------------------------------
+class axi_read_default_values extends axi_read_base_test;
+
+    `uvm_component_utils(axi_read_default_values)
+
+    function new(string name = "axi_read_default_values", uvm_component parent);
         super.new(name,parent);
     endfunction : new
 
@@ -63,17 +81,17 @@ class axi_read_slave_bad_id extends axi_read_base_test;
         // perform checks in monitor
         uvm_config_int::set(this, "tb0.axi0.*", "checks_enable", 1);
         // early termination of bursts
-        uvm_config_int::set(this, "*", "terminate_enable", 0);
+        uvm_config_int::set(this, "*", "terminate_enable", 1);
         // randomizing ready signal for master
         uvm_config_int::set(this, "tb0.axi0.read_master.driver", "master_ready_rand_enable", 1);
         // radnomizing ready signal for slave
         uvm_config_int::set(this, "tb0.axi0.read_slave*.driver", "slave_ready_rand_enable", 1);
         // actions based on region signal
-        uvm_config_int::set(this, "tb0.axi0.read_slave*.sequencer.arbit", "region_enable", 0);
+        uvm_config_int::set(this, "tb0.axi0.read_slave*.sequencer.arbit", "region_enable", 1);
 
         // type overrides
-        set_type_override_by_type(axi_pkg::axi_read_burst_frame::get_type(), axi_read_valid_burst_frame::get_type());
-        set_type_override_by_type(axi_pkg::axi_read_single_addr::get_type(), axi_read_single_frame_bad_id::get_type());
+        set_type_override_by_type(axi_pkg::axi_read_burst_frame::get_type(), axi_read_burst_frame_default_values::get_type());
+        set_type_override_by_type(axi_pkg::axi_read_single_addr::get_type(), axi_read_single_frame_default_values::get_type());
 
         // sequences
         uvm_config_wrapper::set(this, "tb0.virtual_seqr.run_phase", "default_sequence",
@@ -85,4 +103,4 @@ class axi_read_slave_bad_id extends axi_read_base_test;
 
     endfunction : build_phase
 
-endclass : axi_read_slave_bad_id
+endclass : axi_read_default_values

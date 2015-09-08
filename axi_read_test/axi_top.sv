@@ -1,52 +1,59 @@
+// -----------------------------------------------------------------------------
+/**
+* Project : AXI UVC
+*
+* File : axi_top.sv
+*
+* Language : SystemVerilog
+*
+* Company : Elsys Eastern Europe
+*
+* Author : Andrea Erdeljan
+*
+* E-Mail : andrea.erdeljan@elsys-eastern.com
+*
+* Mentor : Darko Tomusilovic
+*
+* Description : top module
+**/
+// -----------------------------------------------------------------------------
 
-`include "dut.v"
-
+`include "dut.v"    // design under test
 `include "sv/axi_if.sv"
 `include "sv/axi_pkg.sv"
 
-
-
 module axi_top;
 
+    import uvm_pkg::*;            // import the UVM library
+    `include "uvm_macros.svh"     // Include the UVM macros
 
-import uvm_pkg::*;            // import the UVM library
-`include "uvm_macros.svh"     // Include the UVM macros
+    import axi_pkg::*;
 
+    `include "tests/axi_test_lib.sv"
 
-import axi_pkg::*;
+    reg clock;
+    reg reset;
 
-  `include "tests/axi_test_lib.sv"
-
-  reg clock;
-  reg reset;
-
-  axi_if if0(.sig_reset(reset), .sig_clock(clock));
+    axi_if if0(.sig_reset(reset), .sig_clock(clock));
   
-  dut dut(.axi_clock(clock), .axi_reset(reset), .axi_if(if0) );
+    dut dut(.axi_clock(clock), .axi_reset(reset), .axi_if(if0) );
 
-initial begin
+    initial begin
 
+        uvm_config_db#(virtual axi_if)::set(null,"uvm_test_top.*","vif", if0);
+        run_test();
 
-  uvm_config_db#(virtual axi_if)::set(null,"uvm_test_top.*","vif", if0);
-  /*
-  `uvm_info("axi_top", "\n**** =============================================================================== ****", UVM_LOW)
-   */
+    end
 
-  run_test();
+    initial begin
+        if0.has_checks = 0;
+        reset <= 1'b0;
+        clock <= 1'b0;
+        #5 reset <= 1'b1;
+    end
 
-end
+    //Generate Clock
+    always #5 clock = ~clock;
 
-initial begin
-    if0.has_checks = 0;
-    reset <= 1'b0;
-    clock <= 1'b0;
-    #3 reset <= 1'b1;
-
-  end
-
-  //Generate Clock
-  always #5 begin clock = ~clock;
-       /*   if (clock) $write ("**** =============================================================================== ****\n");*/
-end
 
 endmodule : axi_top

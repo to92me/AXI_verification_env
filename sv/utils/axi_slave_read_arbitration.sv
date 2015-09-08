@@ -61,7 +61,7 @@ class axi_slave_read_arbitration extends uvm_component;
 
 	// control bit to select whether early termination of bursts is supported
 	bit terminate_enable = 1;
-	// control bit to select whether to use the region signal TODO : AS DARKO COMMANDS
+	// control bit to select whether to use the region signal
 	bit region_enable = 1;
 
 	// Provide implementations of virtual methods such as get_type_name and create
@@ -172,6 +172,11 @@ endclass : axi_slave_read_arbitration
 			// next frame
 			one_frame = whole_burst.single_frames.pop_front();
 
+			// get burst validity
+			if(slverr_flag) begin
+				one_frame.status = UVM_TLM_BURST_ERROR_RESPONSE;
+			end
+
 			// get addr and byte lane info.
 			if(!slverr_flag) begin
 				addr_frame = addr_queue.pop_front();
@@ -184,11 +189,13 @@ endclass : axi_slave_read_arbitration
 					// if the requested address is out of the slave range, return an error
 					if (!(config_obj.check_addr_range(one_frame.addr + (one_frame.upper_byte_lane - one_frame.lower_byte_lane)))) begin
 						slverr_flag = 1;
+						one_frame.status = UVM_TLM_ADDRESS_ERROR_RESPONSE;
 					end
 				end
 			end
 
-			if(slverr_flag) begin
+			// if resp mode is BAD_RESP, do not override the given response
+			if(slverr_flag && (one_frame.resp_mode == GOOD_RESP)) begin
 				one_frame.err = ERROR;
 				one_frame.resp = SLVERR;
 			end
@@ -226,7 +233,7 @@ endclass : axi_slave_read_arbitration
 * Function : check_burst
 * Purpose : check validity of the burst requeset and if the slave needs to
 *			return an error
-* Parameters :	whole_burst - burst info. beeing checked
+* Parameters :	whole_burst - burst info. being checked
 * Return :	bit - flag (if set the slave should return SLVERR)
 **/
 //------------------------------------------------------------------------------
@@ -288,7 +295,7 @@ endclass : axi_slave_read_arbitration
 		end
 
 		// check region signal if needed
-		if (region_enable && (whole_burst.region == 2)) begin 	// TODO : 2 ILI ?
+		if (region_enable && (whole_burst.region == 2)) begin
 			for (int i = 0; i <= whole_burst.len; i++) begin
 				whole_burst.single_frames[i].read_enable = 0;	// don't read from memory
 				whole_burst.single_frames[i].data = 0;	// return reset value
@@ -393,7 +400,7 @@ endclass : axi_slave_read_arbitration
 			addr_frame.valid = FRAME_VALID;
 
 			// read from memory - this is done here so that the correct value will be read
-			if(addr_frame.read_enable && (addr_frame.resp != SLVERR)) begin
+			if(addr_frame.read_enable && (addr_frame.status == UVM_TLM_OK_RESPONSE)) begin
 				addr_calc = new();
 				addr_calc.addr = addr_frame.addr;
 				addr_calc.upper_byte_lane = addr_frame.upper_byte_lane;

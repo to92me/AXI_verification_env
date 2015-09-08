@@ -31,10 +31,17 @@
 // CLASS: apb_axi_read_tb
 //
 //------------------------------------------------------------------------------
-
+/**
+* Description : test bench
+*
+* Functions : 1. new (string name, uvm_component parent)
+*             2. build_phase(uvm_phase phase)
+*             3. connect_phase(uvm_phase phase)
+**/
+// -----------------------------------------------------------------------------
 class axi_read_tb extends uvm_env;
 
-  // apb environment
+  // axi read environment
   axi_env axi0;
 
   // configuration object
@@ -59,7 +66,15 @@ class axi_read_tb extends uvm_env;
 
 endclass : axi_read_tb
 
-  // UVM build_phase
+//------------------------------------------------------------------------------
+/**
+* Function : build_phase
+* Purpose : build - propagate the configuration object and create environment
+*           and virtual sequencer
+* Parameters :  phase - uvm phase
+* Return :  void
+**/
+//------------------------------------------------------------------------------
   function void axi_read_tb::build_phase(uvm_phase phase);
     super.build_phase(phase);
 
@@ -71,7 +86,14 @@ endclass : axi_read_tb
 
   endfunction : build_phase
 
-  // connect_phase
+//------------------------------------------------------------------------------
+/**
+* Function : connect_phase
+* Purpose : connect master sequencer to virtual sequencer
+* Parameters :  phase - uvm phase
+* Return :  void
+**/
+//------------------------------------------------------------------------------
   function void axi_read_tb::connect_phase(uvm_phase phase);
     super.connect_phase(phase);
     virtual_seqr.read_seqr = axi0.read_master.sequencer;

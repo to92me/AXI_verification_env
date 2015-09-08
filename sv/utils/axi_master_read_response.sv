@@ -39,7 +39,7 @@
 *							ref axi_read_burst_frame matching_burst)
 *			2. new_burst(axi_read_burst_frame one_burst)
 *			3. get_num_of_bursts(output int num)
-*			4. reset()
+*			4. reset(ref axi_read_burst_frame burst)
 **/
 // -----------------------------------------------------------------------------
 class axi_master_read_response extends uvm_component;
@@ -75,7 +75,7 @@ class axi_master_read_response extends uvm_component;
 	extern virtual task check_response(axi_read_single_frame one_frame, ref axi_read_burst_frame matching_burst);
 	extern virtual task new_burst(axi_read_burst_frame one_burst);
 	extern virtual task get_num_of_bursts(output int num);
-	extern virtual task reset(ref axi_read_burst_frame burst_queue[$]);
+	extern virtual task reset(ref axi_read_burst_frame burst);
 
 endclass : axi_master_read_response
 
@@ -195,13 +195,17 @@ endtask : get_num_of_bursts
 * Ref :
 **/
 //------------------------------------------------------------------------------
-task axi_master_read_response::reset(ref axi_read_burst_frame burst_queue[$]);
+task axi_master_read_response::reset(ref axi_read_burst_frame burst);
 
 	`uvm_info(get_type_name(), $sformatf("Reset"), UVM_LOW);
 
 	sem.get(1);
-	// TODO : sta bude sa error-ima posle reseta tj da li da salje ponovo ili ne
-		burst_queue = response_bursts;
+		// return one burst to informe the seq. of the reset
+		if(response_bursts.size()) begin
+			burst = response_bursts.pop_front();
+			burst.status = UVM_TLM_INCOMPLETE_RESPONSE;
+		end
+
 		sent_bursts.delete();
 		response_bursts.delete();
 	sem.put(1);

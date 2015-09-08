@@ -99,6 +99,7 @@ class axi_slave_read_simple_two_phase_seq extends axi_slave_read_base_sequence;
 					assert (one_frame.randomize() with {delay >= previous_delay;})
 					previous_delay = one_frame.delay;
 
+					// get id, resp and last
 					one_frame.get_id(one_frame.id_mode, req.id);
 					one_frame.calc_resp(p_sequencer.config_obj.lock, req.lock, one_frame.resp_mode);
 					one_frame.last = one_frame.calc_last_bit((i == req.len), one_frame.last_mode);
@@ -121,6 +122,11 @@ class axi_slave_read_simple_two_phase_seq extends axi_slave_read_base_sequence;
 			// send item to seq. to check for burst completeness and to decrement delay
 			p_sequencer.arbit.frame_complete(rsp);
 
+			// check for reset
+			if(rsp.status == UVM_TLM_INCOMPLETE_RESPONSE) begin
+				p_sequencer.arbit.reset();
+			end
+
 		end
 
 	endtask
@@ -136,6 +142,7 @@ endclass : axi_slave_read_simple_two_phase_seq
 * Description : sequence with 2 phases:
 *					- request sent to driver which returns with burst info.
 *					- single frame sent to driver, all frames have 0 delay
+*				delay is totaly random
 *
 * Functions :	1. new(string name="axi_slave_read_random_delay")
 *
@@ -171,6 +178,7 @@ class axi_slave_read_random_delay extends axi_slave_read_base_sequence;
 
 					assert (one_frame.randomize())
 
+					// get id, resp and last
 					one_frame.get_id(one_frame.id_mode, req.id);
 					one_frame.calc_resp(p_sequencer.config_obj.lock, req.lock, one_frame.resp_mode);
 					one_frame.last = one_frame.calc_last_bit((i == req.len), one_frame.last_mode);
@@ -192,6 +200,11 @@ class axi_slave_read_random_delay extends axi_slave_read_base_sequence;
 
 			// send item to seq. to check for burst completeness and to decrement delay
 			p_sequencer.arbit.frame_complete(rsp);
+
+			// check for reset
+			if(rsp.status == UVM_TLM_INCOMPLETE_RESPONSE) begin
+				p_sequencer.arbit.reset();
+			end
 
 		end
 

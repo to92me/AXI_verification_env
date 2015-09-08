@@ -2,7 +2,7 @@
 /**
 * Project : AXI UVC
 *
-* File : axi_read_all_valid_frames.sv
+* File : axi_read_reserved_type.sv
 *
 * Language : SystemVerilog
 *
@@ -16,24 +16,42 @@
 *
 * Description : one test case
 *
-* Classes : axi_read_all_valid_frames
+* Classes : 1. axi_read_reserved_type
+*           2. axi_read_burst_frame_reserved_type
 **/
 // -----------------------------------------------------------------------------
 
 //------------------------------------------------------------------------------
 //
-// TEST: axi_read_all_valid_frames
+// Class: axi_read_burst_frame_reserved_type
 //
 //------------------------------------------------------------------------------
 /**
-* Description : test with where all the generated frames follow protocol
+* Description : burst frame with reserved burst type
 **/
 // -----------------------------------------------------------------------------
-class axi_read_all_valid_frames extends axi_read_base_test;
+class axi_read_burst_frame_reserved_type extends axi_pkg::axi_read_burst_frame;
 
-    `uvm_component_utils(axi_read_all_valid_frames)
+    `uvm_object_utils(axi_read_burst_frame_reserved_type)
 
-    function new(string name = "axi_read_all_valid_frames", uvm_component parent);
+    constraint reserved_ct {burst_type == Reserved;}
+
+endclass : axi_read_burst_frame_reserved_type
+
+//------------------------------------------------------------------------------
+//
+// TEST: axi_read_reserved_type
+//
+//------------------------------------------------------------------------------
+/**
+* Description : test reserved burst type
+**/
+// -----------------------------------------------------------------------------
+class axi_read_reserved_type extends axi_read_base_test;
+
+    `uvm_component_utils(axi_read_reserved_type)
+
+    function new(string name = "axi_read_reserved_type", uvm_component parent);
         super.new(name,parent);
     endfunction : new
 
@@ -45,21 +63,21 @@ class axi_read_all_valid_frames extends axi_read_base_test;
         // perform checks in monitor
         uvm_config_int::set(this, "tb0.axi0.*", "checks_enable", 1);
         // early termination of bursts
-        uvm_config_int::set(this, "*", "terminate_enable", 0);
+        uvm_config_int::set(this, "*", "terminate_enable", 1);
         // randomizing ready signal for master
         uvm_config_int::set(this, "tb0.axi0.read_master.driver", "master_ready_rand_enable", 1);
         // radnomizing ready signal for slave
         uvm_config_int::set(this, "tb0.axi0.read_slave*.driver", "slave_ready_rand_enable", 1);
         // actions based on region signal
-        uvm_config_int::set(this, "tb0.axi0.read_slave*.sequencer.arbit", "region_enable", 0);
+        uvm_config_int::set(this, "tb0.axi0.read_slave*.sequencer.arbit", "region_enable", 1);
 
         // type overrides
-        set_type_override_by_type(axi_pkg::axi_read_burst_frame::get_type(), axi_read_valid_burst_frame::get_type());
+        set_type_override_by_type(axi_pkg::axi_read_burst_frame::get_type(), axi_read_burst_frame_reserved_type::get_type());
         set_type_override_by_type(axi_pkg::axi_read_single_addr::get_type(), axi_read_valid_single_frame::get_type());
 
         // sequences
         uvm_config_wrapper::set(this, "tb0.virtual_seqr.run_phase", "default_sequence",
-                                                     virtual_transfer_multiple_addr::get_type());
+                                                     virtual_transfer_single_burst::get_type());
         uvm_config_wrapper::set(this, "tb0.axi0.read_slave*.sequencer.run_phase", "default_sequence",
                                                      axi_slave_read_simple_two_phase_seq::get_type());
 
@@ -67,4 +85,4 @@ class axi_read_all_valid_frames extends axi_read_base_test;
 
     endfunction : build_phase
 
-endclass : axi_read_all_valid_frames
+endclass : axi_read_reserved_type

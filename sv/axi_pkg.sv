@@ -102,9 +102,12 @@ package axi_pkg;
 
 `ifdef andrea
 	`ifdef andrea_test
+	// ==================== TEST ================================
 		typedef class axi_read_test_config;
+	// ==========================================================
 	`endif
-	// frames
+
+	// ==================== FRAMES ==============================
 	typedef class axi_read_single_frame;
 	typedef class axi_read_burst_frame;
 	typedef class axi_read_base_frame;
@@ -112,44 +115,50 @@ package axi_pkg;
 	typedef class axi_read_single_addr;
 
 	typedef class ready_randomization;
+	// ==========================================================
 
-	// config
+	// ==================== CONFIG ==============================
 	typedef class axi_master_config;
 	typedef class axi_slave_config;
 	typedef class axi_config;
 	typedef class slave_config_factory;
 	typedef class axi_slave_config_memory_field;
 	typedef class axi_slave_config_memory;
+	// ==========================================================
 
-	// utils
+	// ==================== UTILS ===============================
 	typedef class axi_slave_read_arbitration;
 	typedef class axi_master_read_response;
 	typedef class axi_slave_response;
 	typedef class axi_slave_memory_response;
 	typedef class axi_address_calc;
 	typedef class axi_address_queue;
+	// ==========================================================
 
-	// slave
+	// ==================== SLAVE ===============================
 	typedef class axi_slave_read_driver;
 	typedef class axi_slave_read_sequencer;
 	typedef class axi_slave_read_agent;
 	typedef class axi_slave_read_coverage_collector;
 	typedef class axi_slave_read_collector;
 	typedef class axi_slave_read_monitor;
+	// ==========================================================
 
-	// master
+	// ==================== MASTER ==============================
 	typedef class axi_master_read_driver;
 	typedef class axi_master_read_sequencer;
 	typedef class axi_master_read_agent;
 	typedef class axi_master_read_coverage_collector;
 	typedef class axi_master_read_collector;
 	typedef class axi_master_read_monitor;
+	// ==========================================================
 
-	// top
+	// ==================== TOP ==================================
 	typedef class axi_env;
 	typedef class axi_virtual_sequencer;
 
 	typedef class axi_master_read_multiple_addr;
+	// ==========================================================
 
 `endif
 
@@ -264,18 +273,16 @@ package axi_pkg;
 //	`include "sv/slave/axi_slave_read_sequence_lib.sv"
 
 `ifdef andrea
+
 	`ifdef andrea_test
+	// ==================== TEST ================================
 		`include "axi_read_test_config.sv"
 		`include "axi_read_tb.sv"
+	// ==========================================================
 	`endif
 
-	`include "sv/axi_env.sv"
-
-	`include "sv/axi_read_frames.sv"
-
-	// add include for master
+	// ==================== MASTER ==============================
 	`include "sv/master/axi_master_config.sv"
-
 	`include "sv/master/axi_master_read_driver.sv"
 	`include "sv/master/axi_master_read_coverage_collector.sv"
 	`include "sv/master/axi_master_read_sequencer.sv"
@@ -283,10 +290,10 @@ package axi_pkg;
 	`include "sv/master/axi_master_read_agent.sv"
 	`include "sv/master/axi_master_read_collector.sv"
 	`include "sv/master/axi_master_read_monitor.sv"
+	// ==========================================================
 
-	// add include for slave
+	// ==================== SLAVE ===============================
 	`include "sv/slave/axi_slave_config.sv"
-
 	`include "sv/slave/axi_slave_read_driver.sv"
 	`include "sv/slave/axi_slave_read_coverage_collector.sv"
 	`include "sv/slave/axi_slave_read_sequencer.sv"
@@ -294,21 +301,25 @@ package axi_pkg;
 	`include "sv/slave/axi_slave_read_agent.sv"
 	`include "sv/slave/axi_slave_read_monitor.sv"
 	`include "sv/slave/axi_slave_read_collector.sv"
+	// ==========================================================
 
-	// utils
+	// ==================== UTILS ===============================
 	`include "sv/utils/axi_master_read_response.sv"
 	`include "sv/utils/axi_slave_read_arbitration.sv"
 	`include "sv/utils/axi_mssg.sv"
 	`include "sv/utils/axi_slave_config_memory.sv"
 	`include "sv/utils/axi_address_calc.sv"
+	// ==========================================================
 
+	// ==================== TOP =================================
 	`include "sv/axi_virtual_sequencer.sv"
 	`include "sv/axi_virtual_seq_lib.sv"
+	`include "sv/axi_env.sv"
+	`include "sv/axi_read_frames.sv"
+	// ==========================================================
 
 `endif
 
-
 endpackage : axi_pkg
-
 
 `endif

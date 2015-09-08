@@ -111,7 +111,6 @@ endclass : axi_master_read_driver
 		// The driving should be triggered by an initial reset pulse
 		@(negedge vif.sig_reset);
 		do
-			//@(posedge vif.sig_clock);
 			reset();
 		while(vif.sig_reset!==1);
 		// Start driving here
@@ -149,8 +148,8 @@ endclass : axi_master_read_driver
 //------------------------------------------------------------------------------
 	task axi_master_read_driver::reset();
 
-		axi_read_burst_frame burst_queue[$];
-		axi_read_burst_frame single_burst;
+		axi_read_burst_frame resp_burst;
+		resp_burst = axi_read_burst_frame::type_id::create("resp_burst");
 
 		`uvm_info(get_type_name(), "Reset", UVM_MEDIUM)
 
@@ -176,12 +175,11 @@ endclass : axi_master_read_driver
 			vif.rready <= 1'b1;
 		
 		// send responses to seq. for all outstanding bursts
-		resp.reset(burst_queue);
-		while(burst_queue.size()) begin
-			single_burst = burst_queue.pop_front();
-			single_burst.valid = FRAME_VALID;
-			seq_item_port.put(single_burst);
-		end
+		// resp_burst will have a UVM_TLM_INCOMPLETE_RESPONSE which will reset the seq.
+		// else - seq. is not waiting for any responses
+		resp.reset(resp_burst);
+		if(resp_burst.status == UVM_TLM_INCOMPLETE_RESPONSE)
+			seq_item_port.put(resp_burst);
 
 	endtask : reset
 
@@ -202,7 +200,7 @@ endclass : axi_master_read_driver
 			data_frame = axi_read_single_frame::type_id::create("data_frame");
 			burst_frame = axi_read_burst_frame::type_id::create("burst_frame");
 
-			@(posedge vif.sig_clock);
+			@(posedge vif.sig_clock iff vif.sig_reset == 1);
 			if(vif.rready && vif.rvalid) begin
 				// get info
 				data_frame.id = vif.rid;
@@ -245,13 +243,15 @@ endclass : axi_master_read_driver
 	task axi_master_read_driver::drive_addr_channel();
 		int bursts_in_pipe;
 
+		@(posedge vif.sig_clock iff vif.sig_reset == 1);	// only for the first time
+
 		forever begin
 			// get from seq
 			seq_item_port.get(req);
 
 			// wait if there is a delay
 			if(req.delay > 0) begin
-				repeat(req.delay) @(posedge vif.sig_clock);
+				repeat(req.delay) @(posedge vif.sig_clock iff vif.sig_reset == 1);
 			end
 
 			// check if pipe is full and wait until it is freed up
