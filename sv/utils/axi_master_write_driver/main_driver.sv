@@ -87,16 +87,15 @@ class axi_master_write_main_driver extends uvm_component;
 	// new - constructor
 	function new (string name, uvm_component parent);
 		super.new(name, parent);
-
 	endfunction : new
 
+
 	// build_phase
-	function void build();
+	function void build_phase(uvm_phase phase);
+		super.build_phase(phase);
 		scheduler = axi_master_write_scheduler::getSchedulerInstance(this);
 		address_driver = axi_master_write_address_driver::getDriverInstance(this);
 		data_driver = axi_master_write_data_driver::getDriverInstance(this);
-		address_driver.build();
-		data_driver.build();
 		sem = new(10);
 	endfunction
 

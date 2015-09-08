@@ -87,7 +87,7 @@ class axi_master_write_sequence_lib_test1 extends axi_master_write_sequence_base
 
 		use_response_handler(1);
 
-		repeat(1000)
+		repeat(20)
 			begin
 				`uvm_do(req);
 			end

@@ -10,6 +10,8 @@ package axi_pkg;
 	`ifdef tome_test
 
 
+
+
 	`ifdef testing_includes
 	typedef class axi_write_test_config;
 	typedef class axi_master_write_env;
@@ -71,6 +73,12 @@ package axi_pkg;
 
 	//==================CONFIGURATIONS==============================
 	typedef class axi_depth_config;
+	typedef class axi_write_config_field;
+	typedef class axi_write_configuration_register;
+	typedef class axi_write_master_user_configuration;
+	typedef class axi_write_conf;
+	typedef class axi_write_buss_write_configuration;
+	typedef class axi_write_buss_read_configuration;
 	//=================END CONFIGURATIONS===========================
 
 
@@ -211,6 +219,10 @@ package axi_pkg;
 
 	//==================CONFIGURATIONS==============================
 	`include "sv/utils/configuration/configuration_objects.sv"
+	`include "sv/utils/configuration/write_configuration_base.sv"
+	`include "sv/utils/configuration/write_configuration_wrapper.sv"
+	`include "configurations/register_configuration.sv"
+	`include "configurations/write_user_configuration.sv"
 	//=================END CONFIGURATIONS===========================
 
 

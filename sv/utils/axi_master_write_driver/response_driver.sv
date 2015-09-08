@@ -67,7 +67,6 @@ typedef enum{
 class axi_master_write_response_driver extends axi_master_write_base_driver;
 
 	axi_slave_response									rsp;
-	axi_master_write_scheduler 							scheduler;
 	static axi_master_write_response_driver 			driverInstance;
 	axi_master_write_base_driver_delays					random_delay;
 	axi_master_write_base_driver_ready_default_value	random_ready;
@@ -87,15 +86,21 @@ class axi_master_write_response_driver extends axi_master_write_base_driver;
 
 	endfunction : new
 
+	function void build_phase(input uvm_phase phase);
+		super.build_phase(phase);
+	endfunction
+
 	extern static function axi_master_write_response_driver getDriverInstance(input uvm_component parent);
 
 	extern task getNextFrame();
 	extern task completeTransaction();
 	extern task main();
-	extern function void build();
 	extern task init();
 	extern task packageRecorder();
 	extern task readyResponder();
+	extern function void configureDelayOptions();
+	extern function void setBusWriteConfiguration();
+
 
 endclass : axi_master_write_response_driver
 
@@ -106,6 +111,35 @@ function axi_master_write_response_driver axi_master_write_response_driver::getD
 		driverInstance = new("MasterWriteResponseDriver",parent);
 	end
 	return driverInstance;
+endfunction
+
+function void axi_master_write_response_driver::configureDelayOptions();
+
+	random_delay.setDelay_exist(bus_driver_read_configuration.getReady_delay_exists());
+	random_delay.setDelay_max(bus_driver_read_configuration.getReady_delay_maximum());
+	random_delay.setDelay_min(bus_driver_read_configuration.getReady_delay_minimum());
+	random_delay.setConst_delay(bus_driver_read_configuration.getReady_delay_constant());
+	random_delay.setConst_delay_value(bus_driver_read_configuration.getReady_delay_const_value());
+
+	if(bus_driver_read_configuration.getReady_constant() == FALSE)
+		begin
+			random_ready.setReady_random(TRUE);
+			$display("TOME SAD 1 ");
+		end
+	else
+		begin
+			random_ready.setReady_random(FALSE);
+			$display("TOME WORKS 1 ");
+		end
+
+	random_ready.setReady_default(bus_driver_read_configuration.getReady_const_value());
+	random_ready.setReady_0_dist(bus_driver_read_configuration.getReady_posibility_of_0());
+	random_ready.setReady_1_dist(bus_driver_read_configuration.getReady_posibility_of_1());
+
+endfunction
+
+function void axi_master_write_response_driver::setBusWriteConfiguration();
+   	bus_driver_read_configuration = uvc_config_obj.getMaster_resp_config_object();
 endfunction
 
 task axi_master_write_response_driver::getNextFrame();
@@ -203,14 +237,14 @@ master_write_respons_driver_package_record_enum state = WAIT_RSP_FRAME;
 endtask
 
 
-function void axi_master_write_response_driver::build();
-    scheduler = axi_master_write_scheduler::getSchedulerInstance(this);
-	if(!uvm_config_db#(virtual axi_if)::get(this, "", "vif", vif))
-			 `uvm_fatal("NOVIF",{"virtual interface must be set for: ",get_full_name(),".vif"})
-endfunction
-
 task axi_master_write_response_driver::init();
-	vif.bready <= 1'b0;
+	assert(random_ready.randomize());
+//	  #2
+	if(random_ready.ready == READY_DEFAULT_0)
+		vif.bready <= 'b0;
+	 else
+	  	vif.bready <= 'b1;
+//	vif.bready <= 1'b0;
 endtask
 
 `endif

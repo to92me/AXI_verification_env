@@ -63,6 +63,7 @@ class axi_slave_write_address_driver extends axi_slave_write_base_driver;
 	extern task checkIDAddr(ref true_false_enum correct_slave);
 	extern function void setDataDriverInstance(axi_slave_write_data_driver driver_isntance);
 	extern task waitFrame(ref true_false_enum detected_frame);
+	extern function void setBusReadConfiguration();
 
 
 endclass : axi_slave_write_address_driver
@@ -165,5 +166,9 @@ task axi_slave_write_address_driver::waitFrame(ref true_false_enum detected_fram
 		detected_frame = FALSE;
 
 endtask
+
+function void axi_slave_write_address_driver::setBusReadConfiguration();
+    bus_read_config_obj = uvc_config_obj.getSlave_addr_config_object();
+endfunction
 
 `endif

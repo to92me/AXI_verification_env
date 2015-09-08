@@ -68,11 +68,7 @@ class axi_master_write_address_driver extends axi_master_write_base_driver;
 	endfunction : new
 
 	function void build_phase(uvm_phase phase);
-		`uvm_info("axi master write address driver","Building", UVM_MEDIUM);
-		main_driver = axi_master_write_main_driver::getDriverInstance(this);
-		scheduler = axi_master_write_scheduler::getSchedulerInstance(this);
-		if(!uvm_config_db#(virtual axi_if)::get(this, "", "vif", vif))
-			 `uvm_fatal("NOVIF",{"virtual interface must be set for: ",get_full_name(),".vif"})
+		super.build_phase(phase);
 	endfunction
 
 	extern static function axi_master_write_address_driver getDriverInstance(input uvm_component parent);
@@ -85,7 +81,7 @@ class axi_master_write_address_driver extends axi_master_write_base_driver;
 	extern task main();
 	extern task dataDriver();
 	extern task validTriger();
-
+	extern function void setBusWriteConfiguration();
 
 endclass : axi_master_write_address_driver
 function axi_master_write_address_driver axi_master_write_address_driver::getDriverInstance(input uvm_component parent);
@@ -93,8 +89,13 @@ function axi_master_write_address_driver axi_master_write_address_driver::getDri
 	begin
 		$display("Creating Axi Master Write Address Driver");
 		driverInstance = new("AxiMasterWriteAddressDriver", parent);
+
 	end
 	return driverInstance;
+endfunction
+
+function void axi_master_write_address_driver::setBusWriteConfiguration();
+	bus_driver_configuration = uvc_config_obj.getMaster_addr_config_object();
 endfunction
 
 task axi_master_write_address_driver::getNextFrame();
@@ -207,7 +208,10 @@ task axi_master_write_address_driver::validTriger();
 
 				DELAY_WVALID:
 				begin
-					repeat (current_frame.delay_wvalid) begin
+					assert(random_delay.randomize());
+					repeat(random_delay.getRandomDelay())
+					//repeat (current_frame.delay_wvalid) begin
+					begin
 						if(vif.awvalid == 1)
 							begin
 								#2

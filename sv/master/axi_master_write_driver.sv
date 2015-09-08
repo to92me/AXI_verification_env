@@ -67,8 +67,8 @@ class axi_master_write_driver extends uvm_driver #(axi_frame);
 			driver = axi_master_write_main_driver::getDriverInstance(this);
 			response = axi_master_write_response_driver::getDriverInstance(this);
 
-			driver.build();
-			response.build();
+//			driver.build();
+//			response.build();
 			scheduler.setTopDriverInstance(this);
 	endfunction: build_phase
 

@@ -26,6 +26,8 @@ class axi_slave_write_response_driver extends uvm_component;
 	rsp_states_enum						state = GET_RSP_MSSG;
 	semaphore 							sem;
 	axi_slave_write_base_driver_delays 	valid_delay;
+	axi_write_conf						uvc_config_obj;
+	axi_write_buss_write_configuration	bus_write_config_obj;
 
 
 	// Provide implementations of virtual methods such as get_type_name and create
@@ -48,6 +50,12 @@ class axi_slave_write_response_driver extends uvm_component;
 		if(!uvm_config_db#(virtual axi_if)::get(this, "", "vif", vif))
 			 `uvm_fatal("NOVIF",{"virtual interface must be set for: ",get_full_name(),".vif"})
 		super.build_phase(phase);
+
+		if(!uvm_config_db#(axi_write_conf)::get(this, "", "uvc_write_config", uvc_config_obj))
+			 `uvm_fatal("NO UVC_CONFIG",{"uvc_write config must be set for ",get_full_name(),".uvc_write_config"})
+
+
+
 //		this.init();
 	endfunction : build_phase
 
@@ -56,6 +64,7 @@ class axi_slave_write_response_driver extends uvm_component;
 	extern task driverVif();
 	extern task completeRspMessage();
 	extern task init();
+	extern function void setConfiguration();
 //	extern task
 
 //	extern static function axi_slave_write_response_driver getDriverInstace(uvm_component parent);
@@ -159,5 +168,16 @@ task axi_slave_write_response_driver::main();
 			endcase
 		end
 endtask
+
+function void axi_slave_write_response_driver::setConfiguration();
+   bus_write_config_obj = uvc_config_obj.getSlave_resp_config_object();
+
+	valid_delay.setConst_delay(bus_write_config_obj.getValid_constant_delay());
+	valid_delay.setConst_delay_value(bus_write_config_obj.getValid_contant_delay_value());
+	valid_delay.setDelay_exist(bus_write_config_obj.getValid_delay_exists());
+	valid_delay.setDelay_max(bus_write_config_obj.getDelay_maximum());
+	valid_delay.setDelay_min(bus_write_config_obj.getDelay_minimum());
+
+endfunction
 
 `endif

@@ -663,30 +663,46 @@ endclass
 
 class axi_write_buss_write_configuration extends uvm_object;
 
-	true_false_enum			valid_delay_exists					= TRUE;
-	true_false_enum			valid_constant_delay				= FALSE;
-	int 					valid_contant_delay_value 			= 2;
-	int 					delay_minimum						= 0;
-	int 					delay_maximum						= 5;
+	true_false_enum			valid_delay_exists						= TRUE;
+	true_false_enum			valid_constant_delay					= FALSE;
+	int 					valid_contant_delay_value 				= 2;
+	int 					valid_delay_minimum						= 0;
+	int 					valid_delay_maximum						= 5;
+
+
+
+ `uvm_object_utils_begin(axi_write_buss_write_configuration)
+	 `uvm_field_enum(true_false_enum, valid_delay_exists, UVM_DEFAULT)
+	 `uvm_field_enum(true_false_enum, valid_constant_delay, UVM_DEFAULT)
+	 `uvm_field_int(valid_contant_delay_value, UVM_DEFAULT)
+	 `uvm_field_int(valid_delay_minimum, UVM_DEFAULT)
+	 `uvm_field_int(valid_delay_maximum, UVM_DEFAULT)
+ `uvm_object_utils_end
+
+
+
+	function new(string name = "axi_write_buss_write_configuration");
+		super.new(name);
+	endfunction: new
 
 	// Get delay_maximum
 	function int getDelay_maximum();
-		return delay_maximum;
+		return valid_delay_maximum;
 	endfunction
 
 	// Set delay_maximum
 	function void setDelay_maximum(int delay_maximum);
-		this.delay_maximum = delay_maximum;
+		this.valid_delay_maximum = delay_maximum;
 	endfunction
 
 	// Get delay_minimum
 	function int getDelay_minimum();
-		return delay_minimum;
+		return valid_delay_minimum;
 	endfunction
 
 	// Set delay_minimum
 	function void setDelay_minimum(int delay_minimum);
-		this.delay_minimum = delay_minimum;
+		this.valid_delay_minimum = delay_minimum;
 	endfunction
 
 
@@ -711,12 +727,12 @@ class axi_write_buss_write_configuration extends uvm_object;
 	endfunction
 
 	// Get valid_delay
-	function true_false_enum getValid_delay();
+	function true_false_enum getValid_delay_exists();
 		return valid_delay_exists;
 	endfunction
 
 	// Set valid_delay
-	function void setValid_delay(true_false_enum valid_delay);
+	function void setValid_delay_exists(true_false_enum valid_delay);
 		this.valid_delay_exists = valid_delay;
 	endfunction
 
@@ -734,6 +750,26 @@ class axi_write_buss_read_configuration extends uvm_object;
 	int 					ready_const_value						= 0;
 	int 					ready_posibility_of_0					= 5;
 	int 					ready_posibility_of_1					= 5;
+
+
+ `uvm_object_utils_begin(axi_write_buss_read_configuration)
+	 `uvm_field_enum(true_false_enum, ready_delay_exists, UVM_DEFAULT)
+	 `uvm_field_enum(true_false_enum, ready_delay_constant, UVM_DEFAULT)
+	 `uvm_field_int(ready_delay_const_value, UVM_DEFAULT)
+	 `uvm_field_int(ready_delay_minimum, UVM_DEFAULT)
+	 `uvm_field_int(ready_delay_maximum, UVM_DEFAULT)
+	 `uvm_field_enum(true_false_enum, ready_constant, UVM_DEFAULT)
+	 `uvm_field_int(ready_const_value, UVM_DEFAULT)
+	 `uvm_field_int(ready_posibility_of_0, UVM_DEFAULT)
+	 `uvm_field_int(ready_posibility_of_1, UVM_DEFAULT)
+ `uvm_object_utils_end
+
+
+
+	function new(string name = "axi_write_buss_read_configuration");
+		super.new(name);
+	endfunction: new
+
 
 	// Get ready_const_value
 	function int getReady_const_value();
@@ -837,6 +873,19 @@ class axi_write_correct_one_value extends uvm_object;
 	int 	dist_correct 	= 9;
 	int 	dist_incorrect 	= 1;
 
+
+ `uvm_object_utils_begin(axi_write_correct_one_value)
+	 `uvm_field_int(mode, UVM_DEFAULT)
+	 `uvm_field_int(dist_correct, UVM_DEFAULT)
+	 `uvm_field_int(dist_incorrect, UVM_DEFAULT)
+ `uvm_object_utils_end
+
+
+
+	function new(string name = "axi_write_correct_one_value");
+		super.new(name);
+	endfunction: new
+
 	// Get dist_correct
 	function int getDist_correct();
 		return dist_correct;
@@ -885,9 +934,29 @@ class axi_write_correct_value_conf extends uvm_object;
 	axi_write_correct_one_value			awburst_conf;
 	axi_write_correct_one_value			awlock_conf;
 	axi_write_correct_one_value			awcache_conf;
-	axi_write_correct_one_value			awqos;
-	axi_write_correct_one_value			wstrb;
-	axi_write_correct_one_value			bresp;
+	axi_write_correct_one_value			awqos_conf;
+	axi_write_correct_one_value			wstrb_conf;
+	axi_write_correct_one_value			bresp_conf;
+
+
+ `uvm_object_utils_begin(axi_write_correct_value_conf)
+	 `uvm_field_object(awid_conf, UVM_DEFAULT)
+	 `uvm_field_object(awregion_conf, UVM_DEFAULT)
+	 `uvm_field_object(awlen_conf, UVM_DEFAULT)
+	 `uvm_field_object(awsize_conf, UVM_DEFAULT)
+	 `uvm_field_object(awburst_conf, UVM_DEFAULT)
+	 `uvm_field_object(awlock_conf, UVM_DEFAULT)
+	 `uvm_field_object(awcache_conf, UVM_DEFAULT)
+	 `uvm_field_object(awqos_conf, UVM_DEFAULT)
+	 `uvm_field_object(wstrb_conf, UVM_DEFAULT)
+	 `uvm_field_object(bresp_conf, UVM_DEFAULT)
+ `uvm_object_utils_end
+
+
+
+	function new(string name = "axi_write_correct_value_conf");
+		super.new(name);
+	endfunction: new
 
 	// Get awburst_conf
 	function axi_write_correct_one_value getAwburst_conf();
@@ -940,13 +1009,13 @@ class axi_write_correct_value_conf extends uvm_object;
 	endfunction
 
 	// Get awqos
-	function axi_write_correct_one_value getAwqos();
-		return awqos;
+	function axi_write_correct_one_value getAwqos_conf();
+		return awqos_conf;
 	endfunction
 
 	// Set awqos
-	function void setAwqos(axi_write_correct_one_value awqos);
-		this.awqos = awqos;
+	function void setAwqos_conf(axi_write_correct_one_value awqos_conf);
+		this.awqos_conf = awqos_conf;
 	endfunction
 
 	// Get awregion_conf
@@ -970,23 +1039,23 @@ class axi_write_correct_value_conf extends uvm_object;
 	endfunction
 
 	// Get bresp
-	function axi_write_correct_one_value getBresp();
-		return bresp;
+	function axi_write_correct_one_value getBresp_conf();
+		return bresp_conf;
 	endfunction
 
 	// Set bresp
-	function void setBresp(axi_write_correct_one_value bresp);
-		this.bresp = bresp;
+	function void setBresp_conf(axi_write_correct_one_value bresp_conf);
+		this.bresp_conf = bresp_conf;
 	endfunction
 
 	// Get wstrb
-	function axi_write_correct_one_value getWstrb();
-		return wstrb;
+	function axi_write_correct_one_value getWstrb_conf();
+		return wstrb_conf;
 	endfunction
 
 	// Set wstrb
-	function void setWstrb(axi_write_correct_one_value wstrb);
-		this.wstrb = wstrb;
+	function void setWstrb_conf(axi_write_correct_one_value wstrb_conf);
+		this.wstrb_conf = wstrb_conf;
 	endfunction
 
 endclass
@@ -998,6 +1067,24 @@ class axi_write_global_conf extends uvm_object;
 	true_false_enum			correct_driving_vif 					= TRUE;
 	true_false_enum			axi_3_support							= TRUE;
 	int 					master_write_deepth 					= 5;
+	true_false_enum 		delay_betwen_burst_packages				= TRUE;
+
+
+ `uvm_object_utils_begin(axi_write_global_conf)
+	 `uvm_field_enum(true_false_enum, do_coverage, UVM_DEFAULT)
+	 `uvm_field_enum(true_false_enum, do_checks, UVM_DEFAULT)
+	 `uvm_field_enum(true_false_enum, correct_driving_vif, UVM_DEFAULT)
+	 `uvm_field_enum(true_false_enum, axi_3_support, UVM_DEFAULT)
+	 `uvm_field_int(master_write_deepth, UVM_DEFAULT)
+	 `uvm_field_enum(true_false_enum, delay_betwen_burst_packages, UVM_DEFAULT)
+ `uvm_object_utils_end
+
+
+
+
+	function new(string name = "axi_write_global_conf");
+		super.new(name);
+	endfunction: new
 
 
 	// Get axi_3_support
@@ -1040,11 +1127,213 @@ class axi_write_global_conf extends uvm_object;
 		this.master_write_deepth = master_write_deepth;
 	endfunction
 
+	// Get do_coverage
+	function true_false_enum getDo_coverage();
+		return do_coverage;
+	endfunction
+
+	// Set do_coverage
+	function void setDo_coverage(true_false_enum do_coverage);
+		this.do_coverage = do_coverage;
+	endfunction
+
+	function void setDelay_betwen_burst_packages(input true_false_enum delay_betwen_burst_packages);
+		this.delay_betwen_burst_packages = delay_betwen_burst_packages;
+	endfunction
+
+	function true_false_enum getDelay_betwen_burst_packages();
+		return this.delay_betwen_burst_packages;
+	endfunction
+
+
 endclass
 
-class uvc_axi_write_conf extends uvm_object;
+class axi_write_conf extends uvm_object;
+
+
+
+	axi_write_global_conf					global_config_object;
+	axi_write_correct_value_conf			correct_value_config_object;
+
+	axi_write_buss_write_configuration		master_data_config_object;
+	axi_write_buss_write_configuration		master_addr_config_object;
+	axi_write_buss_read_configuration		master_resp_config_object;
+
+	axi_write_buss_read_configuration		slave_data_config_object;
+	axi_write_buss_read_configuration		slave_addr_config_object;
+ 	axi_write_buss_write_configuration		slave_resp_config_object;
+
+
+ `uvm_object_utils_begin(axi_write_conf)
+	 `uvm_field_object(global_config_object, UVM_DEFAULT)
+	 `uvm_field_object(correct_value_config_object, UVM_DEFAULT)
+	 `uvm_field_object(master_data_config_object, UVM_DEFAULT)
+	 `uvm_field_object(master_addr_config_object, UVM_DEFAULT)
+	 `uvm_field_object(master_resp_config_object, UVM_DEFAULT)
+	 `uvm_field_object(slave_data_config_object, UVM_DEFAULT)
+	 `uvm_field_object(slave_addr_config_object, UVM_DEFAULT)
+	 `uvm_field_object(slave_resp_config_object, UVM_DEFAULT)
+ `uvm_object_utils_end
+
+
+
+
+	function new(string name = "axi_write_conf");
+		super.new(name);
+	endfunction: new
+
+	// Get correct_value_config_object
+	function axi_write_correct_value_conf getCorrect_value_config_object();
+		return correct_value_config_object;
+	endfunction
+
+	// Set correct_value_config_object
+	function void setCorrect_value_config_object(axi_write_correct_value_conf correct_value_config_object);
+		this.correct_value_config_object = correct_value_config_object;
+	endfunction
+
+	// Get global_config_object
+	function axi_write_global_conf getGlobal_config_object();
+		return global_config_object;
+	endfunction
+
+	// Set global_config_object
+	function void setGlobal_config_object(axi_write_global_conf global_config_object);
+		this.global_config_object = global_config_object;
+	endfunction
+
+	// Get master_addr_config_object
+	function axi_write_buss_write_configuration getMaster_addr_config_object();
+		return master_addr_config_object;
+	endfunction
+
+	// Set master_addr_config_object
+	function void setMaster_addr_config_object(axi_write_buss_write_configuration master_addr_config_object);
+		this.master_addr_config_object = master_addr_config_object;
+	endfunction
+
+	// Get master_data_config_object
+	function axi_write_buss_write_configuration getMaster_data_config_object();
+		return master_data_config_object;
+	endfunction
+
+	// Set master_data_config_object
+	function void setMaster_data_config_object(axi_write_buss_write_configuration master_data_config_object);
+		this.master_data_config_object = master_data_config_object;
+	endfunction
+
+	// Get master_resp_config_object
+	function axi_write_buss_read_configuration getMaster_resp_config_object();
+		return master_resp_config_object;
+	endfunction
+
+	// Set master_resp_config_object
+	function void setMaster_resp_config_object(axi_write_buss_read_configuration master_resp_config_object);
+		this.master_resp_config_object = master_resp_config_object;
+	endfunction
+
+	// Get slave_addr_config_object
+	function axi_write_buss_read_configuration getSlave_addr_config_object();
+		return slave_addr_config_object;
+	endfunction
+
+	// Set slave_addr_config_object
+	function void setSlave_addr_config_object(axi_write_buss_read_configuration slave_addr_config_object);
+		this.slave_addr_config_object = slave_addr_config_object;
+	endfunction
+
+	// Get slave_data_config_object
+	function axi_write_buss_read_configuration getSlave_data_config_object();
+		return slave_data_config_object;
+	endfunction
+
+	// Set slave_data_config_object
+	function void setSlave_data_config_object(axi_write_buss_read_configuration slave_data_config_object);
+		this.slave_data_config_object = slave_data_config_object;
+	endfunction
+
+	// Get slave_resp_config_object
+	function axi_write_buss_write_configuration getSlave_resp_config_object();
+		return slave_resp_config_object;
+	endfunction
+
+	// Set slave_resp_config_object
+	function void setSlave_resp_config_object(axi_write_buss_write_configuration slave_resp_config_object);
+		this.slave_resp_config_object = slave_resp_config_object;
+	endfunction
+
+	extern function void checkConfigs();
 
 endclass
+
+	function void axi_write_conf::checkConfigs();
+		if(global_config_object == null)
+			begin
+				axi_write_global_conf default_global_conf;
+				default_global_conf = new();
+				this.setGlobal_config_object(default_global_conf);
+				`uvm_info(get_name(), "Global conf is not seted creating default", UVM_HIGH);
+			end
+
+		if(correct_value_config_object == null)
+			begin
+				axi_write_correct_value_conf default_correct_value_conf;
+				default_correct_value_conf = new();
+				this.setCorrect_value_config_object(default_correct_value_conf);
+				`uvm_info(get_name(), "Correct value conf is not set Creating dafault", UVM_HIGH);
+			end
+
+		if(master_data_config_object == null)
+			begin
+				axi_write_buss_write_configuration  default_bus_write_conf;
+				default_bus_write_conf = new();
+				this.setMaster_data_config_object(default_bus_write_conf);
+				`uvm_info(get_name(), "Master Data conf is not set Creating dafault", UVM_HIGH);
+			end
+
+		if(master_addr_config_object == null)
+			begin
+				axi_write_buss_write_configuration  default_bus_write_conf;
+				default_bus_write_conf = new();
+				this.setMaster_addr_config_object(default_bus_write_conf);
+				`uvm_info(get_name(), "Master addr conf is not set Creating dafault", UVM_HIGH);
+			end
+
+		if(master_resp_config_object == null)
+			begin
+
+				axi_write_buss_read_configuration default_bus_read_conf;
+				default_bus_read_conf = new();
+				this.setMaster_resp_config_object(default_bus_read_conf);
+				`uvm_info(get_name(), "Master resp conf is not set Creating dafault", UVM_HIGH);
+			end
+
+		if(slave_data_config_object == null)
+			begin
+				axi_write_buss_read_configuration default_bus_read_conf;
+				default_bus_read_conf = new();
+				this.setSlave_addr_config_object(default_bus_read_conf);
+				`uvm_info(get_name(), "Slave data conf is not set Creating dafault", UVM_HIGH);
+			end
+
+		if(slave_addr_config_object == null)
+			begin
+				axi_write_buss_read_configuration default_bus_read_conf;
+				default_bus_read_conf = new();
+				this.setSlave_addr_config_object(default_bus_read_conf);
+				`uvm_info(get_name(), "Slave addr conf is not set Creating dafault", UVM_HIGH);
+
+			end
+
+		if(slave_resp_config_object == null)
+			begin
+				axi_write_buss_write_configuration  default_bus_write_conf;
+				default_bus_write_conf = new();
+				this.setSlave_resp_config_object(default_bus_write_conf);
+				`uvm_info(get_name(), "Slave resp conf is not set Creating dafault", UVM_HIGH);
+			end
+
+	endfunction
 
 `endif
 

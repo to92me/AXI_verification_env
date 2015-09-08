@@ -98,7 +98,7 @@ class axi_master_write_base_driver_delays;
 	true_false_enum 	const_delay = FALSE ;
 	true_false_enum		delay_exist = TRUE;
 
-	constraint ready_delay_csr{ // FIXME CSR NO!
+	constraint ready_delay_cs{ // FIXME CSR NO!
 		if(delay_exist == TRUE){
 			if(const_delay == TRUE){
 				delay == cosnt_delay_value;
@@ -117,7 +117,7 @@ class axi_master_write_base_driver_delays;
 	endfunction
 
 	// Set cosnt_delay
-	function void setCosnt_delay(int cosnt_delay_value);
+	function void setConst_delay_value(int cosnt_delay_value);
 		this.cosnt_delay_value = cosnt_delay_value;
 	endfunction
 
@@ -269,6 +269,10 @@ class axi_master_write_base_driver extends uvm_component;
 	axi_master_write_main_driver			main_driver;
 	axi_master_write_scheduler				scheduler;
 	bit 									valid_default = 1'b1;
+	axi_write_conf							uvc_config_obj;
+	axi_write_buss_write_configuration		bus_driver_configuration;
+	axi_write_buss_read_configuration		bus_driver_read_configuration;
+	axi_master_write_base_driver_delays		random_delay;
 
 //	axi_single_frame						address_queue[$];
 	semaphore 								sem;
@@ -283,15 +287,24 @@ class axi_master_write_base_driver extends uvm_component;
 		super.new(name, parent);
 		mssg = new();
 		sem = new(1);
+		random_delay = new();
 	endfunction : new
 
 	// build_phase
-	virtual function void build();
+	virtual function void build_phase(uvm_phase phase);
+		super.build_phase(phase);
 		`uvm_info("axi master write base vif driver","Building", UVM_MEDIUM);
 		main_driver = axi_master_write_main_driver::getDriverInstance(this);
 		scheduler = axi_master_write_scheduler::getSchedulerInstance(this);
 		if(!uvm_config_db#(virtual axi_if)::get(this, "", "vif", vif))
 			 `uvm_fatal("NOVIF",{"virtual interface must be set for: ",get_full_name(),".vif"})
+
+		if(!uvm_config_db#(axi_write_conf)::get(this, "", "uvc_write_config", uvc_config_obj))
+			 `uvm_fatal("NO UVC_CONFIG",{"uvc_write config must be set for ",get_full_name(),".uvc_write_config"})
+
+		this.setBusWriteConfiguration();
+		this.configureDelayOptions();
+
 	endfunction
 
 	extern static function axi_master_write_base_driver getDriverInsance(input uvm_component parent);
@@ -303,9 +316,15 @@ class axi_master_write_base_driver extends uvm_component;
 	extern virtual task init();
 	extern task setValiDefaultValue(input bit input_valid);
 	extern virtual task reset();
+	extern virtual function void configureDelayOptions();
+	extern virtual function void setBusWriteConfiguration();
 
 
 endclass : axi_master_write_base_driver
+
+function void axi_master_write_base_driver::setBusWriteConfiguration();
+    $display("ERRROR AXI MASTER WRITE BASE: redefine this please 0");
+endfunction
 
 task axi_master_write_base_driver::driverVif();
     $display("ERRROR AXI MASTER WRITE BASE: redefine this please 1");
@@ -343,6 +362,15 @@ endfunction
 task axi_master_write_base_driver::setValiDefaultValue(input bit input_valid);
 	this.valid_default = input_valid;
 endtask
+
+function void axi_master_write_base_driver::configureDelayOptions();
+	random_delay.setConst_delay(bus_driver_configuration.getValid_constant_delay());
+	random_delay.setConst_delay_value(bus_driver_configuration.getValid_contant_delay_value());
+	random_delay.setDelay_exist(bus_driver_configuration.getValid_delay_exists());
+	random_delay.setDelay_max(bus_driver_configuration.getDelay_maximum());
+	random_delay.setDelay_min(bus_driver_configuration.getDelay_minimum());
+	$display("Configuration master driver bus driver DONE");
+endfunction
 
 `endif
 

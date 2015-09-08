@@ -70,6 +70,10 @@ class axi_master_write_data_driver extends axi_master_write_base_driver;
 		current_frame = new();
 	endfunction : new
 
+	function void build_phase(uvm_phase phase);
+		super.build_phase(phase);
+	endfunction
+
 	extern static function axi_master_write_data_driver getDriverInstance(input uvm_component parent);
 
 	extern task getNextFrame();
@@ -83,6 +87,7 @@ class axi_master_write_data_driver extends axi_master_write_base_driver;
 	extern task validTriger();
 	extern task dataDriver();
 	extern task testClock();
+	extern function void setBusWriteConfiguration();
 
 
 endclass : axi_master_write_data_driver
@@ -94,6 +99,10 @@ function axi_master_write_data_driver axi_master_write_data_driver::getDriverIns
 		driverInstance = new("AxiMasterWriteDataDriver", parent);
 	end
 	return driverInstance;
+endfunction
+
+function void axi_master_write_data_driver::setBusWriteConfiguration();
+   bus_driver_configuration = uvc_config_obj.getMaster_data_config_object();
 endfunction
 
 task axi_master_write_data_driver::getNextFrame();
@@ -197,7 +206,10 @@ task axi_master_write_data_driver::validTriger();
 
 				DELAY_WVALID:
 				begin
-					repeat (current_frame.delay_wvalid) begin
+					assert(random_delay.randomize());
+					repeat(random_delay.getRandomDelay())
+//					repeat (current_frame.delay_wvalid) begin
+					begin
 						if(vif.wvalid == 1)
 							begin
 								#2

@@ -46,6 +46,7 @@ class axi_slave_write_data_driver extends axi_slave_write_base_driver;
 	extern task setSlaveID(input bit[ID_WIDTH - 1 : 0] ID);
 	extern task checkIDAddr(ref true_false_enum correct_slave);
 	extern task waitFrame(ref true_false_enum detected_frame);
+	extern function void setBusReadConfiguration();
 
 endclass : axi_slave_write_data_driver
 
@@ -58,9 +59,13 @@ task axi_slave_write_data_driver::init();
 	#2
 	assert(ready_default_randomization.randomize());
    if(ready_default_randomization.ready == READY_DEFAULT_0)
-	   vif.wready <= 1'b0;
+	   begin
+	   	vif.wready <= 1'b0;
+	   end
    else
-	   vif.wready <= 1'b1;
+	   begin
+		   vif.wready <= 1'b1;
+	   end
 endtask
 
 task axi_slave_write_data_driver::send();
@@ -97,7 +102,7 @@ task axi_slave_write_data_driver::getDelay(ref int delay);
 		begin
 	    	assert(delay_randomization.randomize());
 	    	delay = delay_randomization.delay;
-	    	delay = 0;
+	    	//delay = 0;
 		end
 	else
 		begin
@@ -116,12 +121,15 @@ endtask
 
 task axi_slave_write_data_driver::completeRecieve();
 	#2
-	ready_default_randomization.ready_random = TRUE;
    assert(ready_default_randomization.randomize());
    if(ready_default_randomization.ready == READY_DEFAULT_0)
-	   vif.wready <= 1'b0;
+	   begin
+	   		vif.wready <= 1'b0;
+	   end
    else
-	   vif.wready <= 1'b1;
+	   begin
+	   		vif.wready <= 1'b1;
+	   end
 endtask
 
 task axi_slave_write_data_driver::setSlaveID(input bit[ID_WIDTH-1:0] ID);
@@ -152,5 +160,9 @@ task axi_slave_write_data_driver::waitFrame(ref true_false_enum detected_frame);
 		detected_frame = FALSE;
 
 endtask
+
+function void  axi_slave_write_data_driver::setBusReadConfiguration();
+    bus_read_config_obj = uvc_config_obj.getSlave_data_config_object();
+endfunction
 
 `endif

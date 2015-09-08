@@ -11,11 +11,13 @@ class axi_master_write_env extends uvm_env;
 	// Virtual Interface variable
 	protected virtual interface axi_if vif;
 
-	bit checks_enable = 1;
-	bit coverage_enable = 1;
-	axi_write_test_config config_obj;
-	axi_master_write_agent master;
-	axi_slave_write_agent slave;
+	bit 							checks_enable 		= 1;
+	bit 							coverage_enable 	= 1;
+	axi_write_test_config 			config_obj;
+	axi_master_write_agent 			master;
+	axi_slave_write_agent 			slave;
+	axi_write_configuration_wrapper configuration_wrapper;
+	axi_write_conf					uvc_configuration;
 
 
 
@@ -31,6 +33,7 @@ class axi_master_write_env extends uvm_env;
 	// new - constructor
 	function new(string name, uvm_component parent);
 		super.new(name, parent);
+
 	endfunction : new
 
 	extern virtual function void build_phase(uvm_phase phase);
@@ -48,6 +51,11 @@ function void axi_master_write_env::build_phase(uvm_phase phase);
 
 		super.build_phase(phase);
 
+
+		//configuration_wrapper = axi_write_configuration_wrapper::type_id::create("ConfigurationWrapper", this);
+
+
+
 		if(config_obj == null) //begin
 			if (!uvm_config_db#(axi_write_test_config)::get(this, "", "axi_config", config_obj)) begin
 				`uvm_info("NOCONFIG", "Using default_axi_config", UVM_MEDIUM)
@@ -55,18 +63,24 @@ function void axi_master_write_env::build_phase(uvm_phase phase);
 			end
 
 		uvm_config_object::set(this, "*", "axi_config", config_obj);
-
 		foreach(config_obj.slave_list[i]) begin
 			string sname;
 			sname = $sformatf("slave_write_agent[%0d]*", i);
 			uvm_config_db#(axi_slave_config)::set(this, sname, "axi_slave_config", config_obj.slave_list[i]);
 		end
 
+//		configuration_wrapper = axi_write_configuration_wrapper::getWraperInstance(this);
+//		uvc_configuration = configuration_wrapper.generateConfigurationObject();
+
+
 		master = axi_master_write_agent::type_id::create("master_write_agent",this);
 
 		foreach(config_obj.slave_list[i])begin
 			slave = axi_slave_write_agent::type_id::create($sformatf("slave_write_agent[%0d]", i), this);
 		end
+
+
+
 endfunction : build_phase
 
 

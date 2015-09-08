@@ -108,7 +108,7 @@ class axi_slave_write_base_driver_delays;
 	endfunction
 
 	// Set cosnt_delay
-	function void setCosnt_delay(int cosnt_delay);
+	function void setConst_delay_value(int cosnt_delay);
 		this.cosnt_delay = cosnt_delay;
 	endfunction
 
@@ -327,6 +327,10 @@ class axi_slave_write_base_driver extends uvm_component;
 	semaphore 											sem;
 	true_false_enum										testing_one_slave = TRUE;
 
+	axi_write_conf										uvc_config_obj;
+	axi_write_buss_read_configuration					bus_read_config_obj;
+
+
 
 
 	// Provide implementations of virtual methods such as get_type_name and create
@@ -349,10 +353,18 @@ class axi_slave_write_base_driver extends uvm_component;
 			 `uvm_fatal("NOVIF",{"virtual interface must be set for: ",get_full_name(),".vif"})
 //		main_driver = axi_slave_write_main_driver::getDriverInstance(this);
 
+		if(!uvm_config_db#(axi_write_conf)::get(this, "", "uvc_write_config", uvc_config_obj))
+			 `uvm_fatal("NO UVC_CONFIG",{"uvc_write config must be set for ",get_full_name(),".uvc_write_config"})
+
+		this.setBusReadConfiguration();
+		this.configureDelayOptions();
+
 	endfunction : build_phase
 
 
 	extern function void setSlaveConfig(input axi_slave_config cfg);
+	extern virtual function void setBusReadConfiguration();
+	extern function void configureDelayOptions();
 
 	extern task main();
 	extern task readyTriger();
@@ -559,6 +571,33 @@ endclass : axi_slave_write_base_driver
 	   this.testing_one_slave = testing;
 	endtask
 
+	function void axi_slave_write_base_driver::configureDelayOptions();
+		$display("000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000");
+	    delay_randomization.setDelay_exist(bus_read_config_obj.getReady_delay_exists());
+		delay_randomization.setDelay_max(bus_read_config_obj.getReady_delay_maximum());
+		delay_randomization.setDelay_min(bus_read_config_obj.getReady_delay_minimum());
+		delay_randomization.setConst_delay(bus_read_config_obj.getReady_delay_constant());
+		delay_randomization.setConst_delay_value(bus_read_config_obj.getReady_delay_const_value());
+
+		if(bus_read_config_obj.getReady_constant() == FALSE)
+			begin
+				ready_default_randomization.setReady_random(TRUE);
+			end
+		else
+			begin
+			ready_default_randomization.setReady_random(FALSE);
+				$display("TOME WORKS 2 ");
+			end
+
+		ready_default_randomization.setReady_default(bus_read_config_obj.getReady_const_value());
+		ready_default_randomization.setReady_0_dist(bus_read_config_obj.getReady_posibility_of_0());
+		ready_default_randomization.setReady_1_dist(bus_read_config_obj.getReady_posibility_of_1());
+
+	endfunction
+
+	function void axi_slave_write_base_driver::setBusReadConfiguration();
+		$display("AXI WRITE SLAVE BASE DRIVER OVERRIDE PLEASE!!!!");
+	endfunction
 
 
 `endif

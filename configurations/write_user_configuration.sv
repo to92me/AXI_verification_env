@@ -3,9 +3,15 @@
 
 class axi_write_master_user_configuration extends axi_write_user_config_base;
 
+`uvm_component_utils(axi_write_master_user_configuration)
+
+function new (string name, uvm_component parent);
+		super.new(name, parent);
+endfunction : new
+
 function void setConfigurations();
 
-
+$display("USER CONFIGURATION");
 
 // +++++++++++++++++++++++++++++++++++++++++GLOOBAL SETTINGS+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 //with setting do coverage axi_write uvc will collect coverage and report it
@@ -20,7 +26,7 @@ registerConfiguration("general","do_checks", TRUE);
 // if correct_driving_vif is setted as true then axi master write uvc will correcly ( acording to axi 3 / 4 protocol ) drive DUV
 // and section incorrect data will be ignored
 //true_false_enum			correct_driving_vif 					= TRUE;
-registerConfiguration("general", "correct_driving_vif", TRUE);
+registerConfiguration("general", "correct_driving_vif", FALSE);
 
 //if this is setted as TRUE then axi uvc will support data interleaving ( AXI 3 feature )
 //true_false_enum			axi_3_support							= TRUE;
@@ -35,6 +41,8 @@ registerConfiguration("general", "master_write_deepth", 5);
 
 //if this option is TRUE then all delay options and seetings for ready will be ignored
 //true_false_enum			global_full_speed						= FALSE;
+
+registerConfiguration("general", "full_speed", TRUE);
 
 //+++++++++++++++++++++++++++++++++++++++END GLOBAL SETTINGS++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
@@ -51,6 +59,7 @@ registerConfiguration("general", "master_write_deepth", 5);
 //int 			awid_possibility_correct		= 5;
 //int 			awid_possibility_incorrect 		= 5;
 registerConfiguration("data_correctnes", "awid_mode", 1);
+registerConfiguration("data_correctnes","awid_dist_incorrect", 5);
 
 
 // 2. AWREGION
@@ -156,12 +165,12 @@ registerConfiguration("data_correctnes", "bresp_mode", 1);
 //if full_speed == TRUE then there will be no any delay in any stage of driving data of  DUT othervise configuration after will
 // be used for delays
 //true_false_enum			data_master_full_speed 					= FALSE;
-registerConfiguration("master_data_driver", "full_speed", FALSE);
+//registerConfiguration("master_data_driver", "full_speed", FALSE);
 
 
 //// if valid_delay == TRUE when setting new dat on data bus driver will wait some time before setting wvalid
 //true_false_enum			data_valid_delay 						= TRUE;
-registerConfiguration("master_data_driver", "valid_delay", TRUE);
+
 //
 //// if data_valid_constant_delay == TRUE then delay before setting wvalid to active will be constant value
 //true_false_enum			data_valid_constant_delay				= FALSE;
@@ -172,8 +181,9 @@ registerConfiguration("master_data_driver", "valid_delay", TRUE);
 //// configuration for random delay before setting valid
 //int 					data_delay_minimum						= 0;
 //int 					data_delay_maximum						= 5;
-registerConfiguration("master_data_driver", "delay_minimum", 0);
-registerConfiguration("master_data_driver", "delay_maximum", 5);
+registerConfiguration("master_data_driver", "valid_delay_exists", TRUE);
+registerConfiguration("master_data_driver", "valid_delay_minimum", 0);
+registerConfiguration("master_data_driver", "valid_delay_maximum", 5);
 
 //
 ////++ ADDRESS DRIVER
@@ -195,6 +205,11 @@ registerConfiguration("master_data_driver", "delay_maximum", 5);
 //// configuration for random delay before setting valid
 //int 					addr_data_delay_minimum					= 0;
 //int 					addr_delay_maximum						= 5;
+
+registerConfiguration("master_addr_driver", "valid_delay_exists", TRUE);
+registerConfiguration("master_addr_driver", "valid_delay_minimum", 0);
+registerConfiguration("master_addr_driver", "valid_delay_maximum", 5);
+
 //
 ////++ MAIN DRIVER
 //
@@ -223,7 +238,13 @@ registerConfiguration("master_data_driver", "delay_maximum", 5);
 //int 					bready_posibility_of_0					= 5;
 //int 					bready_posibility_of_1					= 5;
 
-
+registerConfiguration("master_resp_driver", "ready_delay_exists", TRUE);
+registerConfiguration("master_resp_driver", "ready_delay_constant", FALSE);
+registerConfiguration("master_resp_driver", "ready_delay_minimum", 0);
+registerConfiguration("master_resp_driver", "ready_delay_maximum", 5);
+registerConfiguration("master_resp_driver", "ready_constant", FALSE);
+registerConfiguration("master_resp_driver", "ready_posibility_of_0", 5);
+registerConfiguration("master_resp_driver", "ready_posibility_of_1", 5);
 //+++++++++++++++++++++++++++++++++++++++END MASTER DRIVER+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 
@@ -254,6 +275,14 @@ registerConfiguration("master_data_driver", "delay_maximum", 5);
 //int 					wready_posibility_of_0					= 5;
 //int 					wready_posibility_of_1					= 5;
 //
+registerConfiguration("slave_addr_driver", "ready_delay_exists", TRUE);
+registerConfiguration("slave_addr_driver", "ready_delay_constant", FALSE);
+registerConfiguration("slave_addr_driver", "ready_delay_minimum", 0);
+registerConfiguration("slave_addr_driver", "ready_delay_maximum", 5);
+registerConfiguration("slave_addr_driver", "ready_constant", FALSE);
+registerConfiguration("slave_addr_driver", "ready_posibility_of_0", 5);
+registerConfiguration("slave_addr_driver", "ready_posibility_of_1", 5);
+
 //
 //
 //// ADDRESS DRIVER
@@ -277,6 +306,14 @@ registerConfiguration("master_data_driver", "delay_maximum", 5);
 //int 					awready_posibility_of_0					= 5;
 //int 					awready_posibility_of_1					= 5;
 //
+registerConfiguration("slave_data_driver", "ready_delay_exists", TRUE);
+registerConfiguration("slave_data_driver", "ready_delay_constant", FALSE);
+registerConfiguration("slave_data_driver", "ready_delay_minimum", 0);
+registerConfiguration("slave_data_driver", "ready_delay_maximum", 5);
+registerConfiguration("slave_data_driver", "ready_constant", FALSE);
+registerConfiguration("slave_data_driver", "ready_posibility_of_0", 5);
+registerConfiguration("slave_data_driver", "ready_posibility_of_1", 5);
+
 //
 ////++ RESPONS DRIVER
 //
@@ -296,6 +333,10 @@ registerConfiguration("master_data_driver", "delay_maximum", 5);
 //// configuration for random delay before setting bvalid
 //int 					bvalid_data_delay_minimum				= 0;
 //int 					bvalid_delay_maximum					= 5;
+
+registerConfiguration("slave_resp_driver", "valid_delay_exists", TRUE);
+registerConfiguration("slave_resp_driver", "valid_delay_minimum", 0);
+registerConfiguration("slave_resp_driver", "valid_delay_maximum", 5);
 
 
 //+++++++++++++++++++++++++++++++++++++++++END SLAVE DRIVER ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
