@@ -232,7 +232,7 @@ endclass : axi_master_read_monitor
 
 			num_single_frames++;
 
-			// reset flags
+			// flags
 			last = 0;
 			i = 0;
 

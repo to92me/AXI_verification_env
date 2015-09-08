@@ -49,7 +49,7 @@ module axi_top;
         if0.has_checks = 0;
         reset <= 1'b0;
         clock <= 1'b0;
-        #3 reset <= 1'b1;
+        #5 reset <= 1'b1;
     end
 
     //Generate Clock

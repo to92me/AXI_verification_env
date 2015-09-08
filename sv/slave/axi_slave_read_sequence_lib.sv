@@ -122,6 +122,11 @@ class axi_slave_read_simple_two_phase_seq extends axi_slave_read_base_sequence;
 			// send item to seq. to check for burst completeness and to decrement delay
 			p_sequencer.arbit.frame_complete(rsp);
 
+			// check for reset
+			if(rsp.status == UVM_TLM_INCOMPLETE_RESPONSE) begin
+				p_sequencer.arbit.reset();
+			end
+
 		end
 
 	endtask
@@ -195,6 +200,11 @@ class axi_slave_read_random_delay extends axi_slave_read_base_sequence;
 
 			// send item to seq. to check for burst completeness and to decrement delay
 			p_sequencer.arbit.frame_complete(rsp);
+
+			// check for reset
+			if(rsp.status == UVM_TLM_INCOMPLETE_RESPONSE) begin
+				p_sequencer.arbit.reset();
+			end
 
 		end
 

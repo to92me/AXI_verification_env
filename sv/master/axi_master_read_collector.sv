@@ -38,6 +38,7 @@
 *
 * Tasks :	1. run_phase(uvm_phase phase)
 *			2. collect_transactions()
+*			3. reset()
 **/
 // -----------------------------------------------------------------------------
 class axi_master_read_collector extends uvm_monitor;
@@ -82,6 +83,7 @@ class axi_master_read_collector extends uvm_monitor;
 	extern task run_phase(uvm_phase phase);
 	extern virtual task collect_transactions();
 	extern virtual function void report_phase(uvm_phase phase);
+	extern virtual task reset();
 
 endclass : axi_master_read_collector
 
@@ -122,18 +124,32 @@ endclass : axi_master_read_collector
 
     	fork
     		collect_transactions();
-
-    		// reset
-    		forever begin
-				@(negedge vif.sig_reset);
-				do
-					@(posedge vif.sig_clock);
-				while(vif.sig_reset!==1);
-		    	num_single_frames = 0;
-		    	num_burst_frames = 0;
-    		end
+    		reset();
     	join
 	endtask : run_phase
+
+//------------------------------------------------------------------------------
+/**
+* Task : reset
+* Purpose : reset
+* Inputs :
+* Outputs :
+* Ref :
+**/
+//------------------------------------------------------------------------------
+	task axi_master_read_collector::reset();
+
+    	forever begin
+			@(negedge vif.sig_reset);
+			do
+				@(posedge vif.sig_clock);
+			while(vif.sig_reset!==1);
+
+			// reset counters
+	    	num_single_frames = 0;
+	    	num_burst_frames = 0;
+    	end
+	endtask : reset
 
 //------------------------------------------------------------------------------
 /**

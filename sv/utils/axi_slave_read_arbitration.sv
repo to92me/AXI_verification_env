@@ -172,6 +172,11 @@ endclass : axi_slave_read_arbitration
 			// next frame
 			one_frame = whole_burst.single_frames.pop_front();
 
+			// get burst validity
+			if(slverr_flag) begin
+				one_frame.status = UVM_TLM_BURST_ERROR_RESPONSE;
+			end
+
 			// get addr and byte lane info.
 			if(!slverr_flag) begin
 				addr_frame = addr_queue.pop_front();
@@ -184,11 +189,13 @@ endclass : axi_slave_read_arbitration
 					// if the requested address is out of the slave range, return an error
 					if (!(config_obj.check_addr_range(one_frame.addr + (one_frame.upper_byte_lane - one_frame.lower_byte_lane)))) begin
 						slverr_flag = 1;
+						one_frame.status = UVM_TLM_ADDRESS_ERROR_RESPONSE;
 					end
 				end
 			end
 
-			if(slverr_flag) begin
+			// if resp mode is BAD_RESP, do not override the given response
+			if(slverr_flag && (one_frame.resp_mode == GOOD_RESP)) begin
 				one_frame.err = ERROR;
 				one_frame.resp = SLVERR;
 			end
@@ -393,7 +400,7 @@ endclass : axi_slave_read_arbitration
 			addr_frame.valid = FRAME_VALID;
 
 			// read from memory - this is done here so that the correct value will be read
-			if(addr_frame.read_enable && (addr_frame.resp != SLVERR)) begin
+			if(addr_frame.read_enable && (addr_frame.status == UVM_TLM_OK_RESPONSE)) begin
 				addr_calc = new();
 				addr_calc.addr = addr_frame.addr;
 				addr_calc.upper_byte_lane = addr_frame.upper_byte_lane;

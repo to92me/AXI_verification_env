@@ -94,25 +94,17 @@ interface axi_if (input sig_reset, input sig_clock);
 	bit							has_checks = 1;
 	bit							has_coverage = 1;
 
-	// vif assertions
-
-    // TODO : ASK DARKO
+//------------------------------------------------------------------------------
+//
+// axi read vif assertions
+//
+//------------------------------------------------------------------------------
+    bit reset_flag = 0;
+    // catch reset signal
     always @(posedge sig_reset) begin
-        // Assertion AXI4_ERRM_ARVALID_RESET
-        // ARVALID is low for the first cycle after ARESETn goes HIGH
-        assert_AXI4_ERRM_ARVALID_RESET : assert property (
-            disable iff(!has_checks || !sig_reset)
-            ($rose(sig_reset) |=> (arvalid == 0)))
-            else
-                `uvm_error("ASSERTION_ERR", "AXI4_ERRM_ARVALID_RESET: ARVALID not low for the first cycle after ARESETn goes HIGH")
-
-        // Assertion AXI4_ERRS_RVALID_RESET
-        // RVALID is low for the first cycle after ARESETn goes HIGH
-        assert_AXI4_ERRS_RVALID_RESET : assert property (
-            disable iff(!has_checks || !sig_reset)
-            ($rose(sig_clock) |=> (rvalid == 0)))
-            else
-                `uvm_error("ASSERTION_ERR", "AXI4_ERRS_RVALID_RESET: RVALID not low for the first cycle after ARESETn goes HIGH")
+        reset_flag = 1;
+        @(posedge sig_clock);
+        reset_flag = 0;
     end
 
 	always @(posedge sig_clock)
@@ -245,14 +237,13 @@ interface axi_if (input sig_reset, input sig_clock);
             else
             	`uvm_error("ASSERTION_ERR", "AXI4_ERRM_ARPROT_X: ARPROT went to X or Z when ARVALID is HIGH")
 
-// TODO : ??
-/*        // Assertion AXI4_ERRM_ARVALID_RESET
+        // Assertion AXI4_ERRM_ARVALID_RESET
         // ARVALID is low for the first cycle after ARESETn goes HIGH
         assert_AXI4_ERRM_ARVALID_RESET : assert property (
         	disable iff(!has_checks || !sig_reset)
-        	($fell(sig_reset) |=> (arvalid == 0)))
+        	(reset_flag == 1 |-> (arvalid == 0)))
         	else
-        		`uvm_error("ASSERTION_ERR", "AXI4_ERRM_ARVALID_RESET: ARVALID not low for the first cycle after ARESETn goes HIGH")*/
+        		`uvm_error("ASSERTION_ERR", "AXI4_ERRM_ARVALID_RESET: ARVALID not low for the first cycle after ARESETn goes HIGH")
 
         // Assertion AXI4_ERRM_ARVALID_STABLE
         // When ARVALID is asserted, then it remains asserted until ARREADY is HIGH
@@ -415,14 +406,13 @@ interface axi_if (input sig_reset, input sig_clock);
             else
             	`uvm_error("ASSERTION_ERR", "AXI4_ERRS_RLAST_X: RLAST went to X or Z when RVALID is HIGH")
 
-// TODO : ??
         // Assertion AXI4_ERRS_RVALID_RESET
         // RVALID is low for the first cycle after ARESETn goes HIGH
-        /*assert_AXI4_ERRS_RVALID_RESET : assert property (
+        assert_AXI4_ERRS_RVALID_RESET : assert property (
         	disable iff(!has_checks || !sig_reset)
-        	($fell(sig_reset) |=> (rvalid == 0)))
+        	(reset_flag == 1 |-> (rvalid == 0)))
         	else
-        		`uvm_error("ASSERTION_ERR", "AXI4_ERRS_RVALID_RESET: RVALID not low for the first cycle after ARESETn goes HIGH")*/
+        		`uvm_error("ASSERTION_ERR", "AXI4_ERRS_RVALID_RESET: RVALID not low for the first cycle after ARESETn goes HIGH")
 
         // Assertion AXI4_ERRS_RVALID_STABLE
         // When RVALID is asserted, then it remains asserted until RREADY is HIGH

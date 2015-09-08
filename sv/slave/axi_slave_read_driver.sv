@@ -62,6 +62,9 @@ class axi_slave_read_driver extends uvm_driver #(axi_read_base_frame, axi_read_b
 	bit slave_ready_rand_enable = 1;
 	ready_randomization ready_rand;
 
+	// helper bit - to inform the seq. when reset happens
+	bit reset_flag = 0;
+
 	// Provide implmentations of virtual methods such as get_type_name and create
 	`uvm_component_utils_begin(axi_slave_read_driver)
 		`uvm_field_int(slave_ready_rand_enable, UVM_DEFAULT)
@@ -199,6 +202,10 @@ endclass : axi_slave_read_driver
 				end
 			else
 				`uvm_error("CASTFAIL", "The recieved seq. item is not a response seq. item");
+			if (reset_flag) begin
+				rsp.status = UVM_TLM_INCOMPLETE_RESPONSE;
+				reset_flag = 0;
+			end
 			seq_item_port.item_done();
 		end
 	endtask : get_from_seq
@@ -239,7 +246,8 @@ endclass : axi_slave_read_driver
 		ready_queue.delete();
 		ready_sem.put(1);
 
-		// TODO: reset sequence
+		// info to seq.
+		reset_flag = 1;
 
 	endtask : reset
 

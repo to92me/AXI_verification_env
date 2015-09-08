@@ -46,6 +46,8 @@ class axi_read_base_frame extends uvm_sequence_item;
 	// control
 	valid_enum 				valid;
 	rand bit [2:0]			delay;
+	// response - used to signal wheteher there was a reset
+	uvm_tlm_response_status_e status;
 
 	`uvm_object_utils_begin(axi_read_base_frame)
 		`uvm_field_int(id, UVM_DEFAULT)
@@ -55,6 +57,7 @@ class axi_read_base_frame extends uvm_sequence_item;
 
 	function new (string name = "axi_read_base_frame");
 		super.new(name);
+		this.status = UVM_TLM_OK_RESPONSE;
 	endfunction
 
 endclass : axi_read_base_frame
@@ -80,12 +83,13 @@ class axi_read_single_frame extends axi_read_base_frame;
 	bit								last;
 	rand bit [RUSER_WIDTH-1 : 0]	user;
 
-	// control
 	rand last_enum				last_mode;	// rlast signal generated correcty or not
-	err_enum					err;	// used for early termination and bad last bit for last frame in burst
 	rand bit 					read_enable;	// read from memory or return random data
 	rand resp_mode_enum			resp_mode;	// response generated correctly or not
 	rand id_enum				id_mode;
+
+	// control
+	err_enum					err;	// used for early termination and bad last bit for last frame in burst
 
 	// control bit for default value of rresp signal
 	rand bit default_resp;	// if set use default value for resp (OKAY)
@@ -306,8 +310,6 @@ class axi_read_burst_frame extends axi_read_base_frame;
 			qos == 4'h0;
 		}
 	}
-
-	constraint delay_constraint {delay < 5;}
 
 	constraint valid_burst_constraint {
 		if (valid_burst) {
