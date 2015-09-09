@@ -56,8 +56,6 @@ class axi_slave_read_driver extends uvm_driver #(axi_read_base_frame, axi_read_b
 	// queue that holds single frames that are ready to be sent
 	axi_read_single_frame ready_queue[$];
 
-	semaphore burst_sem, ready_sem;
-
 	// control bit for enabling ready randomization
 	bit slave_ready_rand_enable = 1;
 	ready_randomization ready_rand;
@@ -75,8 +73,6 @@ class axi_slave_read_driver extends uvm_driver #(axi_read_base_frame, axi_read_b
 		super.new(name, parent);
 		if(slave_ready_rand_enable)
 			ready_rand = new();
-		burst_sem = new(1);
-		ready_sem = new(1);
 	endfunction : new
 
 	// class methods
@@ -120,9 +116,7 @@ endclass : axi_slave_read_driver
 	task axi_slave_read_driver::run_phase(uvm_phase phase);
 		// The driving should be triggered by an initial reset pulse
 		@(negedge vif.sig_reset);
-		do
-			reset();
-		while(vif.sig_reset!==1);
+		reset();
 		// Start driving here
 		get_and_drive();
 	endtask : run_phase
@@ -139,20 +133,29 @@ endclass : axi_slave_read_driver
 //------------------------------------------------------------------------------
 	task axi_slave_read_driver::get_and_drive();
 		fork
-			forever begin
-				@(negedge vif.sig_reset);
-				reset();
-			end
+
+			@(negedge vif.sig_reset);
+			
 			get_from_seq();
 			drive_addr_channel();
 			drive_data_channel();
+			
+		join_any
+		disable fork;
+
+		// only way to get to this point is after reset
+		reset();
+		// start everything again
+		fork 
+			get_and_drive();
 		join
+
 	endtask : get_and_drive
 
 //------------------------------------------------------------------------------
 /**
 * Task : get_from_seq
-* Purpose : get new burst from sequencer
+* Purpose : two phase communication with seq.
 *				phase 1 - send burst info. to seq.
 *				phase 2 - get single frame from seq.
 * Inputs :
@@ -169,13 +172,11 @@ endclass : axi_slave_read_driver
 		forever begin
 
 			@(posedge vif.sig_clock);
-			#1	// for simulation
 
 			// phase 1 - send burst info to seq.
 			seq_item_port.get_next_item(item);
 			if ($cast(req, item))
 				begin
-					burst_sem.get(1);
 					if (burst_req.size()) begin
 						req.copy(burst_req.pop_front());
 						req.valid = FRAME_VALID;
@@ -183,7 +184,6 @@ endclass : axi_slave_read_driver
 					else begin
 						req.valid = FRAME_NOT_VALID;
 					end
-					burst_sem.put(1);
 				end
 			else
 				`uvm_error("CASTFAIL", "The recieved seq. item is not a request seq. item");
@@ -191,19 +191,18 @@ endclass : axi_slave_read_driver
 
 			// phase 2 - get single frame from seq.
 			seq_item_port.get_next_item(item);
-			if ($cast(rsp, item))
-				begin
+			if ($cast(rsp, item)) begin
+				if(!reset_flag) begin 	// if there was a reset, ignore the frame
 					// put the frame in the ready queue
 					if(rsp.valid == FRAME_VALID) begin
-						ready_sem.get(1);
 						ready_queue.push_back(rsp);
-						ready_sem.put(1);
 					end
 				end
+			end
 			else
 				`uvm_error("CASTFAIL", "The recieved seq. item is not a response seq. item");
 			if (reset_flag) begin
-				rsp.status = UVM_TLM_INCOMPLETE_RESPONSE;
+				rsp.status = UVM_TLM_INCOMPLETE_RESPONSE;	// send reset info. to seq.
 				reset_flag = 0;
 			end
 			seq_item_port.item_done();
@@ -222,8 +221,13 @@ endclass : axi_slave_read_driver
 	task axi_slave_read_driver::reset();
 
 		`uvm_info(get_type_name(), "Reset", UVM_MEDIUM)
-		@(posedge vif.sig_clock);	// reset can be asynchronous, but deassertion must be synchronous with clk
-		#1	// for simulation
+
+		// reset queues
+		burst_req.delete();
+		ready_queue.delete();
+
+		// info to seq.
+		reset_flag = 1;
 
 		// reset signals
 		vif.rid <= {RID_WIDTH {1'b0}};
@@ -236,18 +240,6 @@ endclass : axi_slave_read_driver
 			vif.arready <= ready_rand.getRandom();
 		else
 			vif.arready <= 1'b1;
-
-		// reset queues
-		burst_sem.get(1);
-		burst_req.delete();
-		burst_sem.put(1);
-
-		ready_sem.get(1);
-		ready_queue.delete();
-		ready_sem.put(1);
-
-		// info to seq.
-		reset_flag = 1;
 
 	endtask : reset
 
@@ -283,9 +275,7 @@ endclass : axi_slave_read_driver
 					burst_collected.region = vif.arregion;
 					burst_collected.user = vif.aruser;
 
-					burst_sem.get(1);
 					burst_req.push_back(burst_collected);
-					burst_sem.put(1);
 				end
 
 				// randomize ready
@@ -323,10 +313,8 @@ endclass : axi_slave_read_driver
 		#1	// for simulation
 		forever begin
 			// is there a frame waiting to be sent
-			ready_sem.get(1);
 			if (ready_queue.size()) begin
 				rsp = ready_queue.pop_front();
-				ready_sem.put(1);
 
 				#1	// for simulation
 				// vif signals
@@ -340,7 +328,6 @@ endclass : axi_slave_read_driver
 				@(posedge vif.sig_clock iff vif.rready);	// wait for master
 			end
 			else begin
-				ready_sem.put(1);
 				#1	// for simulation
 				vif.rvalid <= 1'b0;
 

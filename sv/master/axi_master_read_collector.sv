@@ -116,12 +116,6 @@ endclass : axi_master_read_collector
 **/
 //------------------------------------------------------------------------------
 	task axi_master_read_collector::run_phase(uvm_phase phase);
-		@(negedge vif.sig_reset);
-		do
-			@(posedge vif.sig_clock);
-		while(vif.sig_reset!==1);
-    	`uvm_info(get_type_name(), "Detected Reset Done", UVM_LOW)
-
     	fork
     		collect_transactions();
     		reset();
@@ -141,14 +135,13 @@ endclass : axi_master_read_collector
 
     	forever begin
 			@(negedge vif.sig_reset);
-			do
-				@(posedge vif.sig_clock);
-			while(vif.sig_reset!==1);
+			`uvm_info(get_type_name(), "Reset", UVM_LOW)
 
 			// reset counters
 	    	num_single_frames = 0;
 	    	num_burst_frames = 0;
     	end
+
 	endtask : reset
 
 //------------------------------------------------------------------------------

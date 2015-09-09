@@ -37,9 +37,10 @@
 *
 * Tasks :	1. run_phase(uvm_phase phase)
 *			2. get_and_drive()
-*			3. read_data_channel()
-*			4. drive_addr_channel()
-*			5. reset()
+*			3. get_from_seq()
+*			4. read_data_channel()
+*			5. drive_addr_channel()
+*			6. reset()
 **/
 // -----------------------------------------------------------------------------
 class axi_master_read_driver extends uvm_driver #(axi_read_burst_frame);
@@ -56,6 +57,9 @@ class axi_master_read_driver extends uvm_driver #(axi_read_burst_frame);
 	// control bit to enable ready randomization (else - default = 1)
 	bit master_ready_rand_enable = 1;
 	ready_randomization ready_rand;
+
+	// queue of bursts waiting to be sent
+	axi_read_burst_frame burst_queue[$];
 
 	// Provide implmentations of virtual methods such as get_type_name and create
 	`uvm_component_utils_begin(axi_master_read_driver)
@@ -74,6 +78,7 @@ class axi_master_read_driver extends uvm_driver #(axi_read_burst_frame);
 	extern virtual function void build_phase(uvm_phase phase);
 	extern virtual task run_phase(uvm_phase phase);
 	extern virtual task get_and_drive();
+	extern virtual task get_from_seq();
 	extern virtual task read_data_channel();
 	extern virtual task drive_addr_channel();
 	extern virtual task reset();
@@ -110,10 +115,7 @@ endclass : axi_master_read_driver
 	task axi_master_read_driver::run_phase(uvm_phase phase);
 		// The driving should be triggered by an initial reset pulse
 		@(negedge vif.sig_reset);
-		do
-			reset();
-		while(vif.sig_reset!==1);
-		// Start driving here
+		reset();
 		get_and_drive();
 	endtask : run_phase
 
@@ -127,15 +129,47 @@ endclass : axi_master_read_driver
 **/
 //------------------------------------------------------------------------------
 	task axi_master_read_driver::get_and_drive();
+
 		fork
-			forever begin
-				@(negedge vif.sig_reset);
-				reset();
-			end
+			@(negedge vif.sig_reset);
+
+			get_from_seq();
 			drive_addr_channel();
 			read_data_channel();
+
+		join_any
+		disable fork;
+
+		// only way to get to this point is after reset
+		reset();
+
+		// start everything again
+		fork 
+			get_and_drive();
 		join
+
 	endtask : get_and_drive
+
+//------------------------------------------------------------------------------
+/**
+* Task : get_from_seq
+* Purpose : get new burst from sequencer
+* Inputs :
+* Outputs :
+* Ref :
+**/
+//------------------------------------------------------------------------------
+	task axi_master_read_driver::get_from_seq();
+
+		forever begin
+			// get from seq
+			seq_item_port.get(req);
+			// and put all bursts in a queue
+			burst_queue.push_back(req);
+			resp.new_burst(req);	// send burst to resp so responses can be calculated
+		end
+
+	endtask : get_from_seq
 
 //------------------------------------------------------------------------------
 /**
@@ -152,10 +186,18 @@ endclass : axi_master_read_driver
 		resp_burst = axi_read_burst_frame::type_id::create("resp_burst");
 
 		`uvm_info(get_type_name(), "Reset", UVM_MEDIUM)
+		
+		// send responses to seq. for all outstanding bursts
+		// resp_burst will have a UVM_TLM_INCOMPLETE_RESPONSE which will reset the seq.
+		// else - seq. is not waiting for any responses
+		resp.reset(resp_burst);
+		if(resp_burst.status == UVM_TLM_INCOMPLETE_RESPONSE)
+			seq_item_port.put(resp_burst);
 
-		@(posedge vif.sig_clock);	// reset can be asynchronous, but deassertion must be synchronous with clk
-		#1	// for simulation
+		// reset the queue of burst waiting to be sent
+		burst_queue.delete();
 
+		vif.arvalid <= 1'b0;
 		vif.arid <= {RID_WIDTH {1'b0}};
 		vif.araddr <= {ADDR_WIDTH {1'b0}};
 		vif.arlen <= 8'h0;
@@ -167,19 +209,11 @@ endclass : axi_master_read_driver
 		vif.arqos <= 4'h0;
 		vif.arregion <= 4'h0;
 		vif.aruser <= {ARUSER_WIDTH {1'b0}};
-		vif.arvalid <= 1'b0;
 
 		if (master_ready_rand_enable)
 			vif.rready <= ready_rand.getRandom();
 		else
 			vif.rready <= 1'b1;
-		
-		// send responses to seq. for all outstanding bursts
-		// resp_burst will have a UVM_TLM_INCOMPLETE_RESPONSE which will reset the seq.
-		// else - seq. is not waiting for any responses
-		resp.reset(resp_burst);
-		if(resp_burst.status == UVM_TLM_INCOMPLETE_RESPONSE)
-			seq_item_port.put(resp_burst);
 
 	endtask : reset
 
@@ -242,48 +276,56 @@ endclass : axi_master_read_driver
 //------------------------------------------------------------------------------
 	task axi_master_read_driver::drive_addr_channel();
 		int bursts_in_pipe;
+		axi_read_burst_frame current_burst;
 
 		@(posedge vif.sig_clock iff vif.sig_reset == 1);	// only for the first time
 
 		forever begin
-			// get from seq
-			seq_item_port.get(req);
 
-			// wait if there is a delay
-			if(req.delay > 0) begin
-				repeat(req.delay) @(posedge vif.sig_clock iff vif.sig_reset == 1);
-			end
-
-			// check if pipe is full and wait until it is freed up
-			resp.get_num_of_bursts(bursts_in_pipe);
-			if(bursts_in_pipe >= MASTER_PIPE_SIZE) begin
-				do begin
-					@ (posedge vif.sig_clock);
-					resp.get_num_of_bursts(bursts_in_pipe);
+			// get burst and send it
+			if(burst_queue.size()) begin
+				current_burst = burst_queue.pop_front();
+			
+				// wait if there is a delay
+				if(current_burst.delay > 0) begin
+					repeat(current_burst.delay) @(posedge vif.sig_clock);
 				end
-				while(bursts_in_pipe >= MASTER_PIPE_SIZE);
+
+				// check if pipe is full and wait until it is freed up
+				resp.get_num_of_bursts(bursts_in_pipe);
+				if(bursts_in_pipe >= MASTER_PIPE_SIZE) begin
+					do begin
+						@ (posedge vif.sig_clock);
+						resp.get_num_of_bursts(bursts_in_pipe);
+					end
+					while(bursts_in_pipe >= MASTER_PIPE_SIZE);
+				end
+
+				#1	// for simulation
+				vif.arid <= current_burst.id;
+				vif.araddr <= current_burst.addr;
+				vif.arlen <= current_burst.len;
+				vif.arsize <= current_burst.size;
+				vif.arburst <= current_burst.burst_type;
+				vif.arlock <= current_burst.lock;
+				vif.arcache <= current_burst.cache;
+				vif.arprot <= current_burst.prot;
+				vif.arqos <= current_burst.qos;
+				vif.arregion <= current_burst.region;
+				vif.aruser <= current_burst.user;
+				vif.arvalid <= 1'b1;
+
+				resp.send_burst(current_burst);	// send burst to resp so responses can be calculated
+
+				@(posedge vif.sig_clock iff (vif.arready && (vif.sig_reset == 1)));	// wait for slave
+				#1	// for simulation
+				vif.arvalid <= 1'b0;
+
 			end
-
-			#1	// for simulation
-
-			vif.arid <= req.id;
-			vif.araddr <= req.addr;
-			vif.arlen <= req.len;
-			vif.arsize <= req.size;
-			vif.arburst <= req.burst_type;
-			vif.arlock <= req.lock;
-			vif.arcache <= req.cache;
-			vif.arprot <= req.prot;
-			vif.arqos <= req.qos;
-			vif.arregion <= req.region;
-			vif.aruser <= req.user;
-			vif.arvalid <= 1'b1;
-
-			resp.new_burst(req);	// send burst to resp so responses can be calculated
-
-			@(posedge vif.sig_clock iff vif.arready);	// wait for slave
-			#1	// for simulation
-			vif.arvalid <= 1'b0;
+			else begin
+				#1	// for simulation
+				vif.arvalid <= 1'b0;
+			end
 
 		end
 	endtask : drive_addr_channel

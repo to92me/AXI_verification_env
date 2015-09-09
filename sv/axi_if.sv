@@ -99,7 +99,11 @@ interface axi_if (input sig_reset, input sig_clock);
 // axi read vif assertions
 //
 //------------------------------------------------------------------------------
-    bit reset_flag = 0;
+    // helper flags
+    bit arvalid_arready_flag = 0;   // set if arvalid is HIGH and arready is LOW
+    bit rvalid_rready_flag = 0; // set if rvalid is HIGH and rready is LOW
+    bit reset_flag = 0; // set when reset occurs
+
     // catch reset signal
     always @(posedge sig_reset) begin
         reset_flag = 1;
@@ -112,7 +116,7 @@ interface axi_if (input sig_reset, input sig_clock);
 		// Assertion AXI4_ERRM_ARID_STABLE
 		// ARID remains stable when ARVALID is asserted and ARREADY is low
 		assert_AXI4_ERRM_ARID_STABLE : assert property (
-			disable iff(!has_checks || !sig_reset) 
+			disable iff(!has_checks || !sig_reset || !arvalid_arready_flag) 
 			((arvalid == 1 && arready == 0) |=> $stable(arid)))
             else
             	`uvm_error("ASSERTION_ERR","AXI4_ERRM_ARID_STABLE: ARID didn't remain stable when ARVALID is asserted and ARREADY is low")
@@ -128,7 +132,7 @@ interface axi_if (input sig_reset, input sig_clock);
         // Assertion AXI4_ERRM_ARADDR_STABLE
         // ARADDR remains stable when ARVALID is asserted and ARREADY is low
         assert_AXI4_ERRM_ARADDR_STABLE : assert property (
-        	disable iff(!has_checks || !sig_reset)
+        	disable iff(!has_checks || !sig_reset || !arvalid_arready_flag)
         	((arvalid == 1 && arready == 0) |=> $stable(araddr)))
         	else
         		`uvm_error("ASSERTION_ERR", "AXI4_ERRM_ARADDR_STABLE: ARADDR didn't remain stable when ARVALID is asserted and ARREADY is low")
@@ -144,7 +148,7 @@ interface axi_if (input sig_reset, input sig_clock);
         // Assertion AXI4_ERRM_ARLEN_STABLE
         // ARLEN remains stable when ARVALID is asserted and ARREADY is LOW
         assert_AXI4_ERRM_ARLEN_STABLE : assert property (
-        	disable iff(!has_checks || !sig_reset)
+        	disable iff(!has_checks || !sig_reset || !arvalid_arready_flag)
         	((arvalid == 1 && arready == 0) |=> $stable(arlen)))
         	else
         		`uvm_error("ASSERTION_ERR", "AXI4_ERRM_ARLEN_STABLE: ARLEN didn't remain stable when ARVALID is asserted and ARREADY is low")
@@ -160,7 +164,7 @@ interface axi_if (input sig_reset, input sig_clock);
         // Assertion AXI4_ERRM_ARSIZE_STABLE
         // ARSIZE remains stable when ARVALID is asserted and ARREADY is LOW
         assert_AXI4_ERRM_ARSIZE_STABLE : assert property (
-        	disable iff(!has_checks || !sig_reset)
+        	disable iff(!has_checks || !sig_reset || !arvalid_arready_flag)
         	((arvalid == 1 && arready == 0) |=> $stable(arsize)))
         	else
         		`uvm_error("ASSERTION_ERR", "AXI4_ERRM_ARSIZE_STABLE: ARSIZE didn't remain stable when ARVALID is asserted and ARREADY is low")
@@ -176,7 +180,7 @@ interface axi_if (input sig_reset, input sig_clock);
         // Assertion AXI4_ERRM_ARBURST_STABLE
         // ARBURST remains stable when ARVALID is asserted and ARREADY is LOW
         assert_AXI4_ERRM_ARBURST_STABLE : assert property (
-        	disable iff(!has_checks || !sig_reset)
+        	disable iff(!has_checks || !sig_reset || !arvalid_arready_flag)
         	((arvalid == 1 && arready == 0) |=> $stable(arburst)))
         	else
         		`uvm_error("ASSERTION_ERR", "AXI4_ERRM_ARBURST_STABLE: ARBURST didn't remain stable when ARVALID is asserted and ARREADY is low")
@@ -192,7 +196,7 @@ interface axi_if (input sig_reset, input sig_clock);
         // Assertion AXI4_ERRM_ARLOCK_STABLE
         // ARLOCK remains stable when ARVALID is asserted and ARREADY is LOW
         assert_AXI4_ERRM_ARLOCK_STABLE : assert property (
-        	disable iff(!has_checks || !sig_reset)
+        	disable iff(!has_checks || !sig_reset || !arvalid_arready_flag)
         	((arvalid == 1 && arready == 0) |=> $stable(arlock)))
         	else
         		`uvm_error("ASSERTION_ERR", "AXI4_ERRM_ARLOCK_STABLE: ARLOCK didn't remain stable when ARVALID is asserted and ARREADY is low")
@@ -208,7 +212,7 @@ interface axi_if (input sig_reset, input sig_clock);
         // Assertion AXI4_ERRM_ARCACHE_STABLE
         // ARCACHE remains stable when ARVALID is asserted and ARREADY is LOW
         assert_AXI4_ERRM_ARCACHE_STABLE : assert property (
-        	disable iff(!has_checks || !sig_reset)
+        	disable iff(!has_checks || !sig_reset || !arvalid_arready_flag)
         	((arvalid == 1 && arready == 0) |=> $stable(arcache)))
         	else
         		`uvm_error("ASSERTION_ERR", "AXI4_ERRM_ARCACHE_STABLE: ARCACHE didn't remain stable when ARVALID is asserted and ARREADY is low")
@@ -224,7 +228,7 @@ interface axi_if (input sig_reset, input sig_clock);
         // Assertion AXI4_ERRM_ARPROT_STABLE
         // ARPROT remains stable when ARVALID is asserted and ARREADY is LOW
         assert_AXI4_ERRM_ARPROT_STABLE : assert property (
-        	disable iff(!has_checks || !sig_reset)
+        	disable iff(!has_checks || !sig_reset || !arvalid_arready_flag)
         	((arvalid == 1 && arready == 0) |=> $stable(arprot)))
         	else
         		`uvm_error("ASSERTION_ERR", "AXI4_ERRM_ARPROT_STABLE: ARPROT didn't remain stable when ARVALID is asserted and ARREADY is low")
@@ -281,7 +285,7 @@ interface axi_if (input sig_reset, input sig_clock);
         // Assertion AXI4_ERRM_ARUSER_STABLE
         // ARUSER remains stable when ARVALID is asserted, and ARREADY is LOW
         assert_AXI4_ERRM_ARUSER_STABLE : assert property (
-        	disable iff(!has_checks || !sig_reset)
+        	disable iff(!has_checks || !sig_reset || !arvalid_arready_flag)
         	((arvalid == 1 && arready == 0) |=> $stable(aruser)))
         	else
         		`uvm_error("ASSERTION_ERR", "AXI4_ERRM_ARUSER_STABLE: ARUSER didn't remain stable when ARVALID is asserted and ARREADY is low")
@@ -297,7 +301,7 @@ interface axi_if (input sig_reset, input sig_clock);
         // Assertion AXI4_ERRM_ARQOS_STABLE
         // ARQOS remains stable when ARVALID is asserted and ARREADY is LOW
         assert_AXI4_ERRM_ARQOS_STABLE : assert property (
-        	disable iff(!has_checks || !sig_reset)
+        	disable iff(!has_checks || !sig_reset || !arvalid_arready_flag)
         	((arvalid == 1 && arready == 0) |=> $stable(arqos)))
         	else
         		`uvm_error("ASSERTION_ERR", "AXI4_ERRM_ARQOS_STABLE: ARQOS didn't remain stable when ARVALID is asserted and ARREADY is low")
@@ -313,7 +317,7 @@ interface axi_if (input sig_reset, input sig_clock);
         // Assertion AXI4_ERRM_ARREGION_STABLE
         // ARREGION remains stable when ARVALID is asserted and ARREADY is LOW
         assert_AXI4_ERRM_ARREGION_STABLE : assert property (
-        	disable iff(!has_checks || !sig_reset)
+        	disable iff(!has_checks || !sig_reset || !arvalid_arready_flag)
         	((arvalid == 1 && arready == 0) |=> $stable(arregion)))
         	else
         		`uvm_error("ASSERTION_ERR", "AXI4_ERRM_ARREGION_STABLE: ARREGION didn't remain stable when ARVALID is asserted and ARREADY is low")
@@ -345,7 +349,7 @@ interface axi_if (input sig_reset, input sig_clock);
        	// Assertion AXI4_ERRS_RID_STABLE
         // RID remains stable when RVALID is asserted and RREADY is LOW
         assert_AXI4_ERRS_RID_STABLE : assert property (
-        	disable iff(!has_checks || !sig_reset)
+        	disable iff(!has_checks || !sig_reset || !rvalid_rready_flag)
         	((rvalid == 1 && rready == 0) |=> $stable(rid)))
         	else
         		`uvm_error("ASSERTION_ERR", "AXI4_ERRS_RID_STABLE: RID didn't remain stable when RVALID is asserted and RREADY is low")
@@ -361,7 +365,7 @@ interface axi_if (input sig_reset, input sig_clock);
         // AXI4_ERRS_RDATA_STABLE
         // RDATA remains stable when RVALID is asserted and RREADY is LOW
         assert_AXI4_ERRS_RDATA_STABLE : assert property (
-        	disable iff(!has_checks || !sig_reset)
+        	disable iff(!has_checks || !sig_reset || !rvalid_rready_flag)
         	((rvalid == 1 && rready == 0) |=> $stable(rdata)))
         	else
         		`uvm_error("ASSERTION_ERR", "AXI4_ERRS_RDATA_STABLE: RDATA didn't remain stable when RVALID is asserted and RREADY is low")
@@ -377,7 +381,7 @@ interface axi_if (input sig_reset, input sig_clock);
         // Assertion AXI4_ERRS_RRESP_STABLE
         // RRESP remains stable when RVALID is asserted and RREADY is LOW
         assert_AXI4_ERRS_RRESP_STABLE : assert property (
-        	disable iff(!has_checks || !sig_reset)
+        	disable iff(!has_checks || !sig_reset || !rvalid_rready_flag)
         	((rvalid == 1 && rready == 0) |=> $stable(rresp)))
         	else
         		`uvm_error("ASSERTION_ERR", "AXI4_ERRS_RRESP_STABLE: RRESP didn't remain stable when RVALID is asserted and RREADY is low")
@@ -393,7 +397,7 @@ interface axi_if (input sig_reset, input sig_clock);
         // Assertion AXI4_ERRS_RLAST_STABLE
         // RLAST remains stable when RVALID is asserted and RREADY is LOW
         assert_AXI4_ERRS_RLAST_STABLE : assert property (
-        	disable iff(!has_checks || !sig_reset)
+        	disable iff(!has_checks || !sig_reset || !rvalid_rready_flag)
         	((rvalid == 1 && rready == 0) |=> $stable(rlast)))
         	else
         		`uvm_error("ASSERTION_ERR", "AXI4_ERRS_RLAST_STABLE: RLAST didn't remain stable when RVALID is asserted and RREADY is low")
@@ -458,7 +462,7 @@ interface axi_if (input sig_reset, input sig_clock);
         // Assertion AXI4_ERRS_RUSER_STABLE
         // RUSER remains stable when RVALID is asserted, and RREADY is LOW
         assert_AXI4_ERRS_RUSER_STABLE : assert property (
-        	disable iff(!has_checks || !sig_reset)
+        	disable iff(!has_checks || !sig_reset || !rvalid_rready_flag)
         	((rvalid == 1 && rready == 0) |=> $stable(ruser)))
         	else
         		`uvm_error("ASSERTION_ERR", "AXI4_ERRS_RUSER_STABLE: RUSER didn't remain stable when RVALID is asserted and RREADY is low")
@@ -479,6 +483,21 @@ interface axi_if (input sig_reset, input sig_clock);
         	else
         		`uvm_error("ASSERTION_ERR", "AXI4_ERRS_RID_TIEOFF: RID not stable when RID_WIDTH set to zero")
 
+
+        // set arvalid_arready_flag if needed
+        // must come after all assertions
+        // the first time arvalid goes high and arready is low, the assertions that
+        // id, len, addr... stay stable should not be checked
+        if((arvalid == 1) && (arready == 0))
+            arvalid_arready_flag = 1;
+        else
+            arvalid_arready_flag = 0;
+
+        // set rvalid_rready_flag if needed
+        if((rvalid == 1) && (rready == 0))
+            rvalid_rready_flag = 1;
+        else
+            rvalid_rready_flag = 0;
 	end
 
 endinterface : axi_if
