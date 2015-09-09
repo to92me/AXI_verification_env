@@ -44,7 +44,7 @@ class axi_read_base_frame extends uvm_sequence_item;
 	rand bit [RID_WIDTH-1 : 0]	id;
 
 	// control
-	valid_enum 				valid;
+	valid_enum 				valid;	// contols whether or not the frame should be sent
 	rand bit [2:0]			delay;
 	// response - used to signal wheteher there was a reset
 	uvm_tlm_response_status_e status;
@@ -58,6 +58,12 @@ class axi_read_base_frame extends uvm_sequence_item;
 	function new (string name = "axi_read_base_frame");
 		super.new(name);
 		this.status = UVM_TLM_OK_RESPONSE;
+		this.valid = FRAME_VALID;
+	endfunction
+
+	function post_randomize();
+		this.status = UVM_TLM_OK_RESPONSE;
+		this.valid = FRAME_VALID;
 	endfunction
 
 endclass : axi_read_base_frame
@@ -442,8 +448,8 @@ class ready_randomization;
 
 	constraint ready_default{
 		ready dist {
-			0 := 10,
-			1 := 90
+			0 := 30,
+			1 := 70
 		};
 	}
 

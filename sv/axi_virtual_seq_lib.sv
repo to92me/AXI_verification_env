@@ -109,6 +109,16 @@ class virtual_transfer_multiple_addr extends virtual_base_sequence;
 					address[i] == slave_addr[i];
 				address.size() == slave_addr.size();
 		})
+		`uvm_do_on_with(read_seq, p_sequencer.read_seqr, {
+				foreach (slave_addr[i])
+					address[i] == slave_addr[i];
+				address.size() == slave_addr.size();
+		})
+		`uvm_do_on_with(read_seq, p_sequencer.read_seqr, {
+				foreach (slave_addr[i])
+					address[i] == slave_addr[i];
+				address.size() == slave_addr.size();
+		})
 	endtask
 
 endclass : virtual_transfer_multiple_addr

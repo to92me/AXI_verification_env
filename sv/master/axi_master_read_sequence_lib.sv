@@ -104,7 +104,10 @@ class axi_master_read_multiple_addr extends axi_master_read_base_seq;
 		count = address.size();	// number of bursts to be sent
 
 		for(int i = 0; i < address.size(); i++) begin
-			`uvm_do_with(req, {req.valid == FRAME_VALID; req.addr == address[i];})
+			if (count)	// if there was a reset, count will be set to 0
+				`uvm_do_with(req, {req.addr == address[i];})
+			else
+				break;
 		end
 
 		wait(!count);	// wait for all responses before finishing simulation
@@ -155,7 +158,7 @@ endclass : axi_master_read_multiple_addr
 		if(rsp.status == UVM_TLM_INCOMPLETE_RESPONSE) begin
 			`uvm_info(get_type_name(), "Reset detected", UVM_MEDIUM)
 			count = 0;	// do not wait for any more responses
-			error_bursts.delete();	// do not try to send bursts again 	ASK DARKO!!!
+			error_bursts.delete();	// do not try to send bursts again
 		end
 
 	endfunction: response_handler
@@ -196,7 +199,10 @@ class axi_master_read_no_err_count extends axi_master_read_base_seq;
 		count = address.size();	// number of bursts to be sent
 
 		for(int i = 0; i < address.size(); i++) begin
-			`uvm_do_with(req, {req.valid == FRAME_VALID; req.addr == address[i];})
+			if (count)	// if there was a reset, count will be set to 0
+				`uvm_do_with(req, {req.addr == address[i];})
+			else
+				break;
 		end
 
 		wait(!count);	// wait for all responses before finishing simulation

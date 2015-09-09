@@ -83,9 +83,9 @@ class axi_read_zero_delay extends axi_read_base_test;
         // early termination of bursts
         uvm_config_int::set(this, "*", "terminate_enable", 1);
         // randomizing ready signal for master
-        uvm_config_int::set(this, "tb0.axi0.read_master.driver", "master_ready_rand_enable", 1);
+        uvm_config_int::set(this, "tb0.axi0.read_master.driver", "master_ready_rand_enable", 0);
         // radnomizing ready signal for slave
-        uvm_config_int::set(this, "tb0.axi0.read_slave*.driver", "slave_ready_rand_enable", 1);
+        uvm_config_int::set(this, "tb0.axi0.read_slave*.driver", "slave_ready_rand_enable", 0);
         // actions based on region signal
         uvm_config_int::set(this, "tb0.axi0.read_slave*.sequencer.arbit", "region_enable", 1);
 

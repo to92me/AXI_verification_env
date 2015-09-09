@@ -50,6 +50,10 @@ module axi_top;
         reset <= 1'b0;
         clock <= 1'b0;
         #5 reset <= 1'b1;
+        #53 reset <= 1'b0;
+        #360 reset <= 1'b1;
+        #551 reset <= 1'b0;
+        #700 reset <= 1'b1;
     end
 
     //Generate Clock

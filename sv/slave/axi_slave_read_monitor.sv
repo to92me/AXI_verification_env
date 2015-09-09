@@ -133,13 +133,7 @@ endclass : axi_slave_read_monitor
 		fork
 			new_frame();
 			new_burst();
-
-			// reset
-			forever begin
-				@(negedge vif.sig_reset);
-		    	reset();
-    		end
-
+			reset();
     		// end simulation
 			forever begin
 				@(posedge vif.sig_clock);
@@ -494,15 +488,20 @@ endclass : axi_slave_read_monitor
 //------------------------------------------------------------------------------
 	task axi_slave_read_monitor::reset();
 
-		`uvm_info(get_type_name(), $sformatf("Monitor reset"), UVM_LOW);
-		`uvm_info(get_type_name(), $sformatf("Report: AXI monitor collected: %0d bursts, %0d single frames, of which %0d bursts were finished and %0d were not and %0d frames had an error/warning", burst_queue.size()+finished_bursts.size(), num_single_frames, finished_bursts.size(), burst_queue.size(), error_frames.size()), UVM_LOW);
+		forever begin
+			@(negedge vif.sig_reset);
 
-		sem.get(1);
-			num_single_frames = 0;
-			error_frames.delete();
-			burst_queue.delete();
-			finished_bursts.delete();
-		sem.put(1);
+		    `uvm_info(get_type_name(), $sformatf("Monitor reset"), UVM_LOW);
+			`uvm_info(get_type_name(), $sformatf("Report: AXI monitor collected: %0d bursts, %0d single frames, of which %0d bursts were finished and %0d were not and %0d frames had an error/warning", burst_queue.size()+finished_bursts.size(), num_single_frames, finished_bursts.size(), burst_queue.size(), error_frames.size()), UVM_LOW);
+
+			sem.get(1);
+				num_single_frames = 0;
+				error_frames.delete();
+				burst_queue.delete();
+				finished_bursts.delete();
+			sem.put(1);
+
+    	end
 
 	endtask : reset
 

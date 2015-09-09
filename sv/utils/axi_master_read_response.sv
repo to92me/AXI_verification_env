@@ -38,8 +38,9 @@
 * Tasks :	1. check_response(axi_read_single_frame one_frame,
 *							ref axi_read_burst_frame matching_burst)
 *			2. new_burst(axi_read_burst_frame one_burst)
-*			3. get_num_of_bursts(output int num)
-*			4. reset(ref axi_read_burst_frame burst)
+*			3. send_burst(axi_read_burst_frame one_burst)
+*			4. get_num_of_bursts(output int num)
+*			5. reset(ref axi_read_burst_frame burst)
 **/
 // -----------------------------------------------------------------------------
 class axi_master_read_response extends uvm_component;
@@ -74,6 +75,7 @@ class axi_master_read_response extends uvm_component;
 
 	extern virtual task check_response(axi_read_single_frame one_frame, ref axi_read_burst_frame matching_burst);
 	extern virtual task new_burst(axi_read_burst_frame one_burst);
+	extern virtual task send_burst(axi_read_burst_frame one_burst);
 	extern virtual task get_num_of_bursts(output int num);
 	extern virtual task reset(ref axi_read_burst_frame burst);
 
@@ -147,14 +149,14 @@ endtask : check_response
 
 //------------------------------------------------------------------------------
 /**
-* Task : new_burst
+* Task : send_burst
 * Purpose : when the master sends a new burst frame, put it in the queue
 * Inputs : one_burst - burst request sent by master to slave
 * Outputs :
 * Ref :
 **/
 //------------------------------------------------------------------------------
-task axi_master_read_response::new_burst(axi_read_burst_frame one_burst);
+task axi_master_read_response::send_burst(axi_read_burst_frame one_burst);
 
 	axi_read_whole_burst whole_burst;
 
@@ -163,8 +165,22 @@ task axi_master_read_response::new_burst(axi_read_burst_frame one_burst);
 
 	sem.get(1);
 	sent_bursts.push_back(whole_burst);	// copy (with single frames queue)
-	response_bursts.push_back(one_burst);	// original
 	sem.put(1);
+
+endtask : send_burst
+
+//------------------------------------------------------------------------------
+/**
+* Task : new_burst
+* Purpose : when the master gets a new burst from the seq.
+* Inputs : one_burst - burst from seq.
+* Outputs :
+* Ref :
+**/
+//------------------------------------------------------------------------------
+task axi_master_read_response::new_burst(axi_read_burst_frame one_burst);
+
+	response_bursts.push_back(one_burst);
 
 endtask : new_burst
 
