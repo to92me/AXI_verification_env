@@ -1067,8 +1067,12 @@ class axi_write_global_conf extends uvm_object;
 	true_false_enum			correct_driving_vif 					= TRUE;
 	true_false_enum			axi_3_support							= TRUE;
 	int 					master_write_deepth 					= 5;
-	true_false_enum 		delay_betwen_burst_packages				= TRUE;
-
+	int				 		delay_between_burst_packages			= 1;
+	true_false_enum			delay_addr_package						= TRUE;
+	true_false_enum			delay_data_package						= TRUE;
+	int 					delay_between_packages_minimum			= 0;
+	int 					delay_between_packages_maximum			= 50;
+	int 					delay_between_packages_constant 		= 20;
 
  `uvm_object_utils_begin(axi_write_global_conf)
 	 `uvm_field_enum(true_false_enum, do_coverage, UVM_DEFAULT)
@@ -1076,7 +1080,12 @@ class axi_write_global_conf extends uvm_object;
 	 `uvm_field_enum(true_false_enum, correct_driving_vif, UVM_DEFAULT)
 	 `uvm_field_enum(true_false_enum, axi_3_support, UVM_DEFAULT)
 	 `uvm_field_int(master_write_deepth, UVM_DEFAULT)
-	 `uvm_field_enum(true_false_enum, delay_betwen_burst_packages, UVM_DEFAULT)
+	 `uvm_field_int(delay_between_burst_packages, UVM_DEFAULT)
+	 `uvm_field_enum(true_false_enum, delay_addr_package, UVM_DEFAULT)
+	 `uvm_field_enum(true_false_enum, delay_data_package, UVM_DEFAULT)
+	 `uvm_field_int(delay_between_packages_minimum, UVM_DEFAULT)
+	 `uvm_field_int(delay_between_packages_maximum, UVM_DEFAULT)
+	 `uvm_field_int(delay_between_packages_constant, UVM_DEFAULT)
  `uvm_object_utils_end
 
 
@@ -1137,13 +1146,61 @@ class axi_write_global_conf extends uvm_object;
 		this.do_coverage = do_coverage;
 	endfunction
 
-	function void setDelay_betwen_burst_packages(input true_false_enum delay_betwen_burst_packages);
-		this.delay_betwen_burst_packages = delay_betwen_burst_packages;
+	function void setDelay_between_burst_packages(input int delay_betewen_burst_packages);
+		this.delay_between_burst_packages = delay_between_burst_packages;
 	endfunction
 
-	function true_false_enum getDelay_betwen_burst_packages();
-		return this.delay_betwen_burst_packages;
+	function int  getDelay_between_burst_packages();
+		return this.delay_between_burst_packages;
 	endfunction
+
+	function true_false_enum getDelay_data_package();
+		return delay_data_package;
+	endfunction
+
+	function void setDelay_data_package(true_false_enum delay_data_package);
+		this.delay_data_package = delay_data_package;
+	endfunction
+
+	function true_false_enum getDelay_addr_package();
+		return delay_addr_package;
+	endfunction
+
+	function void setDelay_addr_package(true_false_enum delay_addr_package);
+		this.delay_addr_package = delay_addr_package;
+	endfunction
+
+	// Get delay_between_packages_maximum
+	function int getDelay_between_packages_maximum();
+		return delay_between_packages_maximum;
+	endfunction
+
+	// Set delay_between_packages_maximum
+	function void setDelay_between_packages_maximum(int delay_between_packages_maximum);
+		this.delay_between_packages_maximum = delay_between_packages_maximum;
+	endfunction
+
+	// Get delay_between_packages_minimum
+	function int getDelay_between_packages_minimum();
+		return delay_between_packages_minimum;
+	endfunction
+
+	// Set delay_between_packages_minimum
+	function void setDelay_between_packages_minimum(int delay_between_packages_minimum);
+		this.delay_between_packages_minimum = delay_between_packages_minimum;
+	endfunction
+
+	// Get delay_between_packages_constant
+	function int getDelay_between_packages_constant();
+		return delay_between_packages_constant;
+	endfunction
+
+	// Set delay_between_packages_constant
+	function void setDelay_between_packages_constant(int delay_between_packages_constant);
+		this.delay_between_packages_constant = delay_between_packages_constant;
+	endfunction
+
+
 
 
 endclass

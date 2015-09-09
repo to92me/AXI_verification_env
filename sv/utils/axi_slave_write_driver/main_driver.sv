@@ -99,7 +99,7 @@ endclass : axi_slave_write_main_driver
 			this.main();
 			this.driver_addr.main();
 			this.driver_data.main();
-			this.driver_rsp.main();   // FIXME
+			this.driver_rsp.main(); 
 		join
 	endtask
 
@@ -167,7 +167,7 @@ endclass : axi_slave_write_main_driver
 									begin
 										$display("ERROR  DATA PACKAGE ADDING sending last but di not get last, iD: %d, count = %d", rsp.ID, burst_status_queue[i].len);
 									end
-								driver_rsp.pushRsp(rsp);   // FIXME
+								driver_rsp.pushRsp(rsp); 
 								tmp = i;
 							end
 					end
@@ -211,7 +211,7 @@ endclass : axi_slave_write_main_driver
 									begin
 										$display("ERROR  ADDR PACKAGE ADDING sending last but di not get last, iD: %d, count = %d", rsp.ID, burst_status_queue[i].len);
 									end
-								driver_rsp.pushRsp(rsp); // FIXME
+								driver_rsp.pushRsp(rsp); 
 								tmp = i;
 							end
 					end

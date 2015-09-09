@@ -7,31 +7,89 @@
 //
 //------------------------------------------------------------------------------
 class randomize_data;
-		rand int delay;
-		rand int delay_data;
-		rand int delay_addr;
-		rand int delay_awvalid;
-		rand int delay_wvalid;
-		true_false_enum delay_addr_exists = FALSE;
+		rand int 				delay;
+		rand int 				delay_data;
+		rand int 				delay_addr;
+
+		int						delay_between_packages;
+		int 					delay_between_packages_minimum;
+		int 					delay_between_packages_maximum;
+		int 					delay_between_packages_cosntat;
+		true_false_enum			delay_addr_package;
+		true_false_enum 		delay_data_package;
 
 
-		constraint delay_cst{
-			delay inside {[0 : 50]}; // initial constraint - needst ti be reset for real testing
+		constraint delay_between_packages_cs{
+			if(delay_between_packages == 1){
+				delay == 0;
+			}else if(delay_between_packages == 2){
+				delay == delay_between_packages_cosntat;
+			}else{
+				delay inside{[delay_between_packages_minimum : delay_between_packages_maximum]};
+			}
 		}
 
-		constraint deleay_addrdata_csr{
-			if(delay_addr_exists == TRUE){
-				delay_addr inside {[0:5]};
+		constraint delay_addr_cs{
+			if(delay_addr_package == TRUE){
+				delay_addr inside {[0 : 5]};
 			}else{
 				delay_addr == 0;
-				}
-			delay_data inside {[0:5]};
+			}
 		}
 
-		constraint delay_valid_csr{
-			delay_awvalid 	inside {[0:5]};
-			delay_wvalid 	inside {[0:5]};
+		constraint delay_data_cs{
+			if(delay_data_package == TRUE){
+				delay_data inside {[0 : 5]};
+			}else{
+				delay_data == 0;
+			}
 		}
+
+		// Get delay
+		function int getDelay();
+			return delay;
+		endfunction
+
+		// Get delay_addr
+		function int getDelay_addr();
+			return delay_addr;
+		endfunction
+
+
+		// Set delay_addr_package
+		function void setDelay_addr_package(true_false_enum delay_addr_package);
+			this.delay_addr_package = delay_addr_package;
+		endfunction
+
+		// Set delay_between_packages
+		function void setDelay_between_packages(int delay_between_packages);
+			this.delay_between_packages = delay_between_packages;
+		endfunction
+
+		// Set delay_between_packages_cosntat
+		function void setDelay_between_packages_cosntat(int delay_between_packages_cosntat);
+			this.delay_between_packages_cosntat = delay_between_packages_cosntat;
+		endfunction
+
+		// Set delay_between_packages_maximum
+		function void setDelay_between_packages_maximum(int delay_between_packages_maximum);
+			this.delay_between_packages_maximum = delay_between_packages_maximum;
+		endfunction
+
+		// Set delay_between_packages_minimum
+		function void setDelay_between_packages_minimum(int delay_between_packages_minimum);
+			this.delay_between_packages_minimum = delay_between_packages_minimum;
+		endfunction
+
+		// Get delay_data
+		function int getDelay_data();
+			return delay_data;
+		endfunction
+
+		// Set delay_data_package
+		function void setDelay_data_package(true_false_enum delay_data_package);
+			this.delay_data_package = delay_data_package;
+		endfunction
 
 
 
@@ -58,9 +116,15 @@ class axi_master_write_scheduler_packages;
 	int 					slave_error_counter = 0;
 	randomize_data 			rand_data;
 
+	axi_write_global_conf		global_config_obj;
+
+
 	semaphore 				sem;
 
-	function new ();
+
+
+
+	function new (string name = "SchedulerPackage");
 		one_frame = new();
 		burst_status = new();
 		rand_data = new();
@@ -74,15 +138,16 @@ class axi_master_write_scheduler_packages;
 	extern task decrementDelay();
 	extern task addSingleFrame(input axi_single_frame frame_for_push);
 	extern function int size();
-	extern task addBurst(input axi_frame frame);
+	extern task addBurst(input axi_frame frame, axi_write_global_conf config_obj);
 	extern task empyQueue();
-	extern task reincarnate();
+	extern task reincarnate( axi_write_global_conf global_config_obj);
 	extern function void resetErrorCounter();
 	extern function int incrementErrorCounter(); // it returns state = number of error counter
 	extern function int getErrorCounter();
 	extern function burst_package_info getBurstInfo();
 
 	extern function void calculateStrobe();
+	extern function void setGlobalConfgiuration(input axi_write_global_conf global_config_obj);
 
 
 endclass : axi_master_write_scheduler_packages
@@ -128,7 +193,7 @@ endtask
 
 
 task axi_master_write_scheduler_packages::decrementDelay();
-	one_frame = data_queue.pop_front;
+	one_frame = data_queue.pop_front();
 	if(one_frame != null)
 	begin
 		if (one_frame.delay != 0)
@@ -147,15 +212,16 @@ function int axi_master_write_scheduler_packages::size();
     return(data_queue.size);
 endfunction
 
-task axi_master_write_scheduler_packages::addBurst(input axi_frame frame);
+task axi_master_write_scheduler_packages::addBurst(input axi_frame frame, axi_write_global_conf config_obj);
 		int tmp_add = 0;
 		$write("\nadded new frame \n");
+		this.setGlobalConfgiuration(config_obj);
 
 		for(int i = 0; i<=frame.len; i++)
 			begin
-				rand_data = new();
+
 				assert(rand_data.randomize);
-				tmp_single_frame 			= new();
+				tmp_single_frame 				= new();
 				tmp_single_frame.data 			= frame.data[i];
 				tmp_single_frame.addr 			= frame.addr;
 				tmp_single_frame.size 			= frame.size;
@@ -169,8 +235,6 @@ task axi_master_write_scheduler_packages::addBurst(input axi_frame frame);
 				tmp_single_frame.delay 			= rand_data.delay;
 				tmp_single_frame.delay_addr 	= rand_data.delay_addr;
 				tmp_single_frame.delay_data 	= rand_data.delay_data;
-				tmp_single_frame.delay_awvalid 	= rand_data.delay_awvalid;
-				tmp_single_frame.delay_wvalid 	= rand_data.delay_wvalid;
 				tmp_single_frame.last_one 		= FALSE;
 				tmp_single_frame.len			= frame.len+1;
 				sem.get(1);
@@ -188,6 +252,7 @@ task axi_master_write_scheduler_packages::addBurst(input axi_frame frame);
 			data_queue[data_queue.size() -1].last_one = TRUE;
 			data_queue[0].first_one = TRUE;
 			this.address = frame.addr;
+			sem.put(1);
 
 endtask
 
@@ -200,10 +265,10 @@ task axi_master_write_scheduler_packages::empyQueue();
 	sem.put(1);
 endtask
 
-task  axi_master_write_scheduler_packages::reincarnate();
+task  axi_master_write_scheduler_packages::reincarnate(axi_write_global_conf global_config_obj);
    	$display("recreating burst with ID: %d", this.ID);
 	this.empyQueue();
-	this.addBurst(this.frame_copy);
+	this.addBurst(this.frame_copy,global_config_obj);
 endtask
 
 function void axi_master_write_scheduler_packages::resetErrorCounter();
@@ -283,6 +348,15 @@ function void axi_master_write_scheduler_packages::calculateStrobe();
 			data_queue[i].data = data_to_single_frame.data;
 			data_queue[i].strobe = strobe_data.one_byte;
 		end
+endfunction
+
+function void axi_master_write_scheduler_packages::setGlobalConfgiuration(input axi_write_global_conf global_config_obj);
+	rand_data.setDelay_between_packages(global_config_obj.getDelay_between_burst_packages());
+	rand_data.setDelay_between_packages_minimum(global_config_obj.getDelay_between_packages_minimum());
+	rand_data.setDelay_between_packages_maximum(global_config_obj.getDelay_between_packages_maximum());
+	rand_data.setDelay_between_packages_cosntat(global_config_obj.getDelay_between_packages_constant());
+	rand_data.setDelay_addr_package(global_config_obj.getDelay_addr_package());
+	rand_data.setDelay_data_package(global_config_obj.getDelay_data_package());
 endfunction
 
 `endif

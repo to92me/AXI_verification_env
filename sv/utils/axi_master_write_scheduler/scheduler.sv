@@ -19,25 +19,28 @@ typedef enum {
 
 class axi_master_write_scheduler extends uvm_component;
 
-	axi_master_write_scheduler_packages 	burst_queue[$];
-	axi_master_write_scheduler_packages 	burst_existing_id[$];
-	axi_waiting_resp						waiting_for_resp_queue[$];
-	bit[ID_WIDTH - 1: 0] 					burst_empyt_queue[$];
-	axi_waiting_resp						single_waiting_for_resp;
-	axi_master_write_scheduler_packages 	single_burst;
-	axi_single_frame 						next_frame_for_sending[$];
-	axi_single_frame 						next_address_for_sending[$];
-	axi_frame 								used_ID_queue[$];
-	axi_frame 								frame_same_id;
-	axi_mssg 								mssg;
-	axi_mssg 								send;
-	int 									response_latenes_error_rising = 1000000000;
-	axi_slave_response						response_from_slave_queue[$];
-	axi_slave_response						single_response_from_slave;
-	int 									error_before_delte_item = 4;
-	true_false_enum							testing_completed = FALSE;
-	int 									burst_deepth = 4;
-	int 									active_bursts = 0;
+	axi_master_write_scheduler_packages 					burst_queue[$];
+	axi_master_write_scheduler_packages 					burst_existing_id[$];
+	axi_waiting_resp										waiting_for_resp_queue[$];
+	bit[ID_WIDTH - 1: 0] 									burst_empyt_queue[$];
+	axi_waiting_resp										single_waiting_for_resp;
+	axi_master_write_scheduler_packages 					single_burst;
+	axi_single_frame 										next_frame_for_sending[$];
+	axi_single_frame 										next_address_for_sending[$];
+	axi_frame 												used_ID_queue[$];
+	axi_frame 												frame_same_id;
+	axi_mssg 												mssg;
+	axi_mssg 												send;
+	int 													response_latenes_error_rising 	= 1000000000;
+	axi_slave_response										response_from_slave_queue[$];
+	axi_slave_response										single_response_from_slave;
+	int 													error_before_delte_item 		= 4;
+	true_false_enum											testing_completed 				= FALSE;
+	int 													burst_deepth 					= 4;
+	int 													active_bursts 					= 0;
+	axi_master_write_correct_incorrect_value_randomization	correct_value_randomization;
+	axi_write_conf											uvc_config_obj;
+	axi_write_global_conf									global_config_obj;
 //	mailbox 								mbx;
 
 
@@ -54,6 +57,7 @@ class axi_master_write_scheduler extends uvm_component;
 	virtual interface axi_if vif;
 	int empyt_scheduler_packages[$];
 
+	extern function void build_phase(uvm_phase phase);
 	extern local function new(string name, uvm_component parent); // DONE
 	extern task addBurst(input axi_frame frame); // DONE
 	extern task serchForReadyFrame(); //DONE
@@ -71,6 +75,7 @@ class axi_master_write_scheduler extends uvm_component;
 	extern local task removeBurstAndCheckExisintgID(input bit[ID_WIDTH - 1 : 0] rsp_id);
 	extern local task checkForDone();
 	extern function  void setTopDriverInstance(input axi_master_write_driver top_driver_instance);
+	extern function void setRandomDelayConfiguration();
 
 
 
@@ -85,18 +90,30 @@ endclass : axi_master_write_scheduler
 		mssg = new();
 		single_response_from_slave = new();
 		sem = new(1);
+		rand_data = new();
+		correct_value_randomization = axi_master_write_correct_incorrect_value_randomization::type_id::create("CorrectValueRandomization", this);
 	endfunction : new
+
+
+	function void axi_master_write_scheduler::build_phase(input uvm_phase phase);
+	    super.build_phase(phase);
+
+		if(!uvm_config_db#(axi_write_conf)::get(this, "", "uvc_write_config", uvc_config_obj))
+		 `uvm_fatal("NO UVC_CONFIG",{"uvc_write config must be set for ",get_full_name(),".uvc_write_config"})
+
+		setRandomDelayConfiguration();
+
+	endfunction
 
 // ADD BURST
 	task axi_master_write_scheduler::addBurst(input axi_frame frame);
 		int tmp_add = 0;
 
-
+//		correct_value_randomization.setValues(frame);
 		single_burst = new();
 		for(int i = 0; i<=frame.len; i++)
 
 			begin
-				rand_data = new();
 				assert(rand_data.randomize);
 				tmp_data = new();
 				tmp_data.data 				= frame.data[i];
@@ -112,8 +129,8 @@ endclass : axi_master_write_scheduler
 				tmp_data.delay 				= rand_data.delay;
 				tmp_data.delay_addr 		= rand_data.delay_addr;
 				tmp_data.delay_data 		= rand_data.delay_data;
-				tmp_data.delay_awvalid 		= rand_data.delay_awvalid;
-				tmp_data.delay_wvalid 		= rand_data.delay_wvalid;
+//				tmp_data.delay_awvalid 		= rand_data.delay_awvalid;
+//				tmp_data.delay_wvalid 		= rand_data.delay_wvalid;
 				tmp_data.last_one 			= FALSE;
 				tmp_data.len				= frame.len+1;
 				sem.get(1);
@@ -295,7 +312,7 @@ endclass : axi_master_write_scheduler
 		int tmp_iterator;
 		axi_master_write_scheduler_packages sch_package;
 
-		sch_package = new();
+		sch_package = new("SchedulerPackage");
 
 		while(!done)
 		begin
@@ -332,15 +349,15 @@ endclass : axi_master_write_scheduler
 								end
 						end
 					waiting_for_resp_queue.push_back(single_waiting_for_resp);
-					if(burst_queue[burst_deepth+1] != null)
-						begin
-							if(burst_queue[burst_deepth].first_status == FIRST_SENT && active_bursts <= burst_deepth)
-								burst_queue[burst_deepth+1].lock_state = QUEUE_UNLOCKED;
-							else
-								active_bursts--;
-						end
-					else
-						active_bursts--;
+//					if(burst_queue[burst_deepth+1] != null)
+//						begin
+//							if(burst_queue[burst_deepth].first_status == FIRST_SENT && active_bursts <= burst_deepth)
+//								burst_queue[burst_deepth+1].lock_state = QUEUE_UNLOCKED;
+//							else
+//								active_bursts--;
+//						end
+//					else
+//						active_bursts--;
 
 					burst_queue.delete(tmp_iterator);
 					state_check_ID = NEXT_CHECK;
@@ -433,6 +450,19 @@ task axi_master_write_scheduler::readSlaveResponse();
 //				single_waiting_for_resp = waiting_for_resp_queue.pop_front();
 				single_response_from_slave = response_from_slave_queue.pop_front();
 //				sem.put(1);
+
+
+				if(burst_queue[burst_deepth+1] != null)
+						begin
+							if(burst_queue[burst_deepth].first_status == FIRST_SENT && active_bursts <= burst_deepth)
+								burst_queue[burst_deepth+1].lock_state = QUEUE_UNLOCKED;
+							else
+								active_bursts--;
+						end
+					else
+						active_bursts--;
+
+
 			end
 
 		case (single_response_from_slave.rsp) // check for  response
@@ -500,7 +530,7 @@ task axi_master_write_scheduler::errorFromSlaveRepetaTransaction(input bit[ID_WI
 			if(burst_queue[i].ID == rsp_id)
 				begin
 					if(burst_queue[i].getErrorCounter() < this.error_before_delte_item )
-						burst_queue[i].reincarnate();
+						burst_queue[i].reincarnate(global_config_obj);
 					else
 						this.removeBurstAndCheckExisintgID(rsp_id);
 				end
@@ -553,6 +583,17 @@ task axi_master_write_scheduler::checkForDone();
 	   end
 endtask
 
+function void axi_master_write_scheduler::setRandomDelayConfiguration();
+	global_config_obj = uvc_config_obj.getGlobal_config_object();
+
+	rand_data.setDelay_between_packages(global_config_obj.getDelay_between_burst_packages());
+	rand_data.setDelay_between_packages_minimum(global_config_obj.getDelay_between_packages_minimum());
+	rand_data.setDelay_between_packages_maximum(global_config_obj.getDelay_between_packages_maximum());
+	rand_data.setDelay_between_packages_cosntat(global_config_obj.getDelay_between_packages_constant());
+	rand_data.setDelay_addr_package(global_config_obj.getDelay_addr_package());
+	rand_data.setDelay_data_package(global_config_obj.getDelay_data_package());
+
+endfunction
 
 
 

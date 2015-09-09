@@ -319,7 +319,13 @@ function void axi_write_configuration_wrapper::fillGlobalConfiguration(ref strin
 	global_confing_queue.push_front("axi_3_support");
 	global_confing_queue.push_front("master_write_deepth");
 	global_confing_queue.push_front("full_speed");
-	global_confing_queue.push_front("delay_betwen_burst_packages");
+	global_confing_queue.push_front("delay_between_burst_packages");
+	global_confing_queue.push_front("delay_addr_package");
+	global_confing_queue.push_front("delay_data_package");
+	global_confing_queue.push_front("delay_between_packages_minimum");
+	global_confing_queue.push_front("delay_between_packages_maximum");
+	global_confing_queue.push_front("delay_between_packages_constant");
+
 endfunction
 
 
@@ -583,11 +589,21 @@ function void axi_write_configuration_wrapper::parseUserGlobalConfiguration();
 					$display("setMaster_write_deepth : %d",global_config_object.getMaster_write_deepth());
 				end
 
+//FULL SPEED
 			else if(option.icompare("full_speed") == 0)
 				begin
 
-					global_config_object.setDelay_betwen_burst_packages(FALSE);
-					void'(removeStringFromQueue("delay_betwen_burst_packages", globalc));
+					global_config_object.setDelay_between_burst_packages(FALSE);
+					void'(removeStringFromQueue("delay_between_burst_packages", globalc));
+					void'(removeStringFromQueue("delay_between_packages_minimum", globalc));
+					void'(removeStringFromQueue("delay_between_packages_maximum", globalc));
+					void'(removeStringFromQueue("delay_between_packages_constant", globalc));
+
+
+					global_config_object.setDelay_addr_package(FALSE);
+					void'(removeStringFromQueue("delay_addr_package", globalc));
+					global_config_object.setDelay_data_package(FALSE);
+					void'(removeStringFromQueue("delay_data_package", globalc));
 
 					master_resp_config_object.setReady_constant(TRUE);
 					master_resp_config_object.setReady_const_value(1);
@@ -669,11 +685,48 @@ function void axi_write_configuration_wrapper::parseUserGlobalConfiguration();
 
 				end
 
-			else if(option.icompare("delay_betwen_burst_packages") == 0)
+// DELAY BETWEAN BURSTS PACKAGES
+			else if(option.icompare("delay_between_burst_packages") == 0)
 				begin
-					global_config_object.setDelay_betwen_burst_packages(global_conf[i].getValue());
-					$display("delay_betwen_burst_packages : %d",global_config_object.getDelay_betwen_burst_packages());
+					global_config_object.setDelay_between_burst_packages(global_conf[i].getValue());
+					$display("delay_between_burst_packages : %d",global_config_object.getDelay_between_burst_packages());
 				end
+
+// DELAY BETWEEN BURSTS PACKAGES MINIMUM
+			else if(option.icompare("delay_between_packages_minimum") == 0)
+				begin
+					global_config_object.setDelay_between_packages_minimum(global_conf[i].getValue());
+					$display("delay_between_packages_minimum : %d",global_config_object.getDelay_between_packages_minimum());
+				end
+
+// DELAY BETWEEN BURSTS PACKAGES MAXIMUM
+			else if(option.icompare("delay_between_packages_maximum") == 0)
+				begin
+					global_config_object.setDelay_between_packages_maximum(global_conf[i].getValue());
+					$display("delay_between_packages_maximum : %d",global_config_object.getDelay_between_packages_maximum());
+				end
+
+// DELAY BETWEEN BURSTS PACKAGES CONSTANT
+			else if(option.icompare("delay_between_packages_constant") == 0)
+				begin
+					global_config_object.setDelay_between_packages_constant(global_conf[i].getValue());
+					$display("delay_between_packages_constant : %d",global_config_object.getDelay_between_packages_constant());
+				end
+
+// DELAY ADDR PACKAGE
+			else if(option.icompare("delay_addr_package") == 0)
+				begin
+					global_config_object.setDelay_addr_package(global_conf[i].getValue());
+					$display("delay_addr_package : %d",global_config_object.getDelay_addr_package());
+				end
+
+//DELAY DATA PACKAGE
+			else if(option.icompare("delay_data_package") == 0)
+				begin
+					global_config_object.setDelay_data_package(global_conf[i].getValue());
+					$display("delay_data_package : %d",global_config_object.getDelay_data_package());
+				end
+
 			end
 		else
 			begin
@@ -1159,7 +1212,7 @@ function void axi_write_configuration_wrapper::checkUnsettedConfiguration();
 	foreach(master_data[i])
 		begin
 			$display("Configuration unsetted : %s, ussing default configuration", master_data[i]);
-			`uvm_info("ConfigurationWrapper [U]: ",$sformatf("Configuration unsetted : %s, ussing default configuration", master_data[i]), UVM_INFO);
+//			`uvm_info("ConfigurationWrapper [U]: ",$sformatf("Configuration unsetted : %s, ussing default configuration", master_data[i]), UVM_INFO);
 		end
 
 	foreach(master_addr[i])

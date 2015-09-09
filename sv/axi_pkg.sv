@@ -79,6 +79,8 @@ package axi_pkg;
 	typedef class axi_write_conf;
 	typedef class axi_write_buss_write_configuration;
 	typedef class axi_write_buss_read_configuration;
+	typedef class axi_master_write_correct_incorrect_value_randomization;
+	typedef class axi_write_global_conf;
 	//=================END CONFIGURATIONS===========================
 
 
@@ -232,6 +234,7 @@ package axi_pkg;
 	`include "sv/utils/configuration/write_configuration_wrapper.sv"
 	`include "configurations/register_configuration.sv"
 	`include "configurations/write_user_configuration.sv"
+	`include "sv/utils/axi_master_write_scheduler/correct_incorrect_value_randomization.sv"
 	//=================END CONFIGURATIONS===========================
 
 

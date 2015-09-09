@@ -18,7 +18,8 @@ class axi_frame_base extends uvm_sequence_item;
 	rand bit [2:0]					prot;
 	rand bit [3:0]					qos;
 	rand bit [3:0]					region;
-
+	rand bit [WUSER_WIDTH -1 : 0]	wuser;
+	rand bit [AWUSER_WIDTH - 1 : 0]	awuser;
 
 	// UVM utility macros
 	`uvm_object_utils_begin(axi_frame_base)
@@ -32,7 +33,8 @@ class axi_frame_base extends uvm_sequence_item;
 	 `uvm_field_int(prot, UVM_DEFAULT)
 	 `uvm_field_int(qos, UVM_DEFAULT)
 	 `uvm_field_int(region, UVM_DEFAULT)
- //`uvm_field_int(user, UVM_DEFAULT)
+	 `uvm_field_int(wuser, UVM_DEFAULT)
+	 `uvm_field_int(awuser, UVM_DEFAULT)
  `uvm_object_utils_end
 
 	function new (string name = "axi_frame");
@@ -77,8 +79,8 @@ class axi_single_frame extends axi_frame_base;
 	rand int 						delay;
 	rand int						delay_addr;
 	rand int 						delay_data;
-	rand int 						delay_awvalid;
-	rand int 						delay_wvalid;
+//	rand int 						delay_awvalid;
+//	rand int 						delay_wvalid;
 	bit [STRB_WIDTH - 1 : 0]		strobe;
 	true_false_enum 				last_one = FALSE;
 	true_false_enum 				first_one = FALSE;
@@ -89,8 +91,8 @@ class axi_single_frame extends axi_frame_base;
 	 `uvm_field_int(delay, UVM_DEFAULT)
 	 `uvm_field_int(delay_addr, UVM_DEFAULT)
 	 `uvm_field_int(delay_data, UVM_DEFAULT)
-	 `uvm_field_int(delay_awvalid, UVM_DEFAULT)
-	 `uvm_field_int(delay_wvalid, UVM_DEFAULT)
+//	 `uvm_field_int(delay_awvalid, UVM_DEFAULT)
+//	 `uvm_field_int(delay_wvalid, UVM_DEFAULT)
 	 `uvm_field_enum(true_false_enum, last_one, UVM_DEFAULT)
 	 `uvm_field_enum(true_false_enum, first_one, UVM_DEFAULT)
 	 `uvm_field_enum(true_false_enum, first_one, UVM_DEFAULT)
@@ -105,13 +107,13 @@ class axi_single_frame extends axi_frame_base;
 		delay_addr inside	{[0 : 5]};
 	}
 
-	constraint delay_awvalid_csr{
-		delay_awvalid inside {[0 : 5]};
-	}
+//	constraint delay_awvalid_csr{
+//		delay_awvalid inside {[0 : 5]};
+//	}
 
-	constraint delay_wvalid_csr{
-		delay_wvalid inside {[0:5]};
-	}
+//	constraint delay_wvalid_csr{
+//		delay_wvalid inside {[0:5]};
+//	}
 
 	function new (string name = "axi_frame");
 		super.new(name);
