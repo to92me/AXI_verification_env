@@ -5,6 +5,8 @@ parameter PIPE_SIZE = 5;
 parameter MASTER_PIPE_SIZE = 5;
 parameter SLAVE_PIPE_SIZE = 5;
 
+parameter MONITOR_WAIT = 1000;	// number of clk cycles after which the monitor ends simulation if nothing happens
+
 
 parameter ADDR_WIDTH = 32;
 parameter DATA_WIDTH = 64;

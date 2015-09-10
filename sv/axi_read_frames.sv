@@ -45,7 +45,7 @@ class axi_read_base_frame extends uvm_sequence_item;
 
 	// control
 	valid_enum 				valid;	// contols whether or not the frame should be sent
-	rand bit [2:0]			delay;
+	rand bit [8:0]			delay;
 	// response - used to signal wheteher there was a reset
 	uvm_tlm_response_status_e status;
 
@@ -275,6 +275,10 @@ class axi_read_burst_frame extends axi_read_base_frame;
 	rand bit default_lock;
 	rand bit default_cache;
 	rand bit default_qos;
+
+	constraint default_delay {
+		delay < 2;
+	}
 
 	constraint default_id_constraint {
 		if (default_id) {

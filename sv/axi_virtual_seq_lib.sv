@@ -87,7 +87,7 @@ class virtual_transfer_multiple_addr extends virtual_base_sequence;
 
 	`uvm_object_utils(virtual_transfer_multiple_addr)
 
-	bit[ADDR_WIDTH-1 : 0] slave_addr[];	// array for storing addresses
+	bit[ADDR_WIDTH-1 : 0] slave_addr[$];	// queue for storing addresses
 
 	// new - constructor
 	function new(string name="virtual_transfer_multiple_addr");
@@ -99,9 +99,8 @@ class virtual_transfer_multiple_addr extends virtual_base_sequence;
 
 	virtual task body();
 
-		slave_addr = new[50];
-		for(int i = 0; i < 50; i++) begin
-			slave_addr[i] = p_sequencer.config_obj.slave_list[0].start_address;
+		for(int i = 0; i < 10; i++) begin
+			slave_addr.push_back(p_sequencer.config_obj.slave_list[0].start_address);
 		end
 
 		`uvm_do_on_with(read_seq, p_sequencer.read_seqr, {
@@ -141,7 +140,7 @@ class virtual_transfer_single_burst extends virtual_base_sequence;
 
 	`uvm_object_utils(virtual_transfer_single_burst)
 
-	bit[ADDR_WIDTH-1 : 0] slave_addr[];	// array for storing addresses
+	bit[ADDR_WIDTH-1 : 0] slave_addr[$];	// queue for storing addresses
 
 	// new - constructor
 	function new(string name="virtual_transfer_single_burst");
@@ -153,8 +152,7 @@ class virtual_transfer_single_burst extends virtual_base_sequence;
 
 	virtual task body();
 
-		slave_addr = new[1];
-		slave_addr[0] = p_sequencer.config_obj.slave_list[0].start_address;
+		slave_addr.push_back(p_sequencer.config_obj.slave_list[0].start_address);
 
 		`uvm_do_on_with(read_seq, p_sequencer.read_seqr, {
 				foreach (slave_addr[i])
