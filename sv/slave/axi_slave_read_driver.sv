@@ -171,7 +171,7 @@ endclass : axi_slave_read_driver
 
 		forever begin
 
-			@(posedge vif.sig_clock);
+			@(posedge vif.sig_clock iff vif.sig_reset == 1);
 
 			// phase 1 - send burst info to seq.
 			seq_item_port.get_next_item(item);
@@ -259,7 +259,7 @@ endclass : axi_slave_read_driver
 		forever begin
 			burst_collected = axi_read_whole_burst::type_id::create("burst_collected");
 
-			@ (posedge vif.sig_clock);
+			@ (posedge vif.sig_clock iff vif.sig_reset == 1);
 			if(vif.arready && vif.arvalid) begin
 				if(config_obj.check_addr_range(vif.araddr)) begin
 					// get info
@@ -309,7 +309,7 @@ endclass : axi_slave_read_driver
 
 		// @clk only before first if-else check
 		// after that, waiting for clk is done in the if-else branches
-		@(posedge vif.sig_clock);
+		@(posedge vif.sig_clock iff vif.sig_reset == 1);
 		#1	// for simulation
 		forever begin
 			// is there a frame waiting to be sent

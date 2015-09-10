@@ -48,9 +48,8 @@ irun  $other_args \
   -coverage b:u \
   -covoverwrite \
   -nowarn PMBDVX \
-  +UVM_TESTNAME=virtual_seq_test \
   +UVM_VERBOSITY=UVM_HIGH \
-  +UVM_TESTNAME=virtual_seq_test \
+  +UVM_TESTNAME=axi_read_all_valid_frames \
   +svseed=RANDOM \
   $TB_HOME/axi_top.sv \
   $gui

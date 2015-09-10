@@ -138,8 +138,8 @@ endclass : axi_slave_read_monitor
 			forever begin
 				@(posedge vif.sig_clock);
 				end_simulation++;
-				// if nothing happens for 1000 clk cycles, end simulation
-				if(end_simulation == 1000) begin
+				// if nothing happens for MONITOR_WAIT clk cycles, end simulation
+				if(end_simulation == MONITOR_WAIT) begin
 					`uvm_info(get_type_name(), $sformatf("Force end simulation"), UVM_LOW);
 					check_phase(phase);
 					report_phase(phase);
