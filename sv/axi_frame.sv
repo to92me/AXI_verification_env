@@ -45,6 +45,7 @@ class axi_frame_base extends uvm_sequence_item;
 	constraint burst_type_constraint {burst_type inside{FIXED, INCR, WRAP};}
 
 
+
 endclass
 
 class axi_frame extends axi_frame_base;

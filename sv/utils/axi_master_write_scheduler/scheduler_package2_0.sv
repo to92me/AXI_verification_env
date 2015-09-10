@@ -7,7 +7,7 @@
 //
 //------------------------------------------------------------------------------
 
-class axi_master_write_scheduler_package2_0 extends uvm_object;
+class axi_master_write_scheduler_package2_0 ;
 	// local variables
 	axi_single_frame		single_frame_queue[$];
 	axi_frame				frame_copy;
@@ -17,12 +17,13 @@ class axi_master_write_scheduler_package2_0 extends uvm_object;
 	axi_single_frame 		one_frame;
 	true_false_enum			all_correct;
 	axi_single_frame		tmp_single_frame;
+	true_false_enum         sent_last;
 
 	// for scheduler
 	burst_queue_lock_enum   lock_state;
 	first_sent_enum			first_status;
 	int 					response_latenes_counter = 10000;
-	int 					error_counter;
+	int 					error_counter  = 2;
 
 
 	//configurations
@@ -50,11 +51,11 @@ class axi_master_write_scheduler_package2_0 extends uvm_object;
 	axi_write_correct_one_value												qos_config;
 
 
-	`uvm_object_utils(axi_master_write_scheduler_package2_0)
+
 
 
 	function new (string name = "SchedulerPackage",axi_write_conf config_obj);
-		super.new(name);
+		//super.new(name);
 		this.config_obj = config_obj;
 
 		global_config_obj = config_obj.getGlobal_config_object();
@@ -69,17 +70,23 @@ class axi_master_write_scheduler_package2_0 extends uvm_object;
 		qos_randomization			= new();
 		sem 						= new(1);
 		one_frame 					= new();
+		rand_data 					= new();
 	endfunction : new
 
+	// API
 	extern task addBurst(axi_frame frame);
 	extern task decrementDelay();
 	extern task getNextSingleFrame(output axi_mssg rps_mssg);
+	extern function int size();
+	extern function true_false_enum decrementError_counter();
+	extern function void setError_counter(int counter);
+
+	// LOCAL METHODES
 	extern function void calculateStrobe();
-//	extern function void getBurstInfo();
 	extern function void setConfiguration();
 	extern function void checkIfAllModesAre1();
 	extern function void setValues(axi_frame frame);
-	extern function int size();
+
 	extern function true_false_enum decrementResponseLatenesCounter();
 
    // Get first_status
@@ -106,14 +113,20 @@ class axi_master_write_scheduler_package2_0 extends uvm_object;
 	   return frame_copy.id;
    endfunction
 
+   function axi_frame getFrameCopy();
+   		return frame_copy;
+   endfunction
 
 
 endclass : axi_master_write_scheduler_package2_0
 
-function void axi_master_write_scheduler_package2_0::addBurst(axi_frame frame);
+task axi_master_write_scheduler_package2_0::addBurst(axi_frame frame);
+
+	$display("TOME ADDING SCH2_0");
+
 	setConfiguration();
-	setValues(frame);
-	for(int i = 0; i<=frame.len; i++)
+	//setValues(frame);
+	for(int i = 0; i< frame.len+1; i++)
 			begin
 
 				assert(rand_data.randomize);
@@ -147,8 +160,12 @@ function void axi_master_write_scheduler_package2_0::addBurst(axi_frame frame);
 			single_frame_queue[0].first_one = TRUE;
 			sem.put(1);
 
+			this.calculateStrobe();
 
-endfunction
+			$display("TOME DONE  SCH2_0");
+
+
+endtask
 
 task axi_master_write_scheduler_package2_0::decrementDelay();
 	one_frame = single_frame_queue.pop_front();
@@ -161,12 +178,21 @@ task axi_master_write_scheduler_package2_0::decrementDelay();
 endtask
 
 task axi_master_write_scheduler_package2_0::getNextSingleFrame(output axi_mssg rps_mssg);
+	axi_single_frame empty_frame;
 	mssg = new();
+
 	// if queue is empty then return QUEUE_EMPTY
-	if(single_frame_queue.size == 0 )
+	if(single_frame_queue.size() == 0 )
 		begin
+			if(sent_last == FALSE)
+				begin
+					`uvm_fatal("Package","NOT LAST")
+				end
+			$display("package: id: %h, len: %0d",getID(), this.single_frame_queue.size());
+			empty_frame = new();
+			empty_frame.id = getID();
 			mssg.state = QUEUE_EMPTY;
-			mssg.frame = null;
+			mssg.frame = empty_frame;
 			rps_mssg = mssg;
 			return;
 		end
@@ -192,6 +218,10 @@ task axi_master_write_scheduler_package2_0::getNextSingleFrame(output axi_mssg r
 		mssg.state = NOT_READY;
 		mssg.frame = null;
 		single_frame_queue.push_front(one_frame);
+		end
+	if(one_frame.last_one == TRUE)
+		begin
+			sent_last = TRUE;
 		end
 	rps_mssg = mssg;
 endtask
@@ -358,7 +388,6 @@ endfunction
 	endfunction
 
 
-	`endif
 
 
 	function true_false_enum axi_master_write_scheduler_package2_0::decrementResponseLatenesCounter();
@@ -368,3 +397,21 @@ endfunction
 		else
 			return FALSE;
 	endfunction
+
+
+	function true_false_enum axi_master_write_scheduler_package2_0::decrementError_counter();
+	    error_counter--;
+		if(error_counter < 1)
+			return TRUE;
+		else
+			return FALSE;
+
+	endfunction
+
+	function void axi_master_write_scheduler_package2_0::setError_counter(int counter);
+	 	this.error_counter = counter;
+	endfunction
+
+
+	`endif
+

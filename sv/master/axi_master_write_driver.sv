@@ -37,7 +37,7 @@ class axi_master_write_driver extends uvm_driver #(axi_frame);
 
 	// Configuration object
 	axi_config config_obj;
-	axi_master_write_scheduler scheduler;
+	axi_master_write_scheduler2_0 scheduler;  // FIXME scheduler
 	axi_master_write_main_driver driver;
 	axi_master_write_response_driver response;
 
@@ -63,7 +63,7 @@ class axi_master_write_driver extends uvm_driver #(axi_frame);
 		if(!uvm_config_db#(virtual axi_if)::get(this, "", "vif", vif))
 			`uvm_fatal("NOVIF",{"virtual interface must be set for: ",get_full_name(),".vif"})
 
-			scheduler = axi_master_write_scheduler::getSchedulerInstance(this);
+			scheduler = axi_master_write_scheduler2_0::getSchedulerInstance(this);
 			driver = axi_master_write_main_driver::getDriverInstance(this);
 			response = axi_master_write_response_driver::getDriverInstance(this);
 
@@ -140,7 +140,7 @@ task axi_master_write_driver::startScheduler();
 endtask
 
 task axi_master_write_driver::resetDrivers();
-	this.scheduler.resetAll();
+	this.scheduler.reset();
 	this.driver.reset();
 endtask
 

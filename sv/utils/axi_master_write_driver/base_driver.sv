@@ -267,7 +267,7 @@ class axi_master_write_base_driver extends uvm_component;
 	static axi_master_write_base_driver 	driverInstance;
 	axi_mssg 								mssg;
 	axi_master_write_main_driver			main_driver;
-	axi_master_write_scheduler				scheduler;
+	axi_master_write_scheduler2_0			scheduler;
 	bit 									valid_default = 1'b1;
 	axi_write_conf							uvc_config_obj;
 	axi_write_buss_write_configuration		bus_driver_configuration;
@@ -295,7 +295,7 @@ class axi_master_write_base_driver extends uvm_component;
 		super.build_phase(phase);
 		`uvm_info("axi master write base vif driver","Building", UVM_MEDIUM);
 		main_driver = axi_master_write_main_driver::getDriverInstance(this);
-		scheduler = axi_master_write_scheduler::getSchedulerInstance(this);
+		scheduler = axi_master_write_scheduler2_0::getSchedulerInstance(this);
 		if(!uvm_config_db#(virtual axi_if)::get(this, "", "vif", vif))
 			 `uvm_fatal("NOVIF",{"virtual interface must be set for: ",get_full_name(),".vif"})
 

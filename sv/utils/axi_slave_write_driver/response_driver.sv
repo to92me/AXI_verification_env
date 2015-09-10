@@ -20,6 +20,7 @@ typedef enum{
 
 class axi_slave_write_response_driver extends uvm_component;
 //	axi_slave_write_rsp_mssg			rsp_queue[$];
+	int 								rsp_send_counter;
 	mailbox#(axi_slave_write_rsp_mssg)	rsp_mbox;
 	axi_slave_write_rsp_mssg			current_rsp;
 	virtual interface axi_if 			vif;
@@ -87,6 +88,8 @@ task axi_slave_write_response_driver::pushRsp(input axi_slave_write_rsp_mssg mes
 endtask
 
 task axi_slave_write_response_driver::driverVif();
+	$display("       SLAVE: SENDING RSP NO %d ",rsp_send_counter);
+	rsp_send_counter++;
 	#2
 	vif.bid   <= current_rsp.ID;
     vif.bresp <= current_rsp.rsp;

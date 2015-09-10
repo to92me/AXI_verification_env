@@ -69,7 +69,7 @@ class axi_master_write_main_driver extends uvm_component;
 	axi_single_frame 					data_ready_queue[$];
 	axi_single_frame 					addr_frame;
 	axi_single_frame 					data_frame;
-	axi_master_write_scheduler			scheduler;
+	axi_master_write_scheduler2_0		scheduler;
 	semaphore 							sem;
 	static axi_master_write_main_driver	driverInstance;
 	axi_mssg							data_mssg;
@@ -77,7 +77,7 @@ class axi_master_write_main_driver extends uvm_component;
 	axi_mssg 							inbox_mssg;
 	virtual interface axi_if 			vif;
 	event 								address_sent;
-
+	int 								counter;
 	axi_master_write_address_driver 	address_driver;
 	axi_master_write_data_driver		data_driver;
 	true_false_enum						correct_order = TRUE;
@@ -93,7 +93,7 @@ class axi_master_write_main_driver extends uvm_component;
 	// build_phase
 	function void build_phase(uvm_phase phase);
 		super.build_phase(phase);
-		scheduler = axi_master_write_scheduler::getSchedulerInstance(this);
+		scheduler = axi_master_write_scheduler2_0::getSchedulerInstance(this);
 		address_driver = axi_master_write_address_driver::getDriverInstance(this);
 		data_driver = axi_master_write_data_driver::getDriverInstance(this);
 		sem = new(10);
@@ -155,6 +155,12 @@ task  axi_master_write_main_driver::getDataFrame(output axi_mssg rsp_mssg);
 		data_mssg.frame = data_ready_queue.pop_front();
 		data_mssg.state = READY;
 //		$display("DRIVER MASTER MAIN: Sendding full data");
+		if(data_mssg.frame.last_one == TRUE)
+			begin
+				$display("LAST DATA SENT NO: %0d, ID: %h", counter, data_mssg.frame.id);
+				scheduler.lastPackageSent(data_mssg.frame.id);
+				counter++;
+			end
 		end
 	else
 		begin
@@ -186,6 +192,7 @@ endtask
 task axi_master_write_main_driver::getFramesFromScheduler();
    forever
 	   begin
+
 		   scheduler.getFrameForDrivingVif(inbox_mssg);
 		   if(inbox_mssg.state == QUEUE_EMPTY)
 			   return;

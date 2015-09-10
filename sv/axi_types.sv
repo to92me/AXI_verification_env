@@ -144,4 +144,10 @@ typedef enum {
 	BAD_ID
 }	id_enum;
 
+
+typedef enum{
+	MODE_1 = 0,
+	MODE_2 = 1
+}burst_deepth_mode_enum;
+
 `endif

@@ -42,7 +42,7 @@ registerConfiguration("general", "master_write_deepth", 5);
 //if this option is TRUE then all delay options and seetings for ready will be ignored
 //true_false_enum			global_full_speed						= FALSE;
 
-//registerConfiguration("general", "full_speed", TRUE);
+registerConfiguration("general", "full_speed", TRUE);
 
 //+++++++++++++++++++++++++++++++++++++++END GLOBAL SETTINGS++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 

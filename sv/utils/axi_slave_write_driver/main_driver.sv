@@ -99,7 +99,7 @@ endclass : axi_slave_write_main_driver
 			this.main();
 			this.driver_addr.main();
 			this.driver_data.main();
-			this.driver_rsp.main(); 
+			this.driver_rsp.main();
 		join
 	endtask
 
@@ -167,7 +167,7 @@ endclass : axi_slave_write_main_driver
 									begin
 										$display("ERROR  DATA PACKAGE ADDING sending last but di not get last, iD: %d, count = %d", rsp.ID, burst_status_queue[i].len);
 									end
-								driver_rsp.pushRsp(rsp); 
+								driver_rsp.pushRsp(rsp);
 								tmp = i;
 							end
 					end
@@ -182,7 +182,7 @@ endclass : axi_slave_write_main_driver
 				burst_status.len=-1;
 				burst_status.last_one = message.last_one;
 				burst_status_queue.push_back(burst_status);
-//				$display("                                                             new status, DATA, ID: %d , len: %d, last: %d", message.ID, burst_status.len, message.last_one);
+				$display("                                                             new status, DATA, ID: %d , len: %d, last: %d", message.ID, burst_status.len, message.last_one);
 			end
 	endtask
 
@@ -211,7 +211,7 @@ endclass : axi_slave_write_main_driver
 									begin
 										$display("ERROR  ADDR PACKAGE ADDING sending last but di not get last, iD: %d, count = %d", rsp.ID, burst_status_queue[i].len);
 									end
-								driver_rsp.pushRsp(rsp); 
+								driver_rsp.pushRsp(rsp);
 								tmp = i;
 							end
 					end
@@ -222,6 +222,6 @@ endclass : axi_slave_write_main_driver
 		if(found_match_ID == FALSE)
 			begin
 				burst_status_queue.push_back(message);
-//				$display("                                                                    new status, ADDR, ID: %d , len: %d", message.ID, message.len);
+				$display("                                                                    new status, ADDR, ID: %d , len: %d", message.ID, message.len);
 			end
 	endtask

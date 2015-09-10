@@ -20,6 +20,8 @@ package axi_pkg;
 	//scheduler and packages
 	typedef class axi_master_write_scheduler;
 	typedef class axi_master_write_scheduler_packages;
+	typedef class axi_master_write_scheduler2_0;
+	typedef class axi_master_write_scheduler_packages;
 
 	//======================DRIVERS=================================//
 	//MASTER														//
@@ -81,6 +83,9 @@ package axi_pkg;
 	typedef class axi_write_buss_read_configuration;
 	typedef class axi_master_write_correct_incorrect_value_randomization;
 	typedef class axi_write_global_conf;
+	typedef class axi_write_correct_value_conf;
+	typedef class axi_master_write_correct_incorrect_random;
+	typedef class axi_write_correct_one_value;
 	//=================END CONFIGURATIONS===========================
 
 
@@ -186,6 +191,8 @@ package axi_pkg;
 	`include "sv/utils/axi_master_write_driver/response_driver.sv"
 	`include "sv/utils/axi_master_write_scheduler/scheduler_packages.sv"
 	`include "sv/utils/axi_master_write_scheduler/scheduler.sv"
+	`include "sv/utils/axi_master_write_scheduler/scheduler_package2_0.sv"
+	`include "sv/utils/axi_master_write_scheduler/scheduler2_0.sv"
 	// SLAVE
 	`include "sv/utils/axi_slave_write_driver/base_driver.sv"
 	`include "sv/utils/axi_slave_write_driver/main_driver.sv"
