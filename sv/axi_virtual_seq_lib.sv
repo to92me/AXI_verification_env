@@ -163,4 +163,37 @@ class virtual_transfer_single_burst extends virtual_base_sequence;
 
 endclass : virtual_transfer_single_burst
 
+//------------------------------------------------------------------------------
+//
+// SEQUENCE: virtual_transfer_dut_counter
+//
+//------------------------------------------------------------------------------
+/**
+* Description : for dut
+*
+* Functions :	1. new(string name="virtual_transfer_dut_counter")
+*
+* Tasks :	1. body()
+**/
+// -----------------------------------------------------------------------------
+class virtual_transfer_dut_counter extends virtual_base_sequence;
+
+	`uvm_object_utils(virtual_transfer_dut_counter)
+
+	// new - constructor
+	function new(string name="virtual_transfer_dut_counter");
+		super.new(name);
+	endfunction
+
+	// axi read master
+	axi_master_read_simple read_seq;
+
+	virtual task body();
+
+		`uvm_do_on(read_seq, p_sequencer.read_seqr)
+
+	endtask
+
+endclass : virtual_transfer_dut_counter
+
 `endif

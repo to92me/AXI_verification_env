@@ -18,6 +18,8 @@
 **/
 // -----------------------------------------------------------------------------
 
+`include "synchronizer.v"
+
 module dut_counter #
 	(
 		// Width of ID for for write address, write data, read address and read data
@@ -209,15 +211,42 @@ module dut_counter #
 
 	// counter registers
 	reg 	nrst;  // internal signal generated based on SWRESET
-    reg [DATA_WIDTH : 0]	count;
-    // unused bits are reserved, read-only, value=0
-    reg [DATA_WIDTH : 0]	RIS; // bit 0 - OVERFLOW, bit 1 - UNDERFLOW; read-only
-    reg [DATA_WIDTH : 0]	IM;  // bit 0 - OVERFLOW, bit 1 - UNDERFLOW; read-write
-    reg [DATA_WIDTH : 0]	MIS; // bit 0 - OVERFLOW, bit 1 - UNDERFLOW; write 1 deletes flags in MIS and RIS
-    reg [DATA_WIDTH : 0]	LOAD;    // 16-bit value; read-write
-    reg [DATA_WIDTH : 0]	CFG; // bit 0 - counter enable, bit 1 - up(0)/down(1); read-write
+    reg [DATA_WIDTH-1 : 0]	count;
 
-	// I/O Connections assignments
+    // unused bits are reserved, read-only, value=0
+    reg [DATA_WIDTH-1 : 0]	RIS; // bit 0 - OVERFLOW, bit 1 - UNDERFLOW; read-only
+    reg 					ris0_reset_async;	// fclk - for RIS[0]
+    reg 					ris1_reset_async;	// fclk - for RIS[1]
+    wire					ris0_sync;
+    wire					ris1_sync;
+    reg [DATA_WIDTH-1 : 0]	IM;  // bit 0 - OVERFLOW, bit 1 - UNDERFLOW; read-write
+    reg [DATA_WIDTH-1 : 0]	MIS; // bit 0 - OVERFLOW, bit 1 - UNDERFLOW; write 1 deletes flags in MIS and RIS
+    reg [DATA_WIDTH-1 : 0]	LOAD;    // 16-bit value; read-write
+    reg [DATA_WIDTH-1 : 0]	CFG; // bit 0 - counter enable, bit 1 - up(0)/down(1); read-write
+
+// -----------------------------------------------------------------------------
+//
+//	 Synchronizers
+//
+// -----------------------------------------------------------------------------
+	synchronizer sync_ris0 (
+		.CLK(AXI_ACLK),
+		.RESET(AXI_ARESETN),
+		.ASYNC_I(ris0_reset_async),
+		.SYNC_O(ris0_sync)
+	);
+	synchronizer sync_ris1 (
+		.CLK(AXI_ACLK),
+		.RESET(AXI_ARESETN),
+		.ASYNC_I(ris1_reset_async),
+		.SYNC_O(ris1_sync)
+	);
+
+// -----------------------------------------------------------------------------
+//
+//	 I/O Connections assignments
+//
+// -----------------------------------------------------------------------------
 	assign AXI_AWREADY	= axi_awready;
 	assign AXI_WREADY	= axi_wready;
 	assign AXI_BRESP	= axi_bresp;
@@ -231,18 +260,78 @@ module dut_counter #
 	assign AXI_RVALID	= axi_rvalid;
 	assign AXI_BID = AXI_AWID;
 	assign AXI_RID = AXI_ARID;
-	assign AXI_BUSER = 0;
 	assign IRQ_O = irq_o;
 	assign DOUT_O = dout_o;
 
 	// start state
 	initial begin
-        count = 15'b0;
-        RIS = 0;
-        IM = 0;
-        MIS = 0;
-        LOAD = 0;
-        CFG = 0;
+        count <= 0;
+        RIS <= 0;
+        IM <= 0;
+        MIS <= 0;
+        LOAD <= 0;
+        CFG <= 0;
+    end
+
+always @(posedge AXI_ACLK) begin
+
+// -----------------------------------------------------------------------------
+//
+//	Register assigments
+//
+// -----------------------------------------------------------------------------
+	RIS[0] <= ris0_sync;
+	RIS[1] <= ris1_sync;
+
+	// MIS calculation
+    MIS[0] <= RIS[0] && IM[0];
+    MIS[1] <= RIS[1] && IM[1];
+    if(MIS[0] || MIS[1])
+        irq_o <= 1;
+    else
+        irq_o <= 0;
+
+    // LOAD check
+    if (count > LOAD)
+        dout_o <= 1;
+    else
+        dout_o <= 0;
+
+
+// -----------------------------------------------------------------------------
+//
+//	 Reset
+//
+// -----------------------------------------------------------------------------
+    // reset axi signals
+    if (AXI_ARESETN == 0) begin
+    	axi_awready <= 1;
+    	axi_wready <= 0;
+    	axi_bresp <= 0;
+    	axi_buser <= 0;
+    	axi_bvalid <= 0;
+    	axi_arready <= 1;
+    	axi_rdata <= 0;
+    	axi_rresp <= 0;
+    	axi_ruser <= 0;
+    	axi_rvalid <= 0;
+    end
+
+    // reset counter
+    if ((AXI_ARESETN == 0) || (nrst == 1)) begin
+        RIS <= 0;
+        IM <= 0;
+        MIS <= 0;
+        LOAD <= 0;
+        CFG <= 0;
+        irq_o <= 0;
+        nrst <= 0;
+
+        // simulate write
+        CFG[0] <= 1;	// enable
+        CFG[1] <= 1;
+        IM[0] <= 1;
+        IM[1] <= 1;
     end
 
 // -----------------------------------------------------------------------------
@@ -250,11 +339,11 @@ module dut_counter #
 //	 Read address channel
 //
 // -----------------------------------------------------------------------------
-	always @(posedge AXI_ACLK iff AXI_ARESETN == 1) begin
+	if (AXI_ARESETN == 1) begin
 		axi_arready <= 1'b1;	// slave always ready to accept requests
 
 		if(AXI_ARVALID) begin
-			axi_rresp = 2'b00;	// default response - OKAY
+			axi_rresp <= 2'b00;	// default response - OKAY
 
 			case (AXI_ARADDR)
 				0:	// RIS
@@ -265,12 +354,10 @@ module dut_counter #
 					axi_rdata <= MIS;
 				6:	// LOAD
 					axi_rdata <= LOAD;
-				8: //CFG
+				8:	// CFG
 					axi_rdata <= CFG;
 				10:	// SWRESET
 					axi_rdata <= 0;
-				12:	// count
-					axi_rdata <= count;
 				default:
 					begin
 						// unimplemented address
@@ -284,7 +371,7 @@ module dut_counter #
 			if(AXI_ARLEN)
 				axi_rresp <= 2'b10;	// SLVERR
 			// size not 16 bits
-			if(AXI_ARSIZE != 3'b01)
+			if(AXI_ARSIZE != 3'b001)
 				axi_rresp <= 2'b10;	// SLVERR
 			// burst type not fixed
 			if(AXI_ARBURST)
@@ -299,17 +386,17 @@ module dut_counter #
 //	 Read data channel
 //
 // -----------------------------------------------------------------------------
-	always @(posedge AXI_ACLK iff AXI_ARESETN == 1) begin
+	if (AXI_ARESETN == 1) begin
 		// send response
 		if(read_flag || !rready_flag) begin
-			read_flag = 0;	// ILI READ_FLAG-- AKO IH IMA VISE
-			rready_flag = 0;
-			axi_rvalid = 1;
+			read_flag <= 0;	// ILI READ_FLAG-- AKO IH IMA VISE
+			rready_flag <= 0;
+			axi_rvalid <= 1;
 			if(AXI_RREADY)
-				rready_flag = 1;
+				rready_flag <= 1;
 		end
 		else
-			axi_rvalid = 0;
+			axi_rvalid <= 0;
 	end
 
 // -----------------------------------------------------------------------------
@@ -317,13 +404,13 @@ module dut_counter #
 //	Write address channel
 //
 // -----------------------------------------------------------------------------
-	always @(posedge AXI_ACLK iff AXI_ARESETN == 1) begin
-		axi_awready = 1;	// slave always ready
+	if (AXI_ARESETN == 1) begin
+		axi_awready <= 1;	// slave always ready
 
 		if(AXI_AWVALID) begin
 
 			// check and get address
-			if (AXI_AWADDR inside {2, 4, 6, 8, 10, 12}) begin
+			if ((AXI_AWADDR == 2) || (AXI_AWADDR == 4) || (AXI_AWADDR == 6) || (AXI_AWADDR == 8) || (AXI_AWADDR == 10)) begin
 				axi_awaddr <= AXI_AWADDR;
 				axi_awprot <= AXI_AWPROT;
 				write_addr_flag <= 1;
@@ -337,7 +424,7 @@ module dut_counter #
 			if(AXI_AWLEN)
 				write_addr_flag <= 0;
 			// size not 16 bits
-			if(AXI_AWSIZE != 3'b01)
+			if(AXI_AWSIZE != 3'b001)
 				write_addr_flag <= 0;
 			// burst type not fixed
 			if(AXI_AWBURST)
@@ -350,44 +437,42 @@ module dut_counter #
 //	Write data channel
 //
 // -----------------------------------------------------------------------------
-	always @(posedge AXI_ACLK iff AXI_ARESETN == 1) begin
-		axi_wready = 1;	// slave always ready
+	if (AXI_ARESETN == 1) begin
+		axi_wready <= 1;	// slave always ready
 
 		if(AXI_WVALID) begin
 			if(write_addr_flag) begin
-				write_addr_flag = 0;
+				write_addr_flag <= 0;
 				axi_bresp <= 2'b00;	// default OKAY response
 
 				case (axi_awaddr)
 					2:	// IM
-						IM[1:0]	= AXI_WDATA[1:0];
+						IM[1:0]	<= AXI_WDATA[1:0];
 					4:	// MIS - writing allowed only if PROT = 1
 						// sending 1 to a valid bit location deletes the flags
 						// in MIS and RIS registers
 						// 0 does nothing
 						if (axi_awprot == 3'b001) begin
 							if(AXI_WDATA[0] == 1) begin
-								MIS[0] = 0;
-								RIS[0] = 0;
+								MIS[0] <= 0;
+								RIS[0] <= 0;
 							end
 							if(AXI_WDATA[1] == 1) begin
-								MIS[1] = 0;
-								RIS[1] = 0;
+								MIS[1] <= 0;
+								RIS[1] <= 0;
 							end
 						end
 						else
 							axi_bresp <= 2'b10;	// slverr
 					6:	// LOAD
-						LOAD = AXI_WDATA;
+						LOAD <= AXI_WDATA;
 					8: //CFG
-						CFG[1:0] = AXI_WDATA[1:0];
+						CFG[1:0] <= AXI_WDATA[1:0];
 					10:	// SWRESET - writing 0x5a resets all registers
 						if(AXI_WDATA == 'b0000000001011010)
-							nrst = 1;
+							nrst <= 1;
 						else
 							axi_bresp <= 2'b10;	// slverr
-					12:	// count
-						count = AXI_WDATA;
 				endcase
 				write_data_flag <= 1;
 			end
@@ -406,67 +491,58 @@ module dut_counter #
 //	Write response channel
 //
 // -----------------------------------------------------------------------------
-	always @(posedge AXI_ACLK iff AXI_ARESETN == 1) begin
+	if (AXI_ARESETN == 1) begin
 		if(write_data_flag || !bready_flag) begin
-			write_data_flag = 0;
-			bready_flag = 0;
-			axi_bvalid = 1;
+			write_data_flag <= 0;
+			bready_flag <= 0;
+			axi_bvalid <= 1;
 			if(AXI_BREADY)
-				bready_flag = 1;
+				bready_flag <= 1;
 		end
 		else
-			axi_bvalid = 0;
+			axi_bvalid <= 0;
 	end
+end 	// always
 
 // -----------------------------------------------------------------------------
 //
 //	Counter
 //
 // -----------------------------------------------------------------------------
-	always @(posedge FCLK or negedge AXI_ARESETN) begin
+always @(posedge FCLK) begin
 
-        if(!AXI_ARESETN || nrst) begin
-            count = 0;
-            RIS = 0;
-            IM = 0;
-            MIS = 0;
-            LOAD = 0;
-            CFG = 0;
-            irq_o = 0;
-            dout_o = 0;
-            nrst = 0;
-        end
-        else begin
-            if(CFG[0] == 1) begin // counter enable
-            	// default values
-        		RIS[0] = 0;
-       			RIS[1] = 0;
-                if(CFG[1] == 0) begin // up
-                    if(count == 15'b1)  // OVERFLOW
-                        RIS[0] = 1;
-                    count = count + 1;
-                end
-                else begin  // down
-                    if(count == 0)  // UNDERFLOW
-                        RIS[1] = 1;
-                    count = count - 1;
-                end
+	// default
+	ris0_reset_async <= 0;
+	ris1_reset_async <= 0;
+
+	if (AXI_ARESETN == 1) begin
+
+        if(CFG[0] == 1) begin // counter enable
+
+            if(CFG[1] == 0) begin // up
+
+                if(count == 16'b1111111111111111)  // OVERFLOW
+                    ris0_reset_async <= 1;
+                count <= count + 1;
+
             end
+            else begin  // down
 
-            // MIS calculation
-            MIS[0] = RIS[0] && IM[0];
-            MIS[1] = RIS[1] && IM[1];
-            if(MIS[0] || MIS[1])
-                irq_o = 1;
-            else
-                irq_o = 0;
+                if(count == 0)  // UNDERFLOW
+                    ris1_reset_async <= 1;
+                count <= count - 1;
 
-            // LOAD check
-            if (count > LOAD)
-                dout_o = 1;
-            else
-                dout_o = 0;
+            end
         end
-    end
+	end
+	else	begin	// reset
+		  count <= 0;
 
+	end
+	
+	if(nrst == 1) begin
+		count <= 0;
+	end
+end
+ 
 endmodule

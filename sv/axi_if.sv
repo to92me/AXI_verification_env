@@ -71,7 +71,7 @@ interface axi_if (input sig_reset, input sig_clock);
 	logic [7:0]					arlen;
 	logic [2:0]					arsize;
 	logic [1:0]					arburst;
-	logic [1:0]					arlock;
+	logic      					arlock;
 	logic [3:0]					arcache;
 	logic [2:0]					arprot;
 	logic [3:0]					arqos;
