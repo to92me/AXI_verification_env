@@ -22,7 +22,7 @@ class axi_master_write_scheduler extends uvm_component;
 	axi_master_write_scheduler_packages 					burst_queue[$];
 	axi_master_write_scheduler_packages 					burst_existing_id[$];
 	axi_waiting_resp										waiting_for_resp_queue[$];
-	bit[ID_WIDTH - 1: 0] 									burst_empyt_queue[$];
+	bit[WID_WIDTH - 1: 0] 									burst_empyt_queue[$];
 	axi_waiting_resp										single_waiting_for_resp;
 	axi_master_write_scheduler_packages 					single_burst;
 	axi_single_frame 										next_frame_for_sending[$];
@@ -68,11 +68,11 @@ class axi_master_write_scheduler extends uvm_component;
 	extern local task checkUniqueID(); // DONE
 	extern task putResponseFromSlave(input axi_slave_response rsp); //DONE
 	extern task  calculateRepsonseLatenes(); //DONE
-	extern task  errorFromSlaveRepetaTransaction(input bit[ID_WIDTH - 1 : 0] rsp_id ); //DONE
+	extern task  errorFromSlaveRepetaTransaction(input bit[WID_WIDTH - 1 : 0] rsp_id ); //DONE
 	extern local task readSlaveResponse(); // DONE
-	extern local task putOkResp(input bit[ID_WIDTH - 1 : 0] rsp_id );
-	extern local task errorFromSlaveDecError(input bit[ID_WIDTH - 1 : 0] rsp_id); // DONE
-	extern local task removeBurstAndCheckExisintgID(input bit[ID_WIDTH - 1 : 0] rsp_id);
+	extern local task putOkResp(input bit[WID_WIDTH - 1 : 0] rsp_id );
+	extern local task errorFromSlaveDecError(input bit[WID_WIDTH - 1 : 0] rsp_id); // DONE
+	extern local task removeBurstAndCheckExisintgID(input bit[WID_WIDTH - 1 : 0] rsp_id);
 	extern local task checkForDone();
 	extern function  void setTopDriverInstance(input axi_master_write_driver top_driver_instance);
 	extern function void setRandomDelayConfiguration();
@@ -495,7 +495,7 @@ task axi_master_write_scheduler::readSlaveResponse();
 endtask
 
 
-task axi_master_write_scheduler::putOkResp(input bit[ID_WIDTH-1:0] rsp_id);
+task axi_master_write_scheduler::putOkResp(input bit[WID_WIDTH-1:0] rsp_id);
  	int tmp_size;
 //	sem.get(1);
 	tmp_size = waiting_for_resp_queue.size();
@@ -519,11 +519,11 @@ task axi_master_write_scheduler::putOkResp(input bit[ID_WIDTH-1:0] rsp_id);
 
 endtask
 
-task axi_master_write_scheduler::errorFromSlaveDecError(input bit[ID_WIDTH-1:0] rsp_id);
+task axi_master_write_scheduler::errorFromSlaveDecError(input bit[WID_WIDTH-1:0] rsp_id);
 	this.removeBurstAndCheckExisintgID(rsp_id);
 endtask
 
-task axi_master_write_scheduler::errorFromSlaveRepetaTransaction(input bit[ID_WIDTH-1:0] rsp_id);
+task axi_master_write_scheduler::errorFromSlaveRepetaTransaction(input bit[WID_WIDTH-1:0] rsp_id);
 //	sem.get(1);
 	for(int i = 0; i < burst_queue.size()-1; i++)
 		begin
@@ -539,7 +539,7 @@ task axi_master_write_scheduler::errorFromSlaveRepetaTransaction(input bit[ID_WI
 
 endtask
 
-task axi_master_write_scheduler::removeBurstAndCheckExisintgID(input bit[ID_WIDTH - 1 : 0] rsp_id); // za sada se samo odavde poziva i onda ne mora da vide lockovan semaphore
+task axi_master_write_scheduler::removeBurstAndCheckExisintgID(input bit[WID_WIDTH - 1 : 0] rsp_id); // za sada se samo odavde poziva i onda ne mora da vide lockovan semaphore
 	for(int i = 0;i < burst_queue.size()-1; i++ )
 		begin
 			if(burst_queue[i].ID == rsp_id)
@@ -570,7 +570,7 @@ task axi_master_write_scheduler::checkForDone();
 
    if(burst_queue.size() == 0 && burst_existing_id.size() == 0 && waiting_for_resp_queue.size() == 0)
 	  begin
-		  top_driver.putResponseToSequencer();
+//		  top_driver.putResponseToSequencer();
 //		  if(testing_completed == TRUE)
 //			   begin
 //				testing_completed = TRUE;

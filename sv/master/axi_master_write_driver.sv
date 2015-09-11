@@ -29,15 +29,19 @@
 //
 //------------------------------------------------------------------------------
 
+typedef axi_frame axi_frame_queue[$];
+
 
 class axi_master_write_driver extends uvm_driver #(axi_frame);
 
 	// The virtual interface used to drive and view HDL signals.
 	protected virtual axi_if vif;
+	axi_frame									rsp_copy;
+	axi_frame 									rsp_queue[$];
 
 	// Configuration object
 	axi_config config_obj;
-	axi_master_write_scheduler2_0 scheduler;  // FIXME scheduler
+	axi_master_write_scheduler2_0 scheduler;
 	axi_master_write_main_driver driver;
 	axi_master_write_response_driver response;
 
@@ -48,7 +52,6 @@ class axi_master_write_driver extends uvm_driver #(axi_frame);
 	// new - constructor
 	function new (string name, uvm_component parent);
 		super.new(name, parent);
-		  // create scheduler and buld id to fetch vif from database
 	endfunction : new
 
 	extern virtual task getNextBurstFrame();
@@ -56,7 +59,8 @@ class axi_master_write_driver extends uvm_driver #(axi_frame);
 	extern virtual task startDriver();
 	extern virtual task resetAll();
 	extern task resetDrivers();
-	extern task putResponseToSequencer();
+	extern task putResponseToSequencer(input bit[WID_WIDTH - 1 : 0] id );
+	extern function true_false_enum findeIndexFromID(input bit[WID_WIDTH-1:0] id_to_check, input axi_frame_queue queue_to_check, ref int index);
 	// build_phase
 	function void build_phase(uvm_phase phase);
 		super.build_phase(phase);
@@ -67,8 +71,7 @@ class axi_master_write_driver extends uvm_driver #(axi_frame);
 			driver = axi_master_write_main_driver::getDriverInstance(this);
 			response = axi_master_write_response_driver::getDriverInstance(this);
 
-//			driver.build();
-//			response.build();
+
 			scheduler.setTopDriverInstance(this);
 	endfunction: build_phase
 
@@ -84,7 +87,6 @@ class axi_master_write_driver extends uvm_driver #(axi_frame);
 	endtask : run_phase
 
 	virtual protected task get_and_drive();
-//		process main; // used by the reset handling mechanism
 		forever begin
 			fork
 				this.getNextBurstFrame();
@@ -98,18 +100,15 @@ class axi_master_write_driver extends uvm_driver #(axi_frame);
 endclass : axi_master_write_driver
 
 
-// get next item from sequencer
+
  task axi_master_write_driver::getNextBurstFrame();
     forever
 	    begin
-		     $display("adding new item --------------------------------------------------------------------------------------------------------");
 		    seq_item_port.get_next_item(req);
 			$cast(rsp, req.clone());
-//		    rsp.set_id_info(req);
+		    rsp_queue.push_back(req);
 		    scheduler.addBurst(rsp);
 		    seq_item_port.item_done();
-		    $display("adding new item DONE--------------------------------------------------------------------------------------------------------");
-//			seq_item_port.put_response(rsp);
 	    end
  endtask
 
@@ -127,7 +126,7 @@ endclass : axi_master_write_driver
 
 task axi_master_write_driver::startScheduler();
 
-//     scheduler.main();
+
  endtask
 
 
@@ -136,7 +135,6 @@ task axi_master_write_driver::startScheduler();
 	 	this.driver.main();
 		this.response.main();
 	join_none
-	$display("++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++");
 endtask
 
 task axi_master_write_driver::resetDrivers();
@@ -144,8 +142,35 @@ task axi_master_write_driver::resetDrivers();
 	this.driver.reset();
 endtask
 
-task axi_master_write_driver::putResponseToSequencer();
-	seq_item_port.put_response(rsp);
+task axi_master_write_driver::putResponseToSequencer(input bit[WID_WIDTH - 1 : 0] id );
+	int index;
+	axi_frame to_rsp;
+	if(findeIndexFromID(id, rsp_queue, index) == TRUE)
+		begin
+			seq_item_port.put(rsp_queue[index]);
+			rsp_queue.delete(index);
+		end
+	else
+		begin
+			`uvm_fatal("AxiMasterDriver", "Got response with non existing ID")
+		end
+
 endtask
+
+function true_false_enum axi_master_write_driver::findeIndexFromID(input bit[WID_WIDTH-1:0] id_to_check, input axi_frame_queue queue_to_check, ref int index);
+   int i;
+
+	foreach(queue_to_check[i])
+		begin
+			if(queue_to_check[i].id == id_to_check)
+				begin
+					index = i;
+					return TRUE;
+				end
+		end
+	index = -1;
+	return FALSE;
+endfunction;
+
 
 `endif

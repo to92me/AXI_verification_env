@@ -108,7 +108,8 @@ endclass
 
 
 class axi_master_write_checker_base extends uvm_component;
-
+	axi_write_conf								config_obj;
+	axi_write_global_conf						global_config_obj;
 	axi_master_write_main_monitor				main_monitor_instance;
 
 	`uvm_component_utils(axi_master_write_coverage_base)
@@ -121,6 +122,9 @@ class axi_master_write_checker_base extends uvm_component;
 	function void build_phase(uvm_phase phase);
 		super.build_phase(phase);
 		main_monitor_instance = axi_master_write_main_monitor::getMonitorMainInstance(this);
+		if(!uvm_config_db#(axi_write_conf)::get(this, "", "uvc_write_config", config_obj))
+		 `uvm_fatal("NO UVC_CONFIG",{"uvc_write config must be set for ",get_full_name(),".uvc_write_config"})
+		 configureChecker();
 	endfunction : build_phase
 
 	extern virtual task pushAddressItem(axi_write_address_collector_mssg mssg);
@@ -129,6 +133,8 @@ class axi_master_write_checker_base extends uvm_component;
 
 	extern virtual task reset();
 	extern virtual task printState();
+
+	extern local function  void configureChecker();
 
 endclass
 
@@ -153,6 +159,9 @@ endclass
 		$display("axi_master_write_checker_base: methode suscribed to but did not redefine it  !!! ");
 	endtask
 
+	function void axi_master_write_checker_base::configureChecker();
+		global_config_obj = config_obj.getGlobal_config_object();
+	endfunction
 
 
 `endif

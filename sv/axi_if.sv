@@ -35,7 +35,7 @@ interface axi_if (input sig_reset, input sig_clock);
 	parameter STRB_WIDTH = DATA_WIDTH / 8;
 
 	// write address channel signals
-	logic [ID_WIDTH - 1 : 0]	awid;
+	logic [WID_WIDTH - 1 : 0]	awid;
 	logic [ADDR_WIDTH-1 : 0]	awaddr;
 	logic [7:0]					awlen;
 	logic [2:0]					awsize;
@@ -50,7 +50,7 @@ interface axi_if (input sig_reset, input sig_clock);
 	logic 						awready;
 
 	// write data channel signals
-	logic [ID_WIDTH-1 : 0]		wid;
+	logic [WID_WIDTH-1 : 0]		wid;
 	logic [DATA_WIDTH-1 : 0]	wdata;
 	logic [STRB_WIDTH-1 : 0]	wstrb;
 	logic						wlast;
@@ -59,7 +59,7 @@ interface axi_if (input sig_reset, input sig_clock);
 	logic						wready;
 
 	// write response channel signals
-	logic [ID_WIDTH-1 : 0]		bid;
+	logic [WID_WIDTH-1 : 0]		bid;
 	logic [1:0]					bresp;
 	logic [BUSER_WIDTH-1 : 0]	buser;
 	logic						bready;
@@ -116,7 +116,7 @@ interface axi_if (input sig_reset, input sig_clock);
 		// Assertion AXI4_ERRM_ARID_STABLE
 		// ARID remains stable when ARVALID is asserted and ARREADY is low
 		assert_AXI4_ERRM_ARID_STABLE : assert property (
-			disable iff(!has_checks || !sig_reset || !arvalid_arready_flag) 
+			disable iff(!has_checks || !sig_reset || !arvalid_arready_flag)
 			((arvalid == 1 && arready == 0) |=> $stable(arid)))
             else
             	`uvm_error("ASSERTION_ERR","AXI4_ERRM_ARID_STABLE: ARID didn't remain stable when ARVALID is asserted and ARREADY is low")
@@ -140,7 +140,7 @@ interface axi_if (input sig_reset, input sig_clock);
         // Assertion AXI4_ERRM_ARADDR_X
         // A value of X on ARADDR is not permitted when ARVALID is HIGH
         assert_AXI4_ERRM_ARADDR_X : assert property (
-            disable iff(!has_checks || !sig_reset) 
+            disable iff(!has_checks || !sig_reset)
             (arvalid == 1 |-> !$isunknown(araddr)))
             else
             	`uvm_error("ASSERTION_ERR", "AXI4_ERRM_ARADDR_X: ARADDR went to X or Z when ARVALID is HIGH")
@@ -156,7 +156,7 @@ interface axi_if (input sig_reset, input sig_clock);
         // Assertion AXI4_ERRM_ARLEN_X
         // A value of X on ARLEN is not permitted when ARVALID is HIGH
         assert_AXI4_ERRM_ARLEN_X : assert property (
-            disable iff(!has_checks || !sig_reset) 
+            disable iff(!has_checks || !sig_reset)
             (arvalid == 1 |-> !$isunknown(arlen)))
             else
             	`uvm_error("ASSERTION_ERR", "AXI4_ERRM_ARLEN_X: ARLEN went to X or Z when ARVALID is HIGH")
@@ -172,7 +172,7 @@ interface axi_if (input sig_reset, input sig_clock);
         // Assertion AXI4_ERRM_ARSIZE_X
         // A value of X on ARSIZE is not permitted when ARVALID is HIGH
         assert_AXI4_ERRM_ARSIZE_X : assert property (
-            disable iff(!has_checks || !sig_reset) 
+            disable iff(!has_checks || !sig_reset)
             (arvalid == 1 |-> !$isunknown(arsize)))
             else
             	`uvm_error("ASSERTION_ERR", "AXI4_ERRM_ARSIZE_X: ARSIZE went to X or Z when ARVALID is HIGH")
@@ -188,7 +188,7 @@ interface axi_if (input sig_reset, input sig_clock);
        	// Assertion AXI4_ERRM_ARBURST_X
         // A value of X on ARBURST is not permitted when ARVALID is HIGH
         assert_AXI4_ERRM_ARBURST_X : assert property (
-            disable iff(!has_checks || !sig_reset) 
+            disable iff(!has_checks || !sig_reset)
             (arvalid == 1 |-> !$isunknown(arburst)))
             else
             	`uvm_error("ASSERTION_ERR", "AXI4_ERRM_ARBURST_X: ARBURST went to X or Z when ARVALID is HIGH")
@@ -204,7 +204,7 @@ interface axi_if (input sig_reset, input sig_clock);
        	// Assertion AXI4_ERRM_ARLOCK_X
         // A value of X on ARLOCK is not permitted when ARVALID is HIGH
         assert_AXI4_ERRM_ARLOCK_X : assert property (
-            disable iff(!has_checks || !sig_reset) 
+            disable iff(!has_checks || !sig_reset)
             (arvalid == 1 |-> !$isunknown(arlock)))
             else
             	`uvm_error("ASSERTION_ERR", "AXI4_ERRM_ARLOCK_X: ARLOCK went to X or Z when ARVALID is HIGH")
@@ -220,7 +220,7 @@ interface axi_if (input sig_reset, input sig_clock);
         // Assertion AXI4_ERRM_ARCACHE_X
         // A value of X on ARCACHE is not permitted when ARVALID is HIGH
         assert_AXI4_ERRM_ARCACHE_X : assert property (
-            disable iff(!has_checks || !sig_reset) 
+            disable iff(!has_checks || !sig_reset)
             (arvalid == 1 |-> !$isunknown(arcache)))
             else
             	`uvm_error("ASSERTION_ERR", "AXI4_ERRM_ARCACHE_X: ARCACHE went to X or Z when ARVALID is HIGH")
@@ -236,7 +236,7 @@ interface axi_if (input sig_reset, input sig_clock);
        	// Assertion AXI4_ERRM_ARPROT_X
         // A value of X on ARPROT is not permitted when ARVALID is HIGH
         assert_AXI4_ERRM_ARPROT_X : assert property (
-            disable iff(!has_checks || !sig_reset) 
+            disable iff(!has_checks || !sig_reset)
             (arvalid == 1 |-> !$isunknown(arprot)))
             else
             	`uvm_error("ASSERTION_ERR", "AXI4_ERRM_ARPROT_X: ARPROT went to X or Z when ARVALID is HIGH")
@@ -293,7 +293,7 @@ interface axi_if (input sig_reset, input sig_clock);
         // Assertion AXI4_ERRM_ARUSER_X
         // A value of X on ARUSER is not permitted when ARVALID is HIGH
         assert_AXI4_ERRM_ARUSER_X : assert property (
-            disable iff(!has_checks || !sig_reset) 
+            disable iff(!has_checks || !sig_reset)
             (arvalid == 1 |-> !$isunknown(aruser)))
             else
             	`uvm_error("ASSERTION_ERR", "AXI4_ERRM_ARUSER_X: ARUSER went to X or Z when ARVALID is HIGH")
@@ -309,7 +309,7 @@ interface axi_if (input sig_reset, input sig_clock);
       	// Assertion AXI4_ERRM_ARQOS_X
         // A value of X on ARQOS is not permitted when ARVALID is HIGH
         assert_AXI4_ERRM_ARQOS_X : assert property (
-            disable iff(!has_checks || !sig_reset) 
+            disable iff(!has_checks || !sig_reset)
             (arvalid == 1 |-> !$isunknown(arqos)))
             else
             	`uvm_error("ASSERTION_ERR", "AXI4_ERRM_ARQOS_X: ARQOS went to X or Z when ARVALID is HIGH")
@@ -325,7 +325,7 @@ interface axi_if (input sig_reset, input sig_clock);
         // Assertion AXI4_ERRM_ARREGION_X
         // A value of X on ARQOS is not permitted when ARVALID is HIGH
         assert_AXI4_ERRM_ARREGION_X : assert property (
-            disable iff(!has_checks || !sig_reset) 
+            disable iff(!has_checks || !sig_reset)
             (arvalid == 1 |-> !$isunknown(arregion)))
             else
             	`uvm_error("ASSERTION_ERR", "AXI4_ERRM_ARREGION_X: ARREGION went to X or Z when ARVALID is HIGH")
@@ -357,7 +357,7 @@ interface axi_if (input sig_reset, input sig_clock);
         // Assertion AXI4_ERRS_RID_X
         // A value of X on RID is not permitted when RVALID is HIGH
         assert_AXI4_ERRS_RID_X : assert property (
-            disable iff(!has_checks || !sig_reset) 
+            disable iff(!has_checks || !sig_reset)
             (rvalid == 1 |-> !$isunknown(rid)))
             else
             	`uvm_error("ASSERTION_ERR", "AXI4_ERRS_RID_X: RID went to X or Z when RVALID is HIGH")
@@ -373,7 +373,7 @@ interface axi_if (input sig_reset, input sig_clock);
         // Assertion AXI4_ERRS_RDATA_X
         // A value of X on RDATA is not permitted when RVALID is HIGH
         assert_AXI4_ERRS_RDATA_X : assert property (
-            disable iff(!has_checks || !sig_reset) 
+            disable iff(!has_checks || !sig_reset)
             (rvalid == 1 |-> !$isunknown(rdata)))
             else
             	`uvm_error("ASSERTION_ERR", "AXI4_ERRS_RDATA_X: RDATA went to X or Z when RVALID is HIGH")
@@ -389,7 +389,7 @@ interface axi_if (input sig_reset, input sig_clock);
        	// Assertion AXI4_ERRS_RRESP_X
         // A value of X on RRESP is not permitted when RVALID is HIGH
         assert_AXI4_ERRS_RRESP_X : assert property (
-            disable iff(!has_checks || !sig_reset) 
+            disable iff(!has_checks || !sig_reset)
             (rvalid == 1 |-> !$isunknown(rresp)))
             else
             	`uvm_error("ASSERTION_ERR", "AXI4_ERRS_RRESP_X: RRESP went to X or Z when RVALID is HIGH")
@@ -405,7 +405,7 @@ interface axi_if (input sig_reset, input sig_clock);
        	// Assertion AXI4_ERRS_RLAST_X
         // A value of X on RLAST is not permitted when RVALID is HIGH
         assert_AXI4_ERRS_RLAST_X : assert property (
-            disable iff(!has_checks || !sig_reset) 
+            disable iff(!has_checks || !sig_reset)
             (rvalid == 1 |-> !$isunknown(rlast)))
             else
             	`uvm_error("ASSERTION_ERR", "AXI4_ERRS_RLAST_X: RLAST went to X or Z when RVALID is HIGH")
@@ -454,7 +454,7 @@ interface axi_if (input sig_reset, input sig_clock);
        	// Assertion AXI4_ERRS_RUSER_X
        	// A value of X on RUSER is not permitted when RVALID is HIGH
        	assert_AXI4_ERRS_RUSER_X : assert property (
-            disable iff(!has_checks || !sig_reset) 
+            disable iff(!has_checks || !sig_reset)
             (rvalid == 1 |-> !$isunknown(ruser)))
             else
             	`uvm_error("ASSERTION_ERR", "AXI4_ERRS_RUSER_X: RUSER went to X or Z when RVALID is HIGH")

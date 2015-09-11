@@ -83,6 +83,10 @@ class axi_master_write_coverage extends axi_master_write_coverage_base;
 			bins BYTE_128 	= {BYTE_128};
 		}
 
+		USER: coverpoint addr_item.user {
+			bins awuser_value = default;
+		}
+
 	endgroup
 
 
@@ -100,6 +104,10 @@ class axi_master_write_coverage extends axi_master_write_coverage_base;
 			bins NOT_LAST = {0};
 		}
 
+		USER: coverpoint data_item.user{
+			bins wuser_value = default;
+		}
+
 	endgroup
 
 	covergroup axi_master_write_response_cg;
@@ -113,6 +121,10 @@ class axi_master_write_coverage extends axi_master_write_coverage_base;
 			bins EXOKAY = {EXOKAY};
 			bins SLVERR = {SLVERR};
 			bins DECERR = {DECERR};
+		}
+
+		USER: coverpoint response_item.user{
+			bins buser_value = default;
 		}
 
 	endgroup

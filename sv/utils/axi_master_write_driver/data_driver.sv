@@ -125,6 +125,7 @@ task axi_master_write_data_driver::driverVif();
 //		$display(" MASTER SEND DATA current frame: %h %d %h, strobe: %b, count: %d",current_frame.id, current_frame.last_one, current_frame.data, current_frame.strobe,  send_items );
 		send_items++;
 		calculateStrobe(current_frame);
+		vif.wuser	<=	current_frame.wuser;
 		vif.wid 	<= 	current_frame.id;
 		if(current_frame.last_one == TRUE)
 			begin
@@ -145,6 +146,7 @@ task axi_master_write_data_driver::init();
 		vif.wlast 	<= 	0;
 		vif.wdata 	<= 	0;
 		vif.wvalid	<= 	1'b0;
+		vif.wuser 	<= 0;
 endtask
 
 task axi_master_write_data_driver::reset();
@@ -152,12 +154,13 @@ task axi_master_write_data_driver::reset();
 		vif.wlast 	<= 	0;
 		vif.wdata 	<= 	0;
 		vif.wvalid	<= 	1'b0;
+		vif.wuser 	<= 0;
 		`uvm_info(get_name(),$sformatf("reset recievied"), UVM_LOW)
 endtask
 
 task axi_master_write_data_driver::calculateStrobe(input axi_single_frame strobe_frame);
 	vif.wdata <= current_frame.data;
-	vif.wstrb <= 1;
+	vif.wstrb <= current_frame.strobe;
 
 endtask
 

@@ -36,7 +36,7 @@ class axi_master_write_scheduler_package2_0 ;
 
 	axi_master_write_correct_incorrect_random#(bit [7 : 0]) 				len_randomization;
 	axi_master_write_correct_incorrect_random#(bit [3 : 0])     			region_randomization;
-	axi_master_write_correct_incorrect_random#(bit [ID_WIDTH-1 : 0])		id_randomization;
+	axi_master_write_correct_incorrect_random#(bit [WID_WIDTH-1 : 0])		id_randomization;
 	axi_master_write_correct_incorrect_random#(burst_size_enum)				burst_type_randomization;
 	axi_master_write_correct_incorrect_random#(lock_enum)					lock_randomization;
 	axi_master_write_correct_incorrect_random#(bit [3:0])					cache_randomization;
@@ -80,6 +80,7 @@ class axi_master_write_scheduler_package2_0 ;
 	extern function int size();
 	extern function true_false_enum decrementError_counter();
 	extern function void setError_counter(int counter);
+	extern task reincarnateBurstData();
 
 	// LOCAL METHODES
 	extern function void calculateStrobe();
@@ -109,7 +110,7 @@ class axi_master_write_scheduler_package2_0 ;
    	this.lock_state = lock_state;
    endfunction
 
-   function bit[ID_WIDTH - 1 : 0] getID();
+   function bit[WID_WIDTH - 1 : 0] getID();
 	   return frame_copy.id;
    endfunction
 
@@ -125,7 +126,8 @@ task axi_master_write_scheduler_package2_0::addBurst(axi_frame frame);
 	$display("TOME ADDING SCH2_0");
 
 	setConfiguration();
-	//setValues(frame);
+
+	setValues(frame);
 	for(int i = 0; i< frame.len+1; i++)
 			begin
 
@@ -276,7 +278,15 @@ endfunction
 
 function void axi_master_write_scheduler_package2_0::setConfiguration();
 
-		correct_value_config_obj = config_obj.getCorrect_value_config_object();
+		rand_data.setDelay_between_packages(global_config_obj.getDelay_between_burst_packages());
+		rand_data.setDelay_between_packages_cosntat(global_config_obj.getDelay_between_packages_constant());
+		rand_data.setDelay_between_packages_maximum(global_config_obj.getDelay_between_packages_maximum());
+		rand_data.setDelay_between_packages_minimum(global_config_obj.getDelay_between_packages_minimum());
+
+		rand_data.setDelay_addr_package(global_config_obj.getDelay_addr_package());
+		rand_data.setDelay_data_package(global_config_obj.getDelay_data_package());
+
+		//correct_value_config_obj = config_obj.getCorrect_value_config_object();
 
 		len_config			= correct_value_config_obj.getAwlen_conf();
 		region_config 		= correct_value_config_obj.getAwregion_conf();
@@ -411,6 +421,10 @@ endfunction
 	function void axi_master_write_scheduler_package2_0::setError_counter(int counter);
 	 	this.error_counter = counter;
 	endfunction
+
+	task axi_master_write_scheduler_package2_0::reincarnateBurstData();
+	    this.addBurst(this.frame_copy);
+	endtask
 
 
 	`endif

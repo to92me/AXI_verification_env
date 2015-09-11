@@ -13,7 +13,7 @@ class axi_frame_base extends uvm_sequence_item;
 	rand burst_size_enum			size;
 	rand burst_type_enum			burst_type;
 	rand lock_enum					lock;
-	rand bit [ID_WIDTH-1 : 0]		id;
+	rand bit [WID_WIDTH-1 : 0]		id;
 	rand bit [3:0]					cache;
 	rand bit [2:0]					prot;
 	rand bit [3:0]					qos;

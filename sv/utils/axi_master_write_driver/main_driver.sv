@@ -200,21 +200,35 @@ task axi_master_write_main_driver::getFramesFromScheduler();
 			   begin
 				   addr_frame = new();
 				   addr_frame = inbox_mssg.frame;
-				   sem.get(1);
 				   if(correct_order == TRUE)
 					   begin
-					   	addr_ready_queue.push_back(addr_frame);
+						sem.get(1);
+//						addr_inbox_queue.push_back(addr_frame);
+					   	addr_ready_queue.push_back(addr_frame); // must be like this
+						sem.put(1);
 				   		@address_sent;
 					   end
 				   else
-					   addr_inbox_queue.push_back(addr_frame);
-				   sem.put(1);
+					   begin
+						sem.get(1);
+					   	addr_inbox_queue.push_back(addr_frame);
+				   		sem.put(1);
+					   end
 			   end
 			data_frame = new();
 			data_frame = inbox_mssg.frame;
-			sem.get(1);
-			data_inbox_queue.push_back(data_frame);
-			sem.put(1);
+			if(data_frame.delay_data == 0)
+				begin
+					sem.get(1);
+					data_ready_queue.push_back(data_frame);
+					sem.put(1);
+				end
+			else
+				begin
+					sem.get(1);
+					data_inbox_queue.push_back(data_frame);
+					sem.put(1);
+				end
 	   end
 endtask
 
@@ -236,7 +250,6 @@ task axi_master_write_main_driver::decrementDelay();
 		begin
 			if(data_inbox_queue[0].first_one == FALSE || data_inbox_queue[0].delay_data == 0 )
 				begin
-//					$display("adding frame to ready data queue");
 					data_ready_queue.push_back(data_inbox_queue.pop_front());
 				end
 			else

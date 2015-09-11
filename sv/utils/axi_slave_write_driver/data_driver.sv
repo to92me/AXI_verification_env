@@ -43,7 +43,7 @@ class axi_slave_write_data_driver extends axi_slave_write_base_driver;
 	extern task completeRecieve();
 	extern task setReady();
 	extern task getDelay(ref int delay);
-	extern task setSlaveID(input bit[ID_WIDTH - 1 : 0] ID);
+	extern task setSlaveID(input bit[WID_WIDTH - 1 : 0] ID);
 	extern task checkIDAddr(ref true_false_enum correct_slave);
 	extern task waitFrame(ref true_false_enum detected_frame);
 	extern function void setBusReadConfiguration();
@@ -132,7 +132,7 @@ task axi_slave_write_data_driver::completeRecieve();
 	   end
 endtask
 
-task axi_slave_write_data_driver::setSlaveID(input bit[ID_WIDTH-1:0] ID);
+task axi_slave_write_data_driver::setSlaveID(input bit[WID_WIDTH-1:0] ID);
 	sem.get(1);
     this.slave_ID.setID(ID);
 	this.slave_ID.setID_setted(TRUE);

@@ -36,7 +36,7 @@ registerConfiguration("general", "axi_3_support", TRUE);
 //this is number of active bursts at same time if this is setted to 0 then axi uvc will work like AXI4 othervise like AXI3, if AXI3
 //support is disabled this option will be ignored
 //int 					master_write_deepth 					= 5;
-registerConfiguration("general", "master_write_deepth", 5);
+registerConfiguration("general", "master_write_deepth", 10);
 
 
 //if this option is TRUE then all delay options and seetings for ready will be ignored

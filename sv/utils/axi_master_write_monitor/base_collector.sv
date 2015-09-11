@@ -11,7 +11,6 @@
 
 
 class axi_master_write_base_collector extends uvm_component;
-
 	virtual interface axi_if				vif;
 	axi_master_write_main_monitor   	  	main_monitor;
 
@@ -32,12 +31,14 @@ class axi_master_write_base_collector extends uvm_component;
 		if(!uvm_config_db#(virtual axi_if)::get(this, "", "vif", vif))
 			 `uvm_fatal("NOVIF",{"virtual interface must be set for: ",get_full_name(),".vif"})
 
+
 	endfunction : build_phase
 
 	extern task main();
 	extern virtual task checkWaliTransaction(ref true_false_enum valid_transaction);
 	extern virtual task sendData();
 	extern function void setMainMonitorInstance( axi_master_write_main_monitor driver_instance);
+
 
 endclass : axi_master_write_base_collector
 
@@ -81,7 +82,6 @@ endtask
 task axi_master_write_base_collector::sendData();
     $display("AXI MASTER WRITE MONITOR: BASE COLLECTOR: sendData() NOT IMPLEMENTED !!! ");
 endtask
-
 
 
 `endif
