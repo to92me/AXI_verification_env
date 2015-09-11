@@ -18,7 +18,7 @@ endclass : axi_mssg
 
 class unique_id_struct;
 	id_type_enum id_status = UNIQUE_ID;
-	bit [ID_WIDTH-1 : 0] ID;
+	bit [WID_WIDTH-1 : 0] ID;
 endclass: unique_id_struct
 
 class axi_waiting_resp;
@@ -27,7 +27,7 @@ class axi_waiting_resp;
 endclass
 
 class burst_package_info;
-	bit [ID_WIDTH-1 : 0] 	ID;
+	bit [WID_WIDTH-1 : 0] 	ID;
 	bit [ADDR_WIDTH -1: 0]	address;
 	bit  [7:0]				wlen;
 	burst_size_enum			wsize;
@@ -35,12 +35,12 @@ class burst_package_info;
 
 
 	// Get ID
-	function bit[ID_WIDTH-1:0] getID();
+	function bit[WID_WIDTH-1:0] getID();
 		return ID;
 	endfunction
 
 	// Set ID
-	function void setID(bit[ID_WIDTH-1:0] ID);
+	function void setID(bit[WID_WIDTH-1:0] ID);
 		this.ID = ID;
 	endfunction
 
@@ -91,16 +91,16 @@ endclass
 
 
 class slave_ID;
-	bit[ID_WIDTH - 1 : 0]   ID;
+	bit[WID_WIDTH - 1 : 0]   ID;
 	true_false_enum			ID_setted;
 
 	// Get ID
-	function bit[ID_WIDTH-1:0] getID();
+	function bit[WID_WIDTH-1:0] getID();
 		return ID;
 	endfunction : getID
 
 	// Set ID
-	function void setID(bit[ID_WIDTH-1:0] ID);
+	function void setID(bit[WID_WIDTH-1:0] ID);
 		this.ID = ID;
 	endfunction : setID
 
@@ -120,16 +120,16 @@ endclass
 
 
 class axi_slave_response;
-	bit [ID_WIDTH-1 : 0]	ID;
+	bit [WID_WIDTH-1 : 0]	ID;
 	response_enum 			rsp;
 
 	// Get ID
-	function bit[ID_WIDTH-1:0] getID();
+	function bit[WID_WIDTH-1:0] getID();
 		return ID;
 	endfunction : getID
 
 	// Set ID
-	function void setID(bit[ID_WIDTH-1:0] ID);
+	function void setID(bit[WID_WIDTH-1:0] ID);
 		this.ID = ID;
 	endfunction : setID
 
@@ -149,7 +149,7 @@ endclass
 
 
 class axi_slave_write_addr_mssg ;
-	bit [ID_WIDTH-1 : 0]	ID;
+	bit [WID_WIDTH-1 : 0]	ID;
 	bit [7 : 0]				len;
 	true_false_enum			last_one;
 	bit [ADDR_WIDTH -1 : 0] addr;
@@ -178,12 +178,12 @@ class axi_slave_write_addr_mssg ;
 
 
 	// Get ID
-	function bit[ID_WIDTH-1:0] getID();
+	function bit[WID_WIDTH-1:0] getID();
 		return ID;
 	endfunction
 
 	// Set ID
-	function void setID(bit[ID_WIDTH-1:0] ID);
+	function void setID(bit[WID_WIDTH-1:0] ID);
 		this.ID = ID;
 	endfunction
 
@@ -206,7 +206,7 @@ endclass
 
 
 class axi_slave_write_data_mssg;
-	bit [ID_WIDTH-1 : 0]	ID;
+	bit [WID_WIDTH-1 : 0]	ID;
 	true_false_enum 		last_one;
 	bit [DATA_WIDTH-1 : 0 ]	data;
 	bit [STRB_WIDTH-1 : 0 ] strobe;
@@ -220,12 +220,12 @@ class axi_slave_write_data_mssg;
 	endfunction
 
 	// Get ID
-	function bit[ID_WIDTH-1:0] getID();
+	function bit[WID_WIDTH-1:0] getID();
 		return ID;
 	endfunction : getID
 
 	// Set ID
-	function void setID(bit[ID_WIDTH-1:0] ID);
+	function void setID(bit[WID_WIDTH-1:0] ID);
 		this.ID = ID;
 	endfunction : setID
 
@@ -254,16 +254,16 @@ class axi_slave_write_data_mssg;
 endclass
 
 class axi_slave_write_rsp_mssg;
-	bit [ID_WIDTH-1 : 0]	ID;
+	bit [WID_WIDTH-1 : 0]	ID;
 	response_enum			rsp;
 
 	// Get ID
-	function bit[ID_WIDTH-1:0] getID();
+	function bit[WID_WIDTH-1:0] getID();
 		return ID;
 	endfunction : getID
 
 	// Set ID
-	function void setID(bit[ID_WIDTH-1:0] ID);
+	function void setID(bit[WID_WIDTH-1:0] ID);
 		this.ID = ID;
 	endfunction : setID
 
@@ -337,7 +337,7 @@ function void axi_slave_memory_response::setValid(input true_false_enum write_va
 endfunction
 
 class axi_write_address_collector_mssg extends uvm_sequence_item;
-	bit[ID_WIDTH	-1 	: 0]		id;
+	bit[WID_WIDTH	-1 	: 0]		id;
 	bit[ADDR_WIDTH 	- 1 : 0]		addr;
 	bit [7:0]						len;
 	burst_size_enum					size;
@@ -347,7 +347,7 @@ class axi_write_address_collector_mssg extends uvm_sequence_item;
 	bit [2:0]						prot;
 	bit [3:0]						qos;
 	bit [3:0]						region;
-	//								user;
+	bit [AWUSER_WIDTH - 1 : 0]		user;
 
  	function new();
 	 	super.new("axi_write_address_collector_mssg");
@@ -384,12 +384,12 @@ class axi_write_address_collector_mssg extends uvm_sequence_item;
 	endfunction
 
 	// Get id
-	function bit[ID_WIDTH-1:0] getId();
+	function bit[WID_WIDTH-1:0] getId();
 		return id;
 	endfunction
 
 	// Set id
-	function void setId(bit[ID_WIDTH-1:0] id);
+	function void setId(bit[WID_WIDTH-1:0] id);
 		this.id = id;
 	endfunction
 
@@ -453,6 +453,18 @@ class axi_write_address_collector_mssg extends uvm_sequence_item;
 		this.size = size;
 	endfunction
 
+	// Get user
+	function bit[AWUSER_WIDTH-1:0] getUser();
+		return user;
+	endfunction
+
+	// Set user
+	function void setUser(bit[AWUSER_WIDTH-1:0] user);
+		this.user = user;
+	endfunction
+
+
+
 	function void copyMssg(ref axi_write_address_collector_mssg copy_mssg);
 		this.addr			= copy_mssg.getAddr();
 		this.burst_type 	= copy_mssg.getBurst_type();
@@ -464,13 +476,15 @@ class axi_write_address_collector_mssg extends uvm_sequence_item;
 		this.qos 			= copy_mssg.getQos();
 		this.region 		= copy_mssg.getRegion();
 		this.size 			= copy_mssg.getSize();
+		this.user			= copy_mssg.getUser();
 	endfunction
 endclass
 
 class axi_write_data_collector_mssg extends uvm_sequence_item;
-	bit[ID_WIDTH - 1 	: 0]		id;
+	bit[WID_WIDTH - 1 	: 0]		id;
 	bit[DATA_WIDTH - 1 	: 0]    	data;
 	bit[STRB_WIDTH - 1 	: 0]		strobe;
+	bit[WUSER_WIDTH - 1 : 0]		user;
 	true_false_enum					last;
 
 	function new();
@@ -488,12 +502,12 @@ class axi_write_data_collector_mssg extends uvm_sequence_item;
 	endfunction
 
 	// Get id
-	function bit[ID_WIDTH-1:0] getId();
+	function bit[WID_WIDTH-1:0] getId();
 		return id;
 	endfunction
 
 	// Set id
-	function void setId(bit[ID_WIDTH-1:0] id);
+	function void setId(bit[WID_WIDTH-1:0] id);
 		this.id = id;
 	endfunction
 
@@ -517,17 +531,29 @@ class axi_write_data_collector_mssg extends uvm_sequence_item;
 		this.strobe = strobe;
 	endfunction
 
+	// Get user
+	function bit[WUSER_WIDTH-1:0] getUser();
+		return user;
+	endfunction
+
+	// Set user
+	function void setUser(bit[WUSER_WIDTH-1:0] user);
+		this.user = user;
+	endfunction
+
 	function void copyMssg(ref axi_write_data_collector_mssg copy_mssg);
 		this.data 	= copy_mssg.getData();
 		this.id 	= copy_mssg.getId();
 		this.last 	= copy_mssg.getLast();
 		this.strobe = copy_mssg.getStrobe();
+		this.user 	= copy_mssg.getUser();
 	endfunction
 endclass
 
 class axi_write_response_collector_mssg extends uvm_sequence_item;
-	bit [ID_WIDTH-1 : 0]		id;
+	bit [WID_WIDTH-1 : 0]		id;
 	bit [1:0]					bresp;
+	bit [BUSER_WIDTH-1 : 0]		user;
 
 	function new();
 	 	super.new("axi_write_response_collector_mssg");
@@ -545,13 +571,21 @@ class axi_write_response_collector_mssg extends uvm_sequence_item;
 	endfunction
 
 	// Get id
-	function bit[ID_WIDTH-1:0] getId();
+	function bit[WID_WIDTH-1:0] getId();
 		return id;
 	endfunction
 
 	// Set id
-	function void setId(bit[ID_WIDTH-1:0] id);
+	function void setId(bit[WID_WIDTH-1:0] id);
 		this.id = id;
+	endfunction
+
+	function bit[BUSER_WIDTH -1 : 0] getUser();
+		return this.user;
+	endfunction
+
+	function void setUser(bit[BUSER_WIDTH - 1 : 0] user);
+		this.user = user;
 	endfunction
 
 	function void copyMssg(ref axi_write_response_collector_mssg copy_mssg);

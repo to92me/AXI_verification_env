@@ -1,15 +1,213 @@
 `ifndef AXI_MASTER_WRITE_SCHEDULER2_0_SVH
 `define AXI_MASTER_WRITE_SCHEDULER2_0_SVH
 
-//------------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------
 //
-// CLASS: uvc_company_uvc_name_component
+// CLASS: axi_master_write_scheduler_package2_0
 //
-//------------------------------------------------------------------------------
-// burst deepth mode
+//--------------------------------------------------------------------------------------
+// DESCRIPTION:
+//		axi_master_write_scheduler_package2_0 is as it say in name second revision of
+//		axi write uvc scheduler.
+//
+// FEATURES:
+//		1. axi3 data interleavig
+//
+//      2. axi4 one burst by one
+//
+//      3. configuration of data_correctnes
+//
+//		4. configuration of delay between data
+//
+// API:
+//
+//		1. task addBurst(axi_frame frame);
+//
+//			-this methode is used to add new burst for sending
+//			-burst will not be added immediately. it can have maximal one clock delay
+//
+//		2. task getFrameForDrivingVif(output axi_mssg mssg);
+//
+//			-this methode is used to get next redy package for driving virtual interface
+//			-methode as output returns axi_mssg that has status:
+//
+//				1. READY
+//       		   	if status is READY there is data for driving interface and frame (axi_single_frame)
+//					field will be filled with corresponding data
+//
+//				2. QUEUE_EMPYT
+//					if status is READY there is no data for driving vif and frame field
+//					will be NULL ( WARNING: potential null pointer if scheduler user do not
+//					comply with the rules of scheduler usage)
+//
+//			-frame includes delays:
+//
+//				1. delay_addr
+//					-this delay is created randomly in setted constraints( in user_configurations
+//					for more info see user_configuratin_skeleton
+//
+//				2. delay_data
+//					-this delay is created randomly in setted constraints( in user_configurations
+//					for more info see user_configuratin_skeleton
+//
+//
+//		3. task putResponseFromSlave(input axi_slave_response rsp)
+//
+//			-this methode is used to put recieved response from slave
+//			-this inforamtion is used to define number of active bursts
+//
+//		4. task lastPackageSent(input bit[WID_WIDTH-1:0] sent_id)
+//
+//			-this methode is used to inform scheduler that last package of some burst is
+//			sent
+//			-this information is used to check if slave sent response before last package
+//			is sent ( this can mean error )
+//
+//		5. task reset()
+//
+//			-this methode should be called whean reset is detected;
+//
+//
+//REQUIREMENTS:
+//
+//		1. configuration
+//			axi_write_conf configurations needs to be set brefore building scheduler in uvm_database in
+// 			any scope and fiel name : "uvc_write_config"
+//
+//
+//CONFIGURATIONS:
+//
+//		1. correct value
+//
+//			-for driving correct or incorrect data in user configuration ( see user_configuration_skeleton in
+//			configurations ) you need to set corresponding option
+//
+//       	1. registerConfiguration("general", "correct_driving_vif", TRUE);
+//
+//				-this configuration will leave all fields in data correct and uvc will ignore other
+//				registred option in data_correctnes scope ( see user_configurations_skeleton )
+//
+//			2. registerConfiguration("data_correctnes", "options", value);
+//
+//					example : registerConfiguration("data_correctnes", "awid_mode", 1);
+//
+//
+// 				-options:
+//					1. 	awid_mode 						value = __ [1 - 3]
+//	 				2. 	awid_possibility_correct		value = __ [0 -  ]
+// 					3. 	awid_possibility_incorrect 		value = __ [0 -  ]
+//
+//         		-mode:
+//					 1.	correct 						value = 1
+//					 2.	incorrect (default = 0)  		value = 2
+//					 3. random correct vs. incorrect	value = 3
+//
+//
+//			for next values are the same options and modes :
+//
+//				1. awid
+//
+//				2. awregion
+//
+//				3. awlen
+//
+//				4. awsize
+//
+//				5. awburst
+//
+//				6. awlock
+//
+//				7. awcache
+//
+//				8. awqos
+//
+//				9. wstrb
+//
+//
+//		2. delays
+//
+//		-delay that is used in scheduler ( number of clocks  that must pass for currenct frame to be
+//		ready for seanding ) and delays that scheduler generates ( addr_delay and data_delat ) can be configured
+//		in user_configuration ( see user_configuration_skeleton )
+//
+//			1. retisterConfiguration("general","full_speed",[TRUE - FALSE])
+//
+//				-setting this to TRUE option in general scope will configure all delays to be 0
+//				-if this option is setted to TRUE all below options will be ignored
+//
+//			2 delay_between_burst_packages
+//
+//				1. registerConfiguration("general", "delay_between_burst_packages", mode);
+//
+//				 	modes:
+//						1. no delay  			mode = 1
+//						2. costant delay 		mode = 2
+//						3. random delay 		mode = 3
+//
+//				2.  registerConfiguration("general", "delay_between_packages_minimum",value);
+//
+//					-if delay mode is setted as random then minimal delay will be value setted
+//					in this option
+//
+//				3. registerConfiguration("general", "delay_between_packages_maximum",value);
+//
+//					-if delay mode is setted as random then maximal delay will be value setted
+//					in this option
+//
+//				4. registerConfiguration("general", "delay_between_packages_constant",value);
+//
+//					-if delay mode is setted as constatn delay mode then delay will be value
+//					setted in this option
+//
+//				5. registerConfiguration("general", "delay_addr_package",[TRUE-FALSE]);
+//
+//					-if this is TRUE then delay_addr in oputput frame in getFrameForDrivingVif
+//					methode will have random value in range[0 - 5] otherwise 0
+//
+//				6. registerConfiguration("general", "delay_data_package",[TRUE-FALSE]);
+//
+//					-if this is TRUE then delay_data in oputput frame in getFrameForDrivingVif
+//					methode will have random value in range[0 - 5] otherwise 0
+//
+//
+// ADITIONAL INFORMATION
+//
+//
+//	LIFE OF BURST SCHEME
+//																	?2
+//																got rsp
+//															 ------------------>
+//															|					|
+//  		  ?1 ----------------------------------------------------------------------------
+// 			 ->	|    active     | waiting_to_send 	| wating_rsp 	| delete and put respose |
+//  --------|	|---------------|------------------------------------------------------------
+// |add new	|->	| inactive 		|							|					|
+// 	--------|   |---------------|							 ------------------>
+// 			 ->	| duplicate ID 	|							 response_latenes = 0
+// 				 ---------------
+//																	?2
+//
+// 		?1 scheduler will chose where to put new burst on two  conditions
+//
+//			1. is there already burst with same id
+//			if this is true then burst will go -> duplicate ID otherwise
+//			will procede to next condition
+//
+//			2. is number of active burst at the time smaller than burst-deepth
+//			( this is only in AXI 3 supported ) burst will go -> active bursts
+//			otherwise in inactive
+//
+//		?2 every burst can proceede to deletion from waiting response on two
+//		conditions
+//
+//			1.if response is recieved
+//				if resoponse is: SLVERR - scheduler will try one more time to
+//								 OTHER - scheduler will detelete burst
+//
+//			2.if waiting for response is bigger than 10 000 clocks than
+//			scheduler will delete burst
+//
 
-// mode 1 - wait to recieve responde
-// mode 2  - dont wait for respond
 
 typedef axi_master_write_scheduler_package2_0	package_queue[$];
 
@@ -18,6 +216,7 @@ class axi_master_write_scheduler2_0 extends uvm_component;
 	static axi_master_write_scheduler2_0	scheduler_instance;
 	axi_master_write_driver					top_driver;
 	axi_write_conf							config_obj;
+	axi_write_global_conf					global_config_obj;
 	semaphore 								sem;
 	int 									response_counter = 0;
 
@@ -32,10 +231,10 @@ class axi_master_write_scheduler2_0 extends uvm_component;
 	axi_single_frame 						next_frame_for_sending[$];
 
 	//queues for manageing burst statuses
-	bit[ID_WIDTH -1 : 0]					empty_queue_id_queue[$]; // when queue is empyt here are stored his ID-s
-	bit[ID_WIDTH -1 : 0]					rsp_latenes_exipired_id_queue[$]; // if response did not come after some time
-	bit[ID_WIDTH -1 : 0]					recieved_all_send_mssg_id_queue[$]; // when queue is deleted check for duplocates
-	bit[ID_WIDTH -1 : 0]					check_for_Id_duplicates_id_queue[$];
+	bit[WID_WIDTH -1 : 0]					empty_queue_id_queue[$]; // when queue is empyt here are stored his ID-s
+	bit[WID_WIDTH -1 : 0]					rsp_latenes_exipired_id_queue[$]; // if response did not come after some time
+	bit[WID_WIDTH -1 : 0]					recieved_all_send_mssg_id_queue[$]; // when queue is deleted check for duplocates
+	bit[WID_WIDTH -1 : 0]					check_for_Id_duplicates_id_queue[$];
 
 	axi_slave_response						recieved_response[$]; // this are recieved responses
 	axi_frame								add_burst_frame_queue[$]; // waiting to add to some burst
@@ -69,6 +268,7 @@ class axi_master_write_scheduler2_0 extends uvm_component;
 		super.build_phase(phase);
 		if(!uvm_config_db#(axi_write_conf)::get(this, "", "uvc_write_config", config_obj))
 		 `uvm_fatal("NO UVC_CONFIG",{"uvc_write config must be set for ",get_full_name(),".uvc_write_config"})
+		 configureScheduler();
 	endfunction : build_phase
 
 	extern function void setTopDriverInstance(input axi_master_write_driver top_driver_instance);
@@ -80,26 +280,28 @@ class axi_master_write_scheduler2_0 extends uvm_component;
 	extern task addBurst(axi_frame frame);
 	extern task getFrameForDrivingVif(output axi_mssg mssg);
 	extern task putResponseFromSlave(input axi_slave_response rsp);
-	extern task lastPackageSent(input bit[ID_WIDTH-1:0] sent_id);
+	extern task lastPackageSent(input bit[WID_WIDTH-1:0] sent_id);
 	extern task reset();
 
 
 // LOCAL METHODES
-	extern local task checkUniqueID(input bit[ID_WIDTH-1 : 0] id_to_check, package_queue queue_to_check, output true_false_enum existing_id);
+	extern local task checkUniqueID(input bit[WID_WIDTH-1 : 0] id_to_check, package_queue queue_to_check, output true_false_enum existing_id);
 	extern local task checkForDone();
 	extern local task searchReadyFrame();
 	extern local task delayCalculator();
 	extern local task responseLatnesCalculator();
 	extern local task manageBurstStatus();
 	extern local task addBurstPackage(input axi_frame frame);
+	extern local function void configureScheduler();
+	extern local task addBurstGeneratedPackage(input axi_master_write_scheduler_package2_0 new_burst);
 
-	extern local function true_false_enum findeIndexFromID(input bit[ID_WIDTH-1 : 0] id_to_check, package_queue queue_to_check, ref int index);
+	extern local function true_false_enum findeIndexFromID(input bit[WID_WIDTH-1 : 0] id_to_check, package_queue queue_to_check, ref int index);
 
 // PUT RESPONSE METHODES
-	extern local task gotOkayResponse(input bit[ID_WIDTH-1 : 0] rsp_id, int index, input int where_is_burst_found);
-	extern local task gotExOkayResponse(input bit[ID_WIDTH-1 : 0] rsp_id, int index, input int where_is_burst_found);
-	extern local task gotSlaveErrorResponse(input bit[ID_WIDTH-1 : 0] rsp_id, int index, input int where_is_burst_found);
-	extern local task gotDecErrorResponse(input bit[ID_WIDTH-1 : 0] rsp_id, int index, input int where_is_burst_found);
+	extern local task gotOkayResponse(input bit[WID_WIDTH-1 : 0] rsp_id, int index, input int where_is_burst_found);
+	extern local task gotExOkayResponse(input bit[WID_WIDTH-1 : 0] rsp_id, int index, input int where_is_burst_found);
+	extern local task gotSlaveErrorResponse(input bit[WID_WIDTH-1 : 0] rsp_id, int index, input int where_is_burst_found);
+	extern local task gotDecErrorResponse(input bit[WID_WIDTH-1 : 0] rsp_id, int index, input int where_is_burst_found);
 
 // TESTING
 	extern local function void PrintActive();
@@ -127,21 +329,30 @@ task axi_master_write_scheduler2_0::addBurst(input axi_frame frame);
 endtask
 
 
+
+
 task axi_master_write_scheduler2_0::addBurstPackage(input axi_frame frame);
-	true_false_enum  						unique_id1;
-	true_false_enum  						unique_id2;
 
     axi_master_write_scheduler_package2_0 	new_burst;
 	new_burst = new("SchedulerPackage",config_obj);
 
 	new_burst.addBurst(frame);
+	addBurstGeneratedPackage(new_burst);
 
-	checkUniqueID(frame.id, active_queue,unique_id1);
-	checkUniqueID(frame.id, inactive_queue, unique_id2);
+endtask
+
+task axi_master_write_scheduler2_0::addBurstGeneratedPackage(input axi_master_write_scheduler_package2_0 new_burst);
+	true_false_enum  						unique_id1;
+	true_false_enum  						unique_id2;
+
+
+	checkUniqueID(new_burst.getID(), active_queue,unique_id1);
+	checkUniqueID(new_burst.getID(), inactive_queue, unique_id2);
 
 	// if this is duplicate ID then store it to corresponding queue
 	if(unique_id1 == TRUE || unique_id2 == TRUE)
 		begin
+			$display("DUPLICATE");
 			duplicate_ID_queue.push_back(new_burst);
 			return;
 		end
@@ -171,7 +382,7 @@ task axi_master_write_scheduler2_0::addBurstPackage(input axi_frame frame);
 endtask
 
 
-task axi_master_write_scheduler2_0::checkUniqueID(input bit[ID_WIDTH-1:0] id_to_check, input package_queue queue_to_check, output true_false_enum existing_id);
+task axi_master_write_scheduler2_0::checkUniqueID(input bit[WID_WIDTH-1:0] id_to_check, input package_queue queue_to_check, output true_false_enum existing_id);
     int i;
     foreach(queue_to_check[i])
 	    begin
@@ -235,7 +446,7 @@ task axi_master_write_scheduler2_0::delayCalculator();
 	    end
 endtask
 
-task axi_master_write_scheduler2_0::lastPackageSent(input bit[ID_WIDTH-1:0] sent_id);
+task axi_master_write_scheduler2_0::lastPackageSent(input bit[WID_WIDTH-1:0] sent_id);
 	sem.get(1);
 	recieved_all_send_mssg_id_queue.push_back(sent_id);
 	sem.put(1);
@@ -254,7 +465,7 @@ task axi_master_write_scheduler2_0::checkForDone();
 	    duplicate_ID_queue.size() == 0)
 	    begin
 
-		    top_driver.putResponseToSequencer();
+//		    top_driver.putResponseToSequencer();
 
 	    end
 
@@ -285,7 +496,7 @@ endtask
 //
 task axi_master_write_scheduler2_0::manageBurstStatus();
 	int 					index;
-	bit[ID_WIDTH - 1 : 0]	id;
+	bit[WID_WIDTH - 1 : 0]	id;
 
 
 //  			 ----------------------------------------------------------------------------
@@ -494,11 +705,11 @@ task axi_master_write_scheduler2_0::manageBurstStatus();
 //
 //
 //               ---------------------------------------------------------------------------
-//   			|    done       |           done  			|       done		|   done    |
+//   			|    	        |           	  			|       			|   	    |
 //   -----------|---------------|-----------------------------------------------------------
-// 	|  done 	| 		 		|							|					|
-// 	 -----------|---------------|							 ------------------>
-// 				| 			 	|							 response_latenes = 0
+// 	|  done 	| inactive 		|
+// 	 -----------|--		|	 ---|
+// 				| duplicate ID 	|
 // 				 ---------------
 //
 
@@ -526,11 +737,11 @@ task axi_master_write_scheduler2_0::manageBurstStatus();
 //
 //
 //               ---------------------------------------------------------------------------
-//   			|    active     |           done  			|       done		|   done    |
+//   			|    active     |          	  				|       			|		    |
 //   -----------|----   |  -----|-----------------------------------------------------------
 // 	|  done 	| 	inactive	|
 // 	 -----------|---------------|
-// 				| 	 done 	 	|
+// 				| 	 	 	 	|
 // 				 ---------------
 //
 		while(burst_active < burst_deepth && inactive_queue.size() > 0)
@@ -561,16 +772,16 @@ endtask
 // ================================== END BURST MAnAGMENT =============================================
 
 
-function true_false_enum axi_master_write_scheduler2_0::findeIndexFromID(input bit[ID_WIDTH-1:0] id_to_check, input package_queue queue_to_check, ref int index);
+function true_false_enum axi_master_write_scheduler2_0::findeIndexFromID(input bit[WID_WIDTH-1:0] id_to_check, input package_queue queue_to_check, ref int index);
    int i;
 
-	$display("finde index");
-	PrintActive();
+//	$display("finde index");
+//	PrintActive();
 	foreach(queue_to_check[i])
 		begin
 			if(queue_to_check[i].getID() == id_to_check)
 				begin
-					$display("found index = %0d, searching id: %h", i, id_to_check);
+//					$display("found index = %0d, searching id: %h", i, id_to_check);
 					index = i;
 					return TRUE;
 				end
@@ -582,65 +793,76 @@ endfunction;
 
 // ==================================== MANAGE RESPONSE ============================================
 
-task axi_master_write_scheduler2_0::gotOkayResponse(input bit[ID_WIDTH-1 : 0] rsp_id, int index, input int where_is_burst_found);
+task axi_master_write_scheduler2_0::gotOkayResponse(input bit[WID_WIDTH-1 : 0] rsp_id, int index, input int where_is_burst_found);
 //   	rsp_queue.delete(index);
 //	top_driver.putResponseToSequencer(rsp_id);
 
 	case(where_is_burst_found)
 		1:
 		begin
+			top_driver.putResponseToSequencer(waiting_for_RSP_queue[index].getID());
 			waiting_for_RSP_queue.delete(index);
 		end
 
 		2:
 		begin
+			top_driver.putResponseToSequencer(waiting_to_send_all_queue[index].getID());
 			waiting_to_send_all_queue.delete(index);
 		end
 
 		3:
 		begin
-			//active_queue.delete(index);
+			top_driver.putResponseToSequencer(active_queue[index].getID());
+			active_queue.delete(index);
+			`uvm_warning("AxiMasterWriteScheduler [UW]","Recieved  OKAY or EXOKAYresponse from slave and burst did not sent last")
 		end
 	endcase
 
 endtask
 
-task axi_master_write_scheduler2_0::gotExOkayResponse(input bit[ID_WIDTH-1 : 0] rsp_id, int index, input int where_is_burst_found);
+task axi_master_write_scheduler2_0::gotExOkayResponse(input bit[WID_WIDTH-1 : 0] rsp_id, int index, input int where_is_burst_found);
 
 	case(where_is_burst_found)
 		1:
 		begin
+			top_driver.putResponseToSequencer(waiting_for_RSP_queue[index].getID());
 			waiting_for_RSP_queue.delete(index);
 		end
 
 		2:
 		begin
+			top_driver.putResponseToSequencer(waiting_to_send_all_queue[index].getID());
 			waiting_to_send_all_queue.delete(index);
 		end
 
 		3:
 		begin
+			top_driver.putResponseToSequencer(active_queue[index].getID());
 			active_queue.delete(index);
+			`uvm_warning("AxiMasterWriteScheduler [UW]","Recieved  OKAY or EXOKAYresponse from slave and burst did not sent last")
 		end
 	endcase
 
 //	top_driver.putResponseToSequencer(rsp_id);
 endtask
 
-task axi_master_write_scheduler2_0::gotDecErrorResponse(input bit[ID_WIDTH-1 : 0] rsp_id, int index,  input int where_is_burst_found);
+task axi_master_write_scheduler2_0::gotDecErrorResponse(input bit[WID_WIDTH-1 : 0] rsp_id, int index,  input int where_is_burst_found);
 	case(where_is_burst_found)
 		1:
 		begin
+			top_driver.putResponseToSequencer(waiting_for_RSP_queue[index].getID());
 			waiting_for_RSP_queue.delete(index);
 		end
 
 		2:
 		begin
+			top_driver.putResponseToSequencer(waiting_to_send_all_queue[index].getID());
 			waiting_to_send_all_queue.delete(index);
 		end
 
 		3:
 		begin
+			top_driver.putResponseToSequencer(active_queue[index].getID());
 			active_queue.delete(index);
 		end
 	endcase
@@ -649,32 +871,53 @@ task axi_master_write_scheduler2_0::gotDecErrorResponse(input bit[ID_WIDTH-1 : 0
 //	top_driver.putResponseToSequencer(rsp_id);
 endtask
 
-task axi_master_write_scheduler2_0::gotSlaveErrorResponse(input bit[ID_WIDTH-1:0] rsp_id, input int index, input int where_is_burst_found);
+task axi_master_write_scheduler2_0::gotSlaveErrorResponse(input bit[WID_WIDTH-1:0] rsp_id, input int index, input int where_is_burst_found);
 	case(where_is_burst_found)
 		1:
 		begin
-			if(waiting_for_RSP_queue[index].decrementError_counter() == TRUE)
+			if(waiting_for_RSP_queue[index].decrementError_counter() == FALSE)
 				begin
-					addBurst(waiting_for_RSP_queue[index].getFrameCopy());
+					waiting_for_RSP_queue[index].reincarnateBurstData();
+					addBurstGeneratedPackage(waiting_for_RSP_queue[index]);
+//					addBurst(waiting_for_RSP_queue[index].getFrameCopy());
 			 		waiting_for_RSP_queue.delete(index);
 				end
+			else
+				begin
+					top_driver.putResponseToSequencer(waiting_for_RSP_queue[index].getID());
+					waiting_for_RSP_queue.delete(index);
+				end
 		end
 
 		2:
 		begin
-			if(waiting_to_send_all_queue[index].decrementError_counter() == TRUE)
+			if(waiting_to_send_all_queue[index].decrementError_counter() == FALSE)
 				begin
-					addBurst(waiting_to_send_all_queue[index].getFrameCopy());
+					waiting_to_send_all_queue[index].reincarnateBurstData();
+					addBurstGeneratedPackage(waiting_to_send_all_queue[index]);
+//					addBurst(waiting_to_send_all_queue[index].getFrameCopy());
 			 		waiting_to_send_all_queue.delete(index);
+				end
+			else
+				begin
+					top_driver.putResponseToSequencer(waiting_to_send_all_queue[index].getID());
+					waiting_to_send_all_queue.delete(index);
 				end
 		end
 
 		3:
 		begin
-			if(active_queue[index].decrementError_counter() == TRUE)
+			if(active_queue[index].decrementError_counter() == FALSE)
 				begin
-					addBurst(active_queue[index].getFrameCopy());
-			 	//	active_queue.delete(index);
+					active_queue[index].reincarnateBurstData();
+					addBurstGeneratedPackage(active_queue[index]);
+//					addBurst(active_queue[index].getFrameCopy());
+			 		active_queue.delete(index);
+				end
+			else
+				begin
+					top_driver.putResponseToSequencer(active_queue[index].getID());
+					active_queue.delete(index);
 				end
 		end
 	endcase
@@ -691,6 +934,12 @@ task axi_master_write_scheduler2_0::gotSlaveErrorResponse(input bit[ID_WIDTH-1:0
 //		end
 //	top_driver.putResponseToSequencer(rsp_id);
 endtask
+
+
+function void axi_master_write_scheduler2_0::configureScheduler();
+	global_config_obj = config_obj.getGlobal_config_object();
+    this.burst_deepth = global_config_obj.getMaster_write_deepth();
+endfunction
 
 
 // ==================================== INSTANCES ====================================================

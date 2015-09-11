@@ -10,7 +10,7 @@ parameter MONITOR_WAIT = 1000;	// number of clk cycles after which the monitor e
 
 parameter ADDR_WIDTH = 32;
 parameter DATA_WIDTH = 64;
-parameter ID_WIDTH = 32;
+//parameter ID_WIDTH = 32;
 
 
 	//parameter ADDR_WIDTH = 32;	// Width of the address bus

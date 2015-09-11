@@ -26,6 +26,7 @@ class axi_master_write_checker extends axi_master_write_checker_base;
 		void'(main_monitor_instance.suscribeChecker(this, TRUE, TRUE, TRUE, TRUE, TRUE));
 		depth = new();
 		sem = new(1);
+		depth.depth = global_config_obj.getMaster_write_deepth();
 	endfunction : build_phase
 
 	extern task main();

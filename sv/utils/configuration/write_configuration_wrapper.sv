@@ -574,7 +574,7 @@ function void axi_write_configuration_wrapper::parseUserGlobalConfiguration();
 					begin
 						global_config_object.setAxi_3_support(global_conf[i].getValue());
 						$display("setAxi_3_support : %d",global_config_object.getAxi_3_support());
-						if(global_config_object.getAxi_3_support() == TRUE)
+						if(global_config_object.getAxi_3_support() == FALSE)
 							begin
 								global_config_object.setMaster_write_deepth(0);
 								$display("setMaster_write_deepth : %d",global_config_object.getMaster_write_deepth());
@@ -599,7 +599,7 @@ function void axi_write_configuration_wrapper::parseUserGlobalConfiguration();
 					void'(removeStringFromQueue("delay_between_packages_maximum", globalc));
 					void'(removeStringFromQueue("delay_between_packages_constant", globalc));
 
-
+					global_config_object.setDelay_between_burst_packages(0);
 					global_config_object.setDelay_addr_package(FALSE);
 					void'(removeStringFromQueue("delay_addr_package", globalc));
 					global_config_object.setDelay_data_package(FALSE);

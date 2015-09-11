@@ -48,6 +48,7 @@ task axi_slave_write_address_collector::sendData();
 	mssg.setQos(vif.awqos);
 	mssg.setRegion(vif.awregion);
 	mssg.setSize(vif.awsize);
+	mssg.setUser(vif.awuser);
 
 	main_monitor.pushAddressItem(mssg);
 

@@ -131,6 +131,7 @@ task axi_master_write_address_driver::driverVif();
 		vif.awprot 	<= current_frame.prot;
 		vif.awqos 	<= current_frame.qos;
 		vif.awregion<= current_frame.region;
+		vif.awuser 	<= current_frame.awuser;
 //		vif.awvalid <= 1'b1;
 endtask
 
@@ -151,6 +152,7 @@ task axi_master_write_address_driver::init();
 		vif.awprot 	<= 0;
 		vif.awqos 	<= 0;
 		vif.awregion<= 0;
+		vif.awuser 	<= 0;
 		vif.awvalid <= 1'b0;
 endtask
 
@@ -165,6 +167,7 @@ task axi_master_write_address_driver::reset();
 		vif.awprot 	<= 0;
 		vif.awqos 	<= 0;
 		vif.awregion<= 0;
+		vif.awuser	<= 0;
 		vif.awvalid <= 1'b0;
 		`uvm_info(get_name(),$sformatf("reset recievied"), UVM_LOW)
 endtask

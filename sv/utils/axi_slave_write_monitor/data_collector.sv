@@ -43,6 +43,7 @@ task axi_slave_write_data_collector::sendData();
 	mssg.setId(vif.wid);
 	mssg.setLast(vif.wlast);
 	mssg.setStrobe(vif.wstrb);
+	mssg.setUser(vif.wuser);
 
 	main_monitor.pushDataItem(mssg);
 

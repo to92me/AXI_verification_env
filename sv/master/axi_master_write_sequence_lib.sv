@@ -72,7 +72,7 @@ endclass : axi_master_write_sequence_base
 class axi_master_write_sequence_lib_test1 extends axi_master_write_sequence_base;
 
 	// Add local random fields and constraints here
-	int send_bursts = 2;
+	int send_bursts = 3000;
 
 	`uvm_object_utils(axi_master_write_sequence_lib_test1)
 
@@ -81,13 +81,13 @@ class axi_master_write_sequence_lib_test1 extends axi_master_write_sequence_base
 		super.new(name);
 	endfunction
 
-	extern function void response_handler(uvm_sequence_item response);
+	extern function void response_handler(input uvm_sequence_item response);
 
 	virtual task body();
 
 		use_response_handler(1);
 
-		repeat(3000)
+		repeat(send_bursts)
 			begin
 				`uvm_do(req);
 			end

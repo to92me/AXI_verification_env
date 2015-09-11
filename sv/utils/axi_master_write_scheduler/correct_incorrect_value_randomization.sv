@@ -86,7 +86,7 @@ class axi_master_write_correct_incorrect_value_randomization extends uvm_compone
 
 	axi_master_write_correct_incorrect_random#(bit [7 : 0]) 				len_randomization;
 	axi_master_write_correct_incorrect_random#(bit [3 : 0])     			region_randomization;
-	axi_master_write_correct_incorrect_random#(bit [ID_WIDTH-1 : 0])		id_randomization;
+	axi_master_write_correct_incorrect_random#(bit [WID_WIDTH-1 : 0])		id_randomization;
 	axi_master_write_correct_incorrect_random#(burst_size_enum)				burst_type_randomization;
 	axi_master_write_correct_incorrect_random#(lock_enum)					lock_randomization;
 	axi_master_write_correct_incorrect_random#(bit [3:0])					cache_randomization;

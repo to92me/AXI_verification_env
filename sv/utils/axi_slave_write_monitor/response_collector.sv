@@ -40,6 +40,7 @@ task axi_slave_write_response_collector::sendData();
 
 	mssg.setId(vif.bid);
 	mssg.setResp(vif.bresp);
+	mssg.setUser(vif.buser);
 
 	main_monitor.pushResponseItem(mssg);
 

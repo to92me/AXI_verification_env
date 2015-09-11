@@ -84,7 +84,8 @@ endclass
 
 
 class axi_master_write_coverage_base  extends uvm_component;
-
+	axi_write_conf								config_obj;
+	axi_write_global_conf						global_config_obj;
 	axi_master_write_main_monitor				main_monitor_instance;
 
 	axi_write_address_collector_mssg 	addr_item;
@@ -107,7 +108,9 @@ class axi_master_write_coverage_base  extends uvm_component;
 	function void build_phase(uvm_phase phase);
 		super.build_phase(phase);
 		main_monitor_instance = axi_master_write_main_monitor::getMonitorMainInstance(this);
-
+		if(!uvm_config_db#(axi_write_conf)::get(this, "", "uvc_write_config", config_obj))
+			`uvm_fatal("NO UVC_CONFIG",{"uvc_write config must be set for ",get_full_name(),".uvc_write_config"})
+		configureCoverage();
 	endfunction : build_phase
 
 
@@ -118,6 +121,8 @@ class axi_master_write_coverage_base  extends uvm_component;
 	extern virtual task sampleAddr();
 	extern virtual task sampleData();
 	extern virtual task sampleResponse();
+
+	extern local function void configureCoverage();
 
 
 endclass : axi_master_write_coverage_base
@@ -149,5 +154,8 @@ endclass : axi_master_write_coverage_base
 	   	$display("axi_master_write_coverage_base: methode suscribed to but did not redefine it  !!! ");
 	endtask
 
+	function void axi_master_write_coverage_base::configureCoverage();
+	    global_config_obj = config_obj.getGlobal_config_object();
+	endfunction
 
 `endif

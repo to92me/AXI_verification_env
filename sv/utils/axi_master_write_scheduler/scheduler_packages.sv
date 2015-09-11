@@ -107,7 +107,7 @@ class axi_master_write_scheduler_packages;
 	burst_queue_lock_enum	lock_state = QUEUE_LOCKED;
 	unique_id_struct 		burst_status;
 	first_sent_enum 		first_status = FIRST_NOT_SENT;
-	bit [ID_WIDTH-1 : 0] 	ID;
+	bit [WID_WIDTH-1 : 0] 	ID;
 	bit [ADDR_WIDTH -1: 0]	address;
 	bit  [7:0]				wlen;
 	burst_size_enum			wsize;
