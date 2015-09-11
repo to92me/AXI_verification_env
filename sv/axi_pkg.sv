@@ -113,6 +113,7 @@ package axi_pkg;
 	`ifdef andrea_test
 	// ==================== TEST ================================
 		typedef class axi_read_test_config;
+		typedef class axi_read_test_config_dut;
 	// ==========================================================
 	`endif
 
@@ -167,6 +168,8 @@ package axi_pkg;
 	typedef class axi_virtual_sequencer;
 
 	typedef class axi_master_read_multiple_addr;
+	typedef class axi_master_read_no_err_count;
+	typedef class axi_master_read_simple;
 	// ==========================================================
 
 `endif
@@ -293,6 +296,8 @@ package axi_pkg;
 	// ==================== TEST ================================
 		`include "axi_read_test_config.sv"
 		`include "axi_read_tb.sv"
+		`include "axi_read_test_config_dut.sv"
+		`include "axi_read_tb_counter.sv"
 	// ==========================================================
 	`endif
 

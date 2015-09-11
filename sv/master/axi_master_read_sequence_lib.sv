@@ -19,6 +19,7 @@
 * Classes :	1. axi_master_read_base_seq
 *			2. axi_master_read_multiple_addr
 *			3. axi_master_read_no_err_count
+*			4. axi_master_read_simple
 **/
 // -----------------------------------------------------------------------------
 
@@ -223,6 +224,72 @@ endclass : axi_master_read_no_err_count
 **/
 //------------------------------------------------------------------------------
 	function void axi_master_read_no_err_count::response_handler(uvm_sequence_item response);
+
+		if(!($cast(rsp, response)))
+			`uvm_error("CASTFAIL", "The recieved response item is not a burst frame");
+
+		count--;	// keep track of number of responses
+
+		// check if there was a reset
+		if(rsp.status == UVM_TLM_INCOMPLETE_RESPONSE) begin
+			`uvm_info(get_type_name(), "Reset detected", UVM_MEDIUM)
+			count = 0;	// do not wait for any more responses
+		end
+		
+	endfunction: response_handler
+
+
+//------------------------------------------------------------------------------
+//
+// SEQUENCE: axi_master_read_simple
+//
+//------------------------------------------------------------------------------
+/**
+* Description : simple sequence
+*
+* Functions :	1. new(string name="axi_master_read_simple")
+*				2. void response_handler(uvm_sequence_item response)
+*
+* Tasks :	1. body()
+**/
+// -----------------------------------------------------------------------------
+class axi_master_read_simple extends axi_master_read_base_seq;
+
+	`uvm_object_utils(axi_master_read_simple)
+
+	int count = 0;
+
+	// new - constructor
+	function new(string name="axi_master_read_simple");
+		super.new(name);
+	endfunction
+
+	virtual task body();
+
+		use_response_handler(1);
+
+		count = 1;	// number of bursts to be sent
+
+		`uvm_do (req)
+
+		wait(!count);	// wait for all responses before finishing simulation
+
+	endtask : body
+
+	extern virtual function void response_handler(uvm_sequence_item response);
+
+endclass : axi_master_read_simple
+
+//------------------------------------------------------------------------------
+/**
+* Function : response_handler
+* Purpose : called by the sequencer for each response that arrives for this
+*			sequence; decrement the number of requests waiting for responses
+* Parameters :	response - uvm seq. item that the driver put
+* Return :	void
+**/
+//------------------------------------------------------------------------------
+	function void axi_master_read_simple::response_handler(uvm_sequence_item response);
 
 		if(!($cast(rsp, response)))
 			`uvm_error("CASTFAIL", "The recieved response item is not a burst frame");
