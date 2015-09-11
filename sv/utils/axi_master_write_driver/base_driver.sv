@@ -293,7 +293,7 @@ class axi_master_write_base_driver extends uvm_component;
 	// build_phase
 	virtual function void build_phase(uvm_phase phase);
 		super.build_phase(phase);
-		`uvm_info("axi master write base vif driver","Building", UVM_MEDIUM);
+//		`uvm_info("axi master write base vif driver","Building", UVM_MEDIUM);
 		main_driver = axi_master_write_main_driver::getDriverInstance(this);
 		scheduler = axi_master_write_scheduler2_0::getSchedulerInstance(this);
 		if(!uvm_config_db#(virtual axi_if)::get(this, "", "vif", vif))

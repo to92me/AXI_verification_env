@@ -11,7 +11,7 @@ endfunction : new
 
 function void setConfigurations();
 
-$display("USER CONFIGURATION");
+$display("USER CONFIGURATION EXAMPLE ");
 
 // +++++++++++++++++++++++++++++++++++++++++GLOOBAL SETTINGS+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 //with setting do coverage axi_write uvc will collect coverage and report it

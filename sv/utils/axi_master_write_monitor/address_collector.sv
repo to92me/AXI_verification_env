@@ -50,7 +50,7 @@ task axi_master_write_address_collector::sendData();
 	mssg.setSize(vif.awsize);
 	mssg.setUser(vif.awuser);
 
-	$display("		MONITOR ADDR: ID: %h",vif.awid);
+//	$display("		MONITOR ADDR: ID: %h",vif.awid);
 
 	main_monitor.pushAddressItem(mssg);
 

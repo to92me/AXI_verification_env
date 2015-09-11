@@ -227,24 +227,24 @@ function void  axi_write_configuration_wrapper::init();
 	fillGlobalConfiguration(this.globalc);
 	fillCorrectValueConfiguration(this.correct_value);
 
-	$display("master_data:");
-	printStringQueue(master_data);
-	$display("master_addr:");
-	printStringQueue(master_addr);
-	$display("master_resp:");
-	printStringQueue(master_resp);
-
-	$display("slave_data:");
-	printStringQueue(slave_data);
-	$display("slave_addr:");
-	printStringQueue(slave_addr);
-	$display("slave_resp:");
-	printStringQueue(slave_resp);
-
-	$display("globalc:");
-	printStringQueue(globalc);
-	$display("correct_value:");
-	printStringQueue(correct_value);
+//	$display("master_data:");
+//	printStringQueue(master_data);
+//	$display("master_addr:");
+//	printStringQueue(master_addr);
+//	$display("master_resp:");
+//	printStringQueue(master_resp);
+//
+//	$display("slave_data:");
+//	printStringQueue(slave_data);
+//	$display("slave_addr:");
+//	printStringQueue(slave_addr);
+//	$display("slave_resp:");
+//	printStringQueue(slave_resp);
+//
+//	$display("globalc:");
+//	printStringQueue(globalc);
+//	$display("correct_value:");
+//	printStringQueue(correct_value);
 endfunction
 
 
@@ -369,7 +369,7 @@ function void axi_write_configuration_wrapper::fillUserConfiguration();
 	string scope;
 	string option;
 
-	$display("======================== PARSEING SCOPE ================================");
+//	$display("======================== PARSEING SCOPE ================================");
 
 	all_configs = current_config.getConfQueue();
 
@@ -383,7 +383,7 @@ function void axi_write_configuration_wrapper::fillUserConfiguration();
 				if(checkIfOptionIsValid(option, globalc) == TRUE)
 					begin
 						global_conf.push_front(all_configs[i]);
-						$display("scope %s added t global_conf", scope);
+//						$display("scope %s added t global_conf", scope);
 					end
 				else
 					begin
@@ -396,7 +396,7 @@ function void axi_write_configuration_wrapper::fillUserConfiguration();
 				if(checkIfOptionIsValid(option, correct_value) == TRUE)
 					begin
 						correct_value_conf.push_front(all_configs[i]);
-						$display("scope %s added to correct_value_conf", scope);
+//						$display("scope %s added to correct_value_conf", scope);
 					end
 				else
 					begin
@@ -409,7 +409,7 @@ function void axi_write_configuration_wrapper::fillUserConfiguration();
 				if(checkIfOptionIsValid(option, master_data) == TRUE)
 					begin
 						master_data_conf.push_front(all_configs[i]);
-						$display("scope %s added to master_data_conf", scope);
+//						$display("scope %s added to master_data_conf", scope);
 					end
 				else
 					begin
@@ -422,7 +422,7 @@ function void axi_write_configuration_wrapper::fillUserConfiguration();
 				if(checkIfOptionIsValid(option, master_addr) == TRUE)
 					begin
 						master_addr_conf.push_front(all_configs[i]);
-						$display("scope %s added to master_addr_conf", scope);
+//						$display("scope %s added to master_addr_conf", scope);
 					end
 				else
 					begin
@@ -435,7 +435,7 @@ function void axi_write_configuration_wrapper::fillUserConfiguration();
 				if(checkIfOptionIsValid(option, master_resp) == TRUE)
 					begin
 						master_resp_conf.push_front(all_configs[i]);
-						$display("scope %s added to master_resp_conf", scope);
+//						$display("scope %s added to master_resp_conf", scope);
 					end
 				else
 					begin
@@ -448,7 +448,7 @@ function void axi_write_configuration_wrapper::fillUserConfiguration();
 				if(checkIfOptionIsValid(option, slave_data) == TRUE)
 					begin
 						slave_data_conf.push_front(all_configs[i]);
-						$display("scope %s added to slave_data_conf", scope);
+//						$display("scope %s added to slave_data_conf", scope);
 					end
 				else
 					begin
@@ -461,7 +461,7 @@ function void axi_write_configuration_wrapper::fillUserConfiguration();
 				if(checkIfOptionIsValid(option, slave_addr) == TRUE)
 					begin
 						slave_addr_conf.push_front(all_configs[i]);
-						$display("scope %s added to slave_addr_conf", scope);
+//						$display("scope %s added to slave_addr_conf", scope);
 					end
 				else
 					begin
@@ -474,7 +474,7 @@ function void axi_write_configuration_wrapper::fillUserConfiguration();
 				if(checkIfOptionIsValid(option, slave_resp) == TRUE)
 					begin
 						slave_resp_conf.push_front(all_configs[i]);
-						$display("scope %s added to slave_resp_driver", scope);
+//						$display("scope %s added to slave_resp_driver", scope);
 					end
 				else
 					begin
@@ -489,7 +489,7 @@ function void axi_write_configuration_wrapper::fillUserConfiguration();
 
 		end
 
-			$display("======================== END SCOPE ================================");
+//			$display("======================== END SCOPE ================================");
 endfunction
 
 
@@ -528,11 +528,11 @@ endfunction
 function void axi_write_configuration_wrapper::parseUserGlobalConfiguration();
 	int i;
 	string option;
-	$display("=======================PARSING GLOBAL CONF=======================");
+	$display("=================================================================== GENERAL CONFIGURATION ===================================================================");
 	foreach(global_conf[i])
 		begin
 			option = global_conf[i].getOption_name();
-			$display("option: %s",option);
+//			$display("option: %s",option);
 			if(removeStringFromQueue(option,globalc) == TRUE)
 			begin
 
@@ -734,7 +734,8 @@ function void axi_write_configuration_wrapper::parseUserGlobalConfiguration();
 			end
 		end // end foreach
 
-	$display("=======================END GLOBAL CONF=======================");
+	$display("===================================================================END GENERAL CONFIGURATION===================================================================");
+	$display("");
 
 endfunction
 
@@ -746,7 +747,7 @@ function void axi_write_configuration_wrapper::parseUserCorrectValueConfiguratio
 	string option_field;
 	axi_write_correct_one_value new_correct_config;
 
-		$display("=======================PARSING CORRECT VALUE=======================");
+		$display("===================================================================PARSING CORRECT VALUE===================================================================");
 
 
 	foreach(correct_value_conf[i])
@@ -872,7 +873,7 @@ function void axi_write_configuration_wrapper::parseUserCorrectValueConfiguratio
 // ELSE WRONG OPTION
 							else
 								begin
-									`uvm_info("Configuration Wrapper [U] tome : ",$sformatf("%s invalid argument", option_name), UVM_WARNING)
+									`uvm_info("Configuration Wrapper [U]  : ",$sformatf("%s invalid argument", option_name), UVM_WARNING)
 								end
 
 
@@ -884,8 +885,8 @@ function void axi_write_configuration_wrapper::parseUserCorrectValueConfiguratio
 				end
 		end //end foreach
 
-		$display("=======================END  CORRECT VALUE=======================");
-
+		$display("===================================================================END  CORRECT VALUE===================================================================");
+		$display("");
 
 endfunction
 
@@ -896,7 +897,7 @@ function void axi_write_configuration_wrapper::parseUserBusReadConfiguration(ref
 	string option;
 	int order_number;
 
-		$display("========================= PARSING BUS READ CONF =================================");
+		$display("=================================================================== PARSING BUS READ CONF ===================================================================");
 
 	if(findeFullSpeedOption(user_configuration, order_number) == TRUE)
 		begin
@@ -1010,7 +1011,8 @@ function void axi_write_configuration_wrapper::parseUserBusReadConfiguration(ref
 				end
 		end
 
-			$display("========================= END BUS WRITE CONF =================================");
+			$display("=================================================================== END BUS WRITE CONF ===================================================================");
+			$display("");
 
 
 endfunction
@@ -1023,7 +1025,7 @@ function void axi_write_configuration_wrapper::parseUserBusWriteConfiguration(re
 	string option;
 	int order_number;
 
-	$display("========================= PARSIN BUS WRITE CONF =================================");
+	$display("=================================================================== PARSIN BUS WRITE CONF ===================================================================");
 
 	if(findeFullSpeedOption(user_configuration, order_number) == TRUE)
 		begin
@@ -1102,15 +1104,15 @@ function void axi_write_configuration_wrapper::parseUserBusWriteConfiguration(re
 				end
 		end //endforeach
 
-			$display("========================= END BUS WRITE CONF =================================");
-
+			$display("=================================================================== END BUS WRITE CONF =====================================================================");
+			$display("");
 
 endfunction
 
 function true_false_enum axi_write_configuration_wrapper::removeStringFromQueue(input string string_to_delete, ref string_queue queue_from_to_delete);
 	int tmp_i  = -1;
 
-	$display("removeing string: %s",string_to_delete);
+//	$display("removeing string: %s",string_to_delete);
 
 	for(int i = 0; i < queue_from_to_delete.size(); i++)
 		begin
@@ -1209,6 +1211,8 @@ endfunction
 
 function void axi_write_configuration_wrapper::checkUnsettedConfiguration();
 	int i;
+	$display("=================================================================== UNSETTED CONFIGURATION =====================================================================");
+
 	foreach(master_data[i])
 		begin
 			$display("Configuration unsetted : %s, ussing default configuration", master_data[i]);
@@ -1244,6 +1248,9 @@ function void axi_write_configuration_wrapper::checkUnsettedConfiguration();
 			$display("Configuration unsetted : %s, ussing default configuration", master_data[i]);
 //			`uvm_info("ConfigurationWrapper [U]: ",$sformatf("Configuration unsetted : %s, ussing default configuration", slave_resp[i]), UVM_INFO);
 		end
+
+	$display("=================================================================== END UNSETTED CONFIGURATION  =====================================================================");
+	$display("");
 endfunction
 
 function void axi_write_configuration_wrapper::wrappConfigurationObject();

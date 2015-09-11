@@ -123,7 +123,7 @@ endclass : axi_master_write_scheduler_package2_0
 
 task axi_master_write_scheduler_package2_0::addBurst(axi_frame frame);
 
-	$display("TOME ADDING SCH2_0");
+//	$display("TOME ADDING SCH2_0");
 
 	setConfiguration();
 
@@ -164,7 +164,7 @@ task axi_master_write_scheduler_package2_0::addBurst(axi_frame frame);
 
 			this.calculateStrobe();
 
-			$display("TOME DONE  SCH2_0");
+//			$display("TOME DONE  SCH2_0");
 
 
 endtask
@@ -190,7 +190,7 @@ task axi_master_write_scheduler_package2_0::getNextSingleFrame(output axi_mssg r
 				begin
 					`uvm_fatal("Package","NOT LAST")
 				end
-			$display("package: id: %h, len: %0d",getID(), this.single_frame_queue.size());
+//			$display("package: id: %h, len: %0d",getID(), this.single_frame_queue.size());
 			empty_frame = new();
 			empty_frame.id = getID();
 			mssg.state = QUEUE_EMPTY;
@@ -246,8 +246,8 @@ function void axi_master_write_scheduler_package2_0::calculateStrobe();
 	strobe_calculator_item = new();
 
 	strobe_calculator.calc_addr(frame_copy.addr, frame_copy.size, frame_copy.len, frame_copy.burst_type);
-	$display("________________________________________________________________________________________________________");
-	$display("BURST INFO: address: %h, size %h, len: %d, burst: %d",frame_copy.addr, frame_copy.size, frame_copy.len, frame_copy.burst_type);
+//	$display("________________________________________________________________________________________________________");
+//	$display("BURST INFO: address: %h, size %h, len: %d, burst: %d",frame_copy.addr, frame_copy.size, frame_copy.len, frame_copy.burst_type);
 
 	foreach(single_frame_queue[i])
 		begin

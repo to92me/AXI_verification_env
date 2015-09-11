@@ -95,7 +95,7 @@ endclass : axi_master_write_data_driver
 function axi_master_write_data_driver axi_master_write_data_driver::getDriverInstance(input uvm_component parent);
 	if(driverInstance == null)
 	begin
-		$display("Creating Axi Master Write Data Driver ");
+//		$display("Creating Axi Master Write Data Driver ");
 		driverInstance = new("AxiMasterWriteDataDriver", parent);
 	end
 	return driverInstance;

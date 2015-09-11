@@ -178,13 +178,13 @@
 //																got rsp
 //															 ------------------>
 //															|					|
-//  		  ?1 ----------------------------------------------------------------------------
+//  		 ?1  ----------------------------------------------------------------------------
 // 			 ->	|    active     | waiting_to_send 	| wating_rsp 	| delete and put respose |
 //  --------|	|---------------|------------------------------------------------------------
-// |add new	|->	| inactive 		|							|					|
-// 	--------|   |---------------|							 ------------------>
-// 			 ->	| duplicate ID 	|							 response_latenes = 0
-// 				 ---------------
+// |add new	|->	| inactive 		|	<-.					|	|					|
+// 	--------|   |---------------|	  |-----------------	 ------------------>
+// 			 ->	| duplicate ID 	|	<-'	slv_error > max	    response_latenes > max
+// 				 ---------------	?3
 //																	?2
 //
 // 		?1 scheduler will chose where to put new burst on two  conditions
@@ -207,6 +207,20 @@
 //			2.if waiting for response is bigger than 10 000 clocks than
 //			scheduler will delete burst
 //
+//		3? if slave sent SLVERR then if error counter is smaller then setted then
+//		scheduler will reincarnate burst and send or in inactive or in duplicate
+//		corespoing to current state. Otherwise if error counter of burst is bigger
+//		than setted then scheduler will kill burst.
+//
+//	 _             _____ ___  __  __ _____
+//	| |__  _   _  |_   _/ _ \|  \/  | ____|
+//	| '_ \| | | |   | || | | | |\/| |  _|
+//	| |_) | |_| |   | || |_| | |  | | |___
+//	|_.__/ \__, |   |_| \___/|_|  |_|_____|
+//  	   |___/
+//
+//
+//-------------------------------------------------------------------------------------
 
 
 typedef axi_master_write_scheduler_package2_0	package_queue[$];
@@ -257,7 +271,7 @@ class axi_master_write_scheduler2_0 extends uvm_component;
 	static function axi_master_write_scheduler2_0 getSchedulerInstance(input uvm_component parent);
 		if(scheduler_instance == null)
 			begin
-				$display("Creating Sceduler 2.0");
+//				$display("Creating Sceduler 2.0");
 				scheduler_instance = new("MasterWriteScheduler", parent);
 			end
 		return scheduler_instance;
@@ -313,7 +327,6 @@ endclass
 task axi_master_write_scheduler2_0::main(input int clocks);
    repeat(clocks)
 	   begin
-//		   $display("clock");
 		   this.searchReadyFrame();
 		   this.delayCalculator();
 		   this.responseLatnesCalculator();
@@ -352,7 +365,6 @@ task axi_master_write_scheduler2_0::addBurstGeneratedPackage(input axi_master_wr
 	// if this is duplicate ID then store it to corresponding queue
 	if(unique_id1 == TRUE || unique_id2 == TRUE)
 		begin
-			$display("DUPLICATE");
 			duplicate_ID_queue.push_back(new_burst);
 			return;
 		end
@@ -422,14 +434,8 @@ task axi_master_write_scheduler2_0::searchReadyFrame();
 				begin
 					int index;
 					id = rsp_mssg.frame.id;
-					PrintActive();
-					$display("ID : %h", id);
 					findeIndexFromID(id, active_queue, index);
-					$display("returned index: %0d", index);
-					PrintActive();
-					$display("id: %h len: %0d",active_queue[index].getID(), active_queue[index].single_frame_queue.size());
 					empty_queue_id_queue.push_back(id);
-					PrintActive();
 				if(active_queue[index].single_frame_queue.size() != 0)
 					begin
 						`uvm_fatal("Fatal","-1")
@@ -564,7 +570,7 @@ task axi_master_write_scheduler2_0::manageBurstStatus();
 			sem.get(1);
 			id = recieved_all_send_mssg_id_queue.pop_front();
 			sem.put(1);
-			$display("Recieved Sent Last item ID: %0d",id );
+//			$display("Recieved Sent Last item ID: %0d",id );
 			if(findeIndexFromID(id,waiting_to_send_all_queue, index) == FALSE)
 				begin
 					`uvm_fatal("MasterWriteScheduler","waiting to send all packages ")
@@ -597,7 +603,7 @@ task axi_master_write_scheduler2_0::manageBurstStatus();
 			id = rsp.getID();
 			rsp_info = rsp.getRsp();
 
-			$display("MAIN RECIEVED RSP NO: %0d, ID %h", response_counter, id);
+//			$display("MAIN RECIEVED RSP NO: %0d, ID %h", response_counter, id);
 
 			if( findeIndexFromID(id, waiting_for_RSP_queue, index) == TRUE)
 				begin
@@ -620,9 +626,9 @@ task axi_master_write_scheduler2_0::manageBurstStatus();
 				end
 			if(found == TRUE)
 				begin
-					$display(" ");
-					$display("MAIN RECIEVED RSP NO: %0d, ID %h", response_counter, id);
-					$display(" ");
+//					$display(" ");
+//					$display("MAIN RECIEVED RSP NO: %0d, ID %h", response_counter, id);
+//					$display(" ");
 					response_counter++;
 					// id mode = 1 :
 					if(burst_deepth_mode == MODE_1)
@@ -638,9 +644,9 @@ task axi_master_write_scheduler2_0::manageBurstStatus();
 					`uvm_info(get_name(),$sformatf("Recieved Valid ID Response: %h, option: %0d", id, where_is_found), UVM_INFO)
 
 
-					$display("CHECK FOR DONE : active_queue: %0d, inactive_queue: %0d, waiting_to_send_all_queue: %0d,\
-					waiting_for_RSP_queue: %0d,duplicate_ID_queue: %0d",active_queue.size(),inactive_queue.size(),
-					waiting_to_send_all_queue.size(),  waiting_for_RSP_queue.size(), duplicate_ID_queue.size());
+//					$display("CHECK FOR DONE : active_queue: %0d, inactive_queue: %0d, waiting_to_send_all_queue: %0d,\
+//					waiting_for_RSP_queue: %0d,duplicate_ID_queue: %0d",active_queue.size(),inactive_queue.size(),
+//					waiting_to_send_all_queue.size(),  waiting_for_RSP_queue.size(), duplicate_ID_queue.size());
 
 
 					case(rsp_info)

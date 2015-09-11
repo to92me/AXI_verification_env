@@ -75,7 +75,7 @@ endclass
 
 function void axi_write_user_config_base::registerConfiguration(input string scope_name, string option_name, int option_value);
 	axi_write_config_field  conf;
-	$display("new conf registration: \t\t\t %s %s %0d ", scope_name, option_name, option_value);
+//	$display("new conf registration: \t\t\t %s %s %0d ", scope_name, option_name, option_value);
 	conf = new();
 	conf.setScope_name(scope_name);
 	conf.setOption_name(option_name);

@@ -1,11 +1,11 @@
-`ifndef AXI_SLAVE_WRITE_BURST_COLLECOTOR
-`define AXI_SLAVE_WRITE_BURST_COLLECOTOR
+`ifndef AXI_master_WRITE_BURST_COLLECOTOR
+`define AXI_master_WRITE_BURST_COLLECOTOR
 
-class axi_slave_write_burst_collector extends axi_slave_write_checker_base;
+class axi_master_write_burst_collector extends axi_master_write_checker_base;
 	axi_frame				burst_queue[$];
 
 
-	`uvm_component_utils(axi_slave_write_burst_collector)
+	`uvm_component_utils(axi_master_write_burst_collector)
 
 	// new - constructor
 	function new (string name, uvm_component parent);
@@ -30,11 +30,11 @@ class axi_slave_write_burst_collector extends axi_slave_write_checker_base;
 
 	extern task checkForId(input bit[WID_WIDTH - 1 : 0] id, output int index);
 
-endclass : axi_slave_write_burst_collector
+endclass : axi_master_write_burst_collector
 
 
 
-task axi_slave_write_burst_collector::pushAddressItem(input axi_write_address_collector_mssg mssg);
+task axi_master_write_burst_collector::pushAddressItem(input axi_write_address_collector_mssg mssg);
 	int 		index;
 	axi_frame	frame;
 
@@ -59,12 +59,12 @@ task axi_slave_write_burst_collector::pushAddressItem(input axi_write_address_co
 		end
 	else
 		begin
-			`uvm_warning("AxiSlaveWriteBurstCollector [UW]",$sformatf("ID : %h already exists in burst collecotr queue", mssg.getId()));
+			`uvm_warning("AximasterWriteBurstCollector [UW]",$sformatf("ID : %h already exists in burst collecotr queue", mssg.getId()));
 		end
 
 endtask
 
-task axi_slave_write_burst_collector::pushDataItem(input axi_write_data_collector_mssg mssg);
+task axi_master_write_burst_collector::pushDataItem(input axi_write_data_collector_mssg mssg);
     int 		index;
 	checkForId(mssg.id, index);
 
@@ -75,13 +75,13 @@ task axi_slave_write_burst_collector::pushDataItem(input axi_write_data_collecto
 		end
 	else
 		begin
-			`uvm_warning("AxiSlaveWriteBurstCollector [UW]",$sformatf("ID : %h non existing ID in burst collecotr queue", mssg.getId()));
+			`uvm_warning("AximasterWriteBurstCollector [UW]",$sformatf("ID : %h non existing ID in burst collecotr queue", mssg.getId()));
 		end
 
 
 endtask
 
-task axi_slave_write_burst_collector::pushResponseItem(input axi_write_response_collector_mssg mssg);
+task axi_master_write_burst_collector::pushResponseItem(input axi_write_response_collector_mssg mssg);
     int 		index;
 
 	checkForId(mssg.id, index);
@@ -93,13 +93,13 @@ task axi_slave_write_burst_collector::pushResponseItem(input axi_write_response_
 	    end
     else
 	    begin
-		    `uvm_warning("AxiSlaveWriteBurstCollector [UW]",$sformatf("ID : %h non existing ID in burst collecotr queue", mssg.getId()));
+		    `uvm_warning("AximasterWriteBurstCollector [UW]",$sformatf("ID : %h non existing ID in burst collecotr queue", mssg.getId()));
 	    end
 
 endtask
 
 
-task axi_slave_write_burst_collector::checkForId(input bit[WID_WIDTH-1:0] id, output int index);
+task axi_master_write_burst_collector::checkForId(input bit[WID_WIDTH-1:0] id, output int index);
     int i;
 	foreach(burst_queue[i])
 		begin
@@ -115,12 +115,12 @@ task axi_slave_write_burst_collector::checkForId(input bit[WID_WIDTH-1:0] id, ou
 
 endtask
 
-task axi_slave_write_burst_collector::reset();
+task axi_master_write_burst_collector::reset();
     burst_queue.delete();
 endtask
 
-task axi_slave_write_burst_collector::printState();
-   $display("AxiSlaveWriteBurstCollector [UW]: number of active bursts: %0d", burst_queue.size());
+task axi_master_write_burst_collector::printState();
+   $display("AximasterWriteBurstCollector [UW]: number of active bursts: %0d", burst_queue.size());
 
 endtask
 

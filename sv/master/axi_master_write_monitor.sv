@@ -30,6 +30,7 @@ class axi_master_write_main_monitor extends uvm_monitor;
 	uvm_analysis_port#(axi_write_address_collector_mssg)	addr_port;
 	uvm_analysis_port#(axi_write_data_collector_mssg)		data_port;
 	uvm_analysis_port#(axi_write_response_collector_mssg) 	response_port;
+	uvm_analysis_port#(axi_frame) 							burst_port;
 	virtual interface axi_if								vif;
 
 	`uvm_component_utils(axi_master_write_main_monitor)
@@ -41,8 +42,6 @@ class axi_master_write_main_monitor extends uvm_monitor;
 	address_collector 	= 	axi_master_write_address_collector::type_id::create("AxiMasterWriteAddressCollector",this);
 	data_collector 		=	axi_master_write_data_collector::type_id::create("AxiMasterWriteDateCollector", this);
 	response_collector	= 	axi_master_write_response_collector::type_id::create("AxiMasterWriteResponseCollector", this );
-//	coverage	     	= 	axi_master_write_coverage::type_id::create("AxiMasterWriteCoverage", this);
-//	checker_util		= 	axi_master_write_checker::type_id::create("AxiMasterWriteChecker", this);
 
 	checkers			=   axi_master_write_checker_creator::type_id::create("AxiMasterWriteCoverageCreator", this);
 	coverages			=   axi_master_write_coverage_creator::type_id::create("AxiMasterWriteCheckerCreator", this);
@@ -50,6 +49,7 @@ class axi_master_write_main_monitor extends uvm_monitor;
 	addr_port 			= new("AddressCollectedPort",this);
 	data_port 			= new("DataCollectedPort",this);
 	response_port		= new("ResponseCollectedPodr",this);
+	burst_port 			= new("BurstCollectedPort",this);
 
 	endfunction : new
 
@@ -72,6 +72,8 @@ class axi_master_write_main_monitor extends uvm_monitor;
 
 
 	extern static function axi_master_write_main_monitor getMonitorMainInstance(uvm_component parent);
+	extern task sendBurst(input axi_frame burst);
+
 
 	extern task pushAddressItem(axi_write_address_collector_mssg mssg0);
 	extern task pushDataItem(axi_write_data_collector_mssg mssg0);
@@ -94,7 +96,7 @@ endclass : axi_master_write_main_monitor
 	    if(main_monitor_instance == null)
 		    begin
 			    main_monitor_instance = new("AxiMasterMainMonitor", parent);
-			    $display("Creating Axi Master Main Monitor");
+//			    $display("Creating Axi Master Main Monitor");
 		    end
 		return main_monitor_instance;
 	endfunction
@@ -217,7 +219,7 @@ endclass : axi_master_write_main_monitor
 		true_false_enum	suscribed_to_print_event);
 
 		axi_master_write_checker_map checker_package;
-		checker_package = new("AxiMasterWriteCheckerMap",this);
+		checker_package = new($sformatf("AxiMasterWriteCheckerMap[%0d]",checker_map.size()),this);
 
 		checker_package.setChecker_id(checker_map.size());
 		checker_package.setSuscribed_checker_base_instance(checker_base_instance);
@@ -250,5 +252,9 @@ endclass : axi_master_write_main_monitor
 		`uvm_info(this.get_name(),$sformatf("Register new Coverager with checker_id: %d", coverage_package.getCoverage_id()), UVM_INFO);
 		return coverage_package.getCoverage_id();
 	endfunction
+
+	task axi_master_write_main_monitor::sendBurst(input axi_frame burst);
+	   burst_port.write(burst);
+	endtask
 
 `endif

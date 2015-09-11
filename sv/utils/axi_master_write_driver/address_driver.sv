@@ -87,7 +87,7 @@ endclass : axi_master_write_address_driver
 function axi_master_write_address_driver axi_master_write_address_driver::getDriverInstance(input uvm_component parent);
 	if(driverInstance == null)
 	begin
-		$display("Creating Axi Master Write Address Driver");
+//		$display("Creating Axi Master Write Address Driver");
 		driverInstance = new("AxiMasterWriteAddressDriver", parent);
 
 	end
@@ -119,7 +119,7 @@ endtask
 
 task axi_master_write_address_driver::driverVif();
 		#2
-		$display(" 		MASTER SEND ADDR current frame: %h %d %h, count: %d",current_frame.id,current_frame.len, current_frame.data, send_items );
+//		$display(" 		MASTER SEND ADDR current frame: %h %d %h, count: %d",current_frame.id,current_frame.len, current_frame.data, send_items );
 		send_items++;
 		vif.awid	<= current_frame.id;
 		vif.awaddr	<= current_frame.addr;
@@ -184,7 +184,7 @@ task axi_master_write_address_driver::validTriger();
 
 	this.init();
 
-	$display("Running data driver main core....  ");
+//	$display("Running data driver main core....  ");
 	forever
 		begin
 			case (state)

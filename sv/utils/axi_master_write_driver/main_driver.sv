@@ -119,7 +119,7 @@ function axi_master_write_main_driver axi_master_write_main_driver::getDriverIns
     if(driverInstance == null)
 	    begin
 	    driverInstance = new("Write driver main", parent);
-		$display("Created  Driver Core");
+//		$display("Created  Driver Core");
 	    end
 	return driverInstance;
 endfunction
@@ -157,7 +157,7 @@ task  axi_master_write_main_driver::getDataFrame(output axi_mssg rsp_mssg);
 //		$display("DRIVER MASTER MAIN: Sendding full data");
 		if(data_mssg.frame.last_one == TRUE)
 			begin
-				$display("LAST DATA SENT NO: %0d, ID: %h", counter, data_mssg.frame.id);
+//				$display("LAST DATA SENT NO: %0d, ID: %h", counter, data_mssg.frame.id);
 				scheduler.lastPackageSent(data_mssg.frame.id);
 				counter++;
 			end

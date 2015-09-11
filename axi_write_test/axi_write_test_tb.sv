@@ -37,7 +37,7 @@ class  axi_master_write_tb extends uvm_env;
 		uvm_config_db#(axi_write_conf)::set(this, "*", "uvc_write_config", uvc_configuration);
 
 		env  = axi_master_write_env::type_id::create("env", this);
-		$display("TOME TB TB TB ");
+//		$display("TOME TB TB TB ");
 
 	endfunction
 

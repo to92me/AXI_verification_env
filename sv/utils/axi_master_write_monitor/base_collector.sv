@@ -26,7 +26,7 @@ class axi_master_write_base_collector extends uvm_component;
 
 	function void build_phase(uvm_phase phase);
 		super.build_phase(phase);
-		`uvm_info(get_name(),$sformatf("Building Axi Write Master base driver "), UVM_LOW);
+//		`uvm_info(get_name(),$sformatf("Building Axi Write Master base driver "), UVM_LOW);
 
 		if(!uvm_config_db#(virtual axi_if)::get(this, "", "vif", vif))
 			 `uvm_fatal("NOVIF",{"virtual interface must be set for: ",get_full_name(),".vif"})

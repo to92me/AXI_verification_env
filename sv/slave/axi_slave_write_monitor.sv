@@ -37,17 +37,17 @@ class axi_slave_write_main_monitor extends uvm_monitor;
 	axi_slave_write_address_collector 						address_collector;
 	axi_slave_write_data_collector							data_collector;
 	axi_slave_write_response_collector						response_collector;
-//	axi_slave_write_coverage								coverage;
-//	axi_slave_write_checker								checker_util;// ne moze da se zove samo checker
-	axi_slave_write_checker_map							checker_map[$];
+	axi_slave_write_checker_map								checker_map[$];
 	axi_slave_write_coverage_map							coverage_map[$];
 
-	axi_slave_write_checker_creator						checkers;
+	axi_slave_write_checker_creator							checkers;
 	axi_slave_write_coverage_creator						coverages;
 
 	uvm_analysis_port#(axi_write_address_collector_mssg)	addr_port;
 	uvm_analysis_port#(axi_write_data_collector_mssg)		data_port;
 	uvm_analysis_port#(axi_write_response_collector_mssg) 	response_port;
+	uvm_analysis_port#(axi_frame) 							burst_port;
+
 	virtual interface axi_if								vif;
 
 	`uvm_component_utils(axi_slave_write_main_monitor)
@@ -59,8 +59,6 @@ class axi_slave_write_main_monitor extends uvm_monitor;
 	address_collector 	= 	axi_slave_write_address_collector::type_id::create("AxislaveWriteAddressCollector",this);
 	data_collector 		=	axi_slave_write_data_collector::type_id::create("AxislaveWriteDateCollector", this);
 	response_collector	= 	axi_slave_write_response_collector::type_id::create("AxislaveWriteResponseCollector", this );
-//	coverage	     	= 	axi_slave_write_coverage::type_id::create("AxislaveWriteCoverage", this);
-//	checker_util		= 	axi_slave_write_checker::type_id::create("AxislaveWriteChecker", this);
 
 	checkers			=   axi_slave_write_checker_creator::type_id::create("AxislaveWriteCoverageCreator", this);
 	coverages			=   axi_slave_write_coverage_creator::type_id::create("AxislaveWriteCheckerCreator", this);
@@ -68,6 +66,7 @@ class axi_slave_write_main_monitor extends uvm_monitor;
 	addr_port 			= new("AddressCollectedPort",this);
 	data_port 			= new("DataCollectedPort",this);
 	response_port		= new("ResponseCollectedPodr",this);
+	burst_port 			= new("BurstCollectedPort",this);
 
 	endfunction : new
 
@@ -90,6 +89,7 @@ class axi_slave_write_main_monitor extends uvm_monitor;
 
 
 	extern static function axi_slave_write_main_monitor getMonitorMainInstance(uvm_component parent);
+	extern task sendBurst(input axi_frame burst);
 
 	extern task pushAddressItem(axi_write_address_collector_mssg mssg0);
 	extern task pushDataItem(axi_write_data_collector_mssg mssg0);
@@ -169,8 +169,6 @@ endclass : axi_slave_write_main_monitor
 				coverage_map[i].suscribed_coverage_instace.pushDatatItem(mssg1);
 			end
 
-//		coverage.pushDatatItem(mssg0);
-//		checker_util.pushDataItem(mssg1);
 		mssg2 = new();
 		mssg2.copyMssg(mssg0);
 		data_port.write(mssg2);
@@ -197,8 +195,7 @@ endclass : axi_slave_write_main_monitor
 
 		mssg2 = new();
 		mssg2.copyMssg(mssg0);
-//		coverage.pushResponseItem(mssg0);
-//		checker_util.pushResponseItem(mssg1);
+
 		response_port.write(mssg2);
 
 	endtask
@@ -216,7 +213,7 @@ endclass : axi_slave_write_main_monitor
 		true_false_enum	suscribed_to_print_event);
 
 		axi_slave_write_checker_map checker_package;
-		checker_package = new("AxislaveWriteCheckerMap",this);
+		checker_package = new($sformatf("AxislaveWriteCheckerMap[%0d]",checker_map.size()),this);
 
 		checker_package.setChecker_id(checker_map.size());
 		checker_package.setSuscribed_checker_base_instance(checker_base_instance);
@@ -249,5 +246,9 @@ endclass : axi_slave_write_main_monitor
 		`uvm_info(this.get_name(),$sformatf("Register new Coverager with checker_id: %d", coverage_package.getCoverage_id()), UVM_INFO);
 		return coverage_package.getCoverage_id();
 	endfunction
+
+	task axi_slave_write_main_monitor::sendBurst(input axi_frame burst);
+	   burst_port.write(burst);
+	endtask
 
 `endif

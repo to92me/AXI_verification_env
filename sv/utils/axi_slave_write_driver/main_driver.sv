@@ -41,7 +41,7 @@ class axi_slave_write_main_driver extends uvm_component;
 	// new - constructor
 	function new (string name, uvm_component parent);
 		super.new(name, parent);
-		$display("Creating Axi Slave Write Main Driver");
+//		$display("Creating Axi Slave Write Main Driver");
 		sem = new(0);
 		addr_mbox = new();
 		data_mbox = new();
@@ -149,7 +149,9 @@ endclass : axi_slave_write_main_driver
 		int i = 0;
 
 		if(message.last_one == TRUE)
-			$display("SLAVE MAIN: recieved last_one = TRUE");
+			begin
+//			$display("SLAVE MAIN: recieved last_one = TRUE");
+			end
 
 		foreach(burst_status_queue[i])
 			begin
@@ -159,7 +161,7 @@ endclass : axi_slave_write_main_driver
 						found_match_ID = TRUE;
 						if(burst_status_queue[i].len == 0)
 							begin
-								$display("SLAVE MAIN: sending done package to RSP DRIVER from dec delay ");
+//								$display("SLAVE MAIN: sending done package to RSP DRIVER from dec delay ");
 								rsp = new();
 								rsp.setID(burst_status_queue[i].ID);
 								rsp.rsp = OKAY;
@@ -193,7 +195,9 @@ endclass : axi_slave_write_main_driver
 		true_false_enum found_match_ID = FALSE;
 
 		if(message.last_one == TRUE)
-			$display("SLAVE MAIN: recieved last_one = TRUE");
+			begin
+//			$display("SLAVE MAIN: recieved last_one = TRUE");
+			end
 
 		foreach(burst_status_queue[i])
 			begin
@@ -203,7 +207,7 @@ endclass : axi_slave_write_main_driver
 						burst_status_queue[i].len =  message.len + burst_status_queue[i].len;
 						if(burst_status_queue[i].len == 0)
 							begin
-								$display("SLAVE MAIN: sending done package to RSP DRIVER add burst status  ");
+//								$display("SLAVE MAIN: sending done package to RSP DRIVER add burst status  ");
 								rsp = new();
 								rsp.setID(burst_status_queue[i].ID);
 								rsp.rsp = OKAY;

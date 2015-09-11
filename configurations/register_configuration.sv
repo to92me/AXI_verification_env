@@ -22,7 +22,7 @@ class axi_write_configuration_register extends uvm_component;
 	// build_phase
 	function void build_phase(uvm_phase phase);
 		super.build_phase(phase);
-		$display("TOME BILDING REGISTRATOR");
+//		$display("TOME BILDING REGISTRATOR");
 		//registerConfig();
 	endfunction : build_phase
 
@@ -31,7 +31,7 @@ class axi_write_configuration_register extends uvm_component;
 endclass : axi_write_configuration_register
 
 	function void axi_write_configuration_register::registerConfig();
-		$display("++++++ TOME +++++ REGISTRING CONFIGURATIONS++++++++");
+//		$display("++++++ TOME +++++ REGISTRING CONFIGURATIONS++++++++");
 		wrapper = axi_write_configuration_wrapper::getWraperInstance(this);
 		conf0.setConfigurations();
 	 	void'(wrapper.registerConfiguration(conf0,TRUE, 10));
