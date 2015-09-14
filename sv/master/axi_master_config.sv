@@ -1,12 +1,36 @@
 `ifndef AXI_MASTER_CONFIG_SVH
 `define AXI_MASTER_CONFIG_SVH
 
-//------------------------------------------------------------------------------
+/****************************************************************
+* Project : AXI UVC
+*
+* File : data_driver.sv
+*
+* Language : SystemVerilog
+*
+* Company : Elsys Eastern Europe
+*
+* Author : Tomislav Tumbas
+*
+* E-Mail : tomislav.tumbas@elsys-eastern.com
+*
+* Mentor : Darko Tomusilovic
+*
+* Description : data bus driving util
+*
+* Classes :	1.axi_master_write_scheduler_package2_0
+******************************************************************/
+
+//-------------------------------------------------------------------------------------
 //
 // CLASS: axi_master_config
 //
-//for configuration master
-//------------------------------------------------------------------------------
+//--------------------------------------------------------------------------------------
+// DESCRIPTION:
+//		this class is axi master configuration
+//		axi_master_has only one information: axi_maser_name
+//--------------------------------------------------------------------------------------
+
 
 class axi_master_config extends uvm_object;
 

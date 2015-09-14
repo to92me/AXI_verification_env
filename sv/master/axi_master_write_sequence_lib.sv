@@ -26,11 +26,15 @@
 
 
 
-//------------------------------------------------------------------------------
+//--------------------------------------------------------------------------------------
 //
-// CLASS: uvc_company_uvc_name_base_seq
+// CLASS: axi_master_write_sequence_base
 //
-//------------------------------------------------------------------------------
+//--------------------------------------------------------------------------------------
+// DESCRIPTION:
+//		-UVM_SEQUENCE_LIB class ( for more information see uvm_cookbook )
+//		-
+//--------------------------------------------------------------------------------------
 
  class axi_master_write_sequence_base extends uvm_sequence #(axi_frame);
 
@@ -64,11 +68,16 @@
 
 endclass : axi_master_write_sequence_base
 
-//------------------------------------------------------------------------------
+//--------------------------------------------------------------------------------------
 //
-// SEQUENCE: uvc_name_transfer_seq
+// CLASS: axi_master_write_sequence_lib_test1
 //
-//------------------------------------------------------------------------------
+//--------------------------------------------------------------------------------------
+// DESCRIPTION:
+//		-UVM_SEQUENCE_LIB class ( for more information see uvm_cookbook )
+//		-
+//--------------------------------------------------------------------------------------
+
 class axi_master_write_sequence_lib_test1 extends axi_master_write_sequence_base;
 
 	// Add local random fields and constraints here

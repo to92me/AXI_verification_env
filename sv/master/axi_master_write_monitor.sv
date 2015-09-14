@@ -2,15 +2,37 @@
 `define AXI_MASTER_WRITE_MAIN_MONITOR_SVH
 
 
+/**
+* Project : AXI UVC
+*
+* File : axi_master_write_monitor.sv
+*
+* Language : SystemVerilog
+*
+* Company : Elsys Eastern Europe
+*
+* Author : Tomislav Tumbas
+*
+* E-Mail : tomislav.tumbas@elsys-eastern.com
+*
+* Mentor : Darko Tomusilovic
+*
+* Description : master write main driver
+*
+* Classes :	1. axi_master_write_monitor
+*
+**/
 
 
-
-//------------------------------------------------------------------------------
+//--------------------------------------------------------------------------------------
 //
-// CLASS: uvc_company_uvc_name_component
+// CLASS: axi_master_write_main_monitor
 //
-//------------------------------------------------------------------------------
-
+//--------------------------------------------------------------------------------------
+// DESCRIPTION:
+//		-UVM_MONITOR class ( for more information see uvm_cookbook )
+//		-
+//--------------------------------------------------------------------------------------
 
 
 class axi_master_write_main_monitor extends uvm_monitor;
@@ -19,8 +41,6 @@ class axi_master_write_main_monitor extends uvm_monitor;
 	axi_master_write_address_collector 						address_collector;
 	axi_master_write_data_collector							data_collector;
 	axi_master_write_response_collector						response_collector;
-//	axi_master_write_coverage								coverage;
-//	axi_master_write_checker								checker_util;// ne moze da se zove samo checker
 	axi_master_write_checker_map							checker_map[$];
 	axi_master_write_coverage_map							coverage_map[$];
 
@@ -114,8 +134,6 @@ endclass : axi_master_write_main_monitor
 		axi_write_address_collector_mssg mssg1, mssg2;
 		int i;
 
-//			$display("PUSH ADDR ITEM ID: %h", mssg0.getId());
-
 		foreach(checker_map[i])
 			begin
 				if(checker_map[i].getSuscribed_to_address_items() == TRUE)
@@ -168,8 +186,6 @@ endclass : axi_master_write_main_monitor
 					end
 			end
 
-//		coverage.pushDatatItem(mssg0);
-//		checker_util.pushDataItem(mssg1);
 		mssg2 = new();
 		mssg2.copyMssg(mssg0);
 		data_port.write(mssg2);
@@ -202,8 +218,6 @@ endclass : axi_master_write_main_monitor
 
 		mssg2 = new();
 		mssg2.copyMssg(mssg0);
-//		coverage.pushResponseItem(mssg0);
-//		checker_util.pushResponseItem(mssg1);
 		response_port.write(mssg2);
 
 	endtask

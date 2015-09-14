@@ -1,11 +1,80 @@
 `ifndef AXI_MASTER_WRITE_CHECKER_SVH
 `define AXI_MASTER_WRITE_CHECKER_SVH
 
-//------------------------------------------------------------------------------
+/**
+* Project : AXI UVC
+*
+* File : checker.sv
+*
+* Language : SystemVerilog
+*
+* Company : Elsys Eastern Europe
+*
+* Author : Tomislav Tumbas
+*
+* E-Mail : tomislav.tumbas@elsys-eastern.com
+*
+* Mentor : Darko Tomusilovic
+*
+* Description : default checker
+*
+* Classes :	1.axi_master_write_checker
+*
+**/
+
+//-------------------------------------------------------------------------------------
 //
-// CLASS: uvc_company_uvc_name_component
+// CLASS: axi_master_write_checker
 //
-//------------------------------------------------------------------------------
+//--------------------------------------------------------------------------------------
+//
+// DESCRIPTION:
+//			axi_master_write_checker is default checker in axi_master_write einvironment
+//			It checks if:
+//
+//				1. every data package ID has already been registerd on address bus and curretly active
+//				(it is not complited)
+//
+//
+//				2. on every ID last field active there is response.
+//
+//				3. burst is completed and currently waiting for response from slave, that there is no
+//				new burst registration with same ID on address bus.
+//
+//				4. number of active bursts is in range of setted burst_deept
+//
+//				5. there is no OKAY or EXOKAY response from slave if burst is active
+//
+//
+//
+// CONFIGURATION:
+//
+//		1. axi_write_burst_deepth
+//
+//			to configure this field( axi4 supporst only axi_write_burst_deept = 1) You must use user_configuration
+//			(for more information see user_configuration_skeleton in configurations )
+//
+//			1. registerConfiguration("general", "axi_3_support", TRUE);
+//
+//				if this is set as TRUE then axi_write_burst_deepth can have any unsigned integer value,
+//				otherwise axi_write_burst_deepth == 1
+//
+//			2.registerConfiguration("general", "master_write_deepth", 10);
+//
+//				if previous configuration ( axi_3_support ) is TRUE then with this
+//				registration you can set axi_write_burst_deepth value.
+//
+//
+//
+// REQUIREMENTS:
+//
+//			1. this class must extend axi_master_write_checker_base
+//
+//--------------------------------------------------------------------------------------
+
+
+
+
 
 class axi_master_write_checker extends axi_master_write_checker_base;
 	axi_depth_config								depth;
@@ -131,7 +200,7 @@ endclass : axi_master_write_checker
 			end
 		if(delete_tmp != -1)
 			waiting_rsp_burst_queue.delete(delete_tmp);
-		delete_tmp = -1; // FIXME
+		delete_tmp = -1;
 		sem.put(1);
 
 		sem.get(1);
@@ -139,7 +208,7 @@ endclass : axi_master_write_checker
 			begin
 				if(current_burst_queue[i].getID() == mssg.getId())
 					begin
-						if(mssg.getResp == DECERR)
+						if((mssg.getResp == DECERR) || ( mssg.getResp == SLVERR))
 							begin
 								delete_tmp = i;
 								found_ID = TRUE;
