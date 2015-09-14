@@ -90,7 +90,7 @@ class axi_slave_write_base_driver_delays;
 	true_false_enum 	const_delay = FALSE ;
 	true_false_enum		delay_exist = TRUE;
 
-	constraint ready_delay_csr{ // FIXME CSR NO!
+	constraint ready_delay_cs{
 		if(delay_exist == TRUE){
 			if(const_delay == TRUE){
 				delay == const_delay;
@@ -347,7 +347,7 @@ class axi_slave_write_base_driver extends uvm_component;
 
 	function void build_phase(uvm_phase phase);
 		super.build_phase(phase);
-		`uvm_info(get_name(),$sformatf("Building Axi Write Slave Base Driver "), UVM_LOW);
+//		`uvm_info(get_name(),$sformatf("Building Axi Write Slave Base Driver "), UVM_LOW);
 
 		if(!uvm_config_db#(virtual axi_if)::get(this, "", "vif", vif))
 			 `uvm_fatal("NOVIF",{"virtual interface must be set for: ",get_full_name(),".vif"})
@@ -572,7 +572,7 @@ endclass : axi_slave_write_base_driver
 	endtask
 
 	function void axi_slave_write_base_driver::configureDelayOptions();
-		$display("000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000");
+
 	    delay_randomization.setDelay_exist(bus_read_config_obj.getReady_delay_exists());
 		delay_randomization.setDelay_max(bus_read_config_obj.getReady_delay_maximum());
 		delay_randomization.setDelay_min(bus_read_config_obj.getReady_delay_minimum());
@@ -586,7 +586,7 @@ endclass : axi_slave_write_base_driver
 		else
 			begin
 			ready_default_randomization.setReady_random(FALSE);
-				$display("TOME WORKS 2 ");
+
 			end
 
 		ready_default_randomization.setReady_default(bus_read_config_obj.getReady_const_value());

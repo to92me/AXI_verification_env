@@ -90,6 +90,7 @@ class axi_slave_write_main_monitor extends uvm_monitor;
 
 	extern static function axi_slave_write_main_monitor getMonitorMainInstance(uvm_component parent);
 	extern task sendBurst(input axi_frame burst);
+	extern task reorderData(ref axi_write_data_collector_mssg mssg0);
 
 	extern task pushAddressItem(axi_write_address_collector_mssg mssg0);
 	extern task pushDataItem(axi_write_data_collector_mssg mssg0);
@@ -112,7 +113,7 @@ endclass : axi_slave_write_main_monitor
 	    if(main_monitor_instance == null)
 		    begin
 			    main_monitor_instance = new("AxislaveMainMonitor", parent);
-			    $display("Creating Axi slave Main Monitor");
+//			    $display("Creating Axi slave Main Monitor");
 		    end
 		return main_monitor_instance;
 	endfunction
@@ -154,6 +155,8 @@ endclass : axi_slave_write_main_monitor
 	task axi_slave_write_main_monitor::pushDataItem(input axi_write_data_collector_mssg mssg0);
 		axi_write_data_collector_mssg mssg1,mssg2;
 		int i;
+
+		reorderData(mssg0);
 
 		foreach(checker_map[i])
 			begin
@@ -250,5 +253,28 @@ endclass : axi_slave_write_main_monitor
 	task axi_slave_write_main_monitor::sendBurst(input axi_frame burst);
 	   burst_port.write(burst);
 	endtask
+
+	task axi_slave_write_main_monitor::reorderData(ref axi_write_data_collector_mssg mssg0);
+	    int 			line_counter = 0;
+		bit_byte_union	strobe_data;
+		mem_access 		data_from_single_frame;
+		mem_access 		data_to_single_frame;
+
+		data_from_single_frame.data 	= mssg0.getData();
+		strobe_data.one_byte 			= mssg0.getStrobe();
+
+	   for (int j = 0; j <= (DATA_WIDTH/8); j++)
+		   begin
+			   if(strobe_data.one_bit[j] == 1'b1)
+				   begin
+					   data_to_single_frame.lane[line_counter] = data_from_single_frame.lane[j];
+					   line_counter++;
+				   end
+		   end
+
+		mssg0.setData(data_to_single_frame.data);
+
+	endtask
+
 
 `endif

@@ -83,12 +83,12 @@ endfunction
 */
 
 task axi_slave_write_response_driver::pushRsp(input axi_slave_write_rsp_mssg message);
-	$display("SLAVE recieved message to send");
+//	$display("SLAVE recieved message to send");
    	rsp_mbox.put(message);
 endtask
 
 task axi_slave_write_response_driver::driverVif();
-	$display("       SLAVE: SENDING RSP NO %d ",rsp_send_counter);
+//	$display("       SLAVE: SENDING RSP NO %d ",rsp_send_counter);
 	rsp_send_counter++;
 	#2
 	vif.bid   <= current_rsp.ID;
