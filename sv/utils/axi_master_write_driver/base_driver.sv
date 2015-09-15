@@ -369,7 +369,7 @@ function void axi_master_write_base_driver::configureDelayOptions();
 	random_delay.setDelay_exist(bus_driver_configuration.getValid_delay_exists());
 	random_delay.setDelay_max(bus_driver_configuration.getDelay_maximum());
 	random_delay.setDelay_min(bus_driver_configuration.getDelay_minimum());
-	$display("Configuration master driver bus driver DONE");
+//	$display("Configuration master driver bus driver DONE");
 endfunction
 
 `endif

@@ -2,15 +2,37 @@
 `define AXI_MASTER_WRITE_MAIN_MONITOR_SVH
 
 
+/**
+* Project : AXI UVC
+*
+* File : axi_master_write_monitor.sv
+*
+* Language : SystemVerilog
+*
+* Company : Elsys Eastern Europe
+*
+* Author : Tomislav Tumbas
+*
+* E-Mail : tomislav.tumbas@elsys-eastern.com
+*
+* Mentor : Darko Tomusilovic
+*
+* Description : master write main driver
+*
+* Classes :	1. axi_master_write_monitor
+*
+**/
 
 
-
-//------------------------------------------------------------------------------
+//--------------------------------------------------------------------------------------
 //
-// CLASS: uvc_company_uvc_name_component
+// CLASS: axi_master_write_main_monitor
 //
-//------------------------------------------------------------------------------
-
+//--------------------------------------------------------------------------------------
+// DESCRIPTION:
+//		-UVM_MONITOR class ( for more information see uvm_cookbook )
+//		-
+//--------------------------------------------------------------------------------------
 
 
 class axi_master_write_main_monitor extends uvm_monitor;
@@ -19,8 +41,6 @@ class axi_master_write_main_monitor extends uvm_monitor;
 	axi_master_write_address_collector 						address_collector;
 	axi_master_write_data_collector							data_collector;
 	axi_master_write_response_collector						response_collector;
-//	axi_master_write_coverage								coverage;
-//	axi_master_write_checker								checker_util;// ne moze da se zove samo checker
 	axi_master_write_checker_map							checker_map[$];
 	axi_master_write_coverage_map							coverage_map[$];
 
@@ -73,7 +93,7 @@ class axi_master_write_main_monitor extends uvm_monitor;
 
 	extern static function axi_master_write_main_monitor getMonitorMainInstance(uvm_component parent);
 	extern task sendBurst(input axi_frame burst);
-
+	extern task reorderData(ref  axi_write_data_collector_mssg mssg0);
 
 	extern task pushAddressItem(axi_write_address_collector_mssg mssg0);
 	extern task pushDataItem(axi_write_data_collector_mssg mssg0);
@@ -114,8 +134,6 @@ endclass : axi_master_write_main_monitor
 		axi_write_address_collector_mssg mssg1, mssg2;
 		int i;
 
-//			$display("PUSH ADDR ITEM ID: %h", mssg0.getId());
-
 		foreach(checker_map[i])
 			begin
 				if(checker_map[i].getSuscribed_to_address_items() == TRUE)
@@ -146,6 +164,8 @@ endclass : axi_master_write_main_monitor
 		axi_write_data_collector_mssg mssg1,mssg2;
 		int i;
 
+		reorderData(mssg0);
+
 		foreach(checker_map[i])
 			begin
 				if(checker_map[i].getSuscribed_to_data_items() == TRUE)
@@ -166,8 +186,6 @@ endclass : axi_master_write_main_monitor
 					end
 			end
 
-//		coverage.pushDatatItem(mssg0);
-//		checker_util.pushDataItem(mssg1);
 		mssg2 = new();
 		mssg2.copyMssg(mssg0);
 		data_port.write(mssg2);
@@ -200,8 +218,6 @@ endclass : axi_master_write_main_monitor
 
 		mssg2 = new();
 		mssg2.copyMssg(mssg0);
-//		coverage.pushResponseItem(mssg0);
-//		checker_util.pushResponseItem(mssg1);
 		response_port.write(mssg2);
 
 	endtask
@@ -255,6 +271,28 @@ endclass : axi_master_write_main_monitor
 
 	task axi_master_write_main_monitor::sendBurst(input axi_frame burst);
 	   burst_port.write(burst);
+	endtask
+
+	task axi_master_write_main_monitor::reorderData(ref axi_write_data_collector_mssg mssg0);
+	    int 			line_counter = 0;
+		bit_byte_union	strobe_data;
+		mem_access 		data_from_single_frame;
+		mem_access 		data_to_single_frame;
+
+		data_from_single_frame.data 	= mssg0.getData();
+		strobe_data.one_byte 			= mssg0.getStrobe();
+
+	   for (int j = 0; j <= (DATA_WIDTH/8); j++)
+		   begin
+			   if(strobe_data.one_bit[j] == 1'b1)
+				   begin
+					   data_to_single_frame.lane[line_counter] = data_from_single_frame.lane[j];
+					   line_counter++;
+				   end
+		   end
+
+		mssg0.setData(data_to_single_frame.data);
+
 	endtask
 
 `endif

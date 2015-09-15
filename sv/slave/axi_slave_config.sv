@@ -1,11 +1,26 @@
 `ifndef AXI_SLAVE_CONFIG_SVH
 `define AXI_SLAVE_CONFIG_SVH
-//------------------------------------------------------------------------------
-//
-// CLASS: axi_slave_config
-//
-//------------------------------------------------------------------------------
 
+
+/****************************************************************
+* Project : AXI UVC
+*
+* File : axi_slave_config.sv
+*
+* Language : SystemVerilog
+*
+* Company : Elsys Eastern Europe
+*
+* Author : Tomislav Tumbas
+*
+* E-Mail : tomislav.tumbas@elsys-eastern.com
+*
+* Mentor : Darko Tomusilovic
+*
+* Description : data bus driving util
+*
+* Classes :	1.axi_master_write_scheduler_package2_0
+******************************************************************/
 
 
 enum {
@@ -17,6 +32,17 @@ typedef struct{
 	bit[ADDR_WIDTH-1 : 0] start_address;
 	bit[ADDR_WIDTH-1 : 0] end_addressp;
 }slave_address_struct;
+
+
+//-------------------------------------------------------------------------------------
+//
+// CLASS: axi_slave_config_randomize_addres_space
+//
+//--------------------------------------------------------------------------------------
+// DESCRIPTION:
+//		this class is axi slave configuration
+
+
 
 
 class axi_slave_config_randomize_addres_space extends uvm_object;
@@ -36,11 +62,75 @@ class axi_slave_config_randomize_addres_space extends uvm_object;
 endclass
 
 
-//------------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------
 //
-//  CLASS AXI_CONFIG
+// CLASS: axi_slave_config
 //
-//------------------------------------------------------------------------------
+//--------------------------------------------------------------------------------------
+// DESCRIPTION:
+//		this class is axi slave configuration
+//
+//
+//API:
+//	1. task readMemory(input bit [ADDR_WIDTH-1 : 0] read_addr, output axi_slave_memory_response read_rsp)
+//
+//		this method reads slave memory. For arument user must set desired address for reading.
+//		if address is out of slave address boundary then slave will raise error and return null
+//		else if address is correct then this method returns axi_slave_memory_respose message.
+//		for API of this message see file: axi_mssg class axi_slave_memory_response
+//
+//  2. task writeMemory( bit [ADDR_WIDTH-1 : 0] write_addr, input bit [DATA_WIDTH-1 : 0] write_data)
+//
+//		this method is used for writnig to slave memory. User must set address and data to use this task.
+//		if address is out of slave address boundary then slave will raise error otherwise task will
+//		write data to corresponding address.
+//
+//
+//	3. function bit check_addr_range(int unsigned addr);
+//
+//		this method will check send address is it in slave address space. If it is function will
+//		return 1 otherwise 0;
+//
+//
+//FEATURES:
+//
+//	1.name
+//
+//		every slave has own name- default is slave[NO]
+//
+//	2.is_active
+//
+//		slave can be:
+//
+//			1.active: this slave has : 	- monitor
+//										- driver
+//										- sequencer
+//
+//			2.passive: -monitor (only)
+//
+//
+//	3. start_address
+//
+//	 	slave has some address space and because of that it has start address
+//
+//
+// 	4. stop_address
+//
+//	 	slave has some address space and because of that it has end address
+//
+//	5.lock
+//
+//		access to slave can be EXCLUSIVE and NORMAL (for more information
+//		see axi4 specification page 95)
+//
+//	6.memory
+//
+//		this is memory implementation with read and write
+//
+//
+//
+//
+//--------------------------------------------------------------------------------------
 
 
 class axi_slave_config extends uvm_object;
@@ -120,16 +210,34 @@ task axi_slave_config::writeMemory(input bit[ADDR_WIDTH-1:0] write_addr, input b
 endtask
 
 
-//------------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------
 //
-//  CLASS slave factory
+// CLASS: slave_config_factory  (FACTORY)
 //
-//------------------------------------------------------------------------------
+//--------------------------------------------------------------------------------------
+// DESCRIPTION:
+//		this class is factory for creating slaves. Because one slave dos not know other slaves
+// 		address space this class wil create address for each slave and create slave with that
+//		configuration
+//
+// API:
+//
+//	1. function void createSlaves(ref axi_slave_config slave_list[$], input int numberOfSlaves);
+//
+//		this function is used to create list of slaves. It accepts axi_slave_config queue and
+//		number of slaves and returns created slave list.
+//
+//
+// CONFIGURATIONS:
+//
+//		1. number of slaves as imput paramter of method createSlaves.
+//
+//
+//--------------------------------------------------------------------------------------
+
 
 class slave_config_factory extends uvm_object;
 
-//	rand int number_of_slaves;
-//	rand bit[ADDR_WIDTH - 1 : 0] address_points[];
 	axi_slave_config 							slave;
 	axi_slave_config_randomize_addres_space 	rand_space;
 
@@ -138,13 +246,6 @@ class slave_config_factory extends uvm_object;
 	 `uvm_field_object(rand_space, UVM_DEFAULT)
  `uvm_object_utils_end
 
-	//constraint number_of_slaves_csr{
-//		address_points.size() == number_of_slaves;
-//	}
-
-	//constraint even_nuber_of_slaves_scs{
-	//	address_points.size() % 2 = 0;
-	//}
 
  	function new(string name = "slaveFactory");
 		super.new(name);
@@ -157,8 +258,6 @@ endclass : slave_config_factory
 
 
 function void slave_config_factory::createSlaves(ref axi_slave_config slave_list[$], input int numberOfSlaves);
-		 //number_of_slaves = numberOfSlaves;
-		 //address_points.sort();
 
 	rand_space.number_of_slaves = numberOfSlaves;
 	assert(rand_space.randomize());
@@ -180,13 +279,7 @@ function void slave_config_factory::createSlaves(ref axi_slave_config slave_list
 
 	endfunction : createSlaves
 
-//------------------------------------------------------------------------------
-//
-// CLASS slave_unig_memory_space
-// this class provides one unigue slave config that fits constraints ( maximal
-// minimal and unique address space)
-//
-//------------------------------------------------------------------------------
+
 
 `endif
 

@@ -184,7 +184,7 @@ endclass : axi_slave_write_main_driver
 				burst_status.len=-1;
 				burst_status.last_one = message.last_one;
 				burst_status_queue.push_back(burst_status);
-				$display("                                                             new status, DATA, ID: %d , len: %d, last: %d", message.ID, burst_status.len, message.last_one);
+//				$display("                                                             new status, DATA, ID: %d , len: %d, last: %d", message.ID, burst_status.len, message.last_one);
 			end
 	endtask
 
@@ -226,6 +226,6 @@ endclass : axi_slave_write_main_driver
 		if(found_match_ID == FALSE)
 			begin
 				burst_status_queue.push_back(message);
-				$display("                                                                    new status, ADDR, ID: %d , len: %d", message.ID, message.len);
+//				$display("                                                                    new status, ADDR, ID: %d , len: %d", message.ID, message.len);
 			end
 	endtask

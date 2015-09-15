@@ -1,6 +1,27 @@
 `ifndef AXI_MASTER_WRITE_SCHEDULER2_0_SVH
 `define AXI_MASTER_WRITE_SCHEDULER2_0_SVH
 
+/****************************************************************
+* Project : AXI UVC
+*
+* File : data_driver.sv
+*
+* Language : SystemVerilog
+*
+* Company : Elsys Eastern Europe
+*
+* Author : Tomislav Tumbas
+*
+* E-Mail : tomislav.tumbas@elsys-eastern.com
+*
+* Mentor : Darko Tomusilovic
+*
+* Description : data bus driving util
+*
+* Classes :	1.axi_master_write_scheduler_package2_0
+******************************************************************/
+
+
 //-------------------------------------------------------------------------------------
 //
 // CLASS: axi_master_write_scheduler_package2_0
@@ -992,8 +1013,19 @@ task axi_master_write_scheduler2_0::getFrameForDrivingVif(output axi_mssg mssg);
 endtask
 
 task axi_master_write_scheduler2_0::reset();
-    // TODO Auto-generated task stub
-
+	`uvm_info(get_name(),"Recieved Reset signal deleting everything", UVM_MEDIUM);
+   	active_queue.delete();
+	inactive_queue.delete();
+	duplicate_ID_queue.delete();
+	waiting_for_RSP_queue.delete();
+	waiting_to_send_all_queue.delete();
+	next_frame_for_sending.delete();
+	empty_queue_id_queue.delete();
+	rsp_latenes_exipired_id_queue.delete();
+	recieved_all_send_mssg_id_queue.delete();
+	check_for_Id_duplicates_id_queue.delete();
+	recieved_response.delete();
+	add_burst_frame_queue.delete();
 endtask
 
 function void axi_master_write_scheduler2_0::PrintActive();
