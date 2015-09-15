@@ -174,7 +174,8 @@ module dut_counter #
 		// Counter
 		input wire FCLK, // used for counting
     	output wire IRQ_O,   // active when any bit in MIS is active
-    	output wire DOUT_O  // active when count > LOAD
+    	output wire DOUT_O,  // active when count > LOAD
+    	input wire RESET_I	// reset counter on rising edge
 	);
 
 // -----------------------------------------------------------------------------
@@ -186,18 +187,18 @@ module dut_counter #
 	// signal registers
 	// axi
 	reg [ADDR_WIDTH-1 : 0] 	axi_awaddr;
-	reg  	axi_awready;
-	reg  	axi_wready;
-	reg [1 : 0] 	axi_bresp;
-	reg [BUSER_WIDTH-1 : 0] 	axi_buser;
-	reg  	axi_bvalid;
+	reg  					axi_awready;
+	reg  					axi_wready;
+	reg [1 : 0] 			axi_bresp;
+	reg [BUSER_WIDTH-1 : 0] axi_buser;
+	reg  					axi_bvalid;
 	reg [ADDR_WIDTH-1 : 0] 	axi_araddr;
-	reg  	axi_arready;
+	reg  					axi_arready;
 	reg [DATA_WIDTH-1 : 0] 	axi_rdata;
-	reg [1 : 0] 	axi_rresp;
-	reg [RUSER_WIDTH-1 : 0] 	axi_ruser;
-	reg  	axi_rvalid;
-	reg [2 : 0]		axi_awprot;
+	reg [1 : 0] 			axi_rresp;
+	reg [RUSER_WIDTH-1 : 0]	axi_ruser;
+	reg  					axi_rvalid;
+	reg [2 : 0]				axi_awprot;
 	// counter
 	reg 	irq_o;
 	reg 	dout_o;
@@ -210,37 +211,103 @@ module dut_counter #
 	reg 	rready_flag;	// set when axi_rready is set
 
 	// counter registers
-	reg 	nrst;  // internal signal generated based on SWRESET
-    reg [DATA_WIDTH-1 : 0]	count;
+	// unused bits are reserved, read-only, value=0
 
-    // unused bits are reserved, read-only, value=0
+	// ACLK
+	reg 	nrst;  // internal signal generated based on SWRESET
     reg [DATA_WIDTH-1 : 0]	RIS; // bit 0 - OVERFLOW, bit 1 - UNDERFLOW; read-only
-    reg 					ris0_reset_async;	// fclk - for RIS[0]
-    reg 					ris1_reset_async;	// fclk - for RIS[1]
-    wire					ris0_sync;
-    wire					ris1_sync;
     reg [DATA_WIDTH-1 : 0]	IM;  // bit 0 - OVERFLOW, bit 1 - UNDERFLOW; read-write
     reg [DATA_WIDTH-1 : 0]	MIS; // bit 0 - OVERFLOW, bit 1 - UNDERFLOW; write 1 deletes flags in MIS and RIS
-    reg [DATA_WIDTH-1 : 0]	LOAD;    // 16-bit value; read-write
+    reg [DATA_WIDTH-1 : 0]	LOAD;    // read-write
     reg [DATA_WIDTH-1 : 0]	CFG; // bit 0 - counter enable, bit 1 - up(0)/down(1); read-write
+    reg [DATA_WIDTH-1 : 0]	IIR;	// interrupt index registar; read-only
+    reg [DATA_WIDTH-1 : 0]	MATCH;	//  read-write
+    // synchronization
+    wire					ris0_sync;
+    wire					ris1_sync;
+    reg 					cfg0_async;
+    reg 					cfg1_async;
+    // for the handshaking protocol
+    wire					req_sync;	// synchronized request
+    reg 					ack;	// acknowledgement of the req signal
+    reg [DATA_WIDTH-1 : 0]	count_aclk;	// register that holds the count value
+
+	// FCLK
+    reg [DATA_WIDTH-1 : 0]	count;	// counter reg.
+    // synchronization
+    wire 					nrst_sync;	// for nrst
+    reg 					ris0_async;	// for RIS[0]
+    reg 					ris1_async;	// for RIS[1]
+    wire					cfg0_sync;	// fclk
+    wire					cfg1_sync;
+    // for the handshaking protocol
+    reg 					req;	// request
+    wire					ack_sync;	// synchronized acknowledgement
+
+
+    reg [DATA_WIDTH-1 : 0]	data_bus;	// for the handshaking protocol; where the value of count will be placed
 
 // -----------------------------------------------------------------------------
 //
 //	 Synchronizers
 //
 // -----------------------------------------------------------------------------
-	synchronizer sync_ris0 (
+	edge_detection sync_ris0 (
 		.CLK(AXI_ACLK),
-		.RESET(AXI_ARESETN),
-		.ASYNC_I(ris0_reset_async),
+		.RESET(AXI_ARESETN && (!nrst)),
+		.ASYNC_I(ris0_async),
 		.SYNC_O(ris0_sync)
 	);
-	synchronizer sync_ris1 (
+	edge_detection sync_ris1 (
 		.CLK(AXI_ACLK),
-		.RESET(AXI_ARESETN),
-		.ASYNC_I(ris1_reset_async),
+		.RESET(AXI_ARESETN && (!nrst)),
+		.ASYNC_I(ris1_async),
 		.SYNC_O(ris1_sync)
 	);
+
+	simple_2ff_synchronizer sync_cfg0 (
+		.CLK(FCLK),
+		.RESET((!nrst_sync) && (!reset_counter_sync)),
+		.ASYNC_I(cfg0_async),
+		.SYNC_O(cfg0_sync)
+	);
+
+	simple_2ff_synchronizer sync_cfg1 (
+		.CLK(FCLK),
+		.RESET((!nrst_sync) && (!reset_counter_sync)),
+		.ASYNC_I(cfg1_async),
+		.SYNC_O(cfg1_sync)
+	);
+
+	edge_detection sync_nrst (
+		.CLK(FCLK),
+		.RESET((!nrst_sync) && (!reset_counter_sync)),
+		.ASYNC_I(nrst),
+		.SYNC_O(nrst_sync)
+	);
+
+	// 2-phase handshaking protocol for the counter data
+	simple_2ff_synchronizer sync_req (
+		.CLK(AXI_ACLK),
+		.RESET(AXI_ARESETN && (!nrst)),
+		.ASYNC_I(req),
+		.SYNC_O(req_sync)
+	);
+	simple_2ff_synchronizer sync_ack (
+		.CLK(FCLK),
+		.RESET((!nrst_sync) && (!reset_counter_sync)),
+		.ASYNC_I(ack),
+		.SYNC_O(ack_sync)
+	);
+
+	// counter reset on edge
+	edge_detection sync_reset (
+		.CLK(FCLK),
+		.RESET((!nrst_sync) && (!reset_counter_sync)),
+		.ASYNC_I(RESET_I),
+		.SYNC_O(reset_counter_sync)
+	);
+
 
 // -----------------------------------------------------------------------------
 //
@@ -266,37 +333,13 @@ module dut_counter #
 	// start state
 	initial begin
         count <= 0;
-        RIS <= 0;
-        IM <= 0;
-        MIS <= 0;
-        LOAD <= 0;
-        CFG <= 0;
+		ris0_async <= 0;
+		ris1_async <= 0;
+		req <= 0;
+		data_bus <= 0;
     end
 
 always @(posedge AXI_ACLK) begin
-
-// -----------------------------------------------------------------------------
-//
-//	Register assigments
-//
-// -----------------------------------------------------------------------------
-	RIS[0] <= ris0_sync;
-	RIS[1] <= ris1_sync;
-
-	// MIS calculation
-    MIS[0] <= RIS[0] && IM[0];
-    MIS[1] <= RIS[1] && IM[1];
-    if(MIS[0] || MIS[1])
-        irq_o <= 1;
-    else
-        irq_o <= 0;
-
-    // LOAD check
-    if (count > LOAD)
-        dout_o <= 1;
-    else
-        dout_o <= 0;
-
 
 // -----------------------------------------------------------------------------
 //
@@ -317,15 +360,28 @@ always @(posedge AXI_ACLK) begin
     	axi_rvalid <= 0;
     end
 
+    // reset flags
+    read_flag <= 0;
+	write_addr_flag <= 0;
+	write_data_flag <= 0;
+	bready_flag <= 0;
+	rready_flag <= 1;
+
     // reset counter
     if ((AXI_ARESETN == 0) || (nrst == 1)) begin
         RIS <= 0;
         IM <= 0;
         MIS <= 0;
+        IIR <= 0;
         LOAD <= 0;
+        MATCH <= 0;
         CFG <= 0;
         irq_o <= 0;
         nrst <= 0;
+		cfg0_async <= 0;
+		cfg1_async <= 0;
+		ack <= 0;
+		count_aclk <= 0;
 
         // simulate write
         CFG[0] <= 1;	// enable
@@ -334,12 +390,66 @@ always @(posedge AXI_ACLK) begin
         IM[1] <= 1;
     end
 
+
+    else begin	// if reset not asserted
+// -----------------------------------------------------------------------------
+//
+//	Register assigments
+//
+// -----------------------------------------------------------------------------
+    	// first check if RIS is set (so that ris0_sync doen't clear it)
+    	if (!RIS[0])
+			RIS[0] <= ris0_sync;
+		if (!RIS[1])
+			RIS[1] <= ris1_sync;
+
+		// MATCH check
+	    // MATCH check
+	    if (count_aclk == MATCH)
+	    	RIS[2] <= 1;
+
+		// MIS calculation
+	    MIS[0] <= RIS[0] && IM[0];
+	    MIS[1] <= RIS[1] && IM[1];
+	    MIS[2] <= RIS[2] && IM[2];
+	    if(MIS[0] || MIS[1] || MIS[2])
+	        irq_o <= 1;
+	    else
+	        irq_o <= 0;
+
+	    // CFG
+	    cfg0_async <= CFG[0];
+	    cfg1_async <= CFG[1];
+
+	    // handshaking protocol
+	    if(ack != req_sync) begin
+	    	count_aclk <= data_bus;
+	    	ack <= !ack;
+	    end
+
+	    // LOAD check
+	    if (count_aclk > LOAD)
+	        dout_o <= 1;
+	    else
+	        dout_o <= 0;
+
+	    // IIR
+	    case (MIS[2:0])
+	    	3'b000:	IIR[2:0] <= 3'b000;
+			3'b001: IIR[2:0] <= 3'b001;
+	    	3'b010: IIR[2:0] <= 3'b010;
+	    	3'b011: IIR[2:0] <= 3'b010;
+	    	3'b100: IIR[2:0] <= 3'b100;
+	    	3'b101: IIR[2:0] <= 3'b100;
+	    	3'b110: IIR[2:0] <= 3'b100;
+	    	3'b111: IIR[2:0] <= 3'b100;
+	    endcase
+
 // -----------------------------------------------------------------------------
 //
 //	 Read address channel
 //
 // -----------------------------------------------------------------------------
-	if (AXI_ARESETN == 1) begin
 		axi_arready <= 1'b1;	// slave always ready to accept requests
 
 		if(AXI_ARVALID) begin
@@ -358,6 +468,12 @@ always @(posedge AXI_ACLK) begin
 					axi_rdata <= CFG;
 				10:	// SWRESET
 					axi_rdata <= 0;
+				12: // IIR
+					axi_rdata <= IIR;
+				14: // MATCH
+					axi_rdata <= MATCH;
+				16:	// count
+					axi_rdata <= count_aclk;
 				default:
 					begin
 						// unimplemented address
@@ -379,17 +495,16 @@ always @(posedge AXI_ACLK) begin
 
 			read_flag <= 1; // ILI AXI_ARLEN - DA LI JE DOZVOLJENA TERMINACIJA BURST-OVA - ASK DARKO
 		end
-	end
+		else
+			read_flag <= 0;
 
 // -----------------------------------------------------------------------------
 //
 //	 Read data channel
 //
 // -----------------------------------------------------------------------------
-	if (AXI_ARESETN == 1) begin
 		// send response
 		if(read_flag || !rready_flag) begin
-			read_flag <= 0;	// ILI READ_FLAG-- AKO IH IMA VISE
 			rready_flag <= 0;
 			axi_rvalid <= 1;
 			if(AXI_RREADY)
@@ -397,20 +512,18 @@ always @(posedge AXI_ACLK) begin
 		end
 		else
 			axi_rvalid <= 0;
-	end
 
 // -----------------------------------------------------------------------------
 //
 //	Write address channel
 //
 // -----------------------------------------------------------------------------
-	if (AXI_ARESETN == 1) begin
 		axi_awready <= 1;	// slave always ready
 
 		if(AXI_AWVALID) begin
 
 			// check and get address
-			if ((AXI_AWADDR == 2) || (AXI_AWADDR == 4) || (AXI_AWADDR == 6) || (AXI_AWADDR == 8) || (AXI_AWADDR == 10)) begin
+			if ((AXI_AWADDR == 2) || (AXI_AWADDR == 4) || (AXI_AWADDR == 6) || (AXI_AWADDR == 8) || (AXI_AWADDR == 10) || (AXI_AWADDR == 14)) begin
 				axi_awaddr <= AXI_AWADDR;
 				axi_awprot <= AXI_AWPROT;
 				write_addr_flag <= 1;
@@ -430,19 +543,18 @@ always @(posedge AXI_ACLK) begin
 			if(AXI_AWBURST)
 				write_addr_flag <= 0;
 		end
-	end
+		else
+			write_addr_flag <= 0;
 
 // -----------------------------------------------------------------------------
 //
 //	Write data channel
 //
 // -----------------------------------------------------------------------------
-	if (AXI_ARESETN == 1) begin
 		axi_wready <= 1;	// slave always ready
 
 		if(AXI_WVALID) begin
 			if(write_addr_flag) begin
-				write_addr_flag <= 0;
 				axi_bresp <= 2'b00;	// default OKAY response
 
 				case (axi_awaddr)
@@ -461,6 +573,10 @@ always @(posedge AXI_ACLK) begin
 								MIS[1] <= 0;
 								RIS[1] <= 0;
 							end
+							if(AXI_WDATA[2] == 1) begin
+								MIS[2] <= 0;
+								RIS[2] <= 0;
+							end
 						end
 						else
 							axi_bresp <= 2'b10;	// slverr
@@ -473,6 +589,8 @@ always @(posedge AXI_ACLK) begin
 							nrst <= 1;
 						else
 							axi_bresp <= 2'b10;	// slverr
+					14: // MATCH
+						MATCH <= AXI_WDATA;
 				endcase
 				write_data_flag <= 1;
 			end
@@ -484,16 +602,13 @@ always @(posedge AXI_ACLK) begin
 		end
 		else
 			write_data_flag <= 0;
-	end
 
 // -----------------------------------------------------------------------------
 //
 //	Write response channel
 //
 // -----------------------------------------------------------------------------
-	if (AXI_ARESETN == 1) begin
 		if(write_data_flag || !bready_flag) begin
-			write_data_flag <= 0;
 			bready_flag <= 0;
 			axi_bvalid <= 1;
 			if(AXI_BREADY)
@@ -501,8 +616,10 @@ always @(posedge AXI_ACLK) begin
 		end
 		else
 			axi_bvalid <= 0;
-	end
-end 	// always
+
+
+	end // else begin (AXI_ARESETN == 1)
+end 	// always @(posedge AXI_ACLK)
 
 // -----------------------------------------------------------------------------
 //
@@ -512,36 +629,42 @@ end 	// always
 always @(posedge FCLK) begin
 
 	// default
-	ris0_reset_async <= 0;
-	ris1_reset_async <= 0;
+	ris0_async <= 0;
+	ris1_async <= 0;
 
-	if (AXI_ARESETN == 1) begin
+	// RESET
+	if ((reset_counter_sync == 1) || (nrst_sync == 1)) begin
+		count <= 0;
+		ris0_async <= 0;
+		ris1_async <= 0;
+		req <= 0;
+		data_bus <= 0;
+	end
 
-        if(CFG[0] == 1) begin // counter enable
+	else begin
+        if(cfg0_sync == 1) begin // counter enable
 
-            if(CFG[1] == 0) begin // up
+            if(cfg1_sync == 0) begin // up
 
                 if(count == 16'b1111111111111111)  // OVERFLOW
-                    ris0_reset_async <= 1;
+                    ris0_async <= 1;
                 count <= count + 1;
 
             end
             else begin  // down
 
                 if(count == 0)  // UNDERFLOW
-                    ris1_reset_async <= 1;
+                    ris1_async <= 1;
                 count <= count - 1;
 
             end
         end
 	end
-	else	begin	// reset
-		  count <= 0;
 
-	end
-	
-	if(nrst == 1) begin
-		count <= 0;
+	// handshaking protocol
+	if(ack_sync == req) begin
+		req <= !req;
+		data_bus <= count;
 	end
 end
  

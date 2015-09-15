@@ -34,7 +34,7 @@ class axi_read_burst_dut_counter extends axi_pkg::axi_read_burst_frame;
 
     `uvm_object_utils(axi_read_burst_dut_counter)
 
-    constraint default_ct {valid_burst == 1; burst_type == FIXED; size == 1; len == 0; addr == 12; delay == 0;}
+    constraint default_ct {valid_burst == 1; burst_type == FIXED; size == 1; len == 0; addr == 16; delay == 0; id == 0;}
 
 endclass : axi_read_burst_dut_counter
 
@@ -50,7 +50,6 @@ endclass : axi_read_burst_dut_counter
 class axi_read_dut_counter_test extends uvm_test;
 
     axi_read_counter_tb tb0;
-    uvm_table_printer printer;
 
     `uvm_component_utils_begin(axi_read_dut_counter_test)
         `uvm_field_object(tb0, UVM_ALL_ON)
@@ -58,7 +57,6 @@ class axi_read_dut_counter_test extends uvm_test;
 
     function new(string name = "axi_read_dut_counter_test", uvm_component parent);
         super.new(name,parent);
-        printer = new();
     endfunction : new
 
     virtual function void build_phase(uvm_phase phase);
@@ -83,12 +81,5 @@ class axi_read_dut_counter_test extends uvm_test;
         tb0 = axi_read_counter_tb::type_id::create("tb0", this);
 
     endfunction : build_phase
-
-    task run_phase(uvm_phase phase);
-        printer.knobs.depth = 5;
-        // this.print(printer);
-        // Use the drain time for this phase
-        phase.phase_done.set_drain_time(this, 200);
-    endtask : run_phase
 
 endclass : axi_read_dut_counter_test

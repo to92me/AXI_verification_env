@@ -277,7 +277,7 @@ class axi_read_burst_frame extends axi_read_base_frame;
 	rand bit default_qos;
 
 	constraint default_delay {
-		delay < 2;
+		delay < 5;
 	}
 
 	constraint default_id_constraint {

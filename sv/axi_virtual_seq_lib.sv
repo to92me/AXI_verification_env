@@ -19,6 +19,7 @@
 * Classes :	1. virtual_base_sequence
 *			2. virtual_transfer_multiple_addr
 *			3. virtual_transfer_single_burst
+*			4. virtual_transfer_dut_counter
 **/
 // -----------------------------------------------------------------------------
 
@@ -56,6 +57,7 @@ class virtual_base_sequence extends uvm_sequence;
 	virtual task pre_body();
 		if (starting_phase!=null) begin
 			starting_phase.raise_objection(this);
+			//uvm_test_done.set_drain_time(this, 200ns);
 		end
 	endtask
 

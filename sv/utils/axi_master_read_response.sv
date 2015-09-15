@@ -41,6 +41,22 @@
 *			3. send_burst(axi_read_burst_frame one_burst)
 *			4. get_num_of_bursts(output int num)
 *			5. reset(ref axi_read_burst_frame burst)
+*
+* Usage :	1. when a new request is sent from the sequencer to the driver, the
+*				"new_burst" task is called which then holds the original requests
+*				in a queue
+*			2. before the master driver sends a burst to the slave it must check
+*				if the master pipe is full - the "get_num_of_bursts" return the
+*				current number of bursts in the pipe
+*			3. after the driver sends a burst to the slave the "send_burst" task
+*				is called
+*			4. when a master recieves a frame on the data channel (the slave
+*				response), the "check_response" task is called which checks for
+*				errors or burst completeness
+*			5. if there is a reset, the "reset" task is called which return a
+*				request burst from the seq. with the status field set to
+*				UVM_TLM_INCOMPLETE_RESPONSE, which the driver then returns to the
+*				seq.
 **/
 // -----------------------------------------------------------------------------
 class axi_master_read_response extends uvm_component;

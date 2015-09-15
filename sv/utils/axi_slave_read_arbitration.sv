@@ -43,6 +43,16 @@
 *			5. get_single_frame(output axi_read_single_frame single_frame)
 *			6. frame_complete(axi_read_single_frame rsp)
 *			7. reset()
+*
+* Usage :	1. after the seq. recieves a new burst request and randomizes the
+*				single frames, the "get_new_burst task" is called to load that burst
+*			2. when the seq. needs to get the next single frame to send to the
+*				driver the "get_single_frame task" is called which returns the
+*				next frame to be sent
+*			3. after the frame has been sent to the driver (the item is finished)
+*				the "frame_complete" task is called which does the necessary logic
+*				to prepare for the next transfer
+*			4. if there was a reset, the reset task is called
 **/
 // -----------------------------------------------------------------------------
 class axi_slave_read_arbitration extends uvm_component;

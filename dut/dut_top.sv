@@ -36,6 +36,7 @@ module axi_top;
     reg fclk;
     reg irq_o;
     reg dout_o;
+    reg counter_reset;
 
     axi_if if0(.sig_reset(reset), .sig_clock(aclk));
   
@@ -97,7 +98,8 @@ module axi_top;
         .AXI_RREADY(if0.rready),
         .FCLK(fclk),
         .IRQ_O(irq_o),
-        .DOUT_O(dout_o)
+        .DOUT_O(dout_o),
+        .RESET_I(counter_reset)
     );
 
     initial begin
@@ -109,7 +111,10 @@ module axi_top;
         reset <= 1'b0;
         aclk <= 1'b0;
         fclk <= 1'b0;
+        counter_reset <= 1'b0;
         #5 reset <= 1'b1;
+
+        #12 counter_reset <= 1'b1;
     end
 
     //Generate Clocks

@@ -323,6 +323,7 @@ endclass : axi_master_read_driver
 
 			end
 			else begin
+				@(posedge vif.sig_clock);
 				#1	// for simulation
 				vif.arvalid <= 1'b0;
 			end
