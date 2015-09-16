@@ -278,8 +278,8 @@ class MIS extends uvm_reg;
 							.is_rand					(0						),
 							.individually_accessible 	(0						) );
 		begin
-			MIS_overflow_cb _MIS_overflow_cb = new("MIS_overflow_cb");
-			uvm_reg_field_cb::add(_MIS_overflow_cb, underflow);
+			MIS_underflow_cb _MIS_underflow_cb = new("MIS_underflow_cb");
+			uvm_reg_field_cb::add(underflow, _MIS_underflow_cb);
 		end
 
 		overflow = uvm_reg_field::type_id::create(`overflow_string);
@@ -292,6 +292,10 @@ class MIS extends uvm_reg;
 							.has_reset					(1						),
 							.is_rand					(0						),
 							.individually_accessible 	(0						) );
+		begin
+			MIS_overflow_cb _MIS_overflow_cb = new("MIS_overflow_cb");
+			uvm_reg_field_cb::add(overflow, _MIS_overflow_cb);
+		end
 
 		match = uvm_reg_field::type_id::create(`match_string);
 		match.configure(.parent							(this					),
@@ -303,6 +307,11 @@ class MIS extends uvm_reg;
 							.has_reset					(1						),
 							.is_rand					(0						),
 							.individually_accessible 	(0						) );
+
+		begin
+			MIS_match_cb _MIS_match_cb = new("MIS_match_cb");
+			uvm_reg_field_cb::add(match, _MIS_match_cb);
+		end
 
 		reserved = uvm_reg_field::type_id::create(`reserved_string);
 		reserved.configure(.parent						(this					),
@@ -334,10 +343,10 @@ class MIS_overflow_cb extends uvm_reg_cbs;
                                       input uvm_reg_map    map);
 
 
-	 RIS_p = map.get_mem_by_offset(`RIS_address_offset);
+	 RIS_p = map.get_reg_by_offset(`RIS_address_offset);
 	 $cast(RIS_overflow_p, RIS_p.get_field_by_name(`overflow_string));
 
-	 IIR_p = map.get_mem_by_offset(`IIR_address_offset);
+	 IIR_p = map.get_reg_by_offset(`IIR_address_offset);
 	 $cast(IIR_interrupt_priority_p, IIR_p.get_field_by_name(`interrupt_priority_string));
 
 	 if(kind == UVM_WRITE)
@@ -376,10 +385,10 @@ class MIS_underflow_cb extends uvm_reg_cbs;
                                       input uvm_reg_map    map);
 
 
-		RIS_p = map.get_mem_by_offset(`RIS_address_offset);
+		RIS_p = map.get_reg_by_offset(`RIS_address_offset);
 		$cast(RIS_underflow_p, RIS_p.get_field_by_name(`underflow_string));
 
-		IIR_p = map.get_mem_by_offset(`IIR_address_offset);
+		IIR_p = map.get_reg_by_offset(`IIR_address_offset);
 		$cast(IIR_interrupt_priority_p, IIR_p.get_field_by_name(`underflow_string));
 
 		if(kind == UVM_PREDICT_WRITE)
@@ -416,10 +425,10 @@ class MIS_match_cb extends uvm_reg_cbs;
                                       input uvm_reg_map    map);
 
 
-		RIS_p = map.get_mem_by_offset(`RIS_address_offset);
+		RIS_p = map.get_reg_by_offset(`RIS_address_offset);
 		$cast(RIS_match_p, RIS_p.get_field_by_name(`underflow_string));
 
-		IIR_p = map.get_mem_by_offset(`IIR_address_offset);
+		IIR_p = map.get_reg_by_offset(`IIR_address_offset);
 		$cast(IIR_interrupt_priority_p, IIR_p.get_field_by_name(`underflow_string));
 
 		if(kind == UVM_PREDICT_WRITE)
@@ -439,8 +448,6 @@ class MIS_match_cb extends uvm_reg_cbs;
 					end
 			end
 	endfunction
-
-
 endclass
 
 //============================== LOAD SPEC ==================================================
@@ -557,6 +564,57 @@ class SWRESET extends uvm_reg;
 							.has_reset					(1						),
 							.is_rand					(0						),
 							.individually_accessible 	(0						) );
+		begin
+			SWRESET_reset_passcode_cb _SWRESET_reset_passcode_cb = new("SWRESET_reset_passcode_cb");
+			uvm_reg_field_cb::add(reset_passcode, _SWRESET_reset_passcode_cb);
+		end
+	endfunction
+
+endclass
+
+class SWRESET_reset_passcode_cb extends uvm_reg_cbs;
+	uvm_reg		IIR_p;
+	uvm_reg		MIS_p;
+	uvm_reg		RIS_p;
+	uvm_reg		IM_p;
+	uvm_reg		LOAD_p;
+	uvm_reg 	CFG_p;
+	uvm_reg		MATCH_p;
+	uvm_reg		COUNT_p;
+
+
+
+	function void post_predict(input uvm_reg_field  fld,
+                                      input uvm_reg_data_t previous,
+                                      inout uvm_reg_data_t value,
+                                      input uvm_predict_e  kind,
+                                      input uvm_path_e     path,
+                                      input uvm_reg_map    map);
+
+	RIS_p 	= map.get_reg_by_offset(`RIS_address_offset	);
+	IM_p 	= map.get_reg_by_offset(`IM_address_offset	);
+	MIS_p 	= map.get_reg_by_offset(`MIS_address_offset	);
+	LOAD_p 	= map.get_reg_by_offset(`LOAD_address_offset);
+	CFG_p 	= map.get_reg_by_offset(`CFG_address_offset	);
+	IIR_p 	= map.get_reg_by_offset(`IIR_address_offset	);
+	MATCH_p = map.get_reg_by_offset(`MATCH_address_offset);
+	COUNT_p = map.get_reg_by_offset(`COUNT_address_offset);
+
+	if(kind == UVM_PREDICT_WRITE && value == 'h5A)
+		begin
+			// is passcode is correct everything will be reseted
+			RIS_p.predict(0);
+			IM_p.predict(0);
+			MIS_p.predict(0);
+			LOAD_p.predict(0);
+			CFG_p.predict(0);
+			IIR_p.predict(0);
+			MATCH_p.predict(0);
+			COUNT_p.predict(0);
+			fld.predict(0);
+			value = 0;
+		end
+
 	endfunction
 
 endclass
@@ -580,8 +638,8 @@ class IIR extends uvm_reg;
 	endfunction
 
 	function void build();
-	interrupt = uvm_reg_field::type_id::create(`interrupt_priority_string);
-	interrupt.configure(	.parent						(this					),
+	interrupt_priority = uvm_reg_field::type_id::create(`interrupt_priority_string);
+	interrupt_priority.configure(.parent				(this					),
 							.size						(2						),
 							.lsb_pos			    	(`IIR_interrupt_offset	),
 							.access						("R0"					),
@@ -590,6 +648,10 @@ class IIR extends uvm_reg;
 							.has_reset					(1						),
 							.is_rand					(0						),
 							.individually_accessible 	(0						) );
+		begin
+			IIR_interrupt_priority_cb _IIR_interrupt_priority_cb = new("IIR_interrupt_priority_cb");
+			uvm_reg_field_cb::add(interrupt_priority, _IIR_interrupt_priority_cb);
+		end
 
 	reserved = uvm_reg_field::type_id::create(`reserved_string);
 	reserved.configure(		.parent						(this					),
@@ -603,7 +665,108 @@ class IIR extends uvm_reg;
 							.individually_accessible 	(0						) );
 
 	endfunction
+endclass
 
+
+class IIR_interrupt_priority_cb extends uvm_reg_cbs;
+	uvm_reg RIS_p;
+	uvm_reg MIS_p;
+	uvm_reg IM_p;
+
+	uvm_reg_field RIS_overflow_p;
+	uvm_reg_field RIS_underflow_p;
+	uvm_reg_field RIS_match_p;
+
+	uvm_reg_field MIS_overflow_p;
+	uvm_reg_field MIS_underflow_p;
+	uvm_reg_field MIS_match_p;
+
+
+	function void post_predict(input uvm_reg_field  fld,
+                                      input uvm_reg_data_t previous,
+                                      inout uvm_reg_data_t value,
+                                      input uvm_predict_e  kind,
+                                      input uvm_path_e     path,
+                                      input uvm_reg_map    map);
+
+
+	RIS_p = map.get_reg_by_offset(`RIS_address_offset);
+	$cast(RIS_overflow_p , RIS_p.get_field_by_name(`overflow_string));
+	$cast(RIS_underflow_p , RIS_p.get_field_by_name(`underflow_string));
+	$cast(RIS_match_p , RIS_p.get_field_by_name(`match_string));
+
+	MIS_p = map.get_reg_by_offset(`MIS_address_offset);
+	$cast(MIS_overflow_p , MIS_p.get_field_by_name(`overflow_string));
+	$cast(MIS_underflow_p , MIS_p.get_field_by_name(`underflow_string));
+	$cast(MIS_match_p , MIS_p.get_field_by_name(`match_string));
+
+	if(kind == UVM_PREDICT_READ)
+		begin
+			case(value)
+
+// VALUE 3
+				3:
+				begin
+					RIS_match_p.predict(0);
+					if(MIS_match_p.value == 1)
+						begin
+							MIS_match_p.predict(0);
+						end
+
+					if(RIS_underflow_p.value == 1)
+						begin
+							fld.predict(2);
+						end
+
+					else if(RIS_overflow_p.value == 1)
+						begin
+							fld.predict(1);
+						end
+
+					else
+						begin
+							fld.predict(0);
+						end
+				end
+
+// VALUE 2
+				2:
+				begin
+					RIS_underflow_p.predict(0);
+					if(MIS_underflow_p.value == 1)
+						begin
+							MIS_underflow_p.predict(0);
+						end
+
+				 if(RIS_overflow_p.value == 1)
+						begin
+							fld.predict(1);
+						end
+				 else
+					 begin
+						 fld.predict(0);
+					 end
+				end
+
+//VALUE 1
+				1:
+				begin
+					RIS_overflow_p.predict(0);
+					if(MIS_overflow_p.value == 1)
+						begin
+							MIS_overflow_p.predict(0);
+						end
+
+					fld.predict(0);
+				end
+
+				0:
+				begin
+					// onda nista prc
+				end
+			endcase
+		end
+	endfunction
 endclass
 
 //============================== MATCH SPEC ==================================================
@@ -733,11 +896,11 @@ class dut_register_block extends uvm_reg_block;
 		COUNT_reg.configure(this,null,"");
 		COUNT_reg.build();
 
-		dut_map = create_map(	.name			("dut"		),
-								.base_addr		('h0			),
-								.n_bytes		(2				),
-								.byte_addressing(0				),
-								.endian			(UVM_BIG_ENDIAN	)	);
+		dut_map = create_map(	.name			(`map_name_string	),
+								.base_addr		('h0				),
+								.n_bytes		(2					),
+								.byte_addressing(0					),
+								.endian			(UVM_BIG_ENDIAN		)	);
 
 
 		dut_map.add_reg(RIS_reg, 	`RIS_address_offset, 	"RO");
