@@ -17,26 +17,8 @@
 * Description : one test case
 *
 * Classes : 1. axi_read_dut_counter_test
-*           2. axi_read_burst_dut_counter
 **/
 // -----------------------------------------------------------------------------
-
-//------------------------------------------------------------------------------
-//
-// Class: axi_read_burst_dut_counter
-//
-//------------------------------------------------------------------------------
-/**
-* Description : burst frame with default values for all possible signals
-**/
-// -----------------------------------------------------------------------------
-class axi_read_burst_dut_counter extends axi_pkg::axi_read_burst_frame;
-
-    `uvm_object_utils(axi_read_burst_dut_counter)
-
-    constraint default_ct {valid_burst == 1; burst_type == FIXED; size == 1; len == 0; addr == 12; delay == 4; id == 0;}
-
-endclass : axi_read_burst_dut_counter
 
 //------------------------------------------------------------------------------
 //
@@ -51,12 +33,8 @@ class axi_read_dut_counter_test extends uvm_test;
 
     axi_read_counter_tb tb0;
 
-    // WRITE
-    axi_master_write_tb tb1;
-
     `uvm_component_utils_begin(axi_read_dut_counter_test)
         `uvm_field_object(tb0, UVM_ALL_ON)
-        `uvm_field_object(tb1, UVM_ALL_ON)
     `uvm_component_utils_end
 
     function new(string name = "axi_read_dut_counter_test", uvm_component parent);
@@ -74,24 +52,14 @@ class axi_read_dut_counter_test extends uvm_test;
         uvm_config_int::set(this, "*", "terminate_enable", 0);
         // randomizing ready signal for master
         uvm_config_int::set(this, "tb0.axi0.read_master.driver", "master_ready_rand_enable", 0);
-        // type overrides
-        set_type_override_by_type(axi_pkg::axi_read_burst_frame::get_type(), axi_read_burst_dut_counter::get_type());
 
         // sequences
         uvm_config_wrapper::set(this, "tb0.virtual_seqr.run_phase", "default_sequence",
                                                      virtual_transfer_dut_counter::get_type());
 
-        // WRITE
-        uvm_config_int::set(this, "tb1.*", "coverage_enable", 1);
-
-        tb1 =  axi_master_write_tb::type_id::create("tb1",this);
-
-        uvm_config_wrapper::set(this, "tb1.env.master_write_agent.sequencer.run_phase",
-          "default_sequence", axi_master_write_sequence_lib_test1::get_type());
-
+        tb0 = axi_read_counter_tb::type_id::create("tb0", this);
 
         super.build_phase(phase);
-        tb0 = axi_read_counter_tb::type_id::create("tb0", this);
 
     endfunction : build_phase
 

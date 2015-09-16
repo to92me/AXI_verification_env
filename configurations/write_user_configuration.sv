@@ -30,13 +30,13 @@ registerConfiguration("general", "correct_driving_vif", TRUE);
 
 //if this is setted as TRUE then axi uvc will support data interleaving ( AXI 3 feature )
 //true_false_enum			axi_3_support		 					= TRUE;
-registerConfiguration("general", "axi_3_support", TRUE);
+registerConfiguration("general", "axi_3_support", FALSE);
 
 
 //this is number of active bursts at same time if this is setted to 0 then axi uvc will work like AXI4 othervise like AXI3, if AXI3
 //support is disabled this option will be ignored
 //int 					master_write_deepth 					= 5;
-registerConfiguration("general", "master_write_deepth", 10);
+//registerConfiguration("general", "master_write_deepth", 1);
 
 
 //if this option is TRUE then all delay options and seetings for ready will be ignored

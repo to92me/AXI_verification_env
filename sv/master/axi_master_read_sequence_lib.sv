@@ -19,7 +19,7 @@
 * Classes :	1. axi_master_read_base_seq
 *			2. axi_master_read_multiple_addr
 *			3. axi_master_read_no_err_count
-*			4. axi_master_read_simple
+*			4. axi_master_read_dut_counter_seq
 **/
 // -----------------------------------------------------------------------------
 
@@ -241,26 +241,27 @@ endclass : axi_master_read_no_err_count
 
 //------------------------------------------------------------------------------
 //
-// SEQUENCE: axi_master_read_simple
+// SEQUENCE: axi_master_read_dut_counter_seq
 //
 //------------------------------------------------------------------------------
 /**
 * Description : simple sequence
 *
-* Functions :	1. new(string name="axi_master_read_simple")
+* Functions :	1. new(string name="axi_master_read_dut_counter_seq")
 *				2. void response_handler(uvm_sequence_item response)
 *
 * Tasks :	1. body()
 **/
 // -----------------------------------------------------------------------------
-class axi_master_read_simple extends axi_master_read_base_seq;
+class axi_master_read_dut_counter_seq extends axi_master_read_base_seq;
 
-	`uvm_object_utils(axi_master_read_simple)
+	`uvm_object_utils(axi_master_read_dut_counter_seq)
 
-	int count = 0;
+	rand int count;
+	rand int address;
 
 	// new - constructor
-	function new(string name="axi_master_read_simple");
+	function new(string name="axi_master_read_dut_counter_seq");
 		super.new(name);
 	endfunction
 
@@ -268,9 +269,10 @@ class axi_master_read_simple extends axi_master_read_base_seq;
 
 		use_response_handler(1);
 
-		count = 1;	// number of bursts to be sent
-
-		`uvm_do (req)
+		repeat(count)
+			begin
+				`uvm_do_with (req, {req.addr == address; req.valid_burst == 1; req.burst_type == FIXED; req.size == 1; req.len == 0; req.delay == 0; req.id == 0;})
+			end
 
 		wait(!count);	// wait for all responses before finishing simulation
 
@@ -278,7 +280,7 @@ class axi_master_read_simple extends axi_master_read_base_seq;
 
 	extern virtual function void response_handler(uvm_sequence_item response);
 
-endclass : axi_master_read_simple
+endclass : axi_master_read_dut_counter_seq
 
 //------------------------------------------------------------------------------
 /**
@@ -289,7 +291,7 @@ endclass : axi_master_read_simple
 * Return :	void
 **/
 //------------------------------------------------------------------------------
-	function void axi_master_read_simple::response_handler(uvm_sequence_item response);
+	function void axi_master_read_dut_counter_seq::response_handler(uvm_sequence_item response);
 
 		if(!($cast(rsp, response)))
 			`uvm_error("CASTFAIL", "The recieved response item is not a burst frame");

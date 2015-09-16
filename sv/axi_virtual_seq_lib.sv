@@ -57,7 +57,7 @@ class virtual_base_sequence extends uvm_sequence;
 	virtual task pre_body();
 		if (starting_phase!=null) begin
 			starting_phase.raise_objection(this);
-			//uvm_test_done.set_drain_time(this, 200ns);
+			uvm_test_done.set_drain_time(this, 200ns);
 		end
 	endtask
 
@@ -188,11 +188,25 @@ class virtual_transfer_dut_counter extends virtual_base_sequence;
 	endfunction
 
 	// axi read master
-	axi_master_read_simple read_seq;
+	axi_master_read_dut_counter_seq read_seq;
+
+	// WRITE
+	axi_master_write_dut_counter_seq write_seq;
 
 	virtual task body();
 
-		`uvm_do_on(read_seq, p_sequencer.read_seqr)
+		// MORA PRVO READ ZBOG RESETA!!!!!!!!!!!!!!!!!!
+		`uvm_do_on_with(read_seq, p_sequencer.read_seqr, {count == 1; address == 12;})
+
+		#20
+		// counter enable, direction down
+		`uvm_do_on_with(write_seq, p_sequencer.write_seqr, {count == 1; address == 8; write_data == 16'hffff;})
+		// match
+		`uvm_do_on_with(write_seq, p_sequencer.write_seqr, {count == 1; address == 14; write_data == 16'hffff;})
+
+		#100
+		// read counter
+		`uvm_do_on_with(read_seq, p_sequencer.read_seqr, {count == 1; address == 16;})
 
 	endtask
 

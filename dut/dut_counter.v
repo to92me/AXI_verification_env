@@ -52,7 +52,7 @@ module dut_counter #
 		input wire [7 : 0] AXI_AWLEN,
 		// Burst size. This signal indicates the size of each transfer in the burst
 		input wire [2 : 0] AXI_AWSIZE,
-		// Burst type. The burst type and the size information,
+		// Burst type. The burst type and the size information, 
     	// determine how the address for each transfer within the burst is calculated.
 		input wire [1 : 0] AXI_AWBURST,
 		// Lock type. Provides additional information about the
@@ -336,12 +336,6 @@ module dut_counter #
 
 	// start state
 	initial begin
-        // simulate write
-        CFG[0] <= 1;	// enable
-        CFG[1] <= 1;
-        IM[0] <= 1;
-        IM[1] <= 1;
-
         count <= 0;
 		ris0_async <= 0;
 		ris1_async <= 0;
@@ -368,14 +362,15 @@ always @(posedge AXI_ACLK) begin
     	axi_rresp <= 0;
     	axi_ruser <= 0;
     	axi_rvalid <= 0;
-    end
 
-    // reset flags
-    read_flag <= 0;
-	write_addr_flag <= 0;
-	write_data_flag <= 0;
-	bready_flag <= 0;
-	rready_flag <= 1;
+    	// reset flags
+	    read_flag <= 0;
+		write_addr_flag <= 0;
+		write_data_flag <= 0;
+		bready_flag <= 1;
+		rready_flag <= 1;
+
+    end
 
     // reset counter
     if ((AXI_ARESETN == 0) || (nrst == 1)) begin
@@ -392,13 +387,6 @@ always @(posedge AXI_ACLK) begin
 		cfg1_async <= 0;
 		ack <= 0;
 		count_aclk <= 0;
-
-        // simulate write
-        CFG[0] <= 1;	// enable
-        CFG[1] <= 1;
-        IM[0] <= 1;
-        IM[1] <= 1;
-        IM[2] <= 1;
     end
 
 
@@ -577,8 +565,6 @@ always @(posedge AXI_ACLK) begin
 			if(AXI_AWBURST)
 				write_addr_flag <= 0;
 		end
-		else
-			write_addr_flag <= 0;
 
 // -----------------------------------------------------------------------------
 //
@@ -589,6 +575,8 @@ always @(posedge AXI_ACLK) begin
 
 		if(AXI_WVALID) begin
 			if(write_addr_flag) begin
+				write_addr_flag <= 0;
+
 				axi_bresp <= 2'b00;	// default OKAY response
 
 				case (axi_awaddr)
