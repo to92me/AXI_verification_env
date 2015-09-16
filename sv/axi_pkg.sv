@@ -3,8 +3,8 @@
 
 `define tome_test
 `define testing_includes
-//`define andrea
-//`define andrea_test
+`define andrea
+`define andrea_test
 
 package axi_pkg;
 	`ifdef tome_test
@@ -296,8 +296,8 @@ package axi_pkg;
 	// ==================== TEST ================================
 		//`include "axi_read_test_config.sv"
 		//`include "axi_read_tb.sv"
-		`include "axi_read_test_config_dut.sv"
-		`include "axi_read_tb_counter.sv"
+		`include "dut/axi_read_test_config_dut.sv"
+		`include "dut/axi_read_tb_counter.sv"
 	// ==========================================================
 	`endif
 

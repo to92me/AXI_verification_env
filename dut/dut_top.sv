@@ -18,7 +18,7 @@
 **/
 // -----------------------------------------------------------------------------
 
-`include "dut_counter.v"    // design under test
+`include "dut/dut_counter.v"    // design under test
 `include "sv/axi_if.sv"
 `include "sv/axi_pkg.sv"
 
@@ -29,7 +29,7 @@ module axi_top;
 
     import axi_pkg::*;
 
-    `include "axi_read_dut_counter_test.sv"
+    `include "dut/axi_read_dut_counter_test.sv"
 
     reg aclk;
     reg reset;

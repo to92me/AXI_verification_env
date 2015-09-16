@@ -18,7 +18,7 @@
 **/
 // -----------------------------------------------------------------------------
 
-`include "synchronizer.v"
+`include "dut/synchronizer.v"
 
 module dut_counter #
 	(
@@ -212,8 +212,9 @@ module dut_counter #
 
 	// counter registers
 	// unused bits are reserved, read-only, value=0
-
+	// --------------------------------------------------------------------------------------
 	// ACLK
+	// --------------------------------------------------------------------------------------
 	reg 	nrst;  // internal signal generated based on SWRESET
     reg [DATA_WIDTH-1 : 0]	RIS; // bit 0 - OVERFLOW, bit 1 - UNDERFLOW; read-only
     reg [DATA_WIDTH-1 : 0]	IM;  // bit 0 - OVERFLOW, bit 1 - UNDERFLOW; read-write
@@ -230,9 +231,12 @@ module dut_counter #
     // for the handshaking protocol
     wire					req_sync;	// synchronized request
     reg 					ack;	// acknowledgement of the req signal
+
     reg [DATA_WIDTH-1 : 0]	count_aclk;	// register that holds the count value
 
+    // --------------------------------------------------------------------------------------
 	// FCLK
+	// --------------------------------------------------------------------------------------
     reg [DATA_WIDTH-1 : 0]	count;	// counter reg.
     // synchronization
     wire 					nrst_sync;	// for nrst
@@ -332,6 +336,12 @@ module dut_counter #
 
 	// start state
 	initial begin
+        // simulate write
+        CFG[0] <= 1;	// enable
+        CFG[1] <= 1;
+        IM[0] <= 1;
+        IM[1] <= 1;
+
         count <= 0;
 		ris0_async <= 0;
 		ris1_async <= 0;
@@ -388,6 +398,7 @@ always @(posedge AXI_ACLK) begin
         CFG[1] <= 1;
         IM[0] <= 1;
         IM[1] <= 1;
+        IM[2] <= 1;
     end
 
 
@@ -404,7 +415,6 @@ always @(posedge AXI_ACLK) begin
 			RIS[1] <= ris1_sync;
 
 		// MATCH check
-	    // MATCH check
 	    if (count_aclk == MATCH)
 	    	RIS[2] <= 1;
 
@@ -435,14 +445,30 @@ always @(posedge AXI_ACLK) begin
 
 	    // IIR
 	    case (MIS[2:0])
-	    	3'b000:	IIR[2:0] <= 3'b000;
-			3'b001: IIR[2:0] <= 3'b001;
-	    	3'b010: IIR[2:0] <= 3'b010;
-	    	3'b011: IIR[2:0] <= 3'b010;
-	    	3'b100: IIR[2:0] <= 3'b100;
-	    	3'b101: IIR[2:0] <= 3'b100;
-	    	3'b110: IIR[2:0] <= 3'b100;
-	    	3'b111: IIR[2:0] <= 3'b100;
+	    	3'b000:	begin
+	    				IIR[2:0] <= 3'b000;
+	    			end
+			3'b001: begin
+						IIR[2:0] <= 3'b001;
+					end
+	    	3'b010: begin
+	    				IIR[2:0] <= 3'b010;
+	    			end
+	    	3'b011: begin
+	    				IIR[2:0] <= 3'b010;
+	    			end
+	    	3'b100: begin
+	    				IIR[2:0] <= 3'b100;
+	    			end
+	    	3'b101: begin
+	    				IIR[2:0] <= 3'b100;
+	    			end
+	    	3'b110: begin
+	    				IIR[2:0] <= 3'b100;
+	    			end
+	    	3'b111: begin
+	    				IIR[2:0] <= 3'b100;
+	    			end
 	    endcase
 
 // -----------------------------------------------------------------------------
@@ -469,7 +495,15 @@ always @(posedge AXI_ACLK) begin
 				10:	// SWRESET
 					axi_rdata <= 0;
 				12: // IIR
-					axi_rdata <= IIR;
+					begin
+						case (IIR[2:0])
+							//3'b000:	// no interrupts
+							3'b001:	RIS[0] <= 0;
+							3'b010: RIS[1] <= 0;
+							3'b100: RIS[2] <= 0;
+						endcase
+						axi_rdata <= IIR;
+					end
 				14: // MATCH
 					axi_rdata <= MATCH;
 				16:	// count
