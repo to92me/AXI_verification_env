@@ -106,7 +106,7 @@ package axi_pkg;
 	typedef class unique_id_struct;
 	typedef class axi_mssg;
 	typedef class axi_address_queue;
-	typedef class axi_address_calc;
+	//typedef class axi_address_calc;
 `endif
 
 `ifdef andrea
@@ -187,7 +187,7 @@ package axi_pkg;
 	 // ======================DRIVER UTILS==============================
 	 // COMMON
  	`include "sv/utils/axi_mssg.sv"
- 	`include "sv/utils/axi_address_calc.sv"
+ 	//`include "sv/utils/axi_address_calc.sv"
 	 // MASTER
 	`include "sv/utils/axi_master_write_driver/base_driver.sv"
 	`include "sv/utils/axi_master_write_driver/main_driver.sv"
