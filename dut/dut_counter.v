@@ -18,7 +18,7 @@
 **/
 // -----------------------------------------------------------------------------
 
-`include "synchronizer.v"
+`include "dut/synchronizer.v"
 
 module dut_counter #
 	(
@@ -52,7 +52,7 @@ module dut_counter #
 		input wire [7 : 0] AXI_AWLEN,
 		// Burst size. This signal indicates the size of each transfer in the burst
 		input wire [2 : 0] AXI_AWSIZE,
-		// Burst type. The burst type and the size information, 
+		// Burst type. The burst type and the size information,
     	// determine how the address for each transfer within the burst is calculated.
 		input wire [1 : 0] AXI_AWBURST,
 		// Lock type. Provides additional information about the
@@ -122,7 +122,7 @@ module dut_counter #
 		input wire [7 : 0] AXI_ARLEN,
 		// Burst size. This signal indicates the size of each transfer in the burst
 		input wire [2 : 0] AXI_ARSIZE,
-		// Burst type. The burst type and the size information, 
+		// Burst type. The burst type and the size information,
     	// determine how the address for each transfer within the burst is calculated.
 		input wire [1 : 0] AXI_ARBURST,
 		// Lock type. Provides additional information about the
@@ -667,5 +667,5 @@ always @(posedge FCLK) begin
 		data_bus <= count;
 	end
 end
- 
+
 endmodule

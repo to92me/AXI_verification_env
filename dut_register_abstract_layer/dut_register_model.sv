@@ -29,8 +29,57 @@
 //                                  - citanjem registra dobija se vrednost 0
 //===========================================================================================================
 
+//							 ADDRESS  -    BIT
+// RIS offset
+`define RIS_address_offset 		'h0
+`define RIS_underflow_offset 			 0
+`define RIS_overflow_offset 			 1
+`define RIS_match_offset 				 2
+`define RIS_reserved_offest				 3
+
+// IM offest
+`define IM_address_offset 		'h2
+`define IM_underflow_offest				 0
+`define IM_overflow_offset 				 1
+`define IM_match_offset 				 2
+`define IM_reserved_offest				 3
 
 
+// MIS offest
+`define MIS_address_offset		'h4
+`define MIS_underflow_offest			 0
+`define MIS_overflow_offset 			 1
+`define MIS_match_offset 				 2
+`define MIS_reserved_offest				 3
+
+// LOAD
+`define LOAD_address_offset		'h6
+`define LOAD_compare_offest 			 0
+
+// CFG
+`define CFG_address_offset 		'h8
+`define CFG_counter_enable_offset 		 0
+`define CFG_counter_direction_offset 	 1
+`define CFG_reserved_offset 			 2
+
+// SWRESET
+`define SWRESET_address_offset	'h10
+`define SWRESET_passcode_offset 		 0
+
+//IIR
+`define IIR_address_offset		'h12
+`define IIR_interrupt_offset 			 0
+`define IIR_reserved					 2
+
+//MATCH
+`define MATCH_address_offset 	'h14
+`define MATCH_match_offest 				 0
+
+//COUNT
+`define COUNT_address_offset	'h16
+`define COUNT_counter_offest 			 0
+
+//
 // ================================================================================================================
 //
 //											****REGISTER*****
@@ -62,48 +111,48 @@ class RIS extends uvm_reg;
 
 	function void build();
 		underflow = uvm_reg_field::type_id::create("underflow");
-		underflow.configure(.parent						(this	),
-							.size						(1		),
-							.lsb_pos			    	(0		),
-							.access						("RO"	),
-							.volatile					(1		),
-							.reset						(1'b0	),
-							.has_reset					(1		),
-							.is_rand					(0		),
-							.individually_accessible 	(0		) );
+		underflow.configure(.parent						(this					),
+							.size						(1						),
+							.lsb_pos			    	(`RIS_underflow_offset	),
+							.access						("RO"					),
+							.volatile					(1						),
+							.reset						(1'b0					),
+							.has_reset					(1						),
+							.is_rand					(0						),
+							.individually_accessible 	(0						) );
 
 		overflow = uvm_reg_field::type_id::create("overflow");
-		overflow.configure(.parent						(this	),
-							.size						(1		),
-							.lsb_pos			    	(1		),
-							.access						("RO"	),
-							.volatile					(1		),
-							.reset						(1'b0	),
-							.has_reset					(1		),
-							.is_rand					(0		),
-							.individually_accessible 	(0		) );
+		overflow.configure(.parent						(this					),
+							.size						(1						),
+							.lsb_pos			    	(`RIS_overflow_offset	),
+							.access						("RO"					),
+							.volatile					(1						),
+							.reset						(1'b0					),
+							.has_reset					(1						),
+							.is_rand					(0						),
+							.individually_accessible 	(0						) );
 
 		match = uvm_reg_field::type_id::create("match");
-		match.configure(.parent							(this	),
-							.size						(1		),
-							.lsb_pos			    	(2		),
-							.access						("RO"	),
-							.volatile					(1		),
-							.reset						(1'b0	),
-							.has_reset					(1		),
-							.is_rand					(0		),
-							.individually_accessible 	(0		) );
+		match.configure(.parent							(this					),
+							.size						(1						),
+							.lsb_pos			    	(`RIS_match_offset		),
+							.access						("RO"					),
+							.volatile					(1						),
+							.reset						(1'b0					),
+							.has_reset					(1						),
+							.is_rand					(0						),
+							.individually_accessible 	(0						) );
 
 		reserved = uvm_reg_field::type_id::create("reserved");
-		reserved.configure( .parent						(this	),
-							.size						(13		),
-							.lsb_pos			    	(3		),
-							.access						("RO"	),
-							.volatile					(0		),
-							.reset						(0		),
-							.has_reset					(0		),
-							.is_rand					(0		),
-							.individually_accessible 	(0		) );
+		reserved.configure( .parent						(this					),
+							.size						(13						),
+							.lsb_pos			    	(`RIS_reserved_offest	),
+							.access						("RO"					),
+							.volatile					(0						),
+							.reset						(0						),
+							.has_reset					(0						),
+							.is_rand					(0						),
+							.individually_accessible 	(0						) );
 	endfunction
 endclass
 
@@ -132,48 +181,48 @@ class IM extends uvm_reg;
 
 	function void build();
 		underflow = uvm_reg_field::type_id::create("underflow");
-		underflow.configure(.parent						(this	),
-							.size						(1		),
-							.lsb_pos			    	(0		),
-							.access						("RW"	),
-							.volatile					(0		),
-							.reset						(1'b0	),
-							.has_reset					(1		),
-							.is_rand					(0		),
-							.individually_accessible 	(0		) );
+		underflow.configure(.parent						(this					),
+							.size						(1						),
+							.lsb_pos			    	(`IM_underflow_offest	),
+							.access						("RW"					),
+							.volatile					(0						),
+							.reset						(1'b0					),
+							.has_reset					(1						),
+							.is_rand					(0						),
+							.individually_accessible 	(0						) );
 
 		overflow = uvm_reg_field::type_id::create("overflow");
-		overflow.configure(.parent						(this	),
-							.size						(1		),
-							.lsb_pos			    	(1		),
-							.access						("RW"	),
-							.volatile					(0		),
-							.reset						(1'b0	),
-							.has_reset					(1		),
-							.is_rand					(0		),
-							.individually_accessible 	(0		) );
+		overflow.configure(.parent						(this					),
+							.size						(1						),
+							.lsb_pos			    	(`IM_overflow_offset	),
+							.access						("RW"					),
+							.volatile					(0						),
+							.reset						(1'b0					),
+							.has_reset					(1						),
+							.is_rand					(0						),
+							.individually_accessible 	(0						) );
 
 		match = uvm_reg_field::type_id::create("match");
-		match.configure(.parent							(this	),
-							.size						(1		),
-							.lsb_pos			    	(2		),
-							.access						("RW"	),
-							.volatile					(0		),
-							.reset						(1'b0	),
-							.has_reset					(1		),
-							.is_rand					(0		),
-							.individually_accessible 	(0		) );
+		match.configure(.parent							(this					),
+							.size						(1						),
+							.lsb_pos			    	(`IM_match_offset		),
+							.access						("RW"					),
+							.volatile					(0						),
+							.reset						(1'b0					),
+							.has_reset					(1						),
+							.is_rand					(0						),
+							.individually_accessible 	(0						) );
 
 		reserved = uvm_reg_field::type_id::create("reserved");
-		reserved.configure(.parent						(this	),
-							.size						(13		),
-							.lsb_pos			    	(3		),
-							.access						("RO"	),
-							.volatile					(0		),
-							.reset						(0		),
-							.has_reset					(0		),
-							.is_rand					(0		),
-							.individually_accessible 	(0		) );
+		reserved.configure(.parent						(this					),
+							.size						(13						),
+							.lsb_pos			    	(`IM_reserved_offest	),
+							.access						("RO"					),
+							.volatile					(0						),
+							.reset						(0						),
+							.has_reset					(0						),
+							.is_rand					(0						),
+							.individually_accessible 	(0						) );
 	endfunction
 endclass
 
@@ -205,48 +254,48 @@ class MIS extends uvm_reg;
 
 	function void build();
 		underflow = uvm_reg_field::type_id::create("underflow");
-		underflow.configure(.parent						(this	),
-							.size						(1		),
-							.lsb_pos			    	(0		),
-							.access						("RW"	),
-							.volatile					(1		),
-							.reset						(1'b0	),
-							.has_reset					(1		),
-							.is_rand					(0		),
-							.individually_accessible 	(0		) );
+		underflow.configure(.parent						(this					),
+							.size						(1						),
+							.lsb_pos			    	(`MIS_underflow_offest	),
+							.access						("RW"					),
+							.volatile					(1						),
+							.reset						(1'b0					),
+							.has_reset					(1						),
+							.is_rand					(0						),
+							.individually_accessible 	(0						) );
 
 		overflow = uvm_reg_field::type_id::create("overflow");
-		overflow.configure(.parent						(this	),
-							.size						(1		),
-							.lsb_pos			    	(1		),
-							.access						("RW"	),
-							.volatile					(1		),
-							.reset						(1'b0	),
-							.has_reset					(1		),
-							.is_rand					(0		),
-							.individually_accessible 	(0		) );
+		overflow.configure(.parent						(this					),
+							.size						(1						),
+							.lsb_pos			    	(`MIS_overflow_offset	),
+							.access						("RW"					),
+							.volatile					(1						),
+							.reset						(1'b0					),
+							.has_reset					(1						),
+							.is_rand					(0						),
+							.individually_accessible 	(0						) );
 
 		match = uvm_reg_field::type_id::create("match");
-		match.configure(.parent							(this	),
-							.size						(1		),
-							.lsb_pos			    	(2		),
-							.access						("RW"	),
-							.volatile					(1		),
-							.reset						(1'b0	),
-							.has_reset					(1		),
-							.is_rand					(0		),
-							.individually_accessible 	(0		) );
+		match.configure(.parent							(this					),
+							.size						(1						),
+							.lsb_pos			    	(`MIS_match_offset		),
+							.access						("RW"					),
+							.volatile					(1						),
+							.reset						(1'b0					),
+							.has_reset					(1						),
+							.is_rand					(0						),
+							.individually_accessible 	(0						) );
 
 		reserved = uvm_reg_field::type_id::create("reserved");
-		reserved.configure(.parent						(this	),
-							.size						(13		),
-							.lsb_pos			    	(3		),
-							.access						("RO"	),
-							.volatile					(0		),
-							.reset						(0		),
-							.has_reset					(0		),
-							.is_rand					(0		),
-							.individually_accessible 	(0		) );
+		reserved.configure(.parent						(this					),
+							.size						(13						),
+							.lsb_pos			    	(`MIS_reserved_offest	),
+							.access						("RO"					),
+							.volatile					(0						),
+							.reset						(0						),
+							.has_reset					(0						),
+							.is_rand					(0						),
+							.individually_accessible 	(0						) );
 	endfunction
 endclass
 
@@ -268,7 +317,7 @@ class MIS_cb extends uvm_reg_cbs;
 
 	 if(kind == UVM_WRITE)
 		 begin
-			RIS_p = map.
+			RIS_p = map.get_mem_by_offset(offset)
 		 end
 
   endfunction
@@ -293,15 +342,15 @@ class LOAD extends uvm_reg;
 
 	function void build();
 		compare = uvm_reg_field::type_id::create("compare");
-		compare.configure(.parent						(this	),
-							.size						(16		),
-							.lsb_pos			    	(0		),
-							.access						("RW"	),
-							.volatile					(0		),
-							.reset						(16'b0	),
-							.has_reset					(1		),
-							.is_rand					(0		),
-							.individually_accessible 	(0		) );
+		compare.configure(.parent						(this					),
+							.size						(16						),
+							.lsb_pos			    	(`LOAD_compare_offest	),
+							.access						("RW"					),
+							.volatile					(0						),
+							.reset						(16'b0					),
+							.has_reset					(1						),
+							.is_rand					(0						),
+							.individually_accessible 	(0						) );
 
 	endfunction
 endclass
@@ -328,38 +377,38 @@ class CFG extends uvm_reg;
 
 	function void build();
 		counter_enable = uvm_reg_field::type_id::create("counter_enable");
-		counter_enable.configure(.parent				(this	),
-							.size						(1		),
-							.lsb_pos			    	(0		),
-							.access						("RW"	),
-							.volatile					(0		),
-							.reset						(1'b0	),
-							.has_reset					(1		),
-							.is_rand					(0		),
-							.individually_accessible 	(0		) );
+		counter_enable.configure(.parent				(this						),
+							.size						(1							),
+							.lsb_pos			    	(`CFG_counter_enable_offset	),
+							.access						("RW"						),
+							.volatile					(0							),
+							.reset						(1'b0						),
+							.has_reset					(1							),
+							.is_rand					(0							),
+							.individually_accessible 	(0							) );
 
 
 		direction = uvm_reg_field::type_id::create("direction");
-		direction.configure(.parent						(this	),
-							.size						(1		),
-							.lsb_pos			    	(1		),
-							.access						("RW"	),
-							.volatile					(0		),
-							.reset						(1'b0	),
-							.has_reset					(1		),
-							.is_rand					(0		),
-							.individually_accessible 	(0		) );
+		direction.configure(.parent						(this						),
+							.size						(1							),
+							.lsb_pos			    	(`CFG_counter_direction_offset),
+							.access						("RW"						),
+							.volatile					(0							),
+							.reset						(1'b0						),
+							.has_reset					(1							),
+							.is_rand					(0							),
+							.individually_accessible 	(0							) );
 
 		reserved = uvm_reg_field::type_id::create("reserved");
-		reserved.configure( .parent						(this	),
-							.size						(14		),
-							.lsb_pos			    	(3		),
-							.access						("RO"	),
-							.volatile					(0		),
-							.reset						(0		),
-							.has_reset					(0		),
-							.is_rand					(0		),
-							.individually_accessible 	(0		) );
+		reserved.configure( .parent						(this						),
+							.size						(14							),
+							.lsb_pos			    	(`CFG_reserved_offset		),
+							.access						("RO"						),
+							.volatile					(0							),
+							.reset						(0							),
+							.has_reset					(0							),
+							.is_rand					(0							),
+							.individually_accessible 	(0							) );
 	endfunction
 endclass
 
@@ -380,15 +429,15 @@ class SWRESET extends uvm_reg;
 
 	function void build();
 	reset_passcode = uvm_reg_field::type_id::create("reset_passcode");
-		reset_passcode.configure(.parent				(this	),
-							.size						(16		),
-							.lsb_pos			    	(0		),
-							.access						("RW"	),
-							.volatile					(0		),
-							.reset						(16'b0	),
-							.has_reset					(1		),
-							.is_rand					(0		),
-							.individually_accessible 	(0		) );
+		reset_passcode.configure(.parent				(this					),
+							.size						(16						),
+							.lsb_pos			    	(`SWRESET_passcode_offset),
+							.access						("RW"					),
+							.volatile					(0						),
+							.reset						(16'b0					),
+							.has_reset					(1						),
+							.is_rand					(0						),
+							.individually_accessible 	(0						) );
 	endfunction
 
 endclass
@@ -413,26 +462,26 @@ class IIR extends uvm_reg;
 
 	function void build();
 	interrupt = uvm_reg_field::type_id::create("interrupt");
-	interrupt.configure(	.parent						(this	),
-							.size						(2		),
-							.lsb_pos			    	(0		),
-							.access						("R0"	),
-							.volatile					(1		),
-							.reset						(2'b0	),
-							.has_reset					(1		),
-							.is_rand					(0		),
-							.individually_accessible 	(0		) );
+	interrupt.configure(	.parent						(this					),
+							.size						(2						),
+							.lsb_pos			    	(`IIR_interrupt_offset	),
+							.access						("R0"					),
+							.volatile					(1						),
+							.reset						(2'b0					),
+							.has_reset					(1						),
+							.is_rand					(0						),
+							.individually_accessible 	(0						) );
 
 	reserved = uvm_reg_field::type_id::create("reserved");
-	reserved.configure(		.parent						(this	),
-							.size						(14		),
-							.lsb_pos			    	(0		),
-							.access						("R0"	),
-							.volatile					(0		),
-							.reset						(0		),
-							.has_reset					(0		),
-							.is_rand					(0		),
-							.individually_accessible 	(0		) );
+	reserved.configure(		.parent						(this					),
+							.size						(14						),
+							.lsb_pos			    	(`IIR_reserved			),
+							.access						("R0"					),
+							.volatile					(0						),
+							.reset						(0						),
+							.has_reset					(0						),
+							.is_rand					(0						),
+							.individually_accessible 	(0						) );
 
 	endfunction
 
@@ -455,15 +504,15 @@ class MATCH extends uvm_reg;
 
 	function void build();
 	match = uvm_reg_field::type_id::create("match");
-		match.configure(	.parent						(this	),
-							.size						(16		),
-							.lsb_pos			    	(0		),
-							.access						("RW"	),
-							.volatile					(0		),
-							.reset						(16'b0	),
-							.has_reset					(1		),
-							.is_rand					(0		),
-							.individually_accessible 	(0		) );
+		match.configure(	.parent						(this					),
+							.size						(16						),
+							.lsb_pos			    	(`MATCH_match_offest	),
+							.access						("RW"					),
+							.volatile					(0						),
+							.reset						(16'b0					),
+							.has_reset					(1						),
+							.is_rand					(0						),
+							.individually_accessible 	(0						) );
 	endfunction
 
 endclass
@@ -484,15 +533,15 @@ class COUNT extends uvm_reg;
 
 	function void build();
 	counter = uvm_reg_field::type_id::create("counter");
-		counter.configure(	.parent						(this	),
-							.size						(16		),
-							.lsb_pos			    	(0		),
-							.access						("RO"	),
-							.volatile					(1		),
-							.reset						(16'b0	),
-							.has_reset					(1		),
-							.is_rand					(0		),
-							.individually_accessible 	(0		) );
+		counter.configure(	.parent						(this					),
+							.size						(16						),
+							.lsb_pos			    	(`COUNT_counter_offest	),
+							.access						("RO"					),
+							.volatile					(1						),
+							.reset						(16'b0					),
+							.has_reset					(1						),
+							.is_rand					(0						),
+							.individually_accessible 	(0						) );
 	endfunction
 
 endclass

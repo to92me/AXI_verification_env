@@ -18,7 +18,7 @@
 **/
 // -----------------------------------------------------------------------------
 
-`include "dut_counter.v"    // design under test
+`include "dut/dut_counter.v"    // design under test
 `include "sv/axi_if.sv"
 `include "sv/axi_pkg.sv"
 
@@ -29,7 +29,7 @@ module axi_top;
 
     import axi_pkg::*;
 
-    `include "axi_read_dut_counter_test.sv"
+    `include "dut/axi_read_dut_counter_test.sv"
 
     reg aclk;
     reg reset;
@@ -39,8 +39,8 @@ module axi_top;
     reg counter_reset;
 
     axi_if if0(.sig_reset(reset), .sig_clock(aclk));
-  
-    dut_counter # ( 
+
+    dut_counter # (
         .ID_WIDTH(RID_WIDTH),
         .DATA_WIDTH(DATA_WIDTH),
         .ADDR_WIDTH(ADDR_WIDTH),
