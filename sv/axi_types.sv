@@ -67,8 +67,8 @@ typedef enum logic [2:0] {
 } burst_size_enum;
 
 typedef enum {
-	AXI_READ = 0,
-	AXI_WRITE = 1
+	AXI_READ = 1,
+	AXI_WRITE = 0
 } axi_direction_enum;
 
 typedef enum {

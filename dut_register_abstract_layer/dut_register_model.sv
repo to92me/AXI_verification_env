@@ -1,5 +1,5 @@
-`ifndef DUT_REGISTER_MODEL
-`define DUT_REGISTER_MODEL
+`ifndef DUT_REGISTER_MODEL_SVH
+`define DUT_REGISTER_MODEL_SVH
 
 
 
@@ -57,7 +57,7 @@ class RIS extends uvm_reg;
 
 	// new - constructor
 	function new (string name = "RIS");
-		super.new(.name(name), .nbits(32), .has_coverage(UVM_NO_COVERAGE));
+		super.new(.name(name), .nbits(16), .has_coverage(UVM_NO_COVERAGE));
 	endfunction : new
 
 	function void build();
@@ -96,7 +96,7 @@ class RIS extends uvm_reg;
 
 		reserved = uvm_reg_field::type_id::create("reserved");
 		reserved.configure( .parent						(this	),
-							.size						(29		),
+							.size						(13		),
 							.lsb_pos			    	(3		),
 							.access						("RO"	),
 							.volatile					(0		),
@@ -111,6 +111,7 @@ endclass
 //- IM - interrupt enable - bit 0 - overflow
 //                                     - bit 1 - underflow
 //                                     - ta dva polja su read-write, ostala su read-only
+// ne menja ga hardwer
 //=========================================================================================
 
 class IM extends uvm_reg;
@@ -126,7 +127,7 @@ class IM extends uvm_reg;
 
 	// new - constructor
 	function new (string name = "IM");
-		super.new(.name(name), .nbits(32), .has_coverage(UVM_NO_COVERAGE));
+		super.new(.name(name), .nbits(16), .has_coverage(UVM_NO_COVERAGE));
 	endfunction : new
 
 	function void build();
@@ -135,7 +136,7 @@ class IM extends uvm_reg;
 							.size						(1		),
 							.lsb_pos			    	(0		),
 							.access						("RW"	),
-							.volatile					(1		),
+							.volatile					(0		),
 							.reset						(1'b0	),
 							.has_reset					(1		),
 							.is_rand					(0		),
@@ -146,7 +147,7 @@ class IM extends uvm_reg;
 							.size						(1		),
 							.lsb_pos			    	(1		),
 							.access						("RW"	),
-							.volatile					(1		),
+							.volatile					(0		),
 							.reset						(1'b0	),
 							.has_reset					(1		),
 							.is_rand					(0		),
@@ -157,7 +158,7 @@ class IM extends uvm_reg;
 							.size						(1		),
 							.lsb_pos			    	(2		),
 							.access						("RW"	),
-							.volatile					(1		),
+							.volatile					(0		),
 							.reset						(1'b0	),
 							.has_reset					(1		),
 							.is_rand					(0		),
@@ -165,7 +166,7 @@ class IM extends uvm_reg;
 
 		reserved = uvm_reg_field::type_id::create("reserved");
 		reserved.configure(.parent						(this	),
-							.size						(29		),
+							.size						(13		),
 							.lsb_pos			    	(3		),
 							.access						("RO"	),
 							.volatile					(0		),
@@ -199,7 +200,7 @@ class MIS extends uvm_reg;
 
 	// new - constructor
 	function new (string name = "MIS");
-		super.new(.name(name), .nbits(32), .has_coverage(UVM_NO_COVERAGE));
+		super.new(.name(name), .nbits(16), .has_coverage(UVM_NO_COVERAGE));
 	endfunction : new
 
 	function void build();
@@ -238,7 +239,7 @@ class MIS extends uvm_reg;
 
 		reserved = uvm_reg_field::type_id::create("reserved");
 		reserved.configure(.parent						(this	),
-							.size						(29		),
+							.size						(13		),
 							.lsb_pos			    	(3		),
 							.access						("RO"	),
 							.volatile					(0		),
@@ -249,6 +250,30 @@ class MIS extends uvm_reg;
 	endfunction
 endclass
 
+// MIS "CALLBACK"
+
+class MIS_cb extends uvm_reg_cbs;
+
+
+ `uvm_object_utils(MIS_cb)
+
+ uvm_reg RIS_p, IIR_p;
+
+ function void post_predict(input uvm_reg_field  fld,
+                                      input uvm_reg_data_t previous,
+                                      inout uvm_reg_data_t value,
+                                      input uvm_predict_e  kind,
+                                      input uvm_path_e     path,
+                                      input uvm_reg_map    map);
+
+	 if(kind == UVM_WRITE)
+		 begin
+			RIS_p = map.
+		 end
+
+  endfunction
+
+endclass
 
 //============================== LOAD SPEC ==================================================
 //- LOAD registar - 16bitna vrednost sa kojom se poredi brojac
@@ -298,7 +323,7 @@ class CFG extends uvm_reg;
 
 	// new - constructor
 	function new (string name = "CFG");
-		super.new(.name(name), .nbits(32), .has_coverage(UVM_NO_COVERAGE));
+		super.new(.name(name), .nbits(16), .has_coverage(UVM_NO_COVERAGE));
 	endfunction : new
 
 	function void build();
@@ -327,7 +352,7 @@ class CFG extends uvm_reg;
 
 		reserved = uvm_reg_field::type_id::create("reserved");
 		reserved.configure( .parent						(this	),
-							.size						(16		),
+							.size						(14		),
 							.lsb_pos			    	(3		),
 							.access						("RO"	),
 							.volatile					(0		),
@@ -336,7 +361,6 @@ class CFG extends uvm_reg;
 							.is_rand					(0		),
 							.individually_accessible 	(0		) );
 	endfunction
-
 endclass
 
 //============================== SWRESET SPEC ==================================================
@@ -351,17 +375,17 @@ class SWRESET extends uvm_reg;
 	`uvm_object_utils(SWRESET)
 
 	function new (string name = "SWRESET");
-		super.new(.name(name), .nbits(32), .has_coverage(UVM_NO_COVERAGE));
+		super.new(.name(name), .nbits(16), .has_coverage(UVM_NO_COVERAGE));
 	endfunction
 
 	function void build();
 	reset_passcode = uvm_reg_field::type_id::create("reset_passcode");
 		reset_passcode.configure(.parent				(this	),
-							.size						(32		),
+							.size						(16		),
 							.lsb_pos			    	(0		),
 							.access						("RW"	),
 							.volatile					(0		),
-							.reset						(32'b0	),
+							.reset						(16'b0	),
 							.has_reset					(1		),
 							.is_rand					(0		),
 							.individually_accessible 	(0		) );
@@ -384,7 +408,7 @@ class IIR extends uvm_reg;
 	`uvm_object_utils(IIR)
 
 	function new (string name = "IIR");
-		super.new(.name(name), .nbits(32), .has_coverage(UVM_NO_COVERAGE));
+		super.new(.name(name), .nbits(16), .has_coverage(UVM_NO_COVERAGE));
 	endfunction
 
 	function void build();
@@ -392,7 +416,7 @@ class IIR extends uvm_reg;
 	interrupt.configure(	.parent						(this	),
 							.size						(2		),
 							.lsb_pos			    	(0		),
-							.access						("RW"	),
+							.access						("R0"	),
 							.volatile					(1		),
 							.reset						(2'b0	),
 							.has_reset					(1		),
@@ -401,9 +425,9 @@ class IIR extends uvm_reg;
 
 	reserved = uvm_reg_field::type_id::create("reserved");
 	reserved.configure(		.parent						(this	),
-							.size						(30		),
+							.size						(14		),
 							.lsb_pos			    	(0		),
-							.access						("RW"	),
+							.access						("R0"	),
 							.volatile					(0		),
 							.reset						(0		),
 							.has_reset					(0		),
@@ -426,17 +450,17 @@ class MATCH extends uvm_reg;
 	`uvm_object_utils(MATCH)
 
 	function new (string name = "MATCH");
-		super.new(.name(name), .nbits(32), .has_coverage(UVM_NO_COVERAGE));
+		super.new(.name(name), .nbits(16), .has_coverage(UVM_NO_COVERAGE));
 	endfunction
 
 	function void build();
 	match = uvm_reg_field::type_id::create("match");
 		match.configure(	.parent						(this	),
-							.size						(32		),
+							.size						(16		),
 							.lsb_pos			    	(0		),
 							.access						("RW"	),
 							.volatile					(0		),
-							.reset						(32'b0	),
+							.reset						(16'b0	),
 							.has_reset					(1		),
 							.is_rand					(0		),
 							.individually_accessible 	(0		) );
@@ -455,17 +479,17 @@ class COUNT extends uvm_reg;
 	`uvm_object_utils(COUNT)
 
 	function new (string name = "COUNT");
-		super.new(.name(name), .nbits(32), .has_coverage(UVM_NO_COVERAGE));
+		super.new(.name(name), .nbits(16), .has_coverage(UVM_NO_COVERAGE));
 	endfunction
 
 	function void build();
 	counter = uvm_reg_field::type_id::create("counter");
 		counter.configure(	.parent						(this	),
-							.size						(32		),
+							.size						(16		),
 							.lsb_pos			    	(0		),
 							.access						("RO"	),
 							.volatile					(1		),
-							.reset						(32'b0	),
+							.reset						(16'b0	),
 							.has_reset					(1		),
 							.is_rand					(0		),
 							.individually_accessible 	(0		) );
@@ -541,15 +565,20 @@ class dut_register_block extends uvm_reg_block;
 		COUNT_reg.configure(this,null,"");
 		COUNT_reg.build();
 
-		dut_map = create_map("Counter", 'h0, ADDR_WIDTH, ADDR_WIDTH/8, 1);
+		dut_map = create_map(	.name			("Counter"		),
+								.base_addr		('h0			),
+								.n_bytes		(2				),
+								.byte_addressing(0				),
+								.endian			(UVM_BIG_ENDIAN	)	);
+
 
 		dut_map.add_reg(RIS_reg, 	'h0, "RO");
 		dut_map.add_reg(IM_reg,	 	'h2, "RW");
 		dut_map.add_reg(MIS_reg,	'h4, "RW");
 		dut_map.add_reg(LOAD_reg,	'h6, "RW");
-		dut_map.add_reg(CFG_reg,	'h8, "RO");
+		dut_map.add_reg(CFG_reg,	'h8, "RW");
 		dut_map.add_reg(SWRESET_reg,'h10,"RW");
-		dut_map.add_reg(IIR_reg,	'h12,"RW");
+		dut_map.add_reg(IIR_reg,	'h12,"RO");
 		dut_map.add_reg(MATCH_reg,	'h14,"RW");
 		dut_map.add_reg(COUNT_reg,	'h16,"RO");
 
