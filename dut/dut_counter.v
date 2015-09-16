@@ -493,7 +493,7 @@ always @(posedge AXI_ACLK) begin
 			if(AXI_ARBURST)
 				axi_rresp <= 2'b10;	// SLVERR
 
-			read_flag <= 1; // ILI AXI_ARLEN - DA LI JE DOZVOLJENA TERMINACIJA BURST-OVA - ASK DARKO
+			read_flag <= 1;
 		end
 		else
 			read_flag <= 0;
