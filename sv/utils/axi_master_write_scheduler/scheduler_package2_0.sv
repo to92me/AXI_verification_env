@@ -147,7 +147,7 @@ task axi_master_write_scheduler_package2_0::addBurst(axi_frame frame);
 				tmp_single_frame.delay_addr 	= rand_data.delay_addr;
 				tmp_single_frame.delay_data 	= rand_data.delay_data;
 				tmp_single_frame.last_one 		= FALSE;
-				tmp_single_frame.len			= frame.len+1;
+				tmp_single_frame.len			= frame.len;
 				sem.get(1);
 				single_frame_queue.push_front(tmp_single_frame);
 				sem.put(1);

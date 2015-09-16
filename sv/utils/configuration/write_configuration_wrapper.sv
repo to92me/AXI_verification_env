@@ -576,7 +576,7 @@ function void axi_write_configuration_wrapper::parseUserGlobalConfiguration();
 						$display("setAxi_3_support : %d",global_config_object.getAxi_3_support());
 						if(global_config_object.getAxi_3_support() == FALSE)
 							begin
-								global_config_object.setMaster_write_deepth(0);
+								global_config_object.setMaster_write_deepth(1);
 								$display("setMaster_write_deepth : %d",global_config_object.getMaster_write_deepth());
 								void'(removeStringFromQueue("master_write_deepth", globalc));
 							end

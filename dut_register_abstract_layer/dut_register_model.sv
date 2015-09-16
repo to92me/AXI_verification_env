@@ -79,6 +79,20 @@
 `define COUNT_address_offset	'h16
 `define COUNT_counter_offest 			 0
 
+
+`define overflow_string 				"overflow"
+`define underflow_string 				"underflow"
+`define reserved_string					"reserved"
+`define match_string 					"match"
+`define compare_string 					"compare"
+`define counter_string 					"counter"
+`define counter_enable_string 			"counter_enable"
+`define counter_direction_string		"counter_direction"
+`define reset_passcode_string 			"reset_passcode"
+`define interrupt_string				"interrupt_string"
+`define interrupt_priority_string		"interrupt_priority"
+
+`define map_name_string					"dut_register_map"
 //
 // ================================================================================================================
 //
@@ -110,7 +124,7 @@ class RIS extends uvm_reg;
 	endfunction : new
 
 	function void build();
-		underflow = uvm_reg_field::type_id::create("underflow");
+		underflow = uvm_reg_field::type_id::create(`underflow_string);
 		underflow.configure(.parent						(this					),
 							.size						(1						),
 							.lsb_pos			    	(`RIS_underflow_offset	),
@@ -121,7 +135,7 @@ class RIS extends uvm_reg;
 							.is_rand					(0						),
 							.individually_accessible 	(0						) );
 
-		overflow = uvm_reg_field::type_id::create("overflow");
+		overflow = uvm_reg_field::type_id::create(`overflow_string);
 		overflow.configure(.parent						(this					),
 							.size						(1						),
 							.lsb_pos			    	(`RIS_overflow_offset	),
@@ -132,7 +146,7 @@ class RIS extends uvm_reg;
 							.is_rand					(0						),
 							.individually_accessible 	(0						) );
 
-		match = uvm_reg_field::type_id::create("match");
+		match = uvm_reg_field::type_id::create(`match_string);
 		match.configure(.parent							(this					),
 							.size						(1						),
 							.lsb_pos			    	(`RIS_match_offset		),
@@ -143,7 +157,7 @@ class RIS extends uvm_reg;
 							.is_rand					(0						),
 							.individually_accessible 	(0						) );
 
-		reserved = uvm_reg_field::type_id::create("reserved");
+		reserved = uvm_reg_field::type_id::create(`reserved_string);
 		reserved.configure( .parent						(this					),
 							.size						(13						),
 							.lsb_pos			    	(`RIS_reserved_offest	),
@@ -180,7 +194,7 @@ class IM extends uvm_reg;
 	endfunction : new
 
 	function void build();
-		underflow = uvm_reg_field::type_id::create("underflow");
+		underflow = uvm_reg_field::type_id::create(`underflow_string);
 		underflow.configure(.parent						(this					),
 							.size						(1						),
 							.lsb_pos			    	(`IM_underflow_offest	),
@@ -191,7 +205,7 @@ class IM extends uvm_reg;
 							.is_rand					(0						),
 							.individually_accessible 	(0						) );
 
-		overflow = uvm_reg_field::type_id::create("overflow");
+		overflow = uvm_reg_field::type_id::create(`overflow_string);
 		overflow.configure(.parent						(this					),
 							.size						(1						),
 							.lsb_pos			    	(`IM_overflow_offset	),
@@ -202,7 +216,7 @@ class IM extends uvm_reg;
 							.is_rand					(0						),
 							.individually_accessible 	(0						) );
 
-		match = uvm_reg_field::type_id::create("match");
+		match = uvm_reg_field::type_id::create(`match_string);
 		match.configure(.parent							(this					),
 							.size						(1						),
 							.lsb_pos			    	(`IM_match_offset		),
@@ -213,7 +227,7 @@ class IM extends uvm_reg;
 							.is_rand					(0						),
 							.individually_accessible 	(0						) );
 
-		reserved = uvm_reg_field::type_id::create("reserved");
+		reserved = uvm_reg_field::type_id::create(`reserved_string);
 		reserved.configure(.parent						(this					),
 							.size						(13						),
 							.lsb_pos			    	(`IM_reserved_offest	),
@@ -253,7 +267,7 @@ class MIS extends uvm_reg;
 	endfunction : new
 
 	function void build();
-		underflow = uvm_reg_field::type_id::create("underflow");
+		underflow = uvm_reg_field::type_id::create(`underflow_string);
 		underflow.configure(.parent						(this					),
 							.size						(1						),
 							.lsb_pos			    	(`MIS_underflow_offest	),
@@ -263,8 +277,12 @@ class MIS extends uvm_reg;
 							.has_reset					(1						),
 							.is_rand					(0						),
 							.individually_accessible 	(0						) );
+		begin
+			MIS_overflow_cb _MIS_overflow_cb = new("MIS_overflow_cb");
+			uvm_reg_field_cb::add(_MIS_overflow_cb, underflow);
+		end
 
-		overflow = uvm_reg_field::type_id::create("overflow");
+		overflow = uvm_reg_field::type_id::create(`overflow_string);
 		overflow.configure(.parent						(this					),
 							.size						(1						),
 							.lsb_pos			    	(`MIS_overflow_offset	),
@@ -275,7 +293,7 @@ class MIS extends uvm_reg;
 							.is_rand					(0						),
 							.individually_accessible 	(0						) );
 
-		match = uvm_reg_field::type_id::create("match");
+		match = uvm_reg_field::type_id::create(`match_string);
 		match.configure(.parent							(this					),
 							.size						(1						),
 							.lsb_pos			    	(`MIS_match_offset		),
@@ -286,7 +304,7 @@ class MIS extends uvm_reg;
 							.is_rand					(0						),
 							.individually_accessible 	(0						) );
 
-		reserved = uvm_reg_field::type_id::create("reserved");
+		reserved = uvm_reg_field::type_id::create(`reserved_string);
 		reserved.configure(.parent						(this					),
 							.size						(13						),
 							.lsb_pos			    	(`MIS_reserved_offest	),
@@ -301,12 +319,12 @@ endclass
 
 // MIS "CALLBACK"
 
-class MIS_cb extends uvm_reg_cbs;
+class MIS_overflow_cb extends uvm_reg_cbs;
 
+ `uvm_object_utils(MIS_overflow_cb)
 
- `uvm_object_utils(MIS_cb)
-
- uvm_reg RIS_p, IIR_p;
+ uvm_reg 		RIS_p, 			IIR_p;
+ uvm_reg_field 	RIS_overflow_p, IIR_interrupt_priority_p;
 
  function void post_predict(input uvm_reg_field  fld,
                                       input uvm_reg_data_t previous,
@@ -315,12 +333,113 @@ class MIS_cb extends uvm_reg_cbs;
                                       input uvm_path_e     path,
                                       input uvm_reg_map    map);
 
+
+	 RIS_p = map.get_mem_by_offset(`RIS_address_offset);
+	 $cast(RIS_overflow_p, RIS_p.get_field_by_name(`overflow_string));
+
+	 IIR_p = map.get_mem_by_offset(`IIR_address_offset);
+	 $cast(IIR_interrupt_priority_p, IIR_p.get_field_by_name(`interrupt_priority_string));
+
 	 if(kind == UVM_WRITE)
 		 begin
-			RIS_p = map.get_mem_by_offset(offset)
+			 if(value == 1)
+				 begin
+
+					// if previous value of MIS[2:0] is 000 then writing to 001
+					//will change IIR
+					if(fld.value == 0)
+						 begin
+							 IIR_interrupt_priority_p.predict(1);
+						 end
+
+					void'(RIS_overflow_p.predict(0));
+					fld.predict(0);
+					value = 0;
+				 end
 		 end
 
-  endfunction
+ endfunction
+endclass
+
+class MIS_underflow_cb extends uvm_reg_cbs;
+
+ 	`uvm_object_utils(MIS_underflow_cb)
+
+ 	uvm_reg 		RIS_p, 			 IIR_p;
+ 	uvm_reg_field 	RIS_underflow_p, IIR_interrupt_priority_p;
+
+	function void post_predict(input uvm_reg_field  fld,
+                                      input uvm_reg_data_t previous,
+                                      inout uvm_reg_data_t value,
+                                      input uvm_predict_e  kind,
+                                      input uvm_path_e     path,
+                                      input uvm_reg_map    map);
+
+
+		RIS_p = map.get_mem_by_offset(`RIS_address_offset);
+		$cast(RIS_underflow_p, RIS_p.get_field_by_name(`underflow_string));
+
+		IIR_p = map.get_mem_by_offset(`IIR_address_offset);
+		$cast(IIR_interrupt_priority_p, IIR_p.get_field_by_name(`underflow_string));
+
+		if(kind == UVM_PREDICT_WRITE)
+			begin
+				if(value == 1)
+					begin
+						// if MISC = 00x then writing to MISC _1_ will change IIR to 2
+						if(fld.value == 1)
+							begin
+								IIR_interrupt_priority_p.predict(2);
+							end
+
+						void'(RIS_underflow_p.predict(0));
+						fld.predict(0);
+						value = 0;
+					end
+			end
+	endfunction
+endclass
+
+
+class MIS_match_cb extends uvm_reg_cbs;
+
+ 	`uvm_object_utils(MIS_match_cb)
+
+ 	uvm_reg 		RIS_p, 			 IIR_p;
+ 	uvm_reg_field 	RIS_match_p, IIR_interrupt_priority_p;
+
+	function void post_predict(input uvm_reg_field  fld,
+                                      input uvm_reg_data_t previous,
+                                      inout uvm_reg_data_t value,
+                                      input uvm_predict_e  kind,
+                                      input uvm_path_e     path,
+                                      input uvm_reg_map    map);
+
+
+		RIS_p = map.get_mem_by_offset(`RIS_address_offset);
+		$cast(RIS_match_p, RIS_p.get_field_by_name(`underflow_string));
+
+		IIR_p = map.get_mem_by_offset(`IIR_address_offset);
+		$cast(IIR_interrupt_priority_p, IIR_p.get_field_by_name(`underflow_string));
+
+		if(kind == UVM_PREDICT_WRITE)
+			begin
+				if(value == 1)
+					begin
+						// if MISC = 00x then writing to MISC _1_ will change IIR to 2
+						if(fld.value >= 3)
+							begin
+								IIR_interrupt_priority_p.predict(2);
+							end
+
+
+						void'(RIS_overflow_p.predict(0));
+						fld.predict(0);
+						value = 0;
+					end
+			end
+	endfunction
+
 
 endclass
 
@@ -341,7 +460,7 @@ class LOAD extends uvm_reg;
 
 
 	function void build();
-		compare = uvm_reg_field::type_id::create("compare");
+		compare = uvm_reg_field::type_id::create(`compare_string);
 		compare.configure(.parent						(this					),
 							.size						(16						),
 							.lsb_pos			    	(`LOAD_compare_offest	),
@@ -376,7 +495,7 @@ class CFG extends uvm_reg;
 	endfunction : new
 
 	function void build();
-		counter_enable = uvm_reg_field::type_id::create("counter_enable");
+		counter_enable = uvm_reg_field::type_id::create(`counter_string);
 		counter_enable.configure(.parent				(this						),
 							.size						(1							),
 							.lsb_pos			    	(`CFG_counter_enable_offset	),
@@ -428,7 +547,7 @@ class SWRESET extends uvm_reg;
 	endfunction
 
 	function void build();
-	reset_passcode = uvm_reg_field::type_id::create("reset_passcode");
+	reset_passcode = uvm_reg_field::type_id::create(`reset_passcode_string);
 		reset_passcode.configure(.parent				(this					),
 							.size						(16						),
 							.lsb_pos			    	(`SWRESET_passcode_offset),
@@ -451,7 +570,7 @@ endclass
 
 
 class IIR extends uvm_reg;
-	rand uvm_reg_field interrupt;
+	rand uvm_reg_field interrupt_priority;
 	uvm_reg_field reserved;
 
 	`uvm_object_utils(IIR)
@@ -461,7 +580,7 @@ class IIR extends uvm_reg;
 	endfunction
 
 	function void build();
-	interrupt = uvm_reg_field::type_id::create("interrupt");
+	interrupt = uvm_reg_field::type_id::create(`interrupt_priority_string);
 	interrupt.configure(	.parent						(this					),
 							.size						(2						),
 							.lsb_pos			    	(`IIR_interrupt_offset	),
@@ -472,7 +591,7 @@ class IIR extends uvm_reg;
 							.is_rand					(0						),
 							.individually_accessible 	(0						) );
 
-	reserved = uvm_reg_field::type_id::create("reserved");
+	reserved = uvm_reg_field::type_id::create(`reserved_string);
 	reserved.configure(		.parent						(this					),
 							.size						(14						),
 							.lsb_pos			    	(`IIR_reserved			),
@@ -503,7 +622,7 @@ class MATCH extends uvm_reg;
 	endfunction
 
 	function void build();
-	match = uvm_reg_field::type_id::create("match");
+	match = uvm_reg_field::type_id::create(`match_string);
 		match.configure(	.parent						(this					),
 							.size						(16						),
 							.lsb_pos			    	(`MATCH_match_offest	),
@@ -532,7 +651,7 @@ class COUNT extends uvm_reg;
 	endfunction
 
 	function void build();
-	counter = uvm_reg_field::type_id::create("counter");
+	counter = uvm_reg_field::type_id::create(`counter_string);
 		counter.configure(	.parent						(this					),
 							.size						(16						),
 							.lsb_pos			    	(`COUNT_counter_offest	),
@@ -614,22 +733,22 @@ class dut_register_block extends uvm_reg_block;
 		COUNT_reg.configure(this,null,"");
 		COUNT_reg.build();
 
-		dut_map = create_map(	.name			("Counter"		),
+		dut_map = create_map(	.name			("dut"		),
 								.base_addr		('h0			),
 								.n_bytes		(2				),
 								.byte_addressing(0				),
 								.endian			(UVM_BIG_ENDIAN	)	);
 
 
-		dut_map.add_reg(RIS_reg, 	'h0, "RO");
-		dut_map.add_reg(IM_reg,	 	'h2, "RW");
-		dut_map.add_reg(MIS_reg,	'h4, "RW");
-		dut_map.add_reg(LOAD_reg,	'h6, "RW");
-		dut_map.add_reg(CFG_reg,	'h8, "RW");
-		dut_map.add_reg(SWRESET_reg,'h10,"RW");
-		dut_map.add_reg(IIR_reg,	'h12,"RO");
-		dut_map.add_reg(MATCH_reg,	'h14,"RW");
-		dut_map.add_reg(COUNT_reg,	'h16,"RO");
+		dut_map.add_reg(RIS_reg, 	`RIS_address_offset, 	"RO");
+		dut_map.add_reg(IM_reg,	 	`IM_address_offset, 	"RW");
+		dut_map.add_reg(MIS_reg,	`MIS_address_offset, 	"RW");
+		dut_map.add_reg(LOAD_reg,	`LOAD_address_offset, 	"RW");
+		dut_map.add_reg(CFG_reg,	`CFG_address_offset, 	"RW");
+		dut_map.add_reg(SWRESET_reg,`SWRESET_address_offset,"RW");
+		dut_map.add_reg(IIR_reg,	`IIR_address_offset,	"RO");
+		dut_map.add_reg(MATCH_reg,	`MATCH_address_offset,	"RW");
+		dut_map.add_reg(COUNT_reg,	`COUNT_address_offset,	"RO");
 
 		// this is final configuration so lock it
 		lock_model();
