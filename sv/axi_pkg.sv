@@ -112,7 +112,7 @@ package axi_pkg;
 `ifdef andrea
 	`ifdef andrea_test
 	// ==================== TEST ================================
-		typedef class axi_read_test_config;
+		//typedef class axi_read_test_config;
 		typedef class axi_read_test_config_dut;
 	// ==========================================================
 	`endif

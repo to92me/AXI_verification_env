@@ -51,8 +51,12 @@ class axi_read_dut_counter_test extends uvm_test;
 
     axi_read_counter_tb tb0;
 
+    // WRITE
+    axi_master_write_tb tb1;
+
     `uvm_component_utils_begin(axi_read_dut_counter_test)
         `uvm_field_object(tb0, UVM_ALL_ON)
+        `uvm_field_object(tb1, UVM_ALL_ON)
     `uvm_component_utils_end
 
     function new(string name = "axi_read_dut_counter_test", uvm_component parent);
@@ -76,6 +80,15 @@ class axi_read_dut_counter_test extends uvm_test;
         // sequences
         uvm_config_wrapper::set(this, "tb0.virtual_seqr.run_phase", "default_sequence",
                                                      virtual_transfer_dut_counter::get_type());
+
+        // WRITE
+        uvm_config_int::set(this, "tb1.*", "coverage_enable", 1);
+
+        tb1 =  axi_master_write_tb::type_id::create("tb1",this);
+
+        uvm_config_wrapper::set(this, "tb1.env.master_write_agent.sequencer.run_phase",
+          "default_sequence", axi_master_write_sequence_lib_test1::get_type());
+
 
         super.build_phase(phase);
         tb0 = axi_read_counter_tb::type_id::create("tb0", this);

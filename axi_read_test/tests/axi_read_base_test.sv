@@ -36,7 +36,6 @@
 class axi_read_base_test extends uvm_test;
 
     axi_read_tb tb0;
-    uvm_table_printer printer;
 
     `uvm_component_utils_begin(axi_read_base_test)
         `uvm_field_object(tb0, UVM_ALL_ON)
@@ -44,20 +43,12 @@ class axi_read_base_test extends uvm_test;
 
     function new(string name = "axi_read_base_test", uvm_component parent);
         super.new(name,parent);
-        printer = new();
     endfunction : new
 
     virtual function void build_phase(uvm_phase phase);
         super.build_phase(phase);
         tb0 = axi_read_tb::type_id::create("tb0", this);
     endfunction : build_phase
-
-    task run_phase(uvm_phase phase);
-        printer.knobs.depth = 5;
-        // this.print(printer);
-        // Use the drain time for this phase
-        phase.phase_done.set_drain_time(this, 200);
-    endtask : run_phase
 
 endclass : axi_read_base_test
 

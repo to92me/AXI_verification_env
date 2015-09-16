@@ -41,7 +41,7 @@ module axi_top;
     axi_if if0(.sig_reset(reset), .sig_clock(aclk));
   
     dut_counter # ( 
-        .ID_WIDTH(ID_WIDTH),
+        .ID_WIDTH(RID_WIDTH),
         .DATA_WIDTH(DATA_WIDTH),
         .ADDR_WIDTH(ADDR_WIDTH),
         .AWUSER_WIDTH(AWUSER_WIDTH),
