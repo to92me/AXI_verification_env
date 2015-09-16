@@ -225,6 +225,7 @@ endclass : axi_slave_write_main_driver
 
 		if(found_match_ID == FALSE)
 			begin
+				message.len +=1;
 				burst_status_queue.push_back(message);
 //				$display("                                                                    new status, ADDR, ID: %d , len: %d", message.ID, message.len);
 			end

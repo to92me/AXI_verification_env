@@ -44,7 +44,9 @@ class axi_frame_base extends uvm_sequence_item;
 	constraint burst_size_constraint {size <= $clog2(DATA_WIDTH / 8);}
 	constraint burst_type_constraint {burst_type inside{FIXED, INCR, WRAP};}
 
-
+	constraint len_one_test{
+		len == 0 ;
+	}
 
 endclass
 
@@ -58,9 +60,7 @@ class axi_frame extends axi_frame_base;
 	 `uvm_field_queue_int(data, UVM_DEFAULT)
  `   uvm_object_utils_end
 
- 	constraint len_crs{
-	 	len inside {[5 : 127 ]};
- 	}
+
 
  	constraint data_size_csr {
 	 	data.size() == this.len + 1;

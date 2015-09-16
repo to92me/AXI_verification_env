@@ -143,7 +143,7 @@ endclass : axi_master_write_checker
 		status.setAddr(mssg.getAddr());
 		status.setID(mssg.getId());
 		status.setLast_one(FALSE);
-		status.setLen(mssg.getLen());
+		status.setLen(mssg.getLen()+1);
 
 //		`uvm_info(get_name(), $sformatf("Adding new ID from Address bus, ID: %h, start address: %h ", mssg.getId(), mssg.getAddr()), UVM_INFO)
 

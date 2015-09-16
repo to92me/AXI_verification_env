@@ -81,7 +81,7 @@ endclass : axi_master_write_sequence_base
 class axi_master_write_sequence_lib_test1 extends axi_master_write_sequence_base;
 
 	// Add local random fields and constraints here
-	int send_bursts = 20;
+	int send_bursts = 1;
 
 	`uvm_object_utils(axi_master_write_sequence_lib_test1)
 
