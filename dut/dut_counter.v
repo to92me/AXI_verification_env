@@ -362,14 +362,15 @@ always @(posedge AXI_ACLK) begin
     	axi_rresp <= 0;
     	axi_ruser <= 0;
     	axi_rvalid <= 0;
-    end
 
-    // reset flags
-    read_flag <= 0;
-	write_addr_flag <= 0;
-	write_data_flag <= 0;
-	bready_flag <= 1;
-	rready_flag <= 1;
+    	// reset flags
+	    read_flag <= 0;
+		write_addr_flag <= 0;
+		write_data_flag <= 0;
+		bready_flag <= 1;
+		rready_flag <= 1;
+
+    end
 
     // reset counter
     if ((AXI_ARESETN == 0) || (nrst == 1)) begin
@@ -575,6 +576,7 @@ always @(posedge AXI_ACLK) begin
 		if(AXI_WVALID) begin
 			if(write_addr_flag) begin
 				write_addr_flag <= 0;
+
 				axi_bresp <= 2'b00;	// default OKAY response
 
 				case (axi_awaddr)

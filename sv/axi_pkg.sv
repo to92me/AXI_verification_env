@@ -114,6 +114,7 @@ package axi_pkg;
 	// ==================== TEST ================================
 		//typedef class axi_read_test_config;
 		typedef class axi_read_test_config_dut;
+		typedef class axi_write_env;
 	// ==========================================================
 	`endif
 
@@ -169,7 +170,7 @@ package axi_pkg;
 
 	typedef class axi_master_read_multiple_addr;
 	typedef class axi_master_read_no_err_count;
-	typedef class axi_master_read_simple;
+	typedef class axi_master_read_dut_counter_seq;
 	// ==========================================================
 
 `endif
@@ -298,6 +299,7 @@ package axi_pkg;
 		//`include "axi_read_tb.sv"
 		`include "dut/axi_read_test_config_dut.sv"
 		`include "dut/axi_read_tb_counter.sv"
+		`include "dut/axi_write_env.sv"
 	// ==========================================================
 	`endif
 

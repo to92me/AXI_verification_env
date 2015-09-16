@@ -81,7 +81,7 @@ endclass : axi_master_write_sequence_base
 class axi_master_write_sequence_lib_test1 extends axi_master_write_sequence_base;
 
 	// Add local random fields and constraints here
-	int send_bursts = 1;
+	int send_bursts = 20;
 
 	`uvm_object_utils(axi_master_write_sequence_lib_test1)
 
@@ -98,7 +98,7 @@ class axi_master_write_sequence_lib_test1 extends axi_master_write_sequence_base
 
 		repeat(send_bursts)
 			begin
-				`uvm_do(req);
+				`uvm_do (req)
 			end
 
 		wait(!send_bursts);
@@ -112,5 +112,46 @@ endclass : axi_master_write_sequence_lib_test1
 function void axi_master_write_sequence_lib_test1::response_handler(input uvm_sequence_item response);
 	    send_bursts--;
 endfunction
+
+
+// DODATO - ANDREA
+////////////////////////////////////
+class axi_master_write_dut_counter_seq extends axi_master_write_sequence_base;
+
+	// Add local random fields and constraints here
+	rand int count;
+	rand int address;
+	rand bit[15:0] write_data;
+
+	`uvm_object_utils(axi_master_write_dut_counter_seq)
+
+	// new - constructor
+	function new(string name="axi_master_write_dut_counter_seq");
+		super.new(name);
+	endfunction
+
+	extern function void response_handler(input uvm_sequence_item response);
+
+	virtual task body();
+
+		use_response_handler(1);
+
+		repeat(count)
+			begin
+				`uvm_do_with(req, {req.burst_type == FIXED; req.size == 1; req.len == 0; req.addr == address; req.id == 0; req.data[0] == write_data;});
+			end
+
+		wait(!count);
+
+//		get_response(rsp);
+	endtask
+
+endclass : axi_master_write_dut_counter_seq
+
+
+function void axi_master_write_dut_counter_seq::response_handler(input uvm_sequence_item response);
+	    count--;
+endfunction
+///////////////////////////////
 
 `endif

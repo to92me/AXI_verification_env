@@ -42,6 +42,9 @@ class axi_virtual_sequencer extends uvm_sequencer;
 
 	axi_master_read_sequencer read_seqr;
 
+	// WRITE
+	axi_master_write_sequencer write_seqr;
+
 	`uvm_component_utils(axi_virtual_sequencer)
 
 	// new - constructor
