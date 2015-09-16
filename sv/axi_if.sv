@@ -13,7 +13,7 @@ import uvm_pkg::*;            // import the UVM library
 interface axi_if (input sig_reset, input sig_clock);
 
 	parameter ADDR_WIDTH = 32;
-	parameter DATA_WIDTH = 64;
+	parameter DATA_WIDTH = 16;
 	parameter ID_WIDTH = 32;
 
 	//parameter ADDR_WIDTH = 32;	// Width of the address bus

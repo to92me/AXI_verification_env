@@ -34,7 +34,7 @@ class axi_read_burst_dut_counter extends axi_pkg::axi_read_burst_frame;
 
     `uvm_object_utils(axi_read_burst_dut_counter)
 
-    constraint default_ct {valid_burst == 1; burst_type == FIXED; size == 1; len == 0; addr == 16; delay == 0; id == 0;}
+    constraint default_ct {valid_burst == 1; burst_type == FIXED; size == 1; len == 0; addr == 12; delay == 4; id == 0;}
 
 endclass : axi_read_burst_dut_counter
 
