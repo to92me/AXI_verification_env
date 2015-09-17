@@ -203,10 +203,15 @@ class virtual_transfer_dut_counter extends virtual_base_sequence;
 		`uvm_do_on_with(write_seq, p_sequencer.write_seqr, {count == 1; address == 8; write_data == 16'hffff;})
 		// match
 		`uvm_do_on_with(write_seq, p_sequencer.write_seqr, {count == 1; address == 14; write_data == 16'hffff;})
+		// IM
+		`uvm_do_on_with(write_seq, p_sequencer.write_seqr, {count == 1; address == 2; write_data == 16'hffff;})
 
 		#100
 		// read counter
 		`uvm_do_on_with(read_seq, p_sequencer.read_seqr, {count == 1; address == 16;})
+		// clear interrupt (IIR)
+		`uvm_do_on_with(read_seq, p_sequencer.read_seqr, {count == 1; address == 12;
+		})
 
 	endtask
 
