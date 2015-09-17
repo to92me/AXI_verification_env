@@ -184,7 +184,9 @@ module dut_counter #
 //
 // -----------------------------------------------------------------------------
 
+	// --------------------------------------------------------------------------------------
 	// signal registers
+	// --------------------------------------------------------------------------------------
 	// axi
 	reg [ADDR_WIDTH-1 : 0] 	axi_awaddr;
 	reg  					axi_awready;
@@ -192,7 +194,6 @@ module dut_counter #
 	reg [1 : 0] 			axi_bresp;
 	reg [BUSER_WIDTH-1 : 0] axi_buser;
 	reg  					axi_bvalid;
-	reg [ADDR_WIDTH-1 : 0] 	axi_araddr;
 	reg  					axi_arready;
 	reg [DATA_WIDTH-1 : 0] 	axi_rdata;
 	reg [1 : 0] 			axi_rresp;
@@ -203,7 +204,9 @@ module dut_counter #
 	reg 	irq_o;
 	reg 	dout_o;
 
+	// --------------------------------------------------------------------------------------
 	// helper registers
+	// --------------------------------------------------------------------------------------
 	reg 	read_flag;	// set when a read request has been accepted
 	reg 	write_addr_flag;	// set when a valid address has been sent
 	reg 	write_data_flag;	// set when data has been sent
@@ -213,69 +216,98 @@ module dut_counter #
 	// counter registers
 	// unused bits are reserved, read-only, value=0
 	// --------------------------------------------------------------------------------------
-	// ACLK
+	// ACLK domain
 	// --------------------------------------------------------------------------------------
-	reg 	nrst;  // internal signal generated based on SWRESET
-    reg [DATA_WIDTH-1 : 0]	RIS; // bit 0 - OVERFLOW, bit 1 - UNDERFLOW; read-only
-    reg [DATA_WIDTH-1 : 0]	IM;  // bit 0 - OVERFLOW, bit 1 - UNDERFLOW; read-write
-    reg [DATA_WIDTH-1 : 0]	MIS; // bit 0 - OVERFLOW, bit 1 - UNDERFLOW; write 1 deletes flags in MIS and RIS
-    reg [DATA_WIDTH-1 : 0]	LOAD;    // read-write
+	reg 					nrst;  // internal signal generated based on SWRESET
+    reg [DATA_WIDTH-1 : 0]	RIS; // bit 0 - OVERFLOW, bit 1 - UNDERFLOW; bit 2 - MATCH; read-only
+    reg [DATA_WIDTH-1 : 0]	IM;  // bit 0 - OVERFLOW, bit 1 - UNDERFLOW; bit 2 - MATCH; read-write
+    reg [DATA_WIDTH-1 : 0]	MIS; // bit 0 - OVERFLOW, bit 1 - UNDERFLOW; bit 2 - MATCH; write 1 deletes flags in MIS and RIS
+    reg [DATA_WIDTH-1 : 0]	LOAD;    // counter compared to this value; read-write
     reg [DATA_WIDTH-1 : 0]	CFG; // bit 0 - counter enable, bit 1 - up(0)/down(1); read-write
     reg [DATA_WIDTH-1 : 0]	IIR;	// interrupt index registar; read-only
-    reg [DATA_WIDTH-1 : 0]	MATCH;	//  read-write
+    reg [DATA_WIDTH-1 : 0]	MATCH;	//  counter compared to this value; read-write
+    reg [DATA_WIDTH-1 : 0]	count_aclk;	// register that holds the count value
     // synchronization
-    wire					ris0_sync;
-    wire					ris1_sync;
-    reg 					cfg0_async;
-    reg 					cfg1_async;
-    // for the handshaking protocol
+    wire					ris0_sync;	// for RIS[0]
+    wire					ris1_sync;	// for RIS[1]
+    wire 					ris2_sync;	// for RIS[2]
+    reg 					cfg0_async;	// for CFG[0]
+    reg 					cfg1_async;	// for CFG[1]
+    wire 					dout_sync;	// for dout_o
+    // handshaking protocol
     wire					req_sync;	// synchronized request
     reg 					ack;	// acknowledgement of the req signal
-
-    reg [DATA_WIDTH-1 : 0]	count_aclk;	// register that holds the count value
+    reg [2*DATA_WIDTH-1 : 0] data_bus_pull;	// the values of load and match are placed here
 
     // --------------------------------------------------------------------------------------
-	// FCLK
+	// FCLK domain
 	// --------------------------------------------------------------------------------------
     reg [DATA_WIDTH-1 : 0]	count;	// counter reg.
     // synchronization
     wire 					nrst_sync;	// for nrst
     reg 					ris0_async;	// for RIS[0]
     reg 					ris1_async;	// for RIS[1]
-    wire					cfg0_sync;	// fclk
-    wire					cfg1_sync;
+    reg 					ris2_async;	// for RIS[2]
+    wire					cfg0_sync;	// for CFG[0]
+    wire					cfg1_sync;	// for CFG[1]
+    reg [DATA_WIDTH-1 : 0]	load_fclk;	// holds the LOAD value
+    reg [DATA_WIDTH-1 : 0]	match_fclk;	// holds the MATCH value
+    reg 					dout_async;	// for the dout_o output signal 
     // for the handshaking protocol
     reg 					req;	// request
     wire					ack_sync;	// synchronized acknowledgement
+    reg [DATA_WIDTH-1 : 0]	data_bus_push;	// where the value of count will be placed
 
-
-    reg [DATA_WIDTH-1 : 0]	data_bus;	// for the handshaking protocol; where the value of count will be placed
+    // the two-phase handshaking protocol between the two clock domains is as follows:
+    // the push operation:
+    // The talker activates the req signal and places data on the data bus
+    // The listener detects activation of the req signal. It retrieves the data and activates the ack signal
+    // Once the talker senses activation of the ack signal, it removes the data from the data bus.
+    // The first push operation is done at this point. When the talker wants to push the next data, the handshaking continues from this state
+    // The talker deactivates the req signal and places data on the data bus.
+    // The listener detects deactivation of the req signal. It retrieves the data and deactivates the ack signal.
+    // Once the talker senses deactivation of the ack signal, it removes the data from the data bus.
+    // the pull operation:
+    // When the talker initiates a new data transfer, it implicitly indicates that the data from the previous pull
+	// operation has been retrieved. when the listener detects the transition of the req signal of the next operation, it can safely remove
+	// the data from the data bus
+    // separate data lines are needed for the push and pull operations
 
 // -----------------------------------------------------------------------------
 //
 //	 Synchronizers
 //
 // -----------------------------------------------------------------------------
+    // RIS[0]
 	edge_detection sync_ris0 (
 		.CLK(AXI_ACLK),
 		.RESET(AXI_ARESETN && (!nrst)),
 		.ASYNC_I(ris0_async),
 		.SYNC_O(ris0_sync)
 	);
+	// RIS[1]
 	edge_detection sync_ris1 (
 		.CLK(AXI_ACLK),
 		.RESET(AXI_ARESETN && (!nrst)),
 		.ASYNC_I(ris1_async),
 		.SYNC_O(ris1_sync)
 	);
+	// RIS[2]
+	edge_detection sync_ris2 (
+		.CLK(AXI_ACLK),
+		.RESET(AXI_ARESETN && (!nrst)),
+		.ASYNC_I(ris2_async),
+		.SYNC_O(ris2_sync)
+	);
 
+	// CFG[0]
 	simple_2ff_synchronizer sync_cfg0 (
 		.CLK(FCLK),
 		.RESET((!nrst_sync) && (!reset_counter_sync)),
 		.ASYNC_I(cfg0_async),
 		.SYNC_O(cfg0_sync)
 	);
-
+	// CFG[1]
 	simple_2ff_synchronizer sync_cfg1 (
 		.CLK(FCLK),
 		.RESET((!nrst_sync) && (!reset_counter_sync)),
@@ -283,6 +315,7 @@ module dut_counter #
 		.SYNC_O(cfg1_sync)
 	);
 
+	// nrst
 	edge_detection sync_nrst (
 		.CLK(FCLK),
 		.RESET((!nrst_sync) && (!reset_counter_sync)),
@@ -312,6 +345,13 @@ module dut_counter #
 		.SYNC_O(reset_counter_sync)
 	);
 
+	// load check - dout_o
+	simple_2ff_synchronizer sync_dout (
+		.CLK(AXI_ACLK),
+		.RESET(AXI_ARESETN && (!nrst)),
+		.ASYNC_I(dout_async),
+		.SYNC_O(dout_sync)
+	);
 
 // -----------------------------------------------------------------------------
 //
@@ -340,7 +380,7 @@ module dut_counter #
 		ris0_async <= 0;
 		ris1_async <= 0;
 		req <= 0;
-		data_bus <= 0;
+		data_bus_push <= 0;
     end
 
 always @(posedge AXI_ACLK) begin
@@ -372,7 +412,7 @@ always @(posedge AXI_ACLK) begin
 
     end
 
-    // reset counter
+    // reset registers
     if ((AXI_ARESETN == 0) || (nrst == 1)) begin
         RIS <= 0;
         IM <= 0;
@@ -387,6 +427,7 @@ always @(posedge AXI_ACLK) begin
 		cfg1_async <= 0;
 		ack <= 0;
 		count_aclk <= 0;
+		data_bus_pull <= 0;
     end
 
 
@@ -396,15 +437,13 @@ always @(posedge AXI_ACLK) begin
 //	Register assigments
 //
 // -----------------------------------------------------------------------------
-    	// first check if RIS is set (so that ris0_sync doen't clear it)
+    	// first check if RIS is set (so that risX_sync doen't clear it)
     	if (!RIS[0])
 			RIS[0] <= ris0_sync;
 		if (!RIS[1])
 			RIS[1] <= ris1_sync;
-
-		// MATCH check
-	    if (count_aclk == MATCH)
-	    	RIS[2] <= 1;
+		if (!RIS[2])
+			RIS[2] <= ris2_sync;
 
 		// MIS calculation
 	    MIS[0] <= RIS[0] && IM[0];
@@ -419,17 +458,8 @@ always @(posedge AXI_ACLK) begin
 	    cfg0_async <= CFG[0];
 	    cfg1_async <= CFG[1];
 
-	    // handshaking protocol
-	    if(ack != req_sync) begin
-	    	count_aclk <= data_bus;
-	    	ack <= !ack;
-	    end
-
-	    // LOAD check
-	    if (count_aclk > LOAD)
-	        dout_o <= 1;
-	    else
-	        dout_o <= 0;
+	   	// LOAD check
+	    dout_o <= dout_sync;
 
 	    // IIR
 	    case (MIS[2:0])
@@ -458,6 +488,13 @@ always @(posedge AXI_ACLK) begin
 	    				IIR[2:0] <= 3'b100;
 	    			end
 	    endcase
+
+	    // handshaking protocol
+	    if(ack != req_sync) begin
+	    	count_aclk <= data_bus_push;
+	    	data_bus_pull <= {LOAD, MATCH};
+	    	ack <= !ack;
+	    end
 
 // -----------------------------------------------------------------------------
 //
@@ -564,6 +601,7 @@ always @(posedge AXI_ACLK) begin
 			// burst type not fixed
 			if(AXI_AWBURST)
 				write_addr_flag <= 0;
+
 		end
 
 // -----------------------------------------------------------------------------
@@ -581,7 +619,7 @@ always @(posedge AXI_ACLK) begin
 
 				case (axi_awaddr)
 					2:	// IM
-						IM[1:0]	<= AXI_WDATA[1:0];
+						IM[2:0]	<= AXI_WDATA[2:0];
 					4:	// MIS - writing allowed only if PROT = 1
 						// sending 1 to a valid bit location deletes the flags
 						// in MIS and RIS registers
@@ -660,9 +698,11 @@ always @(posedge FCLK) begin
 		ris0_async <= 0;
 		ris1_async <= 0;
 		req <= 0;
-		data_bus <= 0;
+		data_bus_push <= 0;
+		load_fclk <= 0;
+		match_fclk <= 0;
+		dout_async <= 0;
 	end
-
 	else begin
         if(cfg0_sync == 1) begin // counter enable
 
@@ -683,10 +723,24 @@ always @(posedge FCLK) begin
         end
 	end
 
+	// MATCH check
+	if(match_fclk == count)
+		ris2_async <= 1;
+	else
+		ris2_async <= 0;
+
+	// LOAD check
+	if(count > load_fclk)
+		dout_async <= 1;
+	else
+		dout_async <= 0;
+
 	// handshaking protocol
 	if(ack_sync == req) begin
 		req <= !req;
-		data_bus <= count;
+		data_bus_push <= count;
+		load_fclk <= data_bus_pull[2*DATA_WIDTH-1 : DATA_WIDTH];
+		match_fclk <= data_bus_pull[DATA_WIDTH-1 : 0];
 	end
 end
 
