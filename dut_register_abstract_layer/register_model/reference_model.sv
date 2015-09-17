@@ -1,5 +1,5 @@
-`ifndef DUT_REGISTER_MODEL_REFERECE_MODEL_SVH
-`define DUT_REGISTER_MODEL_REFERECE_MODEL_SVH
+`ifndef DUT_REGISTER_MODEL_REFERECE_MODEL_SVH_TOME
+`define DUT_REGISTER_MODEL_REFERECE_MODEL_SVH_TOME
 
 //------------------------------------------------------------------------------
 //
@@ -113,6 +113,11 @@ class dut_referece_model extends uvm_component;
 
 	uvm_reg_field MATCH_compare_p;
 
+	uvm_reg_fielf COUNT_counter;
+
+
+	virtual interface dut_helper_vif vif;
+
 
 `uvm_component_utils_begin(dut_referece_model)
 	 `uvm_field_int(RIS, UVM_DEFAULT)
@@ -134,10 +139,11 @@ class dut_referece_model extends uvm_component;
 	// build_phase
 	function void build_phase(uvm_phase phase);
 		super.build_phase(phase);
+		if(!uvm_config_db#(virtual dut_helper_vif)::get(this, "", "dut_vif", vif))
+			 `uvm_fatal("NOVIF",{"virtual interface must be set for: ",get_full_name(),".vif"})
 	endfunction : build_phase
 
 	extern task main();
-	extern task clockGenerator();
 	extern task refereceModelMain();
 	extern task init();
 
@@ -146,45 +152,45 @@ endclass : dut_referece_model
 	task dut_referece_model::main();
 		this.init();
 	    fork
-		    this.clockGenerator();
 		    this.refereceModelMain();
 	    join
 	endtask
 
-	task dut_referece_model::clockGenerator();
-		forever begin
-		#clock_frek
-		->clock;
-		end
-	endtask
+
 
 	task dut_referece_model::refereceModelMain();
 		bit[15 : 0] internal_counter;
 		forever begin
-			@clock;
+			@(posedge vif.sig_fclock);
+
 			if(CFG_counter_enable_p.value == 1)
 				begin
-					case(CFG_direction_p)
+					case(CFG_direction_p.value)
 
 // UP DIRECTION
 						0:
 						begin
 							internal_counter++;
+							COUNT_counter.predicti(internal_counter);
 							if(internal_counter == 0)
 								begin
 									void'(RIS_overflow_p.predict(1));
 									if(IM_overflow_p.value == 1)
-										MIS_overflow_p.predict(1);
-									if(IIR_interrupt_priority_p < 2)
-										IIR_interrupt_priority_p.predict(2);
+										begin
+											MIS_overflow_p.predict(1);
+											if(IIR_interrupt_priority_p < 2)
+												IIR_interrupt_priority_p.predict(2);
+										end
 								end
 
 							if(internal_counter == MATCH_compare_p.value)
 								begin
 									void'(RIS_match_p.predict(1));
 									if(IM_match_p.value == 1)
-										MIS_match_p.predict(1);
-									IIR_interrupt_priority_p.predict(3);
+										begin
+											MIS_match_p.predict(1);
+											IIR_interrupt_priority_p.predict(3);
+										end
 								end
 						end
 
@@ -193,27 +199,53 @@ endclass : dut_referece_model
 						1:
 						begin
 							internal_counter--;
+							COUNT_counter.predicti(internal_counter);
 							if(internal_counter == 'hffff)
 								begin
 									void'(RIS_underflow_p.predict(1));
 									if(IM_underflow_p.value == 1)
-										MIS_underflow_p.predict(1);
-									if(IIR_interrupt_priority_p < 1 )
-										IIR_interrupt_priority_p.predict(1);
+										begin
+											MIS_underflow_p.predict(1);
+											if(IIR_interrupt_priority_p < 1 )
+												IIR_interrupt_priority_p.predict(1);
+										end
 								end
 
 							if(internal_counter == MATCH_compare_p.value)
 								begin
 									void'(RIS_match_p.predict(1));
 									if(IM_match_p.value == 1)
-										MIS_match_p.predict(1);
-									IIR_interrupt_priority_p.predict(3);
+										begin
+											MIS_match_p.predict(1);
+											IIR_interrupt_priority_p.predict(3);
+										end
 								end
 
 						end
 					endcase
 
 				end // if counter_enable == 1 end
+			else
+				begin
+					if(MATCH_compare_p.value == COUNT_counter.value)
+						begin
+							RIS_match_p.predict(1);
+							if(IM_match_p.value == 1)
+								begin
+									MIS_match_p.predict(1);
+									IIR_interrupt_priority_p.predict(3);
+								end
+
+						end
+					//if() // TODO
+					// dodati scenario i
+					// da je pod default active
+					// dodati u dut helper if DOUT_O
+					// dodati IRQ;
+					// dodati checkere za signale  DOUT_O i IRQ
+					//
+				end
+
 		end // foreve begin end
 	endtask
 
@@ -223,6 +255,7 @@ endclass : dut_referece_model
 		SWRESET_p 	= dut_register_map.get_reg_by_offset(`SWRESET_address_offset);
 
 		COUNTER_p 	= dut_register_map.get_reg_by_offset(`COUNT_address_offset);
+		$cast(COUNT_counter, COUNTER_p.get_field_by_name(`counter_string));
 
 		CFG_p		= dut_register_map.get_reg_by_offset(`CFG_address_offset);
 		$cast(CFG_counter_enable_p,	 	CFG_p.get_field_by_name(`counter_enable_string));
@@ -249,6 +282,7 @@ endclass : dut_referece_model
 
 		MATCH_p		= dut_register_map.get_reg_by_offset(`MATCH_address_offset);
 		$cast(MATCH_compare_p, MATCH_p.get_field_by_name(`compare_string));
+
 
 	endtask
 

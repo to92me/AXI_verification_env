@@ -256,7 +256,7 @@ endclass : axi_master_write_main_monitor
 		true_false_enum	suscribed_to_address_sample, true_false_enum suscribed_to_data_sample, true_false_enum	suscribed_to_response_sample);
 
 		axi_master_write_coverage_map coverage_package;
-		coverage_package = new("AxiMasterWriteCoverageMap", this);
+		coverage_package = new($sformatf("AxiMasterWriteCoveragerMap[%0d]",coverage_map.size()), this);
 
 		coverage_package.setCoverage_id(coverage_map.size());
 		coverage_package.setSuscribed_coverage_instace(coverage_instace_base);
