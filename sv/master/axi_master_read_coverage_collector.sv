@@ -42,7 +42,7 @@ class axi_master_read_coverage_collector extends uvm_component;
 	`uvm_analysis_imp_decl(1)
 	`uvm_analysis_imp_decl(2)
 	
-	// TLM connection to the monitor
+	// TLM connection to the collector
 	uvm_analysis_imp #(axi_read_single_frame, axi_master_read_coverage_collector) data_channel_port;
 	uvm_analysis_imp1 #(axi_read_burst_frame, axi_master_read_coverage_collector) addr_channel_port;
 

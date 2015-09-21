@@ -125,10 +125,10 @@ endclass : axi_slave_read_agent
 		collector.addr_collected_port.connect(monitor.addr_channel_imp);
 		collector.data_collected_port.connect(monitor.data_channel_imp);
 
-		// connect monitor and coverage collector
+		// connect collector and coverage collector
 		if (coverage_enable) begin
-			monitor.addr_collected_port.connect(coverage_coll.addr_channel_port);
-			monitor.data_collected_port.connect(coverage_coll.data_channel_port);
+			collector.addr_collected_port.connect(coverage_coll.addr_channel_port);
+			collector.data_collected_port.connect(coverage_coll.data_channel_port);
 		end
 
 		if(config_obj.is_active == UVM_ACTIVE) begin

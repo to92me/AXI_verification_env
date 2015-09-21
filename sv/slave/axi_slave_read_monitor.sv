@@ -79,6 +79,7 @@ class axi_slave_read_monitor extends uvm_monitor;
 	// TLM Ports
 	uvm_analysis_port #(axi_read_single_frame) data_collected_port;
 	uvm_analysis_port #(axi_read_burst_frame) addr_collected_port;
+	uvm_analysis_port #(axi_read_whole_burst) burst_collected_port;
 
 	`uvm_analysis_imp_decl(1)
 	`uvm_analysis_imp_decl(2)
@@ -100,6 +101,7 @@ class axi_slave_read_monitor extends uvm_monitor;
 		super.new(name, parent);
 		data_collected_port = new("data_collected_port", this);
 		addr_collected_port = new("addr_collected_port", this);
+		burst_collected_port = new("burst_collected_port", this);
 		data_channel_imp = new("data_channel_imp", this);
 		addr_channel_imp = new("addr_channel_imp", this);
 		sem = new(1);
@@ -249,6 +251,7 @@ endclass : axi_slave_read_monitor
 			end
 			if(last) begin
 				finished_bursts.push_back(burst_queue[i]);
+				burst_collected_port.write(burst_queue[i]);
 				burst_queue.delete(i);
 			end
 			sem.put(1);

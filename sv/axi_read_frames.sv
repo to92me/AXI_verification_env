@@ -425,7 +425,7 @@ class axi_read_whole_burst extends axi_read_burst_frame;
 	axi_read_single_addr single_frames[$];
 
 	`uvm_object_utils_begin(axi_read_whole_burst)
-		//`uvm_field_queue_int(single_frames, UVM_DEFAULT)
+		`uvm_field_queue_object(single_frames, UVM_DEFAULT)
 	`uvm_object_utils_end
 
 	function new (string name = "axi_read_whole_burst");
