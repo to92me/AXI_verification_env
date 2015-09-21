@@ -153,6 +153,8 @@ class axi_master_write_coverage extends axi_master_write_coverage_base;
 	extern task sampleData();
 	extern task sampleResponse();
 
+	extern task reset();
+
 endclass : axi_master_write_coverage
 
 	task axi_master_write_coverage::sampleAddr();
@@ -165,6 +167,10 @@ endclass : axi_master_write_coverage
 
 	task axi_master_write_coverage::sampleResponse();
 		axi_master_write_response_cg.sample();
+	endtask
+
+	task axi_master_write_coverage::reset();
+		// DO nothing
 	endtask
 
 `endif

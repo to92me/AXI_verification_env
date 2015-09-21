@@ -223,9 +223,18 @@ endclass : axi_master_write_main_monitor
 	endtask
 
 	task axi_master_write_main_monitor::reset();
+		int  r;
 	    forever begin
 		    @(posedge vif.sig_reset);
-		    $display("RESET TODO");
+		    foreach(coverage_map[r])
+			    begin
+				    coverage_map[r].suscribed_coverage_instace.reset();
+			    end
+
+			foreach(checker_map[r])
+				begin
+					checker_map[r].suscribed_checker_base_instance.reset();
+				end
 	    end
 	endtask
 
@@ -265,7 +274,7 @@ endclass : axi_master_write_main_monitor
 		coverage_package.setSuscribed_to_response_sample(suscribed_to_response_sample);
 
 		coverage_map.push_front(coverage_package);
-		`uvm_info(this.get_name(),$sformatf("Register new Coverager with checker_id: %d", coverage_package.getCoverage_id()), UVM_INFO);
+		`uvm_info(this.get_name(),$sformatf("Register new Coverage with checker_id: %d", coverage_package.getCoverage_id()), UVM_INFO);
 		return coverage_package.getCoverage_id();
 	endfunction
 

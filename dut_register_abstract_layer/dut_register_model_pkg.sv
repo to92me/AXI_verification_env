@@ -24,6 +24,10 @@ package dut_register_model_pkg;
 	typedef class COUNT;
 	typedef class dut_register_block;
 
+	import uvm_pkg::*;
+	`include "uvm_macros.svh"
+
+
 	`include "dut_register_abstract_layer/types.sv"
 
 	`include "dut_register_abstract_layer/register_model/adapter.sv"

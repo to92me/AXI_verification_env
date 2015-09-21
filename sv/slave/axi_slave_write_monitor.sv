@@ -204,9 +204,18 @@ endclass : axi_slave_write_main_monitor
 	endtask
 
 	task axi_slave_write_main_monitor::reset();
+	 	int  r;
 	    forever begin
 		    @(posedge vif.sig_reset);
-		    $display("RESET TODO");
+		    foreach(coverage_map[r])
+			    begin
+				    coverage_map[r].suscribed_coverage_instace.reset();
+			    end
+
+			foreach(checker_map[r])
+				begin
+					checker_map[r].suscribed_checker_base_instance.reset();
+				end
 	    end
 	endtask
 

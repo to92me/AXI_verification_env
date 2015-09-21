@@ -7,70 +7,6 @@
 //
 //------------------------------------------------------------------------------
 
-//							 ADDRESS  -    BIT
-// RIS offset
-`define RIS_address_offset 		'h0
-`define RIS_underflow_offset 			 0
-`define RIS_overflow_offset 			 1
-`define RIS_match_offset 				 2
-`define RIS_reserved_offest				 3
-
-// IM offest
-`define IM_address_offset 		'h2
-`define IM_underflow_offest				 0
-`define IM_overflow_offset 				 1
-`define IM_match_offset 				 2
-`define IM_reserved_offest				 3
-
-
-// MIS offest
-`define MIS_address_offset		'h4
-`define MIS_underflow_offest			 0
-`define MIS_overflow_offset 			 1
-`define MIS_match_offset 				 2
-`define MIS_reserved_offest				 3
-
-// LOAD
-`define LOAD_address_offset		'h6
-`define LOAD_compare_offest 			 0
-
-// CFG
-`define CFG_address_offset 		'h8
-`define CFG_counter_enable_offset 		 0
-`define CFG_counter_direction_offset 	 1
-`define CFG_reserved_offset 			 2
-
-// SWRESET
-`define SWRESET_address_offset	'h10
-`define SWRESET_passcode_offset 		 0
-
-//IIR
-`define IIR_address_offset		'h12
-`define IIR_interrupt_offset 			 0
-`define IIR_reserved					 2
-
-//MATCH
-`define MATCH_address_offset 	'h14
-`define MATCH_match_offest 				 0
-
-//COUNT
-`define COUNT_address_offset	'h16
-`define COUNT_counter_offest 			 0
-
-
-`define overflow_string 				"overflow"
-`define underflow_string 				"underflow"
-`define reserved_string					"reserved"
-`define match_string 					"match"
-`define compare_string 					"compare"
-`define counter_string 					"counter"
-`define counter_enable_string 			"counter_enable"
-`define counter_direction_string		"counter_direction"
-`define reset_passcode_string 			"reset_passcode"
-`define interrupt_string				"interrupt_string"
-`define interrupt_priority_string		"interrupt_priority"
-
-`define map_name_string					"dut_register_map"
 
 
 class dut_referece_model extends uvm_component;
@@ -252,36 +188,36 @@ endclass : dut_referece_model
 	task dut_referece_model::init();
 		dut_register_map = 	dut_register_model.get_default_map();
 
-		SWRESET_p 	= dut_register_map.get_reg_by_offset(`SWRESET_address_offset);
+		SWRESET_p 	= dut_register_map.get_reg_by_offset(SWRESET_address_offset);
 
-		COUNTER_p 	= dut_register_map.get_reg_by_offset(`COUNT_address_offset);
-		$cast(COUNT_counter, COUNTER_p.get_field_by_name(`counter_string));
+		COUNTER_p 	= dut_register_map.get_reg_by_offset(COUNT_address_offset);
+		$cast(COUNT_counter, COUNTER_p.get_field_by_name(counter_string));
 
-		CFG_p		= dut_register_map.get_reg_by_offset(`CFG_address_offset);
-		$cast(CFG_counter_enable_p,	 	CFG_p.get_field_by_name(`counter_enable_string));
-		$cast(CFG_direction_p, 			CFG_p.get_field_by_name(`counter_direction_string));
+		CFG_p		= dut_register_map.get_reg_by_offset(CFG_address_offset);
+		$cast(CFG_counter_enable_p,	 	CFG_p.get_field_by_name(counter_enable_string));
+		$cast(CFG_direction_p, 			CFG_p.get_field_by_name(counter_direction_string));
 
-		RIS_p		= dut_register_map.get_reg_by_offset(`RIS_address_offset);
-		$cast(RIS_overflow_p,	RIS_p.get_field_by_name(`overflow_string));
-		$cast(RIS_underflow_p, 	RIS_p.get_field_by_name(`underflow_string));
-		$cast(RIS_match_p,		RIS_p.get_field_by_name(`match_string));
+		RIS_p		= dut_register_map.get_reg_by_offset(RIS_address_offset);
+		$cast(RIS_overflow_p,	RIS_p.get_field_by_name(overflow_string));
+		$cast(RIS_underflow_p, 	RIS_p.get_field_by_name(underflow_string));
+		$cast(RIS_match_p,		RIS_p.get_field_by_name(match_string));
 
-		MIS_p		= dut_register_map.get_reg_by_offset(`MIS_address_offset);
-		$cast(MIS_overflow_p, 	MIS_p.get_field_by_name(`overflow_string));
-		$cast(MIS_underflow_p, 	MIS_p.get_field_by_name(`underflow_string));
-		$cast(MIS_match_p,		MIS_p.get_field_by_name(`match_string));
+		MIS_p		= dut_register_map.get_reg_by_offset(MIS_address_offset);
+		$cast(MIS_overflow_p, 	MIS_p.get_field_by_name(overflow_string));
+		$cast(MIS_underflow_p, 	MIS_p.get_field_by_name(underflow_string));
+		$cast(MIS_match_p,		MIS_p.get_field_by_name(match_string));
 
 
-		IM_p		= dut_register_map.get_reg_by_offset(`IM_address_offset);
-		$cast(IM_overflow_p, 	IM_p.get_field_by_name(`underflow_string));
-		$cast(IM_underflow_p, 	IM_p.get_field_by_name(`overflow_string));
-		$cast(IM_match_p,		IM_p.get_field_by_name(`match_string));
+		IM_p		= dut_register_map.get_reg_by_offset(IM_address_offset);
+		$cast(IM_overflow_p, 	IM_p.get_field_by_name(underflow_string));
+		$cast(IM_underflow_p, 	IM_p.get_field_by_name(overflow_string));
+		$cast(IM_match_p,		IM_p.get_field_by_name(match_string));
 
-		IIR_p 		= dut_register_map.get_reg_by_offset(`IIR_address_offset);
-		$cast(IIR_interrupt_priority_p, IIR_p.get_field_by_name(`interrupt_priority_string));
+		IIR_p 		= dut_register_map.get_reg_by_offset(IIR_address_offset);
+		$cast(IIR_interrupt_priority_p, IIR_p.get_field_by_name(interrupt_priority_string));
 
-		MATCH_p		= dut_register_map.get_reg_by_offset(`MATCH_address_offset);
-		$cast(MATCH_compare_p, MATCH_p.get_field_by_name(`compare_string));
+		MATCH_p		= dut_register_map.get_reg_by_offset(MATCH_address_offset);
+		$cast(MATCH_compare_p, MATCH_p.get_field_by_name(compare_string));
 
 
 	endtask
