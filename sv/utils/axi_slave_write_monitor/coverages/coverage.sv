@@ -155,6 +155,8 @@ class axi_slave_write_coverage extends axi_slave_write_coverage_base;
 	extern task sampleData();
 	extern task sampleResponse();
 
+	extern task reset();
+
 endclass : axi_slave_write_coverage
 
 	task axi_slave_write_coverage::sampleAddr();
@@ -169,4 +171,7 @@ endclass : axi_slave_write_coverage
 		axi_slave_write_response_cg.sample();
 	endtask
 
+	task axi_slave_write_coverage::reset();
+		// DO nothing
+	endtask
 `endif

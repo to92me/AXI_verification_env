@@ -122,6 +122,8 @@ class axi_slave_write_coverage_base  extends uvm_component;
 	extern virtual task sampleData();
 	extern virtual task sampleResponse();
 
+	extern virtual task reset();
+
 	extern local function void configureCoverage();
 
 endclass : axi_slave_write_coverage_base
@@ -151,6 +153,10 @@ endclass : axi_slave_write_coverage_base
 
 	task axi_slave_write_coverage_base::sampleResponse();
 	   	$display("axi_slave_write_coverage_base: methode suscribed to but did not redefine it  !!! ");
+	endtask
+
+	task axi_slave_write_coverage_base::reset();
+	   	$display("axi_slave_write_coverage_base: reset methode did not redefine  !!! ");
 	endtask
 
 	function void axi_slave_write_coverage_base::configureCoverage();

@@ -1,5 +1,5 @@
-`ifndef DUT_ADAPTER_SVH
-`define DUT_ADAPTER_SVH
+`ifndef DUT_ADAPTER_SVH_
+`define DUT_ADAPTER_SVH_
 
 
 //------------------------------------------------------------------------------
@@ -8,9 +8,9 @@
 //
 //------------------------------------------------------------------------------
 
-class dut_reg_adapter extends uvm_reg_adapter;
+class dut_register_model_adapter extends uvm_reg_adapter;
 
-	`uvm_object_utils(dut_reg_adapter)
+	`uvm_object_utils(dut_register_model_adapter)
 
 	function new( string name = "" );
       super.new( name );
@@ -23,10 +23,10 @@ class dut_reg_adapter extends uvm_reg_adapter;
  extern function uvm_sequence_item reg2bus( const ref uvm_reg_bus_op rw );
  extern function void bus2reg( uvm_sequence_item bus_item, ref uvm_reg_bus_op rw );
 
-endclass : dut_reg_adapter
+endclass : dut_register_model_adapter
 
 
-function uvm_sequence_item dut_reg_adapter::reg2bus(const ref uvm_reg_bus_op rw);
+function uvm_sequence_item dut_register_model_adapter::reg2bus(const ref uvm_reg_bus_op rw);
 	dut_frame reg_frame;
 	reg_frame = dut_frame::type_id::create("DutFrame", this);
 
@@ -54,7 +54,7 @@ function uvm_sequence_item dut_reg_adapter::reg2bus(const ref uvm_reg_bus_op rw)
 
 endfunction
 
-function dut_reg_adapter::bus2reg(input uvm_sequence_item frame, ref uvm_reg_bus_op rw);
+function dut_register_model_adapter::bus2reg(input uvm_sequence_item frame, ref uvm_reg_bus_op rw);
     dut_frame	bus_frame;
 
 	if(! $cast(frame, monitor_frame))

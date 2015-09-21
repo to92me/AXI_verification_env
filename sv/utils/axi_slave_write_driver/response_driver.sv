@@ -93,6 +93,7 @@ task axi_slave_write_response_driver::driverVif();
 	#2
 	vif.bid   <= current_rsp.ID;
     vif.bresp <= current_rsp.rsp;
+	vif.buser <= 'h0;
 endtask
 
 task axi_slave_write_response_driver::completeRspMessage();

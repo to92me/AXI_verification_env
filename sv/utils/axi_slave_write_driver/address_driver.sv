@@ -96,7 +96,7 @@ endtask
 
 task axi_slave_write_address_driver::getData();
 //   $display("SLAVE: ADDR recived and collected data");
-	$display("           																			COLLECT ADDR ID: %h, count: %d", vif.awid, item_counter);
+//	$display("           																			COLLECT ADDR ID: %h, count: %d", vif.awid, item_counter);
 	item_counter++;
    	mssg = new();
    	mssg.setID(vif.awid);
