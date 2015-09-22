@@ -21,6 +21,7 @@
 `include "dut/dut_counter.v"    // design under test
 `include "sv/axi_if.sv"
 `include "sv/axi_pkg.sv"
+`include "dut/dut_if.sv"
 
 module axi_top;
 
@@ -34,11 +35,10 @@ module axi_top;
     reg aclk;
     reg reset;
     reg fclk;
-    reg irq_o;
-    reg dout_o;
     reg counter_reset;
 
     axi_if if0(.sig_reset(reset), .sig_clock(aclk));
+    dut_if if1(.fclk(fclk), .reset(counter_reset));
 
     dut_counter # (
         .ID_WIDTH(RID_WIDTH),
@@ -97,13 +97,14 @@ module axi_top;
         .AXI_RVALID(if0.rvalid),
         .AXI_RREADY(if0.rready),
         .FCLK(fclk),
-        .IRQ_O(irq_o),
-        .DOUT_O(dout_o),
+        .IRQ_O(if1.irq_o),
+        .DOUT_O(if1.dout_o),
         .RESET_I(counter_reset)
     );
 
     initial begin
         uvm_config_db#(virtual axi_if)::set(null,"uvm_test_top.*","vif", if0);
+        uvm_config_db#(virtual dut_if)::set(null,"uvm_test_top.*","dut_vif", if1);
         run_test();
     end
 
