@@ -24,6 +24,9 @@ package dut_register_model_pkg;
 	typedef class COUNT;
 	typedef class dut_register_block;
 
+	//includes from uvc
+	typedef class axi_frame;
+
 	import uvm_pkg::*;
 	`include "uvm_macros.svh"
 
@@ -45,6 +48,9 @@ package dut_register_model_pkg;
 	`include "dut_register_abstract_layer/register_model/registers_and_callbacks/IIR.sv"
 	`include "dut_register_abstract_layer/register_model/registers_and_callbacks/MATCH.sv"
 	`include "dut_register_abstract_layer/register_model/registers_and_callbacks/COUNT.sv"
+
+
+	`include "sv/axi_frame.sv"
 
 
 endpackage

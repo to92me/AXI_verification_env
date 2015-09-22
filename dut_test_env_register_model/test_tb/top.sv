@@ -1,5 +1,5 @@
-`ifndef DUT_REFERENCE_MODEL_TOP_SVH_
-`define DUT_REFERENCE_MODEL_TOP_SVH_
+`ifndef DUT_REFERENCE_MODEL_TOP_SVH__
+`define DUT_REFERENCE_MODEL_TOP_SVH__
 
 // DUT
 `include "dut/dut_counter.v"

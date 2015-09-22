@@ -1,8 +1,5 @@
-/******************************************************************************
-	* DVT CODE TEMPLATE: Base test
-	* Created by root on Sep 17, 2015
-	* uvc_company = uvc_company, uvc_name = uvc_name
-*******************************************************************************/
+`ifndef DUT_REGISTER_MODEL_TEST_LIB
+`define DUT_REGISTER_MODEL_TEST_LIB
 
 class dut_register_model_test_lib_base extends uvm_test;
 
@@ -40,3 +37,4 @@ endclass
 
 
 
+`endif

@@ -1,5 +1,5 @@
-`ifndef DUT_MODEL_REGISTER_CONFIG_SCH
-`define DUT_MODEL_REGISTER_CONFIG_SCH
+`ifndef DUT_MODEL_REGISTER_CONFIG_SVH
+`define DUT_MODEL_REGISTER_CONFIG_SVH
 
 //------------------------------------------------------------------------------
 //
@@ -14,7 +14,7 @@ class dut_register_model_config extends axi_config;
 		super.new(name);
 		`uvm_info(get_name(),$sformatf("Creating test config"), UVM_LOW)
 		this.number_of_slaves = 0;
-		//this.createConfiguration();
+		this.createConfiguration();
 	endfunction: new
 
 endclass : dut_register_model_config
