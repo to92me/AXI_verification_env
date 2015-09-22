@@ -38,7 +38,7 @@
 *			2. post_body()
 **/
 // -----------------------------------------------------------------------------
-class axi_master_read_base_seq extends uvm_sequence #(axi_read_burst_frame);
+class axi_master_read_base_seq extends uvm_sequence #(axi_read_whole_burst);
 
 	`uvm_object_utils(axi_master_read_base_seq)
 	`uvm_declare_p_sequencer(axi_master_read_sequencer)
@@ -89,7 +89,7 @@ class axi_master_read_multiple_addr extends axi_master_read_base_seq;
 
 	int count = 0;
 	int num_of_err = 0;
-	axi_read_burst_frame error_bursts[$];	// a queue for holding bursts that returned an error
+	axi_read_whole_burst error_bursts[$];	// a queue for holding bursts that returned an error
 
 	rand bit [ADDR_WIDTH-1 : 0] address[$];	// slave addresses
 

@@ -43,7 +43,7 @@
 *			6. reset()
 **/
 // -----------------------------------------------------------------------------
-class axi_master_read_driver extends uvm_driver #(axi_read_burst_frame);
+class axi_master_read_driver extends uvm_driver #(axi_read_whole_burst);
 
 	// The virtual interface used to drive and view HDL signals.
 	virtual axi_if vif;
@@ -59,7 +59,7 @@ class axi_master_read_driver extends uvm_driver #(axi_read_burst_frame);
 	ready_randomization ready_rand;
 
 	// queue of bursts waiting to be sent
-	axi_read_burst_frame burst_queue[$];
+	axi_read_whole_burst burst_queue[$];
 
 	// Provide implmentations of virtual methods such as get_type_name and create
 	`uvm_component_utils_begin(axi_master_read_driver)
@@ -166,7 +166,6 @@ endclass : axi_master_read_driver
 			seq_item_port.get(req);
 			// and put all bursts in a queue
 			burst_queue.push_back(req);
-			resp.new_burst(req);	// send burst to resp so responses can be calculated
 		end
 
 	endtask : get_from_seq
@@ -182,8 +181,8 @@ endclass : axi_master_read_driver
 //------------------------------------------------------------------------------
 	task axi_master_read_driver::reset();
 
-		axi_read_burst_frame resp_burst;
-		resp_burst = axi_read_burst_frame::type_id::create("resp_burst");
+		axi_read_whole_burst resp_burst;
+		resp_burst = axi_read_whole_burst::type_id::create("resp_burst");
 
 		`uvm_info(get_type_name(), "Reset", UVM_MEDIUM)
 		
@@ -228,11 +227,11 @@ endclass : axi_master_read_driver
 //------------------------------------------------------------------------------
 	task axi_master_read_driver::read_data_channel();
 		axi_read_single_frame data_frame;
-		axi_read_burst_frame burst_frame;
+		axi_read_whole_burst burst_frame;
 
 		forever begin
 			data_frame = axi_read_single_frame::type_id::create("data_frame");
-			burst_frame = axi_read_burst_frame::type_id::create("burst_frame");
+			burst_frame = axi_read_whole_burst::type_id::create("burst_frame");
 
 			@(posedge vif.sig_clock iff vif.sig_reset == 1);
 			if(vif.rready && vif.rvalid) begin
@@ -276,7 +275,7 @@ endclass : axi_master_read_driver
 //------------------------------------------------------------------------------
 	task axi_master_read_driver::drive_addr_channel();
 		int bursts_in_pipe;
-		axi_read_burst_frame current_burst;
+		axi_read_whole_burst current_burst;
 
 		@(posedge vif.sig_clock iff vif.sig_reset == 1);	// only for the first time
 

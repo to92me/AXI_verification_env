@@ -36,7 +36,7 @@
 *				2. void build_phase(uvm_phase phase)
 **/
 // -----------------------------------------------------------------------------
-class axi_master_read_sequencer extends uvm_sequencer #(axi_read_burst_frame);
+class axi_master_read_sequencer extends uvm_sequencer #(axi_read_whole_burst);
 
 	// Configuration object
 	axi_master_config config_obj;
