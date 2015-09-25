@@ -24,7 +24,7 @@
 `define AXI_MASTER_READ_AGENT_SV
 
 
-`define using_dut_seqr
+//`define using_dut_seqr
 //------------------------------------------------------------------------------
 //
 // CLASS: axi_master_read_agent
