@@ -26,11 +26,11 @@ class CFG extends uvm_reg;
 
 	// new - constructor
 	function new (string name = "CFG");
-		super.new(.name(name), .nbits(16), .has_coverage(UVM_NO_COVERAGE));
+		super.new(.name(name), .n_bits(16), .has_coverage(UVM_NO_COVERAGE));
 	endfunction : new
 
 	function void build();
-		counter_enable = uvm_reg_field::type_id::create(counter_string);
+		counter_enable = uvm_reg_field::type_id::create(counter_enable_string);
 		counter_enable.configure(.parent				(this						),
 							.size						(1							),
 							.lsb_pos			    	(CFG_counter_enable_offset	),
@@ -42,7 +42,7 @@ class CFG extends uvm_reg;
 							.individually_accessible 	(0							) );
 
 
-		direction = uvm_reg_field::type_id::create("direction");
+		direction = uvm_reg_field::type_id::create(counter_direction_string);
 		direction.configure(.parent						(this						),
 							.size						(1							),
 							.lsb_pos			    	(CFG_counter_direction_offset),
@@ -53,7 +53,7 @@ class CFG extends uvm_reg;
 							.is_rand					(0							),
 							.individually_accessible 	(0							) );
 
-		reserved = uvm_reg_field::type_id::create("reserved");
+		reserved = uvm_reg_field::type_id::create(reserved_string);
 		reserved.configure( .parent						(this						),
 							.size						(14							),
 							.lsb_pos			    	(CFG_reserved_offset		),

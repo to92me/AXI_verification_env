@@ -15,7 +15,7 @@ class LOAD extends uvm_reg;
 
 	// new - constructor
 	function new (string name = "LOAD");
-		super.new(.name(name), .nbits(16), .has_coverage(UVM_NO_COVERAGE));
+		super.new(.name(name), .n_bits(16), .has_coverage(UVM_NO_COVERAGE));
 	endfunction : new
 
 

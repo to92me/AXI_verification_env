@@ -23,6 +23,8 @@
 `ifndef AXI_MASTER_READ_AGENT_SV
 `define AXI_MASTER_READ_AGENT_SV
 
+
+`define using_dut_seqr
 //------------------------------------------------------------------------------
 //
 // CLASS: axi_master_read_agent
@@ -131,7 +133,9 @@ endclass : axi_master_read_agent
 		end
 
 		if(config_obj.is_active == UVM_ACTIVE) begin
+`ifndef using_dut_seqr
 			driver.seq_item_port.connect(sequencer.seq_item_export);
+`endif
 		end
 	endfunction : connect_phase
 

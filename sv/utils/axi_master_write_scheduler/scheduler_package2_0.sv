@@ -22,7 +22,7 @@ class axi_master_write_scheduler_package2_0 ;
 	// for scheduler
 	burst_queue_lock_enum   lock_state;
 	first_sent_enum			first_status;
-	int 					response_latenes_counter = 10000;
+	int 					response_latenes_counter = 1000;
 	int 					error_counter  = 2;
 
 

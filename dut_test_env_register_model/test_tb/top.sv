@@ -5,8 +5,10 @@
 `include "dut/dut_counter.v"
 
 //UVC and REGISTER MODEL
-`include "sv/axi_pkg.sv"
+ `include "sv/axi_pkg.sv"
 `include "dut_register_abstract_layer/dut_register_model_pkg.sv"
+`include "dut_test_env_register_model/register_model_env_pkg.sv"
+
 
 //UVC VIF and DUT_REGISTER_MODEL VIF
 `include "dut_register_abstract_layer/dut_if.sv"
@@ -17,8 +19,12 @@ module dut_register_model_top;
     import uvm_pkg::*;
     `include "uvm_macros.svh"
 
+
     import axi_pkg::*;
+//
 	import dut_register_model_pkg::*;
+
+	import register_model_env_pkg::*;
 
     reg aclk;
     reg reset;
@@ -28,7 +34,7 @@ module dut_register_model_top;
     reg counter_reset;
 
     axi_if if0(.sig_reset(reset), .sig_clock(aclk));
-	dut_helper_vif if1(.sig_fclk(flck));
+	dut_helper_vif if1(.sig_fclock(flck));
 
     dut_counter # (
         .ID_WIDTH(RID_WIDTH),
@@ -93,19 +99,16 @@ module dut_register_model_top;
     );
 
     initial begin
+//	    $display("TOME TOME TOME ");
+
         uvm_config_db#(virtual axi_if)::set(null,"uvm_test_top.*","vif", if0);
 	    uvm_config_db#(virtual dut_helper_vif)::set(null,"uvm_test_top.*","dut_vif", if1);
-        run_test();
+        run_test("dut_register_model_test_base");
     end
 
     initial begin
-        reset <= 1'b0;
-        aclk <= 1'b0;
-        fclk <= 1'b0;
-        counter_reset <= 1'b0;
-        #5 reset <= 1'b1;
-
-        #12 counter_reset <= 1'b1;
+        reset <= 1'b1;
+	 	aclk <= 1'b0;
     end
 
     //Generate Clocks

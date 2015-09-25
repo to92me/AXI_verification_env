@@ -22,6 +22,7 @@
 * Classes :	1. axi_master_write_agent
 *
 **/
+`define using_dut_seqr
 
 //--------------------------------------------------------------------------------------
 //
@@ -73,7 +74,9 @@ class axi_master_write_agent extends uvm_agent;
 	// connect_phase
 	function void connect_phase(uvm_phase phase);
 		if(config_obj.is_active == UVM_ACTIVE) begin
+`ifndef using_dut_seqr
 			driver.seq_item_port.connect(sequencer.seq_item_export);
+`endif
 		end
 	endfunction : connect_phase
 

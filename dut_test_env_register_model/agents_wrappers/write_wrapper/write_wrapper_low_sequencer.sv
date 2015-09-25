@@ -7,7 +7,7 @@
 //
 //------------------------------------------------------------------------------
 
-class axi_write_wrapper_low_sequencer extends uvm_sequencer#(dut_frame);
+class axi_write_wrapper_low_sequencer extends uvm_sequencer#(axi_frame);
 
 	uvm_seq_item_pull_port#(dut_frame)		upper_seq_item_port;
 
@@ -18,7 +18,7 @@ class axi_write_wrapper_low_sequencer extends uvm_sequencer#(dut_frame);
 	// new - constructor
 	function new (string name, uvm_component parent);
 		super.new(name, parent);
-		upper_seq_item_port = new("AxiWriteWrapperLowSequencerUpperPullPort");
+		upper_seq_item_port = new("AxiWriteWrapperLowSequencerUpperPullPort",this);
 	endfunction : new
 
 	// build_phase

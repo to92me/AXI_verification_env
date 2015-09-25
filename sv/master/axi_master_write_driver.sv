@@ -63,7 +63,7 @@ class axi_master_write_driver extends uvm_driver #(axi_frame);
 	extern virtual task startDriver();
 	extern virtual task resetAll();
 	extern task resetDrivers();
-	extern task putResponseToSequencer(input bit[WID_WIDTH - 1 : 0] id );
+	extern task putResponseToSequencer(input bit[WID_WIDTH - 1 : 0] id, response_enum resp );
 	extern function true_false_enum findeIndexFromID(input bit[WID_WIDTH-1:0] id_to_check, input axi_frame_queue queue_to_check, ref int index);
 	// build_phase
 	function void build_phase(uvm_phase phase);
@@ -109,8 +109,10 @@ endclass : axi_master_write_driver
     forever
 	    begin
 		    seq_item_port.get_next_item(req);
+		    $display("id: %h, len: %0d, data: %h ", req.id, req.len, req.data[0]);
 			$cast(rsp, req.clone());
 		    rsp_queue.push_back(req);
+		    $display("id: %h, len: %0d, data: %h ", req.id, req.len, req.data[0]);
 		    scheduler.addBurst(rsp);
 		    seq_item_port.item_done();
 	    end
@@ -146,11 +148,12 @@ task axi_master_write_driver::resetDrivers();
 	this.driver.reset();
 endtask
 
-task axi_master_write_driver::putResponseToSequencer(input bit[WID_WIDTH - 1 : 0] id );
+task axi_master_write_driver::putResponseToSequencer(input bit[WID_WIDTH - 1 : 0] id, response_enum resp );
 	int index;
 	axi_frame to_rsp;
 	if(findeIndexFromID(id, rsp_queue, index) == TRUE)
 		begin
+			rsp_queue[index].resp = resp;
 			seq_item_port.put(rsp_queue[index]);
 			rsp_queue.delete(index);
 		end
@@ -174,7 +177,7 @@ function true_false_enum axi_master_write_driver::findeIndexFromID(input bit[WID
 		end
 	index = -1;
 	return FALSE;
-endfunction;
+endfunction
 
 
 `endif

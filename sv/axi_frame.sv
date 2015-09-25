@@ -20,6 +20,7 @@ class axi_frame_base extends uvm_sequence_item;
 	rand bit [3:0]					region;
 	rand bit [WUSER_WIDTH -1 : 0]	wuser;
 	rand bit [AWUSER_WIDTH - 1 : 0]	awuser;
+		 response_enum				resp;
 
 	// UVM utility macros
 	`uvm_object_utils_begin(axi_frame_base)

@@ -18,7 +18,7 @@ class IIR extends uvm_reg;
 	`uvm_object_utils(IIR)
 
 	function new (string name = "IIR");
-		super.new(.name(name), .nbits(16), .has_coverage(UVM_NO_COVERAGE));
+		super.new(.name(name), .n_bits(16), .has_coverage(UVM_NO_COVERAGE));
 	endfunction
 
 	function void build();
@@ -26,7 +26,7 @@ class IIR extends uvm_reg;
 	interrupt_priority.configure(.parent				(this					),
 							.size						(2						),
 							.lsb_pos			    	(IIR_interrupt_offset	),
-							.access						("R0"					),
+							.access						("RO"					),
 							.volatile					(1						),
 							.reset						(2'b0					),
 							.has_reset					(1						),
@@ -41,7 +41,7 @@ class IIR extends uvm_reg;
 	reserved.configure(		.parent						(this					),
 							.size						(14						),
 							.lsb_pos			    	(IIR_reserved			),
-							.access						("R0"					),
+							.access						("RO"					),
 							.volatile					(0						),
 							.reset						(0						),
 							.has_reset					(0						),
@@ -68,10 +68,10 @@ class IIR_interrupt_priority_cb extends uvm_reg_cbs;
 
 	function new(input string name = "IIR_interrupt_priority_cb");
 		super.new(name);
-		this.init();
+//		this.init();
 	endfunction
 
-	function void init();
+	function void init(input uvm_reg_map map);
 		RIS_p = map.get_reg_by_offset(RIS_address_offset);
 		$cast(RIS_overflow_p , RIS_p.get_field_by_name(overflow_string));
 		$cast(RIS_underflow_p , RIS_p.get_field_by_name(underflow_string));
@@ -90,6 +90,7 @@ class IIR_interrupt_priority_cb extends uvm_reg_cbs;
                                       input uvm_path_e     path,
                                       input uvm_reg_map    map);
 
+	this.init(map);
 
 	if(kind == UVM_PREDICT_READ)
 		begin

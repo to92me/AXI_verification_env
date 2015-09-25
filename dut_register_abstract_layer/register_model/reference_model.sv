@@ -49,22 +49,13 @@ class dut_referece_model extends uvm_component;
 
 	uvm_reg_field MATCH_compare_p;
 
-	uvm_reg_fielf COUNT_counter;
+	uvm_reg_field COUNT_counter;
 
 
 	virtual interface dut_helper_vif vif;
 
 
 `uvm_component_utils_begin(dut_referece_model)
-	 `uvm_field_int(RIS, UVM_DEFAULT)
-	 `uvm_field_int(IM, UVM_DEFAULT)
-	 `uvm_field_int(MIS, UVM_DEFAULT)
-	 `uvm_field_int(LOAD, UVM_DEFAULT)
-	 `uvm_field_int(CFG, UVM_DEFAULT)
-	 `uvm_field_int(SWRESET, UVM_DEFAULT)
-	 `uvm_field_int(IIR, UVM_DEFAULT)
-	 `uvm_field_int(MATCH, UVM_DEFAULT)
-	 `uvm_field_int(COUNT, UVM_DEFAULT)
  `uvm_component_utils_end
 
 	// new - constructor
@@ -98,7 +89,7 @@ endclass : dut_referece_model
 		bit[15 : 0] internal_counter;
 		forever begin
 			@(posedge vif.sig_fclock);
-
+			$display("FCLK");
 			if(CFG_counter_enable_p.value == 1)
 				begin
 					case(CFG_direction_p.value)
@@ -107,15 +98,15 @@ endclass : dut_referece_model
 						0:
 						begin
 							internal_counter++;
-							COUNT_counter.predicti(internal_counter);
+							void'(COUNT_counter.predict(internal_counter));
 							if(internal_counter == 0)
 								begin
 									void'(RIS_overflow_p.predict(1));
 									if(IM_overflow_p.value == 1)
 										begin
-											MIS_overflow_p.predict(1);
-											if(IIR_interrupt_priority_p < 2)
-												IIR_interrupt_priority_p.predict(2);
+											void'(MIS_overflow_p.predict(1));
+											if(IIR_interrupt_priority_p.value < 2)
+												void'(IIR_interrupt_priority_p.predict(2));
 										end
 								end
 
@@ -124,8 +115,8 @@ endclass : dut_referece_model
 									void'(RIS_match_p.predict(1));
 									if(IM_match_p.value == 1)
 										begin
-											MIS_match_p.predict(1);
-											IIR_interrupt_priority_p.predict(3);
+											void'(MIS_match_p.predict(1));
+											void'(IIR_interrupt_priority_p.predict(3));
 										end
 								end
 						end
@@ -135,15 +126,15 @@ endclass : dut_referece_model
 						1:
 						begin
 							internal_counter--;
-							COUNT_counter.predicti(internal_counter);
+							void'(COUNT_counter.predict(internal_counter));
 							if(internal_counter == 'hffff)
 								begin
 									void'(RIS_underflow_p.predict(1));
 									if(IM_underflow_p.value == 1)
 										begin
-											MIS_underflow_p.predict(1);
-											if(IIR_interrupt_priority_p < 1 )
-												IIR_interrupt_priority_p.predict(1);
+											void'(MIS_underflow_p.predict(1));
+											if(IIR_interrupt_priority_p.value < 1 )
+												void'(IIR_interrupt_priority_p.predict(1));
 										end
 								end
 
@@ -152,8 +143,8 @@ endclass : dut_referece_model
 									void'(RIS_match_p.predict(1));
 									if(IM_match_p.value == 1)
 										begin
-											MIS_match_p.predict(1);
-											IIR_interrupt_priority_p.predict(3);
+											void'(MIS_match_p.predict(1));
+											void'(IIR_interrupt_priority_p.predict(3));
 										end
 								end
 
@@ -165,11 +156,11 @@ endclass : dut_referece_model
 				begin
 					if(MATCH_compare_p.value == COUNT_counter.value)
 						begin
-							RIS_match_p.predict(1);
+							void'(RIS_match_p.predict(1));
 							if(IM_match_p.value == 1)
 								begin
-									MIS_match_p.predict(1);
-									IIR_interrupt_priority_p.predict(3);
+									void'(MIS_match_p.predict(1));
+									void'(IIR_interrupt_priority_p.predict(3));
 								end
 
 						end

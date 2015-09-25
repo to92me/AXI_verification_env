@@ -7,10 +7,11 @@
 //
 //------------------------------------------------------------------------------
 
-class axi_read_wrapper_monitor extends uvm_subscriber#(dut_frame);
+class axi_read_wrapper_monitor extends uvm_monitor;
 
 
-	uvm_analysis_imp#(.T(axi_read_whole_burst), .IMP(axi_write_wrapper_monitor))  	read_monitor_import;
+
+	uvm_analysis_imp#(.T(axi_read_whole_burst), .IMP(axi_read_wrapper_monitor))  	read_monitor_import;
 	uvm_analysis_port#(.T(dut_frame))												wrapper_port;
 
 
@@ -24,8 +25,8 @@ class axi_read_wrapper_monitor extends uvm_subscriber#(dut_frame);
 	// build_phase
 	function void build_phase(uvm_phase phase);
 		super.build_phase(phase);
-		read_monitor_import 	= new("AxiReadWrapperMonitorReadImport");
-		wrapper_port 			= new("AxiReadWrapperPort");
+		read_monitor_import 	= new("AxiReadWrapperMonitorReadImport", this);
+		wrapper_port 			= new("AxiReadWrapperPort", this);
 	endfunction : build_phase
 
 	extern function void write(input axi_read_whole_burst input_read_frame);
@@ -34,7 +35,7 @@ endclass : axi_read_wrapper_monitor
 
 
 
-	function axi_read_wrapper_monitor::write(input axi_read_whole_burst input_read_frame);
+	function void axi_read_wrapper_monitor::write(input axi_read_whole_burst input_read_frame);
 	    dut_frame export_frame;
 
 		export_frame = new();

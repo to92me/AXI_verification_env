@@ -7,7 +7,7 @@
 //
 //------------------------------------------------------------------------------
 
-class axi_write_wrapper_monitor extends uvm_subscriber#(dut_frame);
+class axi_write_wrapper_monitor extends uvm_monitor;
 
 	uvm_analysis_imp#(.T(axi_frame), .IMP(axi_write_wrapper_monitor))  	write_monitor_import;
 	uvm_analysis_port#(.T(dut_frame))									wrapper_port;
@@ -22,7 +22,7 @@ class axi_write_wrapper_monitor extends uvm_subscriber#(dut_frame);
 
 	function void build_phase(uvm_phase phase);
 		super.build_phase(phase);
-		axi_write_monitor 	= new("AxiWriteWrapperMonitorWriteImprt", this);
+		write_monitor_import 	= new("AxiWriteWrapperMonitorWriteImprt", this);
 		wrapper_port		= new("AxiWriteWrapperMonitorPort", this);
 	endfunction : build_phase
 
@@ -36,7 +36,7 @@ endclass : axi_write_wrapper_monitor
 
 		export_frame = new();
 
-		export_frame.copyAxiFrame(frame);
+		export_frame.copyAxiFrame(input_axi_frame);
 		export_frame.rw = AXI_WRITE;
 
 		wrapper_port.write(export_frame);

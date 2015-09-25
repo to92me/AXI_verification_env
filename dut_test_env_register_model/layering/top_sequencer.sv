@@ -8,11 +8,9 @@
 //------------------------------------------------------------------------------
 
 class dut_register_model_top_sequencer extends uvm_sequencer#(dut_frame);
-	dut_frame frame;
 
-	`uvm_component_utils(uvc_company_uvc_name_component)
 
-	//uvm_seq_item_pull_port#()
+	`uvm_component_utils(dut_register_model_top_sequencer)
 
 	// new - constructor
 	function new (string name, uvm_component parent);
@@ -24,7 +22,7 @@ class dut_register_model_top_sequencer extends uvm_sequencer#(dut_frame);
 		super.build_phase(phase);
 	endfunction : build_phase
 
-endclass : dut_register_model_top_sequencer
+endclass
 
 
 

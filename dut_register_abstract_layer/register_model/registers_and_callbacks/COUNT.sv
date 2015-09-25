@@ -14,7 +14,7 @@ class COUNT extends uvm_reg;
 	`uvm_object_utils(COUNT)
 
 	function new (string name = "COUNT");
-		super.new(.name(name), .nbits(16), .has_coverage(UVM_NO_COVERAGE));
+		super.new(.name(name), .n_bits(16), .has_coverage(UVM_NO_COVERAGE));
 	endfunction
 
 	function void build();

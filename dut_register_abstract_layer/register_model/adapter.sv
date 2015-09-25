@@ -21,43 +21,43 @@ class dut_register_model_adapter extends uvm_reg_adapter;
    endfunction: new
 
  extern function uvm_sequence_item reg2bus( const ref uvm_reg_bus_op rw );
- extern function void bus2reg( uvm_sequence_item bus_item, ref uvm_reg_bus_op rw );
+ extern function void bus2reg(input uvm_sequence_item bus_item, ref uvm_reg_bus_op rw);
 
 endclass : dut_register_model_adapter
 
 
 function uvm_sequence_item dut_register_model_adapter::reg2bus(const ref uvm_reg_bus_op rw);
 	dut_frame reg_frame;
-	reg_frame = dut_frame::type_id::create("DutFrame", this);
+	reg_frame = dut_frame::type_id::create("DutFrame");
 
 	//specific to dut_reqister and operation
-	dut_frame.addr = rw.addr;
-	dut_frame.rw = (rw.kind == UVM_READ)? AXI_READ : AXI_WRITE;
+	reg_frame.addr = rw.addr;
+	reg_frame.rw = (rw.kind == UVM_READ)? AXI_READ : AXI_WRITE;
 
 	//dut burst configuration
-	dut_frame.burst_type = FIXED;
-	dut_frame.size = BYTE_2;
-	dut_frame.len = 0;
+	reg_frame.burst_type = FIXED;
+	reg_frame.size = BYTE_2;
+	reg_frame.len = 0;
 
 	//"random" chose
-	dut_frame.id =	0;
+	reg_frame.id =	0;
 
 	//not of interes because dut doesn't supporst this options
-	dut_frame.awuser = 0;
-	dut_frame.cache = 0;
-	dut_frame.prot = 0;
-	dut_frame.lock = NORMAL;
-	dut_frame.qos = 0;
-	dut_frame.wuser = 0;
+	reg_frame.awuser = 0;
+	reg_frame.cache = 0;
+	reg_frame.prot = 0;
+	reg_frame.lock = NORMAL;
+	reg_frame.qos = 0;
+	reg_frame.wuser = 0;
 
-	return dut_frame;
+	return reg_frame;
 
 endfunction
 
-function dut_register_model_adapter::bus2reg(input uvm_sequence_item frame, ref uvm_reg_bus_op rw);
+function void dut_register_model_adapter::bus2reg(input uvm_sequence_item bus_item, ref uvm_reg_bus_op rw);
     dut_frame	bus_frame;
 
-	if(! $cast(frame, monitor_frame))
+	if(! $cast(bus_frame, bus_item))
 		`uvm_error(get_name(),"Monitor item can not be cast to axi_frame")
 
 	rw.addr = bus_frame.addr;

@@ -455,7 +455,7 @@ task axi_master_write_scheduler2_0::searchReadyFrame();
 				begin
 					int index;
 					id = rsp_mssg.frame.id;
-					findeIndexFromID(id, active_queue, index);
+					void'(findeIndexFromID(id, active_queue, index));
 					empty_queue_id_queue.push_back(id);
 				if(active_queue[index].single_frame_queue.size() != 0)
 					begin
@@ -720,7 +720,7 @@ task axi_master_write_scheduler2_0::manageBurstStatus();
 
 				burst_active--;
 				check_for_Id_duplicates_id_queue.push_back(id);
-
+				top_driver.putResponseToSequencer(id, SLVERR);
 				void'(findeIndexFromID(id,waiting_for_RSP_queue, index));
 				waiting_for_RSP_queue.delete(index);
 				//`uvm_warning("MasterWriteScheduler [ERROR]: ", $sformat(" did not recieved response for quite a longe time for burst id: %h",id))
@@ -815,7 +815,7 @@ function true_false_enum axi_master_write_scheduler2_0::findeIndexFromID(input b
 		end
 	index = -1;
 	return FALSE;
-endfunction;
+endfunction
 
 
 // ==================================== MANAGE RESPONSE ============================================
@@ -827,19 +827,19 @@ task axi_master_write_scheduler2_0::gotOkayResponse(input bit[WID_WIDTH-1 : 0] r
 	case(where_is_burst_found)
 		1:
 		begin
-			top_driver.putResponseToSequencer(waiting_for_RSP_queue[index].getID());
+			top_driver.putResponseToSequencer(waiting_for_RSP_queue[index].getID(),OKAY);
 			waiting_for_RSP_queue.delete(index);
 		end
 
 		2:
 		begin
-			top_driver.putResponseToSequencer(waiting_to_send_all_queue[index].getID());
+			top_driver.putResponseToSequencer(waiting_to_send_all_queue[index].getID(),SLVERR);
 			waiting_to_send_all_queue.delete(index);
 		end
 
 		3:
 		begin
-			top_driver.putResponseToSequencer(active_queue[index].getID());
+			top_driver.putResponseToSequencer(active_queue[index].getID(),SLVERR);
 			active_queue.delete(index);
 			`uvm_warning("AxiMasterWriteScheduler [UW]","Recieved  OKAY or EXOKAYresponse from slave and burst did not sent last")
 		end
@@ -852,19 +852,19 @@ task axi_master_write_scheduler2_0::gotExOkayResponse(input bit[WID_WIDTH-1 : 0]
 	case(where_is_burst_found)
 		1:
 		begin
-			top_driver.putResponseToSequencer(waiting_for_RSP_queue[index].getID());
+			top_driver.putResponseToSequencer(waiting_for_RSP_queue[index].getID(), EXOKAY);
 			waiting_for_RSP_queue.delete(index);
 		end
 
 		2:
 		begin
-			top_driver.putResponseToSequencer(waiting_to_send_all_queue[index].getID());
+			top_driver.putResponseToSequencer(waiting_to_send_all_queue[index].getID(), SLVERR);
 			waiting_to_send_all_queue.delete(index);
 		end
 
 		3:
 		begin
-			top_driver.putResponseToSequencer(active_queue[index].getID());
+			top_driver.putResponseToSequencer(active_queue[index].getID(), SLVERR);
 			active_queue.delete(index);
 			`uvm_warning("AxiMasterWriteScheduler [UW]","Recieved  OKAY or EXOKAYresponse from slave and burst did not sent last")
 		end
@@ -877,19 +877,19 @@ task axi_master_write_scheduler2_0::gotDecErrorResponse(input bit[WID_WIDTH-1 : 
 	case(where_is_burst_found)
 		1:
 		begin
-			top_driver.putResponseToSequencer(waiting_for_RSP_queue[index].getID());
+			top_driver.putResponseToSequencer(waiting_for_RSP_queue[index].getID(),DECERR);
 			waiting_for_RSP_queue.delete(index);
 		end
 
 		2:
 		begin
-			top_driver.putResponseToSequencer(waiting_to_send_all_queue[index].getID());
+			top_driver.putResponseToSequencer(waiting_to_send_all_queue[index].getID(),SLVERR);
 			waiting_to_send_all_queue.delete(index);
 		end
 
 		3:
 		begin
-			top_driver.putResponseToSequencer(active_queue[index].getID());
+			top_driver.putResponseToSequencer(active_queue[index].getID(),SLVERR);
 			active_queue.delete(index);
 		end
 	endcase
@@ -911,7 +911,7 @@ task axi_master_write_scheduler2_0::gotSlaveErrorResponse(input bit[WID_WIDTH-1:
 				end
 			else
 				begin
-					top_driver.putResponseToSequencer(waiting_for_RSP_queue[index].getID());
+					top_driver.putResponseToSequencer(waiting_for_RSP_queue[index].getID(), SLVERR);
 					waiting_for_RSP_queue.delete(index);
 				end
 		end
@@ -927,7 +927,7 @@ task axi_master_write_scheduler2_0::gotSlaveErrorResponse(input bit[WID_WIDTH-1:
 				end
 			else
 				begin
-					top_driver.putResponseToSequencer(waiting_to_send_all_queue[index].getID());
+					top_driver.putResponseToSequencer(waiting_to_send_all_queue[index].getID(),SLVERR);
 					waiting_to_send_all_queue.delete(index);
 				end
 		end
@@ -943,7 +943,7 @@ task axi_master_write_scheduler2_0::gotSlaveErrorResponse(input bit[WID_WIDTH-1:
 				end
 			else
 				begin
-					top_driver.putResponseToSequencer(active_queue[index].getID());
+					top_driver.putResponseToSequencer(active_queue[index].getID(),SLVERR);
 					active_queue.delete(index);
 				end
 		end

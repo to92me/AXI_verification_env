@@ -28,7 +28,7 @@ class IM extends uvm_reg;
 
 	// new - constructor
 	function new (string name = "IM");
-		super.new(.name(name), .nbits(16), .has_coverage(UVM_NO_COVERAGE));
+		super.new(.name(name), .n_bits(16), .has_coverage(UVM_NO_COVERAGE));
 	endfunction : new
 
 	function void build();
@@ -93,10 +93,10 @@ class IM_overflow_cb extends uvm_reg_cbs;
 
 	function new(string name = "IM_overflow_cb");
 		super.new(name);
-		this.init();
+//		this.init();
 	endfunction
 
-	function init();
+	function void init(uvm_reg_map map);
 
 		RIS_p = map.get_reg_by_offset(RIS_address_offset);
 		$cast(RIS_overflow_p, RIS_p.get_field_by_name(overflow_string));
@@ -115,16 +115,17 @@ class IM_overflow_cb extends uvm_reg_cbs;
                                 input uvm_predict_e  kind,
                                 input uvm_path_e     path,
                                 input uvm_reg_map    map);
+	this.init(map);
 
 
 	if(kind == UVM_PREDICT_WRITE && value == 1)
 		begin
-			if(RIS_overflow_p == 1)
+			if(RIS_overflow_p.value == 1)
 				begin
 					void'(MIS_overflow_p.predict(1));
 
 							// if interrupt priority is less than 1 then predict 1
-					if(IIR_interrupt_priority < 1)
+					if(IIR_interrupt_priority.value < 1)
 						begin
 							void'(IIR_interrupt_priority.predict(1));
 						end
@@ -147,10 +148,10 @@ class IM_underflow_cb extends uvm_reg_cbs;
 
 	function new(string name = "IM_underflow_cb");
 		super.new(name);
-		this.init();
+//		this.init();
 	endfunction
 
-	function init();
+	function void init(uvm_reg_map map);
 
 		RIS_p = map.get_reg_by_offset(RIS_address_offset);
 		$cast(RIS_underflow_p, RIS_p.get_field_by_name(underflow_string));
@@ -159,7 +160,7 @@ class IM_underflow_cb extends uvm_reg_cbs;
 		$cast(MIS_underflow_p, MIS_p.get_field_by_name(underflow_string));
 
 		IIR_p = map.get_reg_by_offset(IIR_address_offset);
-		$cast(IIR_interrupt_priority, IIR_p.get_field_by_name(interrupt_priority_string));
+		$cast(IIR_interrupt_priority_p, IIR_p.get_field_by_name(interrupt_priority_string));
 
 
 	endfunction
@@ -170,6 +171,8 @@ class IM_underflow_cb extends uvm_reg_cbs;
                                 input uvm_predict_e  kind,
                                 input uvm_path_e     path,
                                 input uvm_reg_map    map);
+
+	this.init(map);
 
 		if(kind == UVM_PREDICT_WRITE && value == 1)
 			begin
@@ -200,19 +203,19 @@ class IM_match_cb extends uvm_reg_cbs;
 
 	function new(string name = "IM_match_cb");
 		super.new(name);
-		this.init();
+//		this.init();
 	endfunction
 
-	function init();
+	function void init(input uvm_reg_map map);
 
 		RIS_p = map.get_reg_by_offset(RIS_address_offset);
-		$cast(RIS_underflow_p, RIS_p.get_field_by_name(match_string));
+		$cast(RIS_match_p, RIS_p.get_field_by_name(match_string));
 
 		MIS_p = map.get_reg_by_offset(MIS_address_offset);
-		$cast(MIS_underflow_p, MIS_p.get_field_by_name(match_string));
+		$cast(MIS_match_p, MIS_p.get_field_by_name(match_string));
 
 		IIR_p = map.get_reg_by_offset(IIR_address_offset);
-		$cast(IIR_interrupt_priority, IIR_p.get_field_by_name(interrupt_priority_string));
+		$cast(IIR_interrupt_priority_p, IIR_p.get_field_by_name(interrupt_priority_string));
 
 
 	endfunction
@@ -225,6 +228,8 @@ class IM_match_cb extends uvm_reg_cbs;
                                 input uvm_predict_e  kind,
                                 input uvm_path_e     path,
                                 input uvm_reg_map    map);
+
+	this.init(map);
 
 	if(kind == UVM_PREDICT_WRITE && value == 1)
 		begin

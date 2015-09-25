@@ -784,11 +784,11 @@ interface axi_if (input sig_reset, input sig_clock);
 
 
 //23. BVALID_LOW_AFTER_RESET=================================================================
-          assert_AXI4_ERRM_BVALID_RESET : assert property (
-          disable iff(!has_checks || !sig_reset)
-          (reset_flag == 1 |-> (bvalid == 0)))
-          else
-            `uvm_error("ASSERTION_ERR", "AXI4_ERRM_BVALID_RESET: BVALID not low for the first cycle after ARESETn goes HIGH")
+//          assert_AXI4_ERRM_BVALID_RESET : assert property (
+//          disable iff(!has_checks || !sig_reset)
+//          (reset_flag == 1 |-> (bvalid == 0)))
+//          else
+//            `uvm_error("ASSERTION_ERR", "AXI4_ERRM_BVALID_RESET: BVALID not low for the first cycle after ARESETn goes HIGH")
 
 
 

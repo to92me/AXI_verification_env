@@ -15,7 +15,7 @@ class dut_register_model_config extends axi_config;
 		`uvm_info(get_name(),$sformatf("Creating test config"), UVM_LOW)
 		this.number_of_slaves = 0;
 		this.createConfiguration();
-	endfunction: new
+	endfunction
 
 endclass : dut_register_model_config
 

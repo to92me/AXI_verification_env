@@ -19,7 +19,7 @@ class SWRESET extends uvm_reg;
 	`uvm_object_utils(SWRESET)
 
 	function new (string name = "SWRESET");
-		super.new(.name(name), .nbits(16), .has_coverage(UVM_NO_COVERAGE));
+		super.new(.name(name), .n_bits(16), .has_coverage(UVM_NO_COVERAGE));
 	endfunction
 
 	function void build();
@@ -54,11 +54,11 @@ class SWRESET_reset_passcode_cb extends uvm_reg_cbs;
 
 	function new(input string name = "SWRESET_reset_passcode_cb");
 		super.new(name);
-		this.init();
+//		this.init();
 	endfunction
 
 
-	function void init();
+	function void init(input uvm_reg_map map);
 		RIS_p 	= map.get_reg_by_offset(RIS_address_offset	);
 		IM_p 	= map.get_reg_by_offset(IM_address_offset	);
 		MIS_p 	= map.get_reg_by_offset(MIS_address_offset	);
@@ -77,17 +77,17 @@ class SWRESET_reset_passcode_cb extends uvm_reg_cbs;
                                       input uvm_path_e     path,
                                       input uvm_reg_map    map);
 
-
+	this.init(map);
 
 	if(kind == UVM_PREDICT_WRITE && value == 'h5A)
 		begin
 			// is passcode is correct everything will be reseted // VIDETI DA LI CE PROCI
-			void'(RIS_p.predict(0));
-			void'(IM_p.predict(0));
-			void'(MIS_p.predict(0));
-			void'(LOAD_p.predict(0));
-			void'(CFG_p.predict(0));
-			void'(IIR_p.predict(0));
+			void'(RIS_p	 .predict(0));
+			void'(IM_p	 .predict(0));
+			void'(MIS_p	 .predict(0));
+			void'(LOAD_p .predict(0));
+			void'(CFG_p	 .predict(0));
+			void'(IIR_p	 .predict(0));
 			void'(MATCH_p.predict(0));
 			void'(COUNT_p.predict(0));
 			void'(fld.predict(0));

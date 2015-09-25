@@ -20,8 +20,8 @@ class axi_master_write_checker_creator extends uvm_component;
 	function new (string name, uvm_component parent);
 		super.new(name, parent);
 
-		checker0 			= 	axi_master_write_checker::type_id::create("AxislaveWriteChecker", this);
-		burst_collector0	= 	axi_master_write_burst_collector::type_id::create("AxiMasterWriteChecker", this);
+		checker0 			= 	axi_master_write_checker::type_id::create("AxiMasterWriteChecker", this);
+		burst_collector0	= 	axi_master_write_burst_collector::type_id::create("AxiMasterWriteCheckerBurstCollector", this);
 	endfunction : new
 
 	function void build_phase(uvm_phase phase);

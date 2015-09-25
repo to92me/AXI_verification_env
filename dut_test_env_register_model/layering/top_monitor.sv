@@ -9,13 +9,18 @@
 
 class dut_register_model_top_monitor extends uvm_monitor;
 
-	uvm_analysis_imp0#(	.T(dut_frame),
-						.IMP(dut_register_model_top_monitor)) 				write_monitor_import;
-	uvm_analysis_imp1#(	.T(dut_frame),
-						.IMP(dut_register_model_top_monitor))				read_monitor_import;
-	uvm_analysis_port#(	.T(dut_frame)) 										top_monitor_port;
+	int i;
 
-	`uvm_component_utils(dut_register_model_top_monitor)
+	`uvm_analysis_imp_decl(1)
+	`uvm_analysis_imp_decl(2)
+
+	uvm_analysis_imp	#(dut_frame, dut_register_model_top_monitor) 		write_monitor_import;
+	uvm_analysis_imp1	#(dut_frame, dut_register_model_top_monitor)		read_monitor_import;
+	uvm_analysis_port	#(dut_frame) 										top_monitor_port;
+
+`uvm_component_utils_begin(dut_register_model_top_monitor)
+	 `uvm_field_int(i, UVM_DEFAULT)
+ `uvm_component_utils_end
 
 	// new - constructor
 	function new (string name = "DutRegisterTopMonitor", uvm_component parent);
@@ -33,12 +38,12 @@ class dut_register_model_top_monitor extends uvm_monitor;
 	endfunction : build_phase
 
 
-	extern function void write0(input dut_frame frame);
+	extern function void write(input dut_frame frame);
 	extern function void write1(input dut_frame frame);
 
 endclass : dut_register_model_top_monitor
 
-	function void dut_register_model_top_monitor::write0(input dut_frame frame);
+	function void dut_register_model_top_monitor::write(input dut_frame frame);
 
 		top_monitor_port.write(frame);
 

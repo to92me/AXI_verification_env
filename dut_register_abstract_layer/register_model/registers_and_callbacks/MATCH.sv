@@ -14,11 +14,11 @@ class MATCH extends uvm_reg;
 	`uvm_object_utils(MATCH)
 
 	function new (string name = "MATCH");
-		super.new(.name(name), .nbits(16), .has_coverage(UVM_NO_COVERAGE));
+		super.new(.name(name), .n_bits(16), .has_coverage(UVM_NO_COVERAGE));
 	endfunction
 
 	function void build();
-	match = uvm_reg_field::type_id::create(match_string);
+	match = uvm_reg_field::type_id::create(compare_string);
 		match.configure(	.parent						(this					),
 							.size						(16						),
 							.lsb_pos			    	(MATCH_match_offest	),

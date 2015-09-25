@@ -26,8 +26,8 @@ class base_test extends uvm_test;
 	virtual function void build_phase(uvm_phase phase);
 
 
-		 set_config_int("*", "recording_detail", UVM_FULL);
-		 uvm_config_int::set(this, "tb0.*", "coverage_enable", 1);
+		set_config_int("*", "recording_detail", UVM_FULL);
+		uvm_config_int::set(this, "tb0.*", "coverage_enable", 1);
 
 		tb0 =  axi_master_write_tb::type_id::create("tb0",this);
 

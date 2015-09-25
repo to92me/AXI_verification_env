@@ -3,7 +3,7 @@
 
 
 
-`include "dut_register_abstract_layer/dut_if.sv";
+//`include "dut_register_abstract_layer/dut_if.sv";
 
 package dut_register_model_pkg;
 
@@ -23,9 +23,13 @@ package dut_register_model_pkg;
 	typedef class MATCH;
 	typedef class COUNT;
 	typedef class dut_register_block;
+	typedef class dut_frame;
 
 	//includes from uvc
-	typedef class axi_frame;
+	//typedef class axi_frame;
+
+	`include "sv/axi_pkg.sv"
+	import axi_pkg::*;
 
 	import uvm_pkg::*;
 	`include "uvm_macros.svh"

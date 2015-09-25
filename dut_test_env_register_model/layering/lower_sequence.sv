@@ -9,40 +9,57 @@
 
 class dut_register_model_lower_sequence extends uvm_sequence#(dut_frame);
 
-	`uvm_component_utils(dut_register_model_lower_sequence)
+	function new (string name = "DutRegisterModelLowerSequence");
+		super.new(name);
+	endfunction : new
+
+
+	`uvm_object_utils(dut_register_model_lower_sequence)
 	`uvm_declare_p_sequencer(dut_register_model_lower_sequencer)
 
 
-	// new - constructor
-	function new (string name, uvm_component parent);
-		super.new(name, parent);
-	endfunction : new
 
-	// build_phase
-	function void build_phase(uvm_phase phase);
-		super.build_phase(phase);
-	endfunction : build_phase
-
-
-	extern function void  body();
+	extern virtual task body();
 
 
 endclass : dut_register_model_lower_sequence
 
-	function void dut_register_model_lower_sequence::body();
+	task  dut_register_model_lower_sequence::body();
 	   forever begin
-		    frame = new();
-		    up_sequencer.get_next_item(frame);
+
+
+		     dut_frame frame = new();
+
+		     $display("");
+		   	$display(" WAITING FRAME ");
+		   $display("");
+
+
+		    p_sequencer.upper_seq_item_port.get_next_item(frame);
+
+		   $display("");
+		   	$display("GOT FRAME ");
+		   $display("");
+
 		    if(frame.rw == AXI_WRITE)
 			    begin
-				    `uvm_do_on(frame, p_sequencer.write_sequencer)
+				     $display("AXI_WRITE ");
+//				    `uvm_do_on(frame, p_sequencer.write_sequencer)
+				     //start_item(.item(frame), .sequencer(p_sequencer.write_sequencer));
+				    `uvm_do_on_with(req,p_sequencer.write_sequencer, {req.id == frame.id; req.data[0] == frame.data[0]; req.len == frame.len;
+								req.size == frame.size; req.burst_type == FIXED;})
+				     //$display("POSLATO");
+				     //finish_item(frame);
+				     $display("AXI_WRITE DONE ");
+
 			    end
 		    else
 			    begin
+				     $display("AXI READ ");
 				    `uvm_do_on(frame, p_sequencer.read_sequencer)
 			    end
-			up_sequencer.item_done(frame);
+			p_sequencer.upper_seq_item_port.item_done(frame);
 	   end
-	endfunction
+	endtask
 
 `endif

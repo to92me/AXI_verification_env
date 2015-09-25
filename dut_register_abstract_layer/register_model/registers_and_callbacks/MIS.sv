@@ -26,7 +26,7 @@ class MIS extends uvm_reg;
 
 	// new - constructor
 	function new (string name = "MIS");
-		super.new(.name(name), .nbits(16), .has_coverage(UVM_NO_COVERAGE));
+		super.new(.name(name), .n_bits(16), .has_coverage(UVM_NO_COVERAGE));
 	endfunction : new
 
 	function void build();
@@ -101,10 +101,10 @@ class MIS_overflow_cb extends uvm_reg_cbs;
 
 	function new(input string name = "MIS_overflow_cb");
 		super.new(name);
-		this.init();
+//		this.init();
 	endfunction
 
-	function void init();
+	function void init(input uvm_reg_map map);
 	 	 RIS_p = map.get_reg_by_offset(RIS_address_offset);
 		 $cast(RIS_overflow_p, RIS_p.get_field_by_name(overflow_string));
 
@@ -120,7 +120,7 @@ class MIS_overflow_cb extends uvm_reg_cbs;
                                       input uvm_path_e     path,
                                       input uvm_reg_map    map);
 
-
+	 this.init(map);
 
 	 if(kind == UVM_WRITE && value == 1)
 		 begin
@@ -151,11 +151,11 @@ class MIS_underflow_cb extends uvm_reg_cbs;
 
 	function new(input string name = "MIS_underflow_cb");
 	 	super.new(name);
-		this.init();
+//		this.init();
 	endfunction
 
 
-	function init();
+	function void init(uvm_reg_map map);
 
 		RIS_p = map.get_reg_by_offset(RIS_address_offset);
 		$cast(RIS_underflow_p, RIS_p.get_field_by_name(underflow_string));
@@ -177,7 +177,7 @@ class MIS_underflow_cb extends uvm_reg_cbs;
                                       input uvm_reg_map    map);
 
 
-
+		this.init(map);
 
 
 		if(kind == UVM_PREDICT_WRITE && value == 1)
@@ -225,10 +225,10 @@ class MIS_match_cb extends uvm_reg_cbs;
 
 	function new(input string name = "MIS_match_cb");
 		super.new(name);
-		this.init();
+//		this.init();
 	endfunction
 
-	function void init();
+	function void init(input uvm_reg_map map);
 
 		RIS_p = map.get_reg_by_offset(RIS_address_offset);
 		$cast(RIS_match_p, RIS_p.get_field_by_name(underflow_string));
@@ -251,6 +251,7 @@ class MIS_match_cb extends uvm_reg_cbs;
                                       input uvm_reg_map    map);
 
 
+		this.init(map);
 
 
 		if(kind == UVM_PREDICT_WRITE  && value == 1);
