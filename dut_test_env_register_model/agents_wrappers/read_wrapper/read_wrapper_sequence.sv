@@ -36,18 +36,35 @@ endclass : axi_read_wrapper_sequence
 		    p_sequencer.upper_seq_item_port.get_next_item(frame);
 
 
-		    read_frame = new();
-		    read_frame.addr 		= frame.addr;
-		    read_frame.id			= frame.id;
-		    read_frame.len			= frame.len;
-		    read_frame.size 		= frame.size;
-		    read_frame.burst_type 	= frame.burst_type;
+//		    read_frame = new();
+//		    read_frame.addr 		= frame.addr;
+//		    read_frame.id			= frame.id;
+//		    read_frame.len			= frame.len;
+//		    read_frame.size 		= frame.size;
+//		    read_frame.burst_type 	= frame.burst_type;
 
-		    `uvm_do(read_frame);
+		    `uvm_do_with(req,
+							{	req.addr		== frame.addr;
+						    	//req.data[0] 	== frame.data[0];
+						    	req.len			== frame.len;
+								req.size 		== frame.size;
+						    	req.burst_type 	== frame.burst_type;
+						    	req.lock 		== frame.lock;
+						    	req.id			== frame.id;
+						    	req.cache 		== frame.cache;
+						    	req.prot		== frame.prot;
+						    	req.qos			== frame.qos;
+						    	req.region		== frame.region;
+						    	//req.wuser		== frame.wuser;
+						    	//req.awuser		== frame.awuser;
+						    	//req.resp		== frame.resp;
+							}
+						)
 
-		    get_response(read_frame);
+		    get_response(req);
 
-		    frame.data[0] = read_frame.single_frames[0].upper_byte_lane;
+		    frame.data[0] = read_frame.single_frames[0].data;
+			//frame.resp 	  = read_frame.resp;
 
 		    p_sequencer.upper_seq_item_port.item_done(frame);
 

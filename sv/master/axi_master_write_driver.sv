@@ -109,10 +109,9 @@ endclass : axi_master_write_driver
     forever
 	    begin
 		    seq_item_port.get_next_item(req);
-		    $display("id: %h, len: %0d, data: %h ", req.id, req.len, req.data[0]);
 			$cast(rsp, req.clone());
+		    $display("id: %h, len: %0d, data: %h, addr: %h", req.id, req.len, req.data[0], req.addr);
 		    rsp_queue.push_back(req);
-		    $display("id: %h, len: %0d, data: %h ", req.id, req.len, req.data[0]);
 		    scheduler.addBurst(rsp);
 		    seq_item_port.item_done();
 	    end

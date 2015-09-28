@@ -119,7 +119,7 @@ endtask
 
 task axi_master_write_address_driver::driverVif();
 		#2
-		$display(" 		MASTER SEND ADDR current frame: %h %d %h, count: %d",current_frame.id,current_frame.len, current_frame.data, send_items );
+		$display(" 		MASTER SEND ADDR current frame: %h %d %h, count: %d",current_frame.id,current_frame.len, current_frame.addr, send_items );
 		send_items++;
 		vif.awid	<= current_frame.id;
 		vif.awaddr	<= current_frame.addr;

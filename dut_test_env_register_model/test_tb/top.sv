@@ -34,7 +34,7 @@ module dut_register_model_top;
     reg counter_reset;
 
     axi_if if0(.sig_reset(reset), .sig_clock(aclk));
-	dut_helper_vif if1(.sig_fclock(flck));
+	dut_helper_vif if1(.sig_fclock(fclk));
 
     dut_counter # (
         .ID_WIDTH(RID_WIDTH),
@@ -109,11 +109,12 @@ module dut_register_model_top;
     initial begin
         reset <= 1'b1;
 	 	aclk <= 1'b0;
+	    fclk <= 1'b0;
     end
 
     //Generate Clocks
     always begin
-        #4 fclk = ~fclk;
+        #10 fclk = ~fclk;
     end
     always begin
         #5 aclk = ~aclk;

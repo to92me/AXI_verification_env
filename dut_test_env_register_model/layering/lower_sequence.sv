@@ -30,33 +30,52 @@ endclass : dut_register_model_lower_sequence
 
 		     dut_frame frame = new();
 
-		     $display("");
-		   	$display(" WAITING FRAME ");
-		   $display("");
-
-
 		    p_sequencer.upper_seq_item_port.get_next_item(frame);
 
-		   $display("");
-		   	$display("GOT FRAME ");
-		   $display("");
+
 
 		    if(frame.rw == AXI_WRITE)
 			    begin
-				     $display("AXI_WRITE ");
-//				    `uvm_do_on(frame, p_sequencer.write_sequencer)
-				     //start_item(.item(frame), .sequencer(p_sequencer.write_sequencer));
-				    `uvm_do_on_with(req,p_sequencer.write_sequencer, {req.id == frame.id; req.data[0] == frame.data[0]; req.len == frame.len;
-								req.size == frame.size; req.burst_type == FIXED;})
-				     //$display("POSLATO");
-				     //finish_item(frame);
-				     $display("AXI_WRITE DONE ");
-
+				    // constrin all fields to recieved frame fiels
+				    `uvm_do_on_with(req,p_sequencer.write_sequencer,
+					    	{	req.addr		== frame.addr;
+						    	foreach(frame.data[i])
+						    		req.data[i] 	== frame.data[i];
+						    	req.len			== frame.len;
+								req.size 		== frame.size;
+						    	req.burst_type 	== frame.burst_type;
+						    	req.lock 		== frame.lock;
+						    	req.id			== frame.id;
+						    	req.cache 		== frame.cache;
+						    	req.prot		== frame.prot;
+						    	req.qos			== frame.qos;
+						    	req.region		== frame.region;
+						    	req.wuser		== frame.wuser;
+						    	req.awuser		== frame.awuser;
+						    	req.resp		== frame.resp;
+					    	}
+					  )
 			    end
 		    else
 			    begin
-				     $display("AXI READ ");
-				    `uvm_do_on(frame, p_sequencer.read_sequencer)
+				    // constrin all fields to recieved frame fiels
+				    `uvm_do_on_with(req,p_sequencer.read_sequencer,
+					    	{	req.addr		== frame.addr;
+						    	req.data[0] 	== frame.data[0];
+						    	req.len			== frame.len;
+								req.size 		== frame.size;
+						    	req.burst_type 	== frame.burst_type;
+						    	req.lock 		== frame.lock;
+						    	req.id			== frame.id;
+						    	req.cache 		== frame.cache;
+						    	req.prot		== frame.prot;
+						    	req.qos			== frame.qos;
+						    	req.region		== frame.region;
+						    	req.wuser		== frame.wuser;
+						    	req.awuser		== frame.awuser;
+						    	req.resp		== frame.resp;
+					    	}
+					    )
 			    end
 			p_sequencer.upper_seq_item_port.item_done(frame);
 	   end

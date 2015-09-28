@@ -39,13 +39,16 @@ class dut_register_model_test_base extends uvm_test;
 
 
 		// added for register model
-		register_model_test_seq = dut_register_model_test_sequence::type_id::create(.name("RegisterModelTestSeq"),
+		register_model_test_seq = dut_register_model_test_sequence::type_id::create(.name("dut_register_model_test_sequence"),
 																					.parent(this));
 		register_model_test_seq.register_model = register_model;
+//		register_model_test_seq.p_sequencer = tb0.dut_test_env.top_sequencer;
+
+		set_config_string("*tb0.env.DutRegisterModelTopSequencer.run_phase", "default_sequence", "dut_register_model_test_sequence");
 
 //
-		uvm_config_wrapper::set(this, "tb0.env.DutRegisterModelTopSequencer.run_phase",
-          "default_sequence", dut_register_model_test_sequence::get_type());
+//		uvm_config_wrapper::set(this, "tb0.env.DutRegisterModelTopSequencer.run_phase",
+//          "default_sequence", dut_register_model_test_sequence::get_type());
 
 		uvm_config_wrapper::set(this, "tb0.env.DutRegisterModelLowSequencer.run_phase",
           "default_sequence", dut_register_model_lower_sequence::get_type());
@@ -63,6 +66,8 @@ class dut_register_model_test_base extends uvm_test;
 	// run_phase
 	task run_phase(uvm_phase phase);
 		super.run_phase(phase);
+
+		//register_model_test_seq.start(tb0.dut_test_env.top_sequencer);
 //		register_model_test_seq.start(tb0.dut_test_env.top_sequencer);
 		// Print the UVM instance tree at the beginning of simulation (optional)
 		printer.knobs.depth = 5;
@@ -70,7 +75,11 @@ class dut_register_model_test_base extends uvm_test;
 	endtask
 
 	task main_phase(uvm_phase phase);
-//			register_model_test_seq.start(.sequencer(tb0.dut_test_env.top_sequencer));
+			phase.raise_objection(this);
+			register_model_test_seq.start(tb0.dut_test_env.top_sequencer);
+			phase.drop_objection(this);
+
+//			register_model_test_seq.body();
 	endtask
 
 

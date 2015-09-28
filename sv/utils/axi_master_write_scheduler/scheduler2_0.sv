@@ -370,6 +370,7 @@ task axi_master_write_scheduler2_0::addBurstPackage(input axi_frame frame);
     axi_master_write_scheduler_package2_0 	new_burst;
 	new_burst = new("SchedulerPackage",config_obj);
 
+	$display("ADDING NEW BURST");
 	new_burst.addBurst(frame);
 	addBurstGeneratedPackage(new_burst);
 
@@ -662,7 +663,7 @@ task axi_master_write_scheduler2_0::manageBurstStatus();
 					check_for_Id_duplicates_id_queue.push_back(id);
 
 
-					`uvm_info(get_name(),$sformatf("Recieved Valid ID Response: %h, option: %0d", id, where_is_found), UVM_INFO)
+					`uvm_info(get_name(),$sformatf("Recieved Valid ID Response: %h, option: %0d, response: %h", id, where_is_found, rsp_info ), UVM_INFO)
 
 
 //					$display("CHECK FOR DONE : active_queue: %0d, inactive_queue: %0d, waiting_to_send_all_queue: %0d,\
@@ -673,21 +674,25 @@ task axi_master_write_scheduler2_0::manageBurstStatus();
 					case(rsp_info)
 						OKAY:
 						begin
+//							$display("OKAY");
 							gotOkayResponse(id, index, where_is_found);
 						end
 
 						EXOKAY:
 						begin
+//							$display("EXOKAY");
 							gotExOkayResponse(id, index, where_is_found);
 						end
 
 						SLVERR:
 						begin
+//							$display("SLVERR");
 							gotSlaveErrorResponse(id, index, where_is_found);
 						end
 
 						DECERR:
 						begin
+//							$display("DECERR");
 							gotDecErrorResponse(id, index, where_is_found);
 						end
 

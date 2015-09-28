@@ -23,7 +23,7 @@ class dut_register_model_base_sequence extends uvm_sequence #(dut_frame);
 
 
 	virtual task pre_body();
-		$display("AAAA");
+		$display("PRE BODY");
 
 	if (starting_phase != null) begin
         starting_phase.raise_objection(this, {"Executing sequence '", get_full_name(), "'"});
@@ -34,6 +34,7 @@ class dut_register_model_base_sequence extends uvm_sequence #(dut_frame);
 
 
 	virtual task post_body();
+		$display("POST BODY");
 
 		 if (starting_phase != null) begin
         starting_phase.drop_objection(this, {"Completed sequence '",
@@ -72,13 +73,17 @@ class dut_register_model_test_sequence extends dut_register_model_base_sequence;
 		#50
 //		super.body();
 		$display("9999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999");
-//		register_model.IM_reg.match.write(status, 1 );
+		register_model.IM_reg.match.write(status, 1 );
 
 
-		`uvm_do_with(req,{req.rw == AXI_WRITE; req.id == 0; req.len == 0; req.addr == 8; req.data[0] == 16'hffff;} )
-		`uvm_do_with(req,{req.rw == AXI_WRITE; req.id == 0; req.len == 0; req.addr == 8; req.data[0] == 16'hffff;} )
-		`uvm_do_with(req,{req.rw == AXI_WRITE; req.id == 0; req.len == 0; req.addr == 8; req.data[0] == 16'hffff;} )
-		`uvm_do_with(req,{req.rw == AXI_WRITE; req.id == 0; req.len == 0; req.addr == 8; req.data[0] == 16'hffff;} )
+//		`uvm_do_with(req,{req.rw == AXI_WRITE; req.id == 0; req.len == 0; req.addr == 8; req.data[0] == 16'hffff; req.size == 1; req.burst_type == FIXED;} )
+		`uvm_do_with(req,{req.rw == AXI_WRITE; req.id == 0; req.len == 0; req.addr == 8; req.data[0] == 16'hffff; req.size == 1; req.burst_type == FIXED;} )
+//		`uvm_do_with(req,{req.rw == AXI_WRITE; req.id == 0; req.len == 0; req.addr == 8; req.data[0] == 16'hffff; req.size == 1; req.burst_type == FIXED;} )
+//		`uvm_do_with(req,{req.rw == AXI_WRITE; req.id == 0; req.len == 0; req.addr == 8; req.data[0] == 16'hffff; req.size == 1; req.burst_type == FIXED;} )
+
+//		`uvm_do_with(req,{req.rw == AXI_WRITE; req.id == 0; req.len == 0; req.addr == 8; req.data[0] == 16'hffff;} )
+//		`uvm_do_with(req,{req.rw == AXI_WRITE; req.id == 0; req.len == 0; req.addr == 8; req.data[0] == 16'hffff;} )
+//		`uvm_do_with(req,{req.rw == AXI_WRITE; req.id == 0; req.len == 0; req.addr == 8; req.data[0] == 16'hffff;} )
 
 
 	endtask

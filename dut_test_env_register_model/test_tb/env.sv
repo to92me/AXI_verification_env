@@ -77,11 +77,11 @@ function void dut_register_model_env::build_phase(uvm_phase phase);
 
 		write_agent 			= axi_master_write_agent::type_id::create(	"MasterWriteAgent",		this);
 		wrapper_write_agent		= axi_write_wrapper_agent::type_id::create(	"AxiWriteWrapperAgent",	this);
-//		read_agent 				= axi_master_read_agent::type_id::create(	"MasterReadAgent", 		this);
-//		wrapper_read_agent		= axi_read_wrapper_agent::type_id::create(	"AxiReadWrapperAgent", 	this);
+		read_agent 				= axi_master_read_agent::type_id::create(	"MasterReadAgent", 		this);
+		wrapper_read_agent		= axi_read_wrapper_agent::type_id::create(	"AxiReadWrapperAgent", 	this);
 
 		wrapper_write_agent.setAxiWriteAgent(write_agent);
-//		wrapper_read_agent.setAxiReadAgent(read_agent);
+		wrapper_read_agent.setAxiReadAgent(read_agent);
 
 		predictor				= dut_register_model_predictor::type_id::create("DutRegisterModelPredictor",this);
 		adapter					= dut_register_model_adapter::type_id::create(	"DutRegisterModelAdapter", 	this);
@@ -107,10 +107,13 @@ function void dut_register_model_env::connect_phase(input uvm_phase phase);
 		if(!uvm_config_db#(virtual axi_if)::get(this, "", "vif", vif0))
 			`uvm_fatal("NOVIF",{"virtual interface must be set for: ",get_full_name(),".vif"});
 
-		low_sequencer.write_sequencer = wrapper_write_agent.wrapper_top_sequencer;
+//		low_sequencer.write_sequencer = wrapper_write_agent.wrapper_top_sequencer;
+
+		low_sequencer.setReadSequncer(wrapper_read_agent.getTopSequencer());
+		low_sequencer.setWriteSequencer(wrapper_write_agent.getTopSequencer());
 
 		wrapper_write_agent.wrapper_monitor.wrapper_port.connect(monitor.read_monitor_import);
-//		wrapper_read_agent.wrapper_monitor.wrapper_port.connect(monitor.write_monitor_import);
+		wrapper_read_agent.wrapper_monitor.wrapper_port.connect(monitor.write_monitor_import);
 
 		predictor.map 		= register_map;
 		predictor.adapter	= adapter;
@@ -151,8 +154,6 @@ endtask : update_vif_enables
 
 //UVM run_phase()
 task dut_register_model_env::run_phase(uvm_phase phase);
-
-
   fork
     update_vif_enables();
 	reference_model.main();

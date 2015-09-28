@@ -206,7 +206,7 @@ endclass : axi_slave_write_main_monitor
 	task axi_slave_write_main_monitor::reset();
 	 	int  r;
 	    forever begin
-		    @(posedge vif.sig_reset);
+		    @(negedge vif.sig_reset);
 		    foreach(coverage_map[r])
 			    begin
 				    coverage_map[r].suscribed_coverage_instace.reset();

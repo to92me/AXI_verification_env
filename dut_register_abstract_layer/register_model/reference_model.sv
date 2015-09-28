@@ -89,7 +89,6 @@ endclass : dut_referece_model
 		bit[15 : 0] internal_counter;
 		forever begin
 			@(posedge vif.sig_fclock);
-			$display("FCLK");
 			if(CFG_counter_enable_p.value == 1)
 				begin
 					case(CFG_direction_p.value)
