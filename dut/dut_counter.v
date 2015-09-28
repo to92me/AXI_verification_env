@@ -376,11 +376,45 @@ module dut_counter #
 
 	// start state
 	initial begin
+		// fclk
         count <= 0;
 		ris0_async <= 0;
 		ris1_async <= 0;
 		req <= 0;
 		data_bus_push <= 0;
+
+		// aclk
+		axi_awready <= 1;
+    	axi_wready <= 0;
+    	axi_bresp <= 0;
+    	axi_buser <= 0;
+    	axi_bvalid <= 0;
+    	axi_arready <= 1;
+    	axi_rdata <= 0;
+    	axi_rresp <= 0;
+    	axi_ruser <= 0;
+    	axi_rvalid <= 0;
+
+    	read_flag <= 0;
+		write_addr_flag <= 0;
+		write_data_flag <= 0;
+		bready_flag <= 1;
+		rready_flag <= 1;
+		
+		RIS <= 0;
+        IM <= 0;
+        MIS <= 0;
+        IIR <= 0;
+        LOAD <= 0;
+        MATCH <= 0;
+        CFG <= 0;
+        irq_o <= 0;
+        nrst <= 0;
+		cfg0_async <= 0;
+		cfg1_async <= 0;
+		ack <= 0;
+		count_aclk <= 0;
+		data_bus_pull <= 0;
     end
 
 always @(posedge AXI_ACLK) begin
