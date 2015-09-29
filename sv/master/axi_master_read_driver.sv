@@ -54,8 +54,8 @@ class axi_master_read_driver extends uvm_driver #(axi_read_whole_burst);
 	// for sending correct responses
 	axi_master_read_response resp;
 
-	// control bit to enable ready randomization (else - default = 1)
-	bit master_ready_rand_enable = 1;
+	// control bit to enable ready randomization (else - default = 0)
+	bit master_ready_rand_enable = 0;
 	ready_randomization ready_rand;
 
 	// queue of bursts waiting to be sent
@@ -114,7 +114,7 @@ endclass : axi_master_read_driver
 //------------------------------------------------------------------------------
 	task axi_master_read_driver::run_phase(uvm_phase phase);
 		// The driving should be triggered by an initial reset pulse
-		@(negedge vif.sig_reset);
+//		@(negedge vif.sig_reset);
 		reset();
 		get_and_drive();
 	endtask : run_phase
@@ -131,7 +131,7 @@ endclass : axi_master_read_driver
 	task axi_master_read_driver::get_and_drive();
 
 		fork
-			@(negedge vif.sig_reset);
+//			@(negedge vif.sig_reset);
 
 			get_from_seq();
 			drive_addr_channel();
@@ -144,7 +144,7 @@ endclass : axi_master_read_driver
 		reset();
 
 		// start everything again
-		fork 
+		fork
 			get_and_drive();
 		join
 
@@ -164,6 +164,7 @@ endclass : axi_master_read_driver
 		forever begin
 			// get from seq
 			seq_item_port.get(req);
+			$display("GOT FRAME");
 			// and put all bursts in a queue
 			burst_queue.push_back(req);
 		end
@@ -185,7 +186,7 @@ endclass : axi_master_read_driver
 		resp_burst = axi_read_whole_burst::type_id::create("resp_burst");
 
 		`uvm_info(get_type_name(), "Reset", UVM_MEDIUM)
-		
+
 		// send responses to seq. for all outstanding bursts
 		// resp_burst will have a UVM_TLM_INCOMPLETE_RESPONSE which will reset the seq.
 		// else - seq. is not waiting for any responses
@@ -244,6 +245,7 @@ endclass : axi_master_read_driver
 
 				resp.check_response(data_frame, burst_frame);	// check if the burst is complete or if there is an error
 				if (burst_frame != null) begin
+					$display("read driver data : %d",burst_frame.single_frames[0].data);
 					seq_item_port.put(burst_frame);
 				end
 
@@ -284,7 +286,7 @@ endclass : axi_master_read_driver
 			// get burst and send it
 			if(burst_queue.size()) begin
 				current_burst = burst_queue.pop_front();
-			
+
 				// wait if there is a delay
 				if(current_burst.delay > 0) begin
 					repeat(current_burst.delay) @(posedge vif.sig_clock);

@@ -370,7 +370,7 @@ task axi_master_write_scheduler2_0::addBurstPackage(input axi_frame frame);
     axi_master_write_scheduler_package2_0 	new_burst;
 	new_burst = new("SchedulerPackage",config_obj);
 
-	$display("ADDING NEW BURST");
+//	$display("ADDING NEW BURST");
 	new_burst.addBurst(frame);
 	addBurstGeneratedPackage(new_burst);
 

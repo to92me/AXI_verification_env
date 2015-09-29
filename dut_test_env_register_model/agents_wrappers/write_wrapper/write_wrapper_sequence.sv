@@ -37,12 +37,15 @@ endclass : axi_write_wrapper_sequence
 
 			$cast(frame_axi, frame_dut);
 
-			$display("id: %h, len %0d, data: %h", frame_axi.id, frame_axi.len, frame_axi.data[0]);
+//			$display("id: %h, len %0d, data: %h", frame_axi.id, frame_axi.len, frame_axi.data[0]);
+
+//			 		$display("data: %h", frame_axi.data[0]);
 
 			`uvm_do_with(req,
 					    	{	req.addr		== frame_axi.addr;
 						    	foreach(frame_axi.data[i])
-						    		req.data[i] 	== frame_axi.data[i];
+						    			req.data[i] 	== frame_axi.data[i];
+
 						    	req.len			== frame_axi.len;
 								req.size 		== frame_axi.size;
 						    	req.burst_type 	== frame_axi.burst_type;
@@ -54,7 +57,7 @@ endclass : axi_write_wrapper_sequence
 						    	req.region		== frame_axi.region;
 						    	req.wuser		== frame_axi.wuser;
 						    	req.awuser		== frame_axi.awuser;
-						    	req.resp		== frame_axi.resp;
+						    	//req.resp		== frame_axi.resp;
 					    	}
 						)
 

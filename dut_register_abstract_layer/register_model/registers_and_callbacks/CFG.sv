@@ -39,8 +39,7 @@ class CFG extends uvm_reg;
 							.reset						(1'b0						),
 							.has_reset					(1							),
 							.is_rand					(0							),
-							.individually_accessible 	(0							) );
-
+							.individually_accessible 	(1							) );
 
 		direction = uvm_reg_field::type_id::create(counter_direction_string);
 		direction.configure(.parent						(this						),
@@ -51,7 +50,8 @@ class CFG extends uvm_reg;
 							.reset						(1'b0						),
 							.has_reset					(1							),
 							.is_rand					(0							),
-							.individually_accessible 	(0							) );
+							.individually_accessible 	(1							) );
+
 
 		reserved = uvm_reg_field::type_id::create(reserved_string);
 		reserved.configure( .parent						(this						),

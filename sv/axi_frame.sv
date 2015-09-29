@@ -42,9 +42,9 @@ class axi_frame_base extends uvm_sequence_item;
 		super.new(name);
 	endfunction
 
-	constraint burst_size_constraint {size <= $clog2(DATA_WIDTH / 8);}
-	constraint burst_type_constraint {burst_type inside{FIXED, INCR, WRAP};}
-
+	constraint burst_size_constraint 	{size <= $clog2(DATA_WIDTH / 8);}
+	constraint burst_type_constraint 	{burst_type inside{FIXED, INCR, WRAP};}
+	constraint resp_constraint 			{resp inside {OKAY, EXOKAY, DECERR, SLVERR};}
 
 
 endclass

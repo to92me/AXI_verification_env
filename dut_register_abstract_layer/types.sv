@@ -4,23 +4,23 @@
 
 	// RIS parameters
 	parameter RIS_address_offset  		=	'h0;
-	parameter RIS_underflow_offset 				 		= 0;
-	parameter RIS_overflow_offset						= 1;
+	parameter RIS_underflow_offset 				 		= 1;
+	parameter RIS_overflow_offset						= 0;
 	parameter RIS_match_offset							= 2;
 	parameter RIS_reserved_offest						= 3;
 
 	// IM parameters
 	parameter IM_address_offset  		=	'h2;
-	parameter IM_underflow_offest 				 		= 0;
-	parameter IM_overflow_offset						= 1;
+	parameter IM_underflow_offest 				 		= 1;
+	parameter IM_overflow_offset						= 0;
 	parameter IM_match_offset							= 2;
 	parameter IM_reserved_offest						= 3;
 
 
 	//MIS parameters
 	parameter MIS_address_offset  		=	'h4;
-	parameter MIS_underflow_offest 				 		= 0;
-	parameter MIS_overflow_offset						= 1;
+	parameter MIS_underflow_offest 				 		= 1;
+	parameter MIS_overflow_offset						= 0;
 	parameter MIS_match_offset							= 2;
 	parameter MIS_reserved_offest						= 3;
 
@@ -37,23 +37,23 @@
 	parameter CFG_reserved_offset 			  			= 2;
 
 	// SWRESET paramters
-	parameter SWRESET_address_offset	= 	'h10;
+	parameter SWRESET_address_offset	= 	'hA;
 	parameter SWRESET_passcode_offset 		 			= 0;
 
 
 	//IIR paramters
-	parameter IIR_address_offset		=	'h12;
+	parameter IIR_address_offset		=	'hC;
 	parameter IIR_interrupt_offset 						= 0;
 	parameter IIR_reserved					 			= 2;
 
 
 	//MATCH
-	parameter MATCH_address_offset 		=	'h14;
+	parameter MATCH_address_offset 		=	'hE;
 	parameter MATCH_match_offest 						= 0;
 
 
 	//COUNT
-	parameter COUNT_address_offset		=	'h16;
+	parameter COUNT_address_offset		=	'h10;
 	parameter COUNT_counter_offest 						= 0;
 
 

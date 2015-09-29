@@ -97,7 +97,7 @@ class dut_register_block extends uvm_reg_block;
 
 		dut_map = create_map(	.name			(map_name_string	),
 								.base_addr		('h0				),
-								.n_bytes		(2					),
+								.n_bytes		(4					),
 								.byte_addressing(0					),
 								.endian			(UVM_BIG_ENDIAN		)	);
 

@@ -17,8 +17,6 @@ class dut_register_model_lower_sequence extends uvm_sequence#(dut_frame);
 	`uvm_object_utils(dut_register_model_lower_sequence)
 	`uvm_declare_p_sequencer(dut_register_model_lower_sequencer)
 
-
-
 	extern virtual task body();
 
 
@@ -26,13 +24,10 @@ endclass : dut_register_model_lower_sequence
 
 	task  dut_register_model_lower_sequence::body();
 	   forever begin
-
-
-		     dut_frame frame = new();
+		   int i;
+		   dut_frame frame = new();
 
 		    p_sequencer.upper_seq_item_port.get_next_item(frame);
-
-
 
 		    if(frame.rw == AXI_WRITE)
 			    begin
@@ -52,7 +47,7 @@ endclass : dut_register_model_lower_sequence
 						    	req.region		== frame.region;
 						    	req.wuser		== frame.wuser;
 						    	req.awuser		== frame.awuser;
-						    	req.resp		== frame.resp;
+						    	//req.resp		== frame.resp;
 					    	}
 					  )
 			    end
@@ -61,7 +56,7 @@ endclass : dut_register_model_lower_sequence
 				    // constrin all fields to recieved frame fiels
 				    `uvm_do_on_with(req,p_sequencer.read_sequencer,
 					    	{	req.addr		== frame.addr;
-						    	req.data[0] 	== frame.data[0];
+						    	//req.data[0] 	== frame.data[0];
 						    	req.len			== frame.len;
 								req.size 		== frame.size;
 						    	req.burst_type 	== frame.burst_type;
@@ -73,10 +68,11 @@ endclass : dut_register_model_lower_sequence
 						    	req.region		== frame.region;
 						    	req.wuser		== frame.wuser;
 						    	req.awuser		== frame.awuser;
-						    	req.resp		== frame.resp;
+						    	//req.resp		== frame.resp;
 					    	}
 					    )
 			    end
+			frame.copyDutFrame(req);
 			p_sequencer.upper_seq_item_port.item_done(frame);
 	   end
 	endtask

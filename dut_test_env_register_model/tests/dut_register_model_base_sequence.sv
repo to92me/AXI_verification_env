@@ -6,8 +6,6 @@
 // CLASS: uvc_company_uvc_name_base_seq
 //
 //------------------------------------------------------------------------------
-// This sequence raises/drops objections in the pre/post_body so that root
-// sequences raise objections but subsequences do not.
 class dut_register_model_base_sequence extends uvm_sequence #(dut_frame);
 
 	// new - constructor
@@ -68,22 +66,51 @@ class dut_register_model_test_sequence extends dut_register_model_base_sequence;
 
 	virtual task body();
 //		$cast(register_model, model);
+		int test_value;
 
 
-		#50
 //		super.body();
-		$display("9999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999");
-		register_model.IM_reg.match.write(status, 1 );
+		$display("");
+		$display("==============================================================================================================================================================");
+		$display("=                                                             TEST_SEQ_1                                                                                     =");
+		$display("==============================================================================================================================================================");
+		$display("");
+
+		register_model.IM_reg.write(status, 3'b111 );
+//		register_model.IM_reg.match.write(status, 1'b1);
+		register_model.MATCH_reg.write(status, 50);
+		register_model.CFG_reg.write(status, 3 );
+		test_value = 6000;
+
+
+		#100000
+		register_model.RIS_reg.mirror(status, UVM_CHECK);
+
+//		register_model.COUNT_reg.mirror(status, UVM_CHECK);
+
+
+		register_model.RIS_reg.underflow.mirror(status, UVM_CHECK);
+		register_model.RIS_reg.overflow.mirror(status, UVM_CHECK);
+		register_model.RIS_reg.match.mirror(status, UVM_CHECK);
+//		register_model.MIS_reg.mirror(status, UVM_CHECK);
+
 
 
 //		`uvm_do_with(req,{req.rw == AXI_WRITE; req.id == 0; req.len == 0; req.addr == 8; req.data[0] == 16'hffff; req.size == 1; req.burst_type == FIXED;} )
-		`uvm_do_with(req,{req.rw == AXI_WRITE; req.id == 0; req.len == 0; req.addr == 8; req.data[0] == 16'hffff; req.size == 1; req.burst_type == FIXED;} )
+//		`uvm_do_with(req,{req.rw == AXI_WRITE; req.id == 0; req.len == 0; req.addr == 8; req.data[0] == 16'hffff; req.size == 1; req.burst_type == FIXED;} )
 //		`uvm_do_with(req,{req.rw == AXI_WRITE; req.id == 0; req.len == 0; req.addr == 8; req.data[0] == 16'hffff; req.size == 1; req.burst_type == FIXED;} )
 //		`uvm_do_with(req,{req.rw == AXI_WRITE; req.id == 0; req.len == 0; req.addr == 8; req.data[0] == 16'hffff; req.size == 1; req.burst_type == FIXED;} )
 
 //		`uvm_do_with(req,{req.rw == AXI_WRITE; req.id == 0; req.len == 0; req.addr == 8; req.data[0] == 16'hffff;} )
 //		`uvm_do_with(req,{req.rw == AXI_WRITE; req.id == 0; req.len == 0; req.addr == 8; req.data[0] == 16'hffff;} )
 //		`uvm_do_with(req,{req.rw == AXI_WRITE; req.id == 0; req.len == 0; req.addr == 8; req.data[0] == 16'hffff;} )
+
+		$display("");
+		$display("==============================================================================================================================================================");
+		$display("=                                                          END TEST_SEQ_1                                                                                    =");
+		$display("==============================================================================================================================================================");
+		$display("");
+
 
 
 	endtask

@@ -31,11 +31,12 @@ class IIR extends uvm_reg;
 							.reset						(2'b0					),
 							.has_reset					(1						),
 							.is_rand					(0						),
-							.individually_accessible 	(0						) );
+							.individually_accessible 	(1						) );
 		begin
 			IIR_interrupt_priority_cb _IIR_interrupt_priority_cb = new("IIR_interrupt_priority_cb");
 			uvm_reg_field_cb::add(interrupt_priority, _IIR_interrupt_priority_cb);
 		end
+	interrupt_priority.set_compare(UVM_CHECK);
 
 	reserved = uvm_reg_field::type_id::create(reserved_string);
 	reserved.configure(		.parent						(this					),
@@ -49,6 +50,7 @@ class IIR extends uvm_reg;
 							.individually_accessible 	(0						) );
 
 	endfunction
+
 endclass
 
 

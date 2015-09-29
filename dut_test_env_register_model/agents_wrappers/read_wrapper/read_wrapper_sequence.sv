@@ -31,17 +31,10 @@ endclass : axi_read_wrapper_sequence
 	    forever begin
 		    dut_frame frame;
 
-		    $display("Waiting Read Wrapper frame");
 
 		    p_sequencer.upper_seq_item_port.get_next_item(frame);
 
-
-//		    read_frame = new();
-//		    read_frame.addr 		= frame.addr;
-//		    read_frame.id			= frame.id;
-//		    read_frame.len			= frame.len;
-//		    read_frame.size 		= frame.size;
-//		    read_frame.burst_type 	= frame.burst_type;
+//		    $display("UVM_DO_WITH_ REGISTER MODEL");
 
 		    `uvm_do_with(req,
 							{	req.addr		== frame.addr;
@@ -58,13 +51,22 @@ endclass : axi_read_wrapper_sequence
 						    	//req.wuser		== frame.wuser;
 						    	//req.awuser		== frame.awuser;
 						    	//req.resp		== frame.resp;
+//			    			{	req.addr == 16;
+//				    			req.len  == 0;
+//				    			req.size == 1;
+//				    			req.burst_type == FIXED;
 							}
 						)
 
 		    get_response(req);
 
-		    frame.data[0] = read_frame.single_frames[0].data;
-			//frame.resp 	  = read_frame.resp;
+//		    $display("GOT RSP");
+
+		    // budj treba da se reis da se prosledjuje sve kao u write, ne znam trenutno kako
+		    frame.data[0] = req.single_frames[0].data;
+			frame.resp 	  = req.single_frames[0].resp;
+
+//		    $display("sequnece data data: %0d",frame.data[0] );
 
 		    p_sequencer.upper_seq_item_port.item_done(frame);
 

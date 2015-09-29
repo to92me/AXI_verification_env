@@ -32,7 +32,7 @@ class SWRESET extends uvm_reg;
 							.reset						(16'b0					),
 							.has_reset					(1						),
 							.is_rand					(0						),
-							.individually_accessible 	(0						) );
+							.individually_accessible 	(1						) );
 		begin
 			SWRESET_reset_passcode_cb _SWRESET_reset_passcode_cb = new("SWRESET_reset_passcode_cb");
 			uvm_reg_field_cb::add(reset_passcode, _SWRESET_reset_passcode_cb);

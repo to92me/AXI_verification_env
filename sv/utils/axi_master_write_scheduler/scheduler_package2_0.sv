@@ -247,7 +247,7 @@ function void axi_master_write_scheduler_package2_0::calculateStrobe();
 
 	strobe_calculator.calc_addr(frame_copy.addr, frame_copy.size, frame_copy.len, frame_copy.burst_type);
 //	$display("________________________________________________________________________________________________________");
-	$display("BURST INFO: address: %h, size %h, len: %d, burst: %d",frame_copy.addr, frame_copy.size, frame_copy.len, frame_copy.burst_type);
+//	$display("BURST INFO: address: %h, size %h, len: %d, burst: %d",frame_copy.addr, frame_copy.size, frame_copy.len, frame_copy.burst_type);
 
 	foreach(single_frame_queue[i])
 		begin

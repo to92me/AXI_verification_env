@@ -30,7 +30,6 @@ class dut_register_model_env extends uvm_env;
 	dut_register_model_lower_sequencer	low_sequencer;
 	dut_register_model_top_sequencer	top_sequencer;
 	dut_register_model_top_monitor		monitor;
-	//dut_register_model_lower_sequence	sequnece;
 
 	dut_register_model_predictor		predictor;
 	dut_register_model_adapter			adapter;
@@ -72,9 +71,6 @@ function void dut_register_model_env::build_phase(uvm_phase phase);
 				$cast(config_obj, factory.create_object_by_name("dut_register_model_config","config_obj"));
 			end
 
-//		set_config_string("*DutRegisterModelLowSequencer", "default_sequence", "dut_register_model_lower_sequence");
-
-
 		write_agent 			= axi_master_write_agent::type_id::create(	"MasterWriteAgent",		this);
 		wrapper_write_agent		= axi_write_wrapper_agent::type_id::create(	"AxiWriteWrapperAgent",	this);
 		read_agent 				= axi_master_read_agent::type_id::create(	"MasterReadAgent", 		this);
@@ -95,8 +91,6 @@ function void dut_register_model_env::build_phase(uvm_phase phase);
 
 		monitor					= dut_register_model_top_monitor::type_id::create("DutRegisterModelMonitor", this);
 
-//		low_sequencer.setReadSequncer(wrapper_read_agent.getTopSequencer());
-//		low_sequencer.setWriteSequencer(wrapper_write_agent.getTopSequencer());
 
 endfunction : build_phase
 
@@ -106,8 +100,6 @@ function void dut_register_model_env::connect_phase(input uvm_phase phase);
 
 		if(!uvm_config_db#(virtual axi_if)::get(this, "", "vif", vif0))
 			`uvm_fatal("NOVIF",{"virtual interface must be set for: ",get_full_name(),".vif"});
-
-//		low_sequencer.write_sequencer = wrapper_write_agent.wrapper_top_sequencer;
 
 		low_sequencer.setReadSequncer(wrapper_read_agent.getTopSequencer());
 		low_sequencer.setWriteSequencer(wrapper_write_agent.getTopSequencer());

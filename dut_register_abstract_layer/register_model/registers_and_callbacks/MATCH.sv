@@ -27,7 +27,7 @@ class MATCH extends uvm_reg;
 							.reset						(16'b0					),
 							.has_reset					(1						),
 							.is_rand					(0						),
-							.individually_accessible 	(0						) );
+							.individually_accessible 	(1						) );
 	endfunction
 
 endclass

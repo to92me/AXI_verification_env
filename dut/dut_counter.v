@@ -52,7 +52,7 @@ module dut_counter #
 		input wire [7 : 0] AXI_AWLEN,
 		// Burst size. This signal indicates the size of each transfer in the burst
 		input wire [2 : 0] AXI_AWSIZE,
-		// Burst type. The burst type and the size information, 
+		// Burst type. The burst type and the size information,
     	// determine how the address for each transfer within the burst is calculated.
 		input wire [1 : 0] AXI_AWBURST,
 		// Lock type. Provides additional information about the
@@ -252,7 +252,7 @@ module dut_counter #
     wire					cfg1_sync;	// for CFG[1]
     reg [DATA_WIDTH-1 : 0]	load_fclk;	// holds the LOAD value
     reg [DATA_WIDTH-1 : 0]	match_fclk;	// holds the MATCH value
-    reg 					dout_async;	// for the dout_o output signal 
+    reg 					dout_async;	// for the dout_o output signal
     // for the handshaking protocol
     reg 					req;	// request
     wire					ack_sync;	// synchronized acknowledgement
@@ -400,7 +400,7 @@ module dut_counter #
 		write_data_flag <= 0;
 		bready_flag <= 1;
 		rready_flag <= 1;
-		
+
 		RIS <= 0;
         IM <= 0;
         MIS <= 0;
