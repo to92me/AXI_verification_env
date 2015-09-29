@@ -107,9 +107,10 @@ module dut_register_model_top;
     end
 
     initial begin
-        reset <= 1'b1;
+        reset <= 1'b0;
 	 	aclk <= 1'b0;
 	    fclk <= 1'b0;
+	    #5 reset <= 1'b1;
     end
 
     //Generate Clocks

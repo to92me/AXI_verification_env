@@ -87,6 +87,8 @@ class axi_master_write_driver extends uvm_driver #(axi_frame);
 //			@(posedge vif.sig_clock);
 //		while(vif.sig_reset!==1);
 
+		@(negedge vif.sig_reset);
+
 		get_and_drive();
 	endtask : run_phase
 

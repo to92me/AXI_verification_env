@@ -86,6 +86,7 @@ class axi_master_write_main_monitor extends uvm_monitor;
 	endfunction : build_phase
 
 	task run_phase(uvm_phase phase);
+		@(negedge vif.sig_reset);
 		this.main();
 	endtask
 

@@ -76,6 +76,8 @@ class dut_register_model_test_sequence extends dut_register_model_base_sequence;
 		$display("==============================================================================================================================================================");
 		$display("");
 
+		//#20
+
 		register_model.IM_reg.write(status, 3'b111 );
 //		register_model.IM_reg.match.write(status, 1'b1);
 		register_model.MATCH_reg.write(status, 50);
@@ -84,14 +86,14 @@ class dut_register_model_test_sequence extends dut_register_model_base_sequence;
 
 
 		#100000
-		register_model.RIS_reg.mirror(status, UVM_CHECK);
+//		register_model.RIS_reg.mirror(status, UVM_CHECK);
 
-//		register_model.COUNT_reg.mirror(status, UVM_CHECK);
+		register_model.MIS_reg.mirror(status, UVM_CHECK);
+		//register_model.COUNT_reg.read(status, value
 
-
-		register_model.RIS_reg.underflow.mirror(status, UVM_CHECK);
-		register_model.RIS_reg.overflow.mirror(status, UVM_CHECK);
-		register_model.RIS_reg.match.mirror(status, UVM_CHECK);
+//		register_model.RIS_reg.underflow.mirror(status, UVM_CHECK);
+//		register_model.RIS_reg.overflow.mirror(status, UVM_CHECK);
+//		register_model.RIS_reg.match.mirror(status, UVM_CHECK);
 //		register_model.MIS_reg.mirror(status, UVM_CHECK);
 
 

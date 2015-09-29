@@ -114,7 +114,7 @@ endclass : axi_master_read_driver
 //------------------------------------------------------------------------------
 	task axi_master_read_driver::run_phase(uvm_phase phase);
 		// The driving should be triggered by an initial reset pulse
-//		@(negedge vif.sig_reset);
+		@(negedge vif.sig_reset);
 		reset();
 		get_and_drive();
 	endtask : run_phase
@@ -131,7 +131,7 @@ endclass : axi_master_read_driver
 	task axi_master_read_driver::get_and_drive();
 
 		fork
-//			@(negedge vif.sig_reset);
+			@(negedge vif.sig_reset);
 
 			get_from_seq();
 			drive_addr_channel();
