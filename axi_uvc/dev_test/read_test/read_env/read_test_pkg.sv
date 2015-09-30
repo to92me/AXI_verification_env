@@ -1,3 +1,25 @@
+// -----------------------------------------------------------------------------
+/**
+* Project : AXI UVC
+*
+* File : read_test_pkg.sv
+*
+* Language : SystemVerilog
+*
+* Company : Elsys Eastern Europe
+*
+* Author : Andrea Erdeljan
+*
+* E-Mail : andrea.erdeljan@elsys-eastern.com
+*
+* Mentor : Darko Tomusilovic
+*
+* Description : contains typedefs and includes for testing
+*
+* Classes : read_test_pkg
+**/
+// -----------------------------------------------------------------------------
+
 `ifndef READ_TEST_PKG_SV
 `define READ_TEST_PKG_SV
 

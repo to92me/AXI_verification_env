@@ -20,8 +20,8 @@
 **/
 // -----------------------------------------------------------------------------
 
-`ifndef dut_config
-`define dut_config
+`ifndef DUT_CONFIG_SV
+`define DUT_CONFIG_SV
 
 //------------------------------------------------------------------------------
 //
@@ -29,7 +29,7 @@
 //
 //------------------------------------------------------------------------------
 /**
-* Description : test configuration - one slave
+* Description : test configuration - no slaves
 *
 * Functions : 1. new (string name, uvm_component parent)
 **/
@@ -46,6 +46,5 @@ class dut_config extends axi_config;
 	endfunction: new
 
 endclass : dut_config
-
 
 `endif

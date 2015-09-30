@@ -1,3 +1,25 @@
+// -----------------------------------------------------------------------------
+/**
+* Project : AXI UVC
+*
+* File : dut_test_pkg.sv
+*
+* Language : SystemVerilog
+*
+* Company : Elsys Eastern Europe
+*
+* Author : Andrea Erdeljan
+*
+* E-Mail : andrea.erdeljan@elsys-eastern.com
+*
+* Mentor : Darko Tomusilovic
+*
+* Description : contains typedefs and includes for dut testing
+*
+* Classes : dut_test_pkg
+**/
+// -----------------------------------------------------------------------------
+
 `ifndef DUT_TEST_PKG_SV
 `define DUT_TEST_PKG_SV
 

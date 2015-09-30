@@ -31,7 +31,7 @@
 // -----------------------------------------------------------------------------
 class dut_test extends uvm_test;
 
-    dut_tb tb0;
+    dut_tb tb0; // testbench
 
     `uvm_component_utils_begin(dut_test)
         `uvm_field_object(tb0, UVM_ALL_ON)
@@ -53,7 +53,7 @@ class dut_test extends uvm_test;
         // randomizing ready signal for master
         uvm_config_int::set(this, "tb0.axi0.read_master.driver", "master_ready_rand_enable", 0);
 
-        // sequences
+        // sequence
         uvm_config_wrapper::set(this, "tb0.virtual_seqr.run_phase", "default_sequence",
                                                      virtual_dut_seq::get_type());
 
