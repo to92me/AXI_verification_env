@@ -164,7 +164,6 @@ endclass : axi_master_read_driver
 		forever begin
 			// get from seq
 			seq_item_port.get(req);
-			$display("GOT FRAME");
 			// and put all bursts in a queue
 			burst_queue.push_back(req);
 		end

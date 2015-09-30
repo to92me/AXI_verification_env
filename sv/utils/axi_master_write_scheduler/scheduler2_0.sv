@@ -663,7 +663,7 @@ task axi_master_write_scheduler2_0::manageBurstStatus();
 					check_for_Id_duplicates_id_queue.push_back(id);
 
 
-					`uvm_info(get_name(),$sformatf("Recieved Valid ID Response: %h, option: %0d, response: %h", id, where_is_found, rsp_info ), UVM_INFO)
+					`uvm_info(get_name(),$sformatf("Recieved Valid ID Response: %h, option: %0d, response: %h", id, where_is_found, rsp_info ), UVM_HIGH)
 
 
 //					$display("CHECK FOR DONE : active_queue: %0d, inactive_queue: %0d, waiting_to_send_all_queue: %0d,\

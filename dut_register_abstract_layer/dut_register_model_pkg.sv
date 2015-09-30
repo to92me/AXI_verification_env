@@ -41,7 +41,7 @@ package dut_register_model_pkg;
 	`include "dut_register_abstract_layer/register_model/frame.sv"
 	`include "dut_register_abstract_layer/register_model/reference_model.sv"
 	`include "dut_register_abstract_layer/register_model/register_model.sv"
-	`include "dut_register_abstract_layer/register_model/sequencer.sv"
+//	`include "dut_register_abstract_layer/register_model/sequencer.sv"
 
 	`include "dut_register_abstract_layer/register_model/registers_and_callbacks/RIS.sv"
 	`include "dut_register_abstract_layer/register_model/registers_and_callbacks/IM.sv"
@@ -54,7 +54,7 @@ package dut_register_model_pkg;
 	`include "dut_register_abstract_layer/register_model/registers_and_callbacks/COUNT.sv"
 
 
-	`include "sv/axi_frame.sv"
+//	`include "sv/axi_frame.sv"
 
 
 endpackage

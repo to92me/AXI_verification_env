@@ -182,7 +182,7 @@ task axi_master_write_data_driver::validTriger();
 
 	this.init();
 
-	$display("Running data driver main core....  ");
+
 	forever
 		begin
 			case (state)
