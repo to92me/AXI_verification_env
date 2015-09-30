@@ -111,6 +111,7 @@ class axi_write_user_conf_package extends uvm_component;
 	int 								conf_id;
 	true_false_enum						valid_configuration;
 	int 								posibility;
+	string 								name;
 
 	`uvm_component_utils(axi_write_user_conf_package)
 
@@ -156,6 +157,14 @@ class axi_write_user_conf_package extends uvm_component;
 
 	function int getPosibility();
 		return this.posibility;
+	endfunction
+
+	function void setConfiguration_name(input string configuration_name);
+		this.name = configuration_name;
+	endfunction
+
+	function string getConfiguration_name();
+		return this.name;
 	endfunction
 
 endclass

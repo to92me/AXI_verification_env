@@ -11,7 +11,7 @@ endfunction : new
 
 function void setConfigurations();
 
-$display("USER CONFIGURATION EXAMPLE ");
+//$display("USER CONFIGURATION EXAMPLE ");
 
 // +++++++++++++++++++++++++++++++++++++++++GLOOBAL SETTINGS+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 //with setting do coverage axi_write uvc will collect coverage and report it
@@ -58,8 +58,10 @@ registerConfiguration("general", "full_speed", TRUE);
 //int 			awid_mode 						= 1;
 //int 			awid_possibility_correct		= 5;
 //int 			awid_possibility_incorrect 		= 5;
-registerConfiguration("data_correctnes", "awid_mode", 1);
-registerConfiguration("data_correctnes","awid_dist_incorrect", 5);
+//
+// example:
+//registerConfiguration("data_correctnes", "awid_mode", 1);
+//registerConfiguration("data_correctnes","awid_dist_incorrect", 5);
 
 
 // 2. AWREGION
@@ -69,7 +71,9 @@ registerConfiguration("data_correctnes","awid_dist_incorrect", 5);
 //int 			awregion_mode 					=1;
 //int 			awregion_possibility_correct	= 5;
 //int 			awregion_possibility_incorrect 	= 5;
-registerConfiguration("data_correctnes", "awregion_mode", 1);
+//
+// example:
+//registerConfiguration("data_correctnes", "awregion_mode", 1);
 
 
 // 3. AWLEN
@@ -79,7 +83,9 @@ registerConfiguration("data_correctnes", "awregion_mode", 1);
 //int 			awlen_mode						= 1;
 //int 			awlen_possibility_correct		= 5;
 //int 			awlen_possibility_incorrect 	= 5;
-registerConfiguration("data_correctnes", "awlen_mode", 1);
+//
+// example:
+//registerConfiguration("data_correctnes", "awlen_mode", 1);
 
 //4. AWSIEZE
 //				-correct 						option = 1
@@ -88,7 +94,9 @@ registerConfiguration("data_correctnes", "awlen_mode", 1);
 //int 			awsize_mode 					= 1;
 //int 			awsize_possibility_correct		= 5;
 //int 			awsize_possibility_incorrect 	= 5;
-registerConfiguration("data_correctnes", "awsize_mode", 1);
+//
+// example:
+//registerConfiguration("data_correctnes", "awsize_mode", 1);
 
 // 5. AWBURST
 //				-correct 						option = 1
@@ -97,7 +105,9 @@ registerConfiguration("data_correctnes", "awsize_mode", 1);
 //int 			awburst_mode					= 1;
 //int 			awburst_possibility_correct		= 5;
 //int 			awburst_possibility_incorrect 	= 5;
-registerConfiguration("data_correctnes", "awburst_mode", 1);
+//
+// example:
+//registerConfiguration("data_correctnes", "awburst_mode", 1);
 
 
 // 6. AWLOCK
@@ -107,7 +117,9 @@ registerConfiguration("data_correctnes", "awburst_mode", 1);
 //int 			awlock_mode 					= 1;
 //int 			awlock_possibility_correct		= 5;
 //int 			awlock_possibility_incorrect 	= 5;
-registerConfiguration("data_correctnes", "awlock_mode", 1);
+//
+// example:
+//registerConfiguration("data_correctnes", "awlock_mode", 1);
 
 
 
@@ -118,7 +130,9 @@ registerConfiguration("data_correctnes", "awlock_mode", 1);
 //int 			awcache_mode					= 1;
 //int 			awcache_possibility_correct		= 5;
 //int 			awcache_possibility_incorrect 	= 5;
-registerConfiguration("data_correctnes", "awcache_mode", 1);
+//
+// example:
+//registerConfiguration("data_correctnes", "awcache_mode", 1);
 
 
 
@@ -129,7 +143,9 @@ registerConfiguration("data_correctnes", "awcache_mode", 1);
 //int 			awqos_mode 						= 1;
 //int 			awqos_possibility_correct		= 5;
 //int 			awqos_possibility_incorrect 	= 5;
-registerConfiguration("data_correctnes", "awqos_mode", 1);
+//
+// example:
+//registerConfiguration("data_correctnes", "awqos_mode", 1);
 
 
 // 7. WSTRB
@@ -139,7 +155,9 @@ registerConfiguration("data_correctnes", "awqos_mode", 1);
 //int 			wstrb_mode 						= 1;
 //int 			wstrb_possibility_correct		= 5;
 //int 			wstrb_possibility_incorrect 	= 5;
-registerConfiguration("data_correctnes", "wstrb_mode", 1);
+//
+// example:
+//registerConfiguration("data_correctnes", "wstrb_mode", 1);
 
 
 // 8. BRESP
@@ -149,7 +167,9 @@ registerConfiguration("data_correctnes", "wstrb_mode", 1);
 //int 			bresp_mode 						= 1;
 //int 			bresp_possibility_correct		= 5;
 //int 			bresp_possibility_incorrect 	= 5;
-registerConfiguration("data_correctnes", "bresp_mode", 1);
+//
+// example:
+//registerConfiguration("data_correctnes", "bresp_mode", 1);
 
 // ++++++++++++++++++++++++++++++++++++++END INCORECT DATA+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 

@@ -37,6 +37,9 @@ class dut_register_model_test_base extends uvm_test;
 		tb0 =  dut_register_model_tb::type_id::create("tb0",this);
 		tb0.register_model = register_model;
 
+		 uvm_config_int::set(this, "*", "master_ready_rand_enable", 0);
+
+//		set_config_string("*tb0.*", "axi_write_configuration", "FullSpeed");
 
 		// added for register model
 		register_model_test_seq = dut_register_model_test_sequence::type_id::create(.name("dut_register_model_test_sequence"),

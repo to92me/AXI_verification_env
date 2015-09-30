@@ -154,7 +154,7 @@ class axi_write_configuration_wrapper extends uvm_component;
 
 	extern static function axi_write_configuration_wrapper getWraperInstance(input uvm_component parent);
 
-	extern function int registerConfiguration(input axi_write_user_config_base configuration_instance, true_false_enum valid_conf, int posibility);
+	extern function int registerConfiguration(input axi_write_user_config_base configuration_instance, true_false_enum valid_conf, int posibility, string name);
 
 	extern function void fillBusWriterConfiguration(ref string_queue bus_write_config_queue);
 	extern function void fillBusReadConfiguration(ref string_queue bus_read_config_queue);
@@ -200,15 +200,19 @@ function axi_write_configuration_wrapper axi_write_configuration_wrapper::getWra
 	return wraper_instance;
 endfunction
 
-function int axi_write_configuration_wrapper::registerConfiguration(input axi_write_user_config_base configuration_instance, true_false_enum valid_conf, int posibility);
+function int axi_write_configuration_wrapper::registerConfiguration(input axi_write_user_config_base configuration_instance, true_false_enum valid_conf, int posibility, string name);
  	axi_write_user_conf_package conf;
+//	string new_name = $sformatf("ConfigurationPackage[%0d]",user_confs_queue.size());
 
-	conf = axi_write_user_conf_package::type_id::create("ConfigurationPackage", this);
+	configuration_instance.setConfigurations();
+
+	conf = axi_write_user_conf_package::type_id::create($sformatf("ConfigurationPackage[%0d]",user_confs_queue.size()), this);
 
 	conf.setConf_id(this.user_confs_queue.size());
 	conf.setValid_configuration(valid_conf);
 	conf.setUser_conf(configuration_instance);
 	conf.setPosibility(posibility);
+	conf.setConfiguration_name(name);
 
 	this.user_confs_queue.push_front(conf);
 	return conf.getConf_id();
@@ -227,24 +231,6 @@ function void  axi_write_configuration_wrapper::init();
 	fillGlobalConfiguration(this.globalc);
 	fillCorrectValueConfiguration(this.correct_value);
 
-//	$display("master_data:");
-//	printStringQueue(master_data);
-//	$display("master_addr:");
-//	printStringQueue(master_addr);
-//	$display("master_resp:");
-//	printStringQueue(master_resp);
-//
-//	$display("slave_data:");
-//	printStringQueue(slave_data);
-//	$display("slave_addr:");
-//	printStringQueue(slave_addr);
-//	$display("slave_resp:");
-//	printStringQueue(slave_resp);
-//
-//	$display("globalc:");
-//	printStringQueue(globalc);
-//	$display("correct_value:");
-//	printStringQueue(correct_value);
 endfunction
 
 
@@ -341,24 +327,42 @@ function void axi_write_configuration_wrapper::getRandomConfiguration();
 	int random_queue[$];
 	int random_posibility_queue[$];
 	int i;
+	string configuration_name;
 
-	random = new();
 
-	foreach(this.user_confs_queue[i])
+	if(get_config_string("axi_write_configuration", configuration_name))
 		begin
-			if(user_confs_queue[i].getValid_configuration() == TRUE)
+
+			foreach(user_confs_queue[i])
 				begin
-					random_queue.push_front(user_confs_queue[i].getConf_id());
-					random_posibility_queue.push_front(user_confs_queue[i].getPosibility());
+					if(configuration_name == user_confs_queue[i].getConfiguration_name())
+						begin
+							current_config = user_confs_queue[i].getUser_conf();
+							return;
+						end
+					`uvm_warning("Configuration Wrapper [U]: ", $sformatf("Configuration name: %s is not registerd in configurations ",configuration_name ));
 				end
 		end
 
-	random.setConfNO_queue(random_queue);
-	random.setConfNO_posibility_queue(random_posibility_queue);
-	assert(random.randomize());
+		random = new();
 
-	//when random configuration is chosen use it to fill current_config
-	current_config = user_confs_queue[random.getConfNO()].getUser_conf();
+		`uvm_info("Configuration Wrapper [U]: ", "Using random Configuration", UVM_HIGH);
+
+		foreach(this.user_confs_queue[i])
+			begin
+				if(user_confs_queue[i].getValid_configuration() == TRUE)
+					begin
+						random_queue.push_front(user_confs_queue[i].getConf_id());
+						random_posibility_queue.push_front(user_confs_queue[i].getPosibility());
+					end
+			end
+
+			random.setConfNO_queue(random_queue);
+			random.setConfNO_posibility_queue(random_posibility_queue);
+			assert(random.randomize());
+
+		//when random configuration is chosen use it to fill current_config
+			current_config = user_confs_queue[random.getConfNO()].getUser_conf();
 
 endfunction
 
@@ -494,6 +498,12 @@ endfunction
 
 
 function axi_write_conf axi_write_configuration_wrapper::generateConfigurationObject();
+
+	$display("");
+	$display("============================================================== CREATING CONFIGURATION =======================================================================");
+	$display("");
+
+
 	this.init();
 
 	// to create configuration object first randomize configuration;
@@ -521,14 +531,19 @@ function axi_write_conf axi_write_configuration_wrapper::generateConfigurationOb
 	//wrapp configuration in configuratin object;
 	this.wrappConfigurationObject();
 
+	$display("");
+	$display("=================================================================================================================================================================");
+	$display("");
+
 	return configuration_object;
+
 
 endfunction
 
 function void axi_write_configuration_wrapper::parseUserGlobalConfiguration();
 	int i;
 	string option;
-	$display("=================================================================== GENERAL CONFIGURATION ===================================================================");
+//	$display("=================================================================== GENERAL CONFIGURATION ===================================================================");
 	foreach(global_conf[i])
 		begin
 			option = global_conf[i].getOption_name();
@@ -734,7 +749,7 @@ function void axi_write_configuration_wrapper::parseUserGlobalConfiguration();
 			end
 		end // end foreach
 
-	$display("===================================================================END GENERAL CONFIGURATION===================================================================");
+//	$display("===================================================================END GENERAL CONFIGURATION===================================================================");
 	$display("");
 
 endfunction
@@ -747,7 +762,7 @@ function void axi_write_configuration_wrapper::parseUserCorrectValueConfiguratio
 	string option_field;
 	axi_write_correct_one_value new_correct_config;
 
-		$display("===================================================================PARSING CORRECT VALUE===================================================================");
+//		$display("===================================================================PARSING CORRECT VALUE===================================================================");
 
 
 	foreach(correct_value_conf[i])
@@ -885,7 +900,7 @@ function void axi_write_configuration_wrapper::parseUserCorrectValueConfiguratio
 				end
 		end //end foreach
 
-		$display("===================================================================END  CORRECT VALUE===================================================================");
+//		$display("===================================================================END  CORRECT VALUE===================================================================");
 		$display("");
 
 endfunction
@@ -897,7 +912,7 @@ function void axi_write_configuration_wrapper::parseUserBusReadConfiguration(ref
 	string option;
 	int order_number;
 
-		$display("=================================================================== PARSING BUS READ CONF ===================================================================");
+//		$display("=================================================================== PARSING BUS READ CONF ===================================================================");
 
 	if(findeFullSpeedOption(user_configuration, order_number) == TRUE)
 		begin
@@ -1011,7 +1026,7 @@ function void axi_write_configuration_wrapper::parseUserBusReadConfiguration(ref
 				end
 		end
 
-			$display("=================================================================== END BUS WRITE CONF ===================================================================");
+//			$display("=================================================================== END BUS WRITE CONF ===================================================================");
 			$display("");
 
 
@@ -1025,7 +1040,7 @@ function void axi_write_configuration_wrapper::parseUserBusWriteConfiguration(re
 	string option;
 	int order_number;
 
-	$display("=================================================================== PARSIN BUS WRITE CONF ===================================================================");
+//	$display("=================================================================== PARSIN BUS WRITE CONF ===================================================================");
 
 	if(findeFullSpeedOption(user_configuration, order_number) == TRUE)
 		begin
@@ -1104,7 +1119,7 @@ function void axi_write_configuration_wrapper::parseUserBusWriteConfiguration(re
 				end
 		end //endforeach
 
-			$display("=================================================================== END BUS WRITE CONF =====================================================================");
+//			$display("=================================================================== END BUS WRITE CONF =====================================================================");
 			$display("");
 
 endfunction
@@ -1211,7 +1226,7 @@ endfunction
 
 function void axi_write_configuration_wrapper::checkUnsettedConfiguration();
 	int i;
-	$display("=================================================================== UNSETTED CONFIGURATION =====================================================================");
+//	$display("=================================================================== UNSETTED CONFIGURATION =====================================================================");
 
 	foreach(master_data[i])
 		begin
@@ -1249,11 +1264,12 @@ function void axi_write_configuration_wrapper::checkUnsettedConfiguration();
 //			`uvm_info("ConfigurationWrapper [U]: ",$sformatf("Configuration unsetted : %s, ussing default configuration", slave_resp[i]), UVM_INFO);
 		end
 
-	$display("=================================================================== END UNSETTED CONFIGURATION  =====================================================================");
+//	$display("=================================================================== END UNSETTED CONFIGURATION  =====================================================================");
 	$display("");
 endfunction
 
 function void axi_write_configuration_wrapper::wrappConfigurationObject();
+
 
 	configuration_object.setGlobal_config_object(global_config_object);
 	configuration_object.setCorrect_value_config_object(correct_value_config_object);
@@ -1268,7 +1284,7 @@ function void axi_write_configuration_wrapper::wrappConfigurationObject();
 
 	configuration_object.checkConfigs();
 
-	$display("DONE WRAPPING ");
+//	$display("DONE WRAPPING ");
 
 endfunction
 

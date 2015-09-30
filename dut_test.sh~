@@ -50,7 +50,7 @@ irun  $other_args \
   -coverage b:u \
   -covoverwrite \
   -nowarn PMBDVX \
-  +UVM_TESTNAME=base_test2 \
+  +UVM_TESTNAME=dut_register_model_test_base \
   +UVM_VERBOSITY=UVM_HIGH \
   +SVSEED=RANDOM \
   $TB_HOME/top.sv \

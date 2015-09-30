@@ -1,0 +1,9 @@
+
+
+
+				WRITING CONFIGURATIONS MANUAL
+			---------------------------------------
+
+
+To create new configuration You will need to take folowing steps:
+1.
