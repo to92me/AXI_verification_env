@@ -2,7 +2,7 @@
 /**
 * Project : AXI UVC
 *
-* File : axi_env.sv
+* File : axi_read_env.sv
 *
 * Language : SystemVerilog
 *
@@ -16,16 +16,16 @@
 *
 * Description : environment for read
 *
-* Classes : axi_env
+* Classes : axi_read_env
 **/
 // -----------------------------------------------------------------------------
 
-`ifndef AXI_ENV_SV
-`define AXI_ENV_SV
+`ifndef axi_read_env_SV
+`define axi_read_env_SV
 
 //------------------------------------------------------------------------------
 //
-// CLASS: axi_env
+// CLASS: axi_read_env
 //
 //------------------------------------------------------------------------------
 /**
@@ -41,7 +41,7 @@
 *			2. update_vif_enables()
 **/
 // -----------------------------------------------------------------------------
-class axi_env extends uvm_env;
+class axi_read_env extends uvm_env;
 
 	// Virtual Interface variable
 	protected virtual interface axi_if vif;
@@ -61,7 +61,7 @@ class axi_env extends uvm_env;
 	bit coverage_enable = 1;
 
 	// Provide implementations of virtual methods such as get_type_name and create
-	`uvm_component_utils_begin(axi_env)
+	`uvm_component_utils_begin(axi_read_env)
 		`uvm_field_int(num_agents, UVM_DEFAULT)
 		`uvm_field_object(config_obj, UVM_DEFAULT)
 		`uvm_field_object(read_master, UVM_DEFAULT)
@@ -83,7 +83,7 @@ class axi_env extends uvm_env;
 	extern virtual task run_phase(uvm_phase phase);
 	extern virtual task update_vif_enables();
 
-endclass : axi_env
+endclass : axi_read_env
 
 //------------------------------------------------------------------------------
 /**
@@ -94,7 +94,7 @@ endclass : axi_env
 * Return :	void
 **/
 //------------------------------------------------------------------------------
-	function void axi_env::build_phase(uvm_phase phase);
+	function void axi_read_env::build_phase(uvm_phase phase);
 
 		super.build_phase(phase);
 
@@ -130,7 +130,7 @@ endclass : axi_env
 * Return :	void
 **/
 //------------------------------------------------------------------------------
-	function void axi_env::connect_phase(input uvm_phase phase);
+	function void axi_read_env::connect_phase(input uvm_phase phase);
 		super.connect_phase(phase);
 
 		if(!uvm_config_db#(virtual axi_if)::get(this, "", "vif", vif))
@@ -146,7 +146,7 @@ endclass : axi_env
 * Return :	void
 **/
 //------------------------------------------------------------------------------
-	function void axi_env::start_of_simulation_phase(uvm_phase phase);
+	function void axi_read_env::start_of_simulation_phase(uvm_phase phase);
 		set_report_id_action_hier("CFGOVR", UVM_DISPLAY);
 		set_report_id_action_hier("CFGSET", UVM_DISPLAY);
 		check_config_usage();
@@ -160,7 +160,7 @@ endclass : axi_env
 * Return :	void
 **/
 //------------------------------------------------------------------------------
-function void axi_env::update_config(axi_config config_obj);
+function void axi_read_env::update_config(axi_config config_obj);
   read_master.update_config(config_obj.master);
   foreach(read_slaves[i])
     read_slaves[i].update_config(config_obj.slave_list[i]);
@@ -175,7 +175,7 @@ endfunction : update_config
 * Ref :
 **/
 //------------------------------------------------------------------------------
-task axi_env::update_vif_enables();
+task axi_read_env::update_vif_enables();
 	vif.has_checks <= checks_enable;
 	vif.has_coverage <= coverage_enable;
 	forever begin
@@ -194,7 +194,7 @@ endtask : update_vif_enables
 * Ref :
 **/
 //------------------------------------------------------------------------------
-task axi_env::run_phase(uvm_phase phase);
+task axi_read_env::run_phase(uvm_phase phase);
   fork
     update_vif_enables();
   join

@@ -2,7 +2,7 @@
 /**
 * Project : AXI UVC
 *
-* File : axi_read_wrap_type_bad_len_bad_addr.sv
+* File : axi_read_fixed_type_bad_len.sv
 *
 * Language : SystemVerilog
 *
@@ -16,42 +16,42 @@
 *
 * Description : one test case
 *
-* Classes : 1. axi_read_wrap_type_bad_len_bad_addr
-*           2. axi_read_burst_frame_wrap_type
+* Classes : 1. axi_read_fixed_type_bad_len
+*           2. axi_read_whole_burst_fixed_type_bad_len
 **/
 // -----------------------------------------------------------------------------
 
 //------------------------------------------------------------------------------
 //
-// Class: axi_read_burst_frame_wrap_type
+// Class: axi_read_whole_burst_fixed_type_bad_len
 //
 //------------------------------------------------------------------------------
 /**
-* Description : burst frame wrap burst type and bad address and length
+* Description : fixed type, unsuported length
 **/
 // -----------------------------------------------------------------------------
-class axi_read_burst_frame_wrap_type extends axi_pkg::axi_read_burst_frame;
+class axi_read_whole_burst_fixed_type_bad_len extends axi_pkg::axi_read_whole_burst;
 
-    `uvm_object_utils(axi_read_burst_frame_wrap_type)
+    `uvm_object_utils(axi_read_whole_burst_fixed_type_bad_len)
 
-    constraint wrap_ct {burst_type == WRAP; len inside {0, 2, [4:6], [8:14], [16:255]}; !(addr == ((int'(addr/(2**size)))*(2**size)));}
+    constraint fixed_ct {burst_type == FIXED; len > 15;}
 
-endclass : axi_read_burst_frame_wrap_type
+endclass : axi_read_whole_burst_fixed_type_bad_len
 
 //------------------------------------------------------------------------------
 //
-// TEST: axi_read_wrap_type_bad_len_bad_addr
+// TEST: axi_read_fixed_type_bad_len
 //
 //------------------------------------------------------------------------------
 /**
-* Description : test wrap burst type
+* Description : test with fixed burst type and unsupported length
 **/
 // -----------------------------------------------------------------------------
-class axi_read_wrap_type_bad_len_bad_addr extends axi_read_base_test;
+class axi_read_fixed_type_bad_len extends axi_read_base_test;
 
-    `uvm_component_utils(axi_read_wrap_type_bad_len_bad_addr)
+    `uvm_component_utils(axi_read_fixed_type_bad_len)
 
-    function new(string name = "axi_read_wrap_type_bad_len_bad_addr", uvm_component parent);
+    function new(string name = "axi_read_fixed_type_bad_len", uvm_component parent);
         super.new(name,parent);
     endfunction : new
 
@@ -72,7 +72,7 @@ class axi_read_wrap_type_bad_len_bad_addr extends axi_read_base_test;
         uvm_config_int::set(this, "tb0.axi0.read_slave*.sequencer.arbit", "region_enable", 1);
 
         // type overrides
-        set_type_override_by_type(axi_pkg::axi_read_burst_frame::get_type(), axi_read_burst_frame_wrap_type::get_type());
+        set_type_override_by_type(axi_pkg::axi_read_whole_burst::get_type(), axi_read_whole_burst_fixed_type_bad_len::get_type());
         set_type_override_by_type(axi_pkg::axi_read_single_addr::get_type(), axi_read_valid_single_frame::get_type());
 
         // sequences
@@ -85,4 +85,4 @@ class axi_read_wrap_type_bad_len_bad_addr extends axi_read_base_test;
 
     endfunction : build_phase
 
-endclass : axi_read_wrap_type_bad_len_bad_addr
+endclass : axi_read_fixed_type_bad_len

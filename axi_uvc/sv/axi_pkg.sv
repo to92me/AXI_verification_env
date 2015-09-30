@@ -4,7 +4,6 @@
 `define tome_test
 `define testing_includes
 `define andrea
-`define andrea_test
 
 package axi_pkg;
 	`ifdef tome_test
@@ -110,13 +109,6 @@ package axi_pkg;
 `endif
 
 `ifdef andrea
-	`ifdef andrea_test
-	// ==================== TEST ================================
-		//typedef class axi_read_test_config;
-		typedef class axi_read_test_config_dut;
-		typedef class axi_write_env;
-	// ==========================================================
-	`endif
 
 	// ==================== FRAMES ==============================
 	typedef class axi_read_single_frame;
@@ -165,7 +157,7 @@ package axi_pkg;
 	// ==========================================================
 
 	// ==================== TOP ==================================
-	typedef class axi_env;
+	typedef class axi_read_env;
 	typedef class axi_virtual_sequencer;
 
 	typedef class axi_master_read_multiple_addr;
@@ -293,16 +285,6 @@ package axi_pkg;
 
 `ifdef andrea
 
-	`ifdef andrea_test
-	// ==================== TEST ================================
-		//`include "axi_read_test_config.sv"
-		//`include "axi_read_tb.sv"
-		`include "dut/axi_read_test_config_dut.sv"
-		`include "dut/axi_read_tb_counter.sv"
-		`include "dut/axi_write_env.sv"
-	// ==========================================================
-	`endif
-
 	// ==================== MASTER ==============================
 	`include "axi_uvc/sv/master/axi_master_config.sv"
 	`include "axi_uvc/sv/master/axi_master_read_driver.sv"
@@ -336,7 +318,7 @@ package axi_pkg;
 	// ==================== TOP =================================
 	`include "axi_uvc/sv/axi_virtual_sequencer.sv"
 	`include "axi_uvc/sv/axi_virtual_seq_lib.sv"
-	`include "axi_uvc/sv/axi_env.sv"
+	`include "axi_uvc/sv/axi_read_env.sv"
 	`include "axi_uvc/sv/axi_read_frames.sv"
 	// ==========================================================
 

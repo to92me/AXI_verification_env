@@ -23,8 +23,8 @@
 `ifndef AXI_READ_TB_SV
 `define AXI_READ_TB_SV
 
-`include "sv/axi_virtual_sequencer.sv"
-`include "sv/axi_virtual_seq_lib.sv"
+`include "axi_uvc/sv/axi_virtual_sequencer.sv"
+`include "axi_uvc/sv/axi_virtual_seq_lib.sv"
 
 //------------------------------------------------------------------------------
 //
@@ -42,7 +42,7 @@
 class axi_read_tb extends uvm_env;
 
   // axi read environment
-  axi_env axi0;
+  axi_read_env axi0;
 
   // configuration object
   axi_read_test_config config_obj;
@@ -81,7 +81,7 @@ endclass : axi_read_tb
     config_obj = axi_read_test_config::type_id::create("config_obj");
     uvm_config_db#(axi_config)::set(this, "*", "axi_config", config_obj);
 
-    axi0 = axi_env::type_id::create("axi0", this);
+    axi0 = axi_read_env::type_id::create("axi0", this);
     virtual_seqr = axi_virtual_sequencer::type_id::create("virtual_seqr", this);
 
   endfunction : build_phase

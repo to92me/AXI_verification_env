@@ -13,7 +13,7 @@ class axi_write_env extends uvm_env;
 
 	bit 							checks_enable 		= 1;
 	bit 							coverage_enable 	= 1;
-	axi_read_test_config_dut 			config_obj;
+	dut_config 			config_obj;
 	axi_master_write_agent 			master;
 	axi_slave_write_agent 			slave;
 	axi_write_configuration_wrapper configuration_wrapper;
@@ -52,9 +52,9 @@ function void axi_write_env::build_phase(uvm_phase phase);
 		super.build_phase(phase);
 
 		if(config_obj == null) //begin
-			if (!uvm_config_db#(axi_read_test_config_dut)::get(this, "", "axi_config", config_obj)) begin
+			if (!uvm_config_db#(dut_config)::get(this, "", "axi_config", config_obj)) begin
 				`uvm_info("NOCONFIG", "Using default_axi_config", UVM_MEDIUM)
-				$cast(config_obj, factory.create_object_by_name("axi_read_test_config_dut","config_obj"));
+				$cast(config_obj, factory.create_object_by_name("dut_config","config_obj"));
 			end
 
 		uvm_config_object::set(this, "*", "axi_config", config_obj);

@@ -2,7 +2,7 @@
 /**
 * Project : AXI UVC
 *
-* File : axi_read_bad_cache.sv
+* File : axi_read_exclusive_access.sv
 *
 * Language : SystemVerilog
 *
@@ -16,42 +16,42 @@
 *
 * Description : one test case
 *
-* Classes : 1. axi_read_bad_cache
-*           2. axi_read_burst_frame_bad_cache
+* Classes : 1. axi_read_exclusive_access
+*           2. axi_read_whole_burst_bad_exclusive_access
 **/
 // -----------------------------------------------------------------------------
 
 //------------------------------------------------------------------------------
 //
-// Class: axi_read_burst_frame_bad_cache
+// Class: axi_read_whole_burst_bad_exclusive_access
 //
 //------------------------------------------------------------------------------
 /**
-* Description : burst frame with bad cache signal
+* Description : bad signals for exclusive access
 **/
 // -----------------------------------------------------------------------------
-class axi_read_burst_frame_bad_cache extends axi_pkg::axi_read_burst_frame;
+class axi_read_whole_burst_bad_exclusive_access extends axi_pkg::axi_read_whole_burst;
 
-    `uvm_object_utils(axi_read_burst_frame_bad_cache)
+    `uvm_object_utils(axi_read_whole_burst_bad_exclusive_access)
 
-    constraint cache_ct {cache[1] == 0; cache[3:2] != 0;}
+    constraint exclusive_ct {lock == EXCLUSIVE; !(addr == ((int'(addr/(2**size)))*(2**size))); ((2**size) * len) > 128; len >= 16; !(((2**size) * len) inside {1, 3, 7, 15, 31, 63, 127});}
 
-endclass : axi_read_burst_frame_bad_cache
+endclass : axi_read_whole_burst_bad_exclusive_access
 
 //------------------------------------------------------------------------------
 //
-// TEST: axi_read_bad_cache
+// TEST: axi_read_exclusive_access
 //
 //------------------------------------------------------------------------------
 /**
-* Description : test with bad cache signal
+* Description : test exclusive access
 **/
 // -----------------------------------------------------------------------------
-class axi_read_bad_cache extends axi_read_base_test;
+class axi_read_exclusive_access extends axi_read_base_test;
 
-    `uvm_component_utils(axi_read_bad_cache)
+    `uvm_component_utils(axi_read_exclusive_access)
 
-    function new(string name = "axi_read_bad_cache", uvm_component parent);
+    function new(string name = "axi_read_exclusive_access", uvm_component parent);
         super.new(name,parent);
     endfunction : new
 
@@ -72,7 +72,7 @@ class axi_read_bad_cache extends axi_read_base_test;
         uvm_config_int::set(this, "tb0.axi0.read_slave*.sequencer.arbit", "region_enable", 1);
 
         // type overrides
-        set_type_override_by_type(axi_pkg::axi_read_burst_frame::get_type(), axi_read_burst_frame_bad_cache::get_type());
+        set_type_override_by_type(axi_pkg::axi_read_whole_burst::get_type(), axi_read_whole_burst_bad_exclusive_access::get_type());
         set_type_override_by_type(axi_pkg::axi_read_single_addr::get_type(), axi_read_valid_single_frame::get_type());
 
         // sequences
@@ -85,4 +85,4 @@ class axi_read_bad_cache extends axi_read_base_test;
 
     endfunction : build_phase
 
-endclass : axi_read_bad_cache
+endclass : axi_read_exclusive_access

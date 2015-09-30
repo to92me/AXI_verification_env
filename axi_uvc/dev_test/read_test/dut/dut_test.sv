@@ -2,7 +2,7 @@
 /**
 * Project : AXI UVC
 *
-* File : axi_read_dut_counter_test.sv
+* File : dut_test.sv
 *
 * Language : SystemVerilog
 *
@@ -16,28 +16,28 @@
 *
 * Description : one test case
 *
-* Classes : 1. axi_read_dut_counter_test
+* Classes : 1. dut_test
 **/
 // -----------------------------------------------------------------------------
 
 //------------------------------------------------------------------------------
 //
-// TEST: axi_read_dut_counter_test
+// TEST: dut_test
 //
 //------------------------------------------------------------------------------
 /**
 * Description : test for the counter
 **/
 // -----------------------------------------------------------------------------
-class axi_read_dut_counter_test extends uvm_test;
+class dut_test extends uvm_test;
 
-    axi_read_counter_tb tb0;
+    dut_tb tb0;
 
-    `uvm_component_utils_begin(axi_read_dut_counter_test)
+    `uvm_component_utils_begin(dut_test)
         `uvm_field_object(tb0, UVM_ALL_ON)
     `uvm_component_utils_end
 
-    function new(string name = "axi_read_dut_counter_test", uvm_component parent);
+    function new(string name = "dut_test", uvm_component parent);
         super.new(name,parent);
     endfunction : new
 
@@ -55,12 +55,12 @@ class axi_read_dut_counter_test extends uvm_test;
 
         // sequences
         uvm_config_wrapper::set(this, "tb0.virtual_seqr.run_phase", "default_sequence",
-                                                     virtual_transfer_dut_counter::get_type());
+                                                     virtual_dut_seq::get_type());
 
-        tb0 = axi_read_counter_tb::type_id::create("tb0", this);
+        tb0 = dut_tb::type_id::create("tb0", this);
 
         super.build_phase(phase);
 
     endfunction : build_phase
 
-endclass : axi_read_dut_counter_test
+endclass : dut_test

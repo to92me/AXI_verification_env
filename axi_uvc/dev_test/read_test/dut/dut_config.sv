@@ -2,7 +2,7 @@
 /**
 * Project : AXI UVC
 *
-* File : axi_read_test_config_dut.sv
+* File : dut_config.sv
 *
 * Language : SystemVerilog
 *
@@ -16,16 +16,16 @@
 *
 * Description : test configuration for testing the counter
 *
-* Classes :	axi_read_test_config_dut
+* Classes :	dut_config
 **/
 // -----------------------------------------------------------------------------
 
-`ifndef axi_read_test_config_dut
-`define axi_read_test_config_dut
+`ifndef dut_config
+`define dut_config
 
 //------------------------------------------------------------------------------
 //
-// CLASS: axi_read_test_config_dut
+// CLASS: dut_config
 //
 //------------------------------------------------------------------------------
 /**
@@ -34,9 +34,9 @@
 * Functions : 1. new (string name, uvm_component parent)
 **/
 // -----------------------------------------------------------------------------
-class axi_read_test_config_dut extends axi_config;
+class dut_config extends axi_config;
 
-	`uvm_object_utils(axi_read_test_config_dut)
+	`uvm_object_utils(dut_config)
 
 	function new(string name = "axi_write_test_config");
 		super.new(name);
@@ -45,7 +45,7 @@ class axi_read_test_config_dut extends axi_config;
 		this.createConfiguration();
 	endfunction: new
 
-endclass : axi_read_test_config_dut
+endclass : dut_config
 
 
 `endif

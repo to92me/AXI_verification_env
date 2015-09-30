@@ -2,7 +2,7 @@
 /**
 * Project : AXI UVC
 *
-* File : axi_read_fixed_type_bad_len.sv
+* File : axi_read_slave_bad_id.sv
 *
 * Language : SystemVerilog
 *
@@ -16,42 +16,42 @@
 *
 * Description : one test case
 *
-* Classes : 1. axi_read_fixed_type_bad_len
-*           2. axi_read_burst_frame_fixed_type_bad_len
+* Classes : 1. axi_read_slave_bad_id
+*           2. axi_read_single_frame_bad_id
 **/
 // -----------------------------------------------------------------------------
 
 //------------------------------------------------------------------------------
 //
-// Class: axi_read_burst_frame_fixed_type_bad_len
+// Class: axi_read_single_frame_bad_id
 //
 //------------------------------------------------------------------------------
 /**
-* Description : fixed type, unsuported length
+* Description : single frame with bad id
 **/
 // -----------------------------------------------------------------------------
-class axi_read_burst_frame_fixed_type_bad_len extends axi_pkg::axi_read_burst_frame;
+class axi_read_single_frame_bad_id extends axi_pkg::axi_read_single_addr;
 
-    `uvm_object_utils(axi_read_burst_frame_fixed_type_bad_len)
+    `uvm_object_utils(axi_read_single_frame_bad_id)
 
-    constraint fixed_ct {burst_type == FIXED; len > 15;}
-
-endclass : axi_read_burst_frame_fixed_type_bad_len
+    constraint id_ct {id_mode == BAD_ID; resp_mode == GOOD_RESP; last_mode == GOOD_LAST_BIT; correct_lane == 1; read_enable == 0;}
+    
+endclass : axi_read_single_frame_bad_id
 
 //------------------------------------------------------------------------------
 //
-// TEST: axi_read_fixed_type_bad_len
+// TEST: axi_read_slave_bad_id
 //
 //------------------------------------------------------------------------------
 /**
-* Description : test with fixed burst type and unsupported length
+* Description : test where slave responds with random id
 **/
 // -----------------------------------------------------------------------------
-class axi_read_fixed_type_bad_len extends axi_read_base_test;
+class axi_read_slave_bad_id extends axi_read_base_test;
 
-    `uvm_component_utils(axi_read_fixed_type_bad_len)
+    `uvm_component_utils(axi_read_slave_bad_id)
 
-    function new(string name = "axi_read_fixed_type_bad_len", uvm_component parent);
+    function new(string name = "axi_read_slave_bad_id", uvm_component parent);
         super.new(name,parent);
     endfunction : new
 
@@ -63,21 +63,21 @@ class axi_read_fixed_type_bad_len extends axi_read_base_test;
         // perform checks in monitor
         uvm_config_int::set(this, "tb0.axi0.*", "checks_enable", 1);
         // early termination of bursts
-        uvm_config_int::set(this, "*", "terminate_enable", 1);
+        uvm_config_int::set(this, "*", "terminate_enable", 0);
         // randomizing ready signal for master
         uvm_config_int::set(this, "tb0.axi0.read_master.driver", "master_ready_rand_enable", 1);
         // radnomizing ready signal for slave
         uvm_config_int::set(this, "tb0.axi0.read_slave*.driver", "slave_ready_rand_enable", 1);
         // actions based on region signal
-        uvm_config_int::set(this, "tb0.axi0.read_slave*.sequencer.arbit", "region_enable", 1);
+        uvm_config_int::set(this, "tb0.axi0.read_slave*.sequencer.arbit", "region_enable", 0);
 
         // type overrides
-        set_type_override_by_type(axi_pkg::axi_read_burst_frame::get_type(), axi_read_burst_frame_fixed_type_bad_len::get_type());
-        set_type_override_by_type(axi_pkg::axi_read_single_addr::get_type(), axi_read_valid_single_frame::get_type());
+        set_type_override_by_type(axi_pkg::axi_read_whole_burst::get_type(), axi_read_valid_burst_frame::get_type());
+        set_type_override_by_type(axi_pkg::axi_read_single_addr::get_type(), axi_read_single_frame_bad_id::get_type());
 
         // sequences
         uvm_config_wrapper::set(this, "tb0.virtual_seqr.run_phase", "default_sequence",
-                                                     virtual_transfer_single_burst::get_type());
+                                                     virtual_transfer_multiple_addr::get_type());
         uvm_config_wrapper::set(this, "tb0.axi0.read_slave*.sequencer.run_phase", "default_sequence",
                                                      axi_slave_read_simple_two_phase_seq::get_type());
 
@@ -85,4 +85,4 @@ class axi_read_fixed_type_bad_len extends axi_read_base_test;
 
     endfunction : build_phase
 
-endclass : axi_read_fixed_type_bad_len
+endclass : axi_read_slave_bad_id

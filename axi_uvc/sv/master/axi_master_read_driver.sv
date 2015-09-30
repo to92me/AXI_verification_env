@@ -54,8 +54,8 @@ class axi_master_read_driver extends uvm_driver #(axi_read_whole_burst);
 	// for sending correct responses
 	axi_master_read_response resp;
 
-	// control bit to enable ready randomization (else - default = 0)
-	bit master_ready_rand_enable = 0;
+	// control bit to enable ready randomization (else - default = 1)
+	bit master_ready_rand_enable = 1;
 	ready_randomization ready_rand;
 
 	// queue of bursts waiting to be sent
@@ -244,7 +244,6 @@ endclass : axi_master_read_driver
 
 				resp.check_response(data_frame, burst_frame);	// check if the burst is complete or if there is an error
 				if (burst_frame != null) begin
-					$display("read driver data : %d",burst_frame.single_frames[0].data);
 					seq_item_port.put(burst_frame);
 				end
 

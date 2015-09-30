@@ -2,7 +2,7 @@
 /**
 * Project : AXI UVC
 *
-* File : axi_read_bad_last_bit.sv
+* File : axi_read_incr_type_boundary.sv
 *
 * Language : SystemVerilog
 *
@@ -16,42 +16,42 @@
 *
 * Description : one test case
 *
-* Classes : 1. axi_read_bad_last_bit
-*           2. axi_read_single_frame_bad_last_bit
+* Classes : 1. axi_read_incr_type_boundary
+*           2. axi_read_whole_burst_incr_type_bad_boundary
 **/
 // -----------------------------------------------------------------------------
 
 //------------------------------------------------------------------------------
 //
-// Class: axi_read_single_frame_bad_last_bit
+// Class: axi_read_whole_burst_incr_type_bad_boundary
 //
 //------------------------------------------------------------------------------
 /**
-* Description : single frame with bad last signal
+* Description : burst frame incr burst type and crossing 4kb boundary
 **/
 // -----------------------------------------------------------------------------
-class axi_read_single_frame_bad_last_bit extends axi_pkg::axi_read_single_addr;
+class axi_read_whole_burst_incr_type_bad_boundary extends axi_pkg::axi_read_whole_burst;
 
-    `uvm_object_utils(axi_read_single_frame_bad_last_bit)
+    `uvm_object_utils(axi_read_whole_burst_incr_type_bad_boundary)
 
-    constraint valid_ct {last_mode == BAD_LAST_BIT; correct_lane == 1; read_enable == 0; id_mode == GOOD_ID; resp_mode == GOOD_RESP;}
-    
-endclass : axi_read_single_frame_bad_last_bit
+    constraint incr_ct {burst_type == INCR; (len * (2**size)) >= 4096;}
+
+endclass : axi_read_whole_burst_incr_type_bad_boundary
 
 //------------------------------------------------------------------------------
 //
-// TEST: axi_read_bad_last_bit
+// TEST: axi_read_incr_type_boundary
 //
 //------------------------------------------------------------------------------
 /**
-* Description : test with where all the single frames send bad last signal
+* Description : test 4kb address boundary
 **/
 // -----------------------------------------------------------------------------
-class axi_read_bad_last_bit extends axi_read_base_test;
+class axi_read_incr_type_boundary extends axi_read_base_test;
 
-    `uvm_component_utils(axi_read_bad_last_bit)
+    `uvm_component_utils(axi_read_incr_type_boundary)
 
-    function new(string name = "axi_read_bad_last_bit", uvm_component parent);
+    function new(string name = "axi_read_incr_type_boundary", uvm_component parent);
         super.new(name,parent);
     endfunction : new
 
@@ -63,21 +63,21 @@ class axi_read_bad_last_bit extends axi_read_base_test;
         // perform checks in monitor
         uvm_config_int::set(this, "tb0.axi0.*", "checks_enable", 1);
         // early termination of bursts
-        uvm_config_int::set(this, "*", "terminate_enable", 0);
+        uvm_config_int::set(this, "*", "terminate_enable", 1);
         // randomizing ready signal for master
         uvm_config_int::set(this, "tb0.axi0.read_master.driver", "master_ready_rand_enable", 1);
         // radnomizing ready signal for slave
         uvm_config_int::set(this, "tb0.axi0.read_slave*.driver", "slave_ready_rand_enable", 1);
         // actions based on region signal
-        uvm_config_int::set(this, "tb0.axi0.read_slave*.sequencer.arbit", "region_enable", 0);
+        uvm_config_int::set(this, "tb0.axi0.read_slave*.sequencer.arbit", "region_enable", 1);
 
         // type overrides
-        set_type_override_by_type(axi_pkg::axi_read_burst_frame::get_type(), axi_read_valid_burst_frame::get_type());
-        set_type_override_by_type(axi_pkg::axi_read_single_addr::get_type(), axi_read_single_frame_bad_last_bit::get_type());
+        set_type_override_by_type(axi_pkg::axi_read_whole_burst::get_type(), axi_read_whole_burst_incr_type_bad_boundary::get_type());
+        set_type_override_by_type(axi_pkg::axi_read_single_addr::get_type(), axi_read_valid_single_frame::get_type());
 
         // sequences
         uvm_config_wrapper::set(this, "tb0.virtual_seqr.run_phase", "default_sequence",
-                                                     virtual_transfer_multiple_addr::get_type());
+                                                     virtual_transfer_single_burst::get_type());
         uvm_config_wrapper::set(this, "tb0.axi0.read_slave*.sequencer.run_phase", "default_sequence",
                                                      axi_slave_read_simple_two_phase_seq::get_type());
 
@@ -85,4 +85,4 @@ class axi_read_bad_last_bit extends axi_read_base_test;
 
     endfunction : build_phase
 
-endclass : axi_read_bad_last_bit
+endclass : axi_read_incr_type_boundary
