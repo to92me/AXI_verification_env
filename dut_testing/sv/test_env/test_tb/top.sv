@@ -5,14 +5,14 @@
 `include "dut/dut_counter.v"
 
 //UVC and REGISTER MODEL
-`include "sv/axi_pkg.sv"
-`include "dut_register_abstract_layer/dut_register_model_pkg.sv"
-`include "dut_test_env_register_model/register_model_env_pkg.sv"
+`include "axi_uvc/sv/axi_pkg.sv"
+`include "dut_register_layer/sv/dut_register_model_pkg.sv"
+`include "dut_testing/sv/test_env/register_model_env_pkg.sv"
 
 
 //UVC VIF and DUT_REGISTER_MODEL VIF
-`include "dut_register_abstract_layer/dut_if.sv"
-`include "sv/axi_if.sv"
+`include "dut_register_layer/sv/dut_if.sv"
+`include "axi_uvc/sv/axi_if.sv"
 
 module dut_register_model_top;
 

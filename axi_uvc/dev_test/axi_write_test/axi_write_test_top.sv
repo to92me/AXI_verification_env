@@ -2,8 +2,8 @@
 `define AXI_WRITE_TEST_TOP_SVH
 
 
-`include "sv/axi_if.sv"
-`include "sv/axi_pkg.sv"
+`include "axi_uvc/sv/axi_if.sv"
+`include "axi_uvc/sv/axi_pkg.sv"
 
 import uvm_pkg::*;
 `include "uvm_macros.svh"

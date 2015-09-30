@@ -23,8 +23,8 @@
 `ifndef axi_read_counter_tb_SV
 `define axi_read_counter_tb_SV
 
-`include "sv/axi_virtual_sequencer.sv"
-`include "sv/axi_virtual_seq_lib.sv"
+`include "axi_uvc/sv/axi_virtual_sequencer.sv"
+`include "axi_uvc/sv/axi_virtual_seq_lib.sv"
 
 //------------------------------------------------------------------------------
 //

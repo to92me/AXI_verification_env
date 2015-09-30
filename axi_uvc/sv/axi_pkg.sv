@@ -178,34 +178,34 @@ package axi_pkg;
 	import uvm_pkg::*;
 	`include "uvm_macros.svh"
 
-	`include "sv/axi_types.sv"
+	`include "axi_uvc/sv/axi_types.sv"
 
-	`include "sv/axi_frame.sv"
-	`include "sv/axi_config.sv"
+	`include "axi_uvc/sv/axi_frame.sv"
+	`include "axi_uvc/sv/axi_config.sv"
 
 `ifdef tome_test
 
 	 // ======================DRIVER UTILS==============================
 	 // COMMON
- 	`include "sv/utils/axi_mssg.sv"
- 	//`include "sv/utils/axi_address_calc.sv"
+ 	`include "axi_uvc/sv/utils/axi_mssg.sv"
+ 	//`include "axi_uvc/sv/utils/axi_address_calc.sv"
 	 // MASTER
-	`include "sv/utils/axi_master_write_driver/base_driver.sv"
-	`include "sv/utils/axi_master_write_driver/main_driver.sv"
-	`include "sv/utils/axi_master_write_driver/data_driver.sv"
-	`include "sv/utils/axi_master_write_driver/address_driver.sv"
-	`include "sv/utils/axi_master_write_driver/response_driver.sv"
-	`include "sv/utils/axi_master_write_scheduler/scheduler_packages.sv"
-	`include "sv/utils/axi_master_write_scheduler/scheduler.sv"
-	`include "sv/utils/axi_master_write_scheduler/scheduler_package2_0.sv"
-	`include "sv/utils/axi_master_write_scheduler/scheduler2_0.sv"
+	`include "axi_uvc/sv/utils/axi_master_write_driver/base_driver.sv"
+	`include "axi_uvc/sv/utils/axi_master_write_driver/main_driver.sv"
+	`include "axi_uvc/sv/utils/axi_master_write_driver/data_driver.sv"
+	`include "axi_uvc/sv/utils/axi_master_write_driver/address_driver.sv"
+	`include "axi_uvc/sv/utils/axi_master_write_driver/response_driver.sv"
+	`include "axi_uvc/sv/utils/axi_master_write_scheduler/scheduler_packages.sv"
+	`include "axi_uvc/sv/utils/axi_master_write_scheduler/scheduler.sv"
+	`include "axi_uvc/sv/utils/axi_master_write_scheduler/scheduler_package2_0.sv"
+	`include "axi_uvc/sv/utils/axi_master_write_scheduler/scheduler2_0.sv"
 	// SLAVE
-	`include "sv/utils/axi_slave_write_driver/base_driver.sv"
-	`include "sv/utils/axi_slave_write_driver/main_driver.sv"
-	`include "sv/utils/axi_slave_write_driver/data_driver.sv"
-	`include "sv/utils/axi_slave_write_driver/address_driver.sv"
-	`include "sv/utils/axi_slave_write_driver/response_driver.sv"
-	`include "sv/utils/axi_slave_config_memory.sv"
+	`include "axi_uvc/sv/utils/axi_slave_write_driver/base_driver.sv"
+	`include "axi_uvc/sv/utils/axi_slave_write_driver/main_driver.sv"
+	`include "axi_uvc/sv/utils/axi_slave_write_driver/data_driver.sv"
+	`include "axi_uvc/sv/utils/axi_slave_write_driver/address_driver.sv"
+	`include "axi_uvc/sv/utils/axi_slave_write_driver/response_driver.sv"
+	`include "axi_uvc/sv/utils/axi_slave_config_memory.sv"
 	// =================== END DRIVER UTILS==============================
 
 
@@ -213,83 +213,83 @@ package axi_pkg;
 
 	// ==================== MONITOR UTILS ==============================
 	// MASTER
-	`include "sv/utils/axi_master_write_monitor/address_collector.sv"
-	`include "sv/utils/axi_master_write_monitor/data_collector.sv"
-	`include "sv/utils/axi_master_write_monitor/response_collector.sv"
-	`include "sv/utils/axi_master_write_monitor/base_collector.sv"
-	`include "sv/utils/axi_master_write_monitor/burst_collector.sv"
+	`include "axi_uvc/sv/utils/axi_master_write_monitor/address_collector.sv"
+	`include "axi_uvc/sv/utils/axi_master_write_monitor/data_collector.sv"
+	`include "axi_uvc/sv/utils/axi_master_write_monitor/response_collector.sv"
+	`include "axi_uvc/sv/utils/axi_master_write_monitor/base_collector.sv"
+	`include "axi_uvc/sv/utils/axi_master_write_monitor/burst_collector.sv"
 	//COVERAGES
-	`include "sv/utils/axi_master_write_monitor/coverage_base.sv"
-	`include "sv/utils/axi_master_write_monitor/coverages/coverage.sv"
-	`include "sv/utils/axi_master_write_monitor/coverages/create_coverage.sv"
+	`include "axi_uvc/sv/utils/axi_master_write_monitor/coverage_base.sv"
+	`include "axi_uvc/sv/utils/axi_master_write_monitor/coverages/coverage.sv"
+	`include "axi_uvc/sv/utils/axi_master_write_monitor/coverages/create_coverage.sv"
 	//CHECKERS
-	`include "sv/utils/axi_master_write_monitor/checker_base.sv"
-	`include "sv/utils/axi_master_write_monitor/checkers/checker.sv"
-	`include "sv/utils/axi_master_write_monitor/checkers/create_checker.sv"
+	`include "axi_uvc/sv/utils/axi_master_write_monitor/checker_base.sv"
+	`include "axi_uvc/sv/utils/axi_master_write_monitor/checkers/checker.sv"
+	`include "axi_uvc/sv/utils/axi_master_write_monitor/checkers/create_checker.sv"
 
 	 //SLAVE
-	`include "sv/utils/axi_slave_write_monitor/address_collector.sv"
-	`include "sv/utils/axi_slave_write_monitor/data_collector.sv"
-	`include "sv/utils/axi_slave_write_monitor/response_collector.sv"
-	`include "sv/utils/axi_slave_write_monitor/base_collector.sv"
-	`include "sv/utils/axi_slave_write_monitor/burst_collector.sv"
+	`include "axi_uvc/sv/utils/axi_slave_write_monitor/address_collector.sv"
+	`include "axi_uvc/sv/utils/axi_slave_write_monitor/data_collector.sv"
+	`include "axi_uvc/sv/utils/axi_slave_write_monitor/response_collector.sv"
+	`include "axi_uvc/sv/utils/axi_slave_write_monitor/base_collector.sv"
+	`include "axi_uvc/sv/utils/axi_slave_write_monitor/burst_collector.sv"
 	//COVERAGES
-	`include "sv/utils/axi_slave_write_monitor/coverage_base.sv"
-	`include "sv/utils/axi_slave_write_monitor/coverages/coverage.sv"
-	`include "sv/utils/axi_slave_write_monitor/coverages/create_coverage.sv"
+	`include "axi_uvc/sv/utils/axi_slave_write_monitor/coverage_base.sv"
+	`include "axi_uvc/sv/utils/axi_slave_write_monitor/coverages/coverage.sv"
+	`include "axi_uvc/sv/utils/axi_slave_write_monitor/coverages/create_coverage.sv"
 	//CHECKERS
-	`include "sv/utils/axi_slave_write_monitor/checker_base.sv"
-	`include "sv/utils/axi_slave_write_monitor/checkers/checker.sv"
-	`include "sv/utils/axi_slave_write_monitor/checkers/create_checker.sv"
+	`include "axi_uvc/sv/utils/axi_slave_write_monitor/checker_base.sv"
+	`include "axi_uvc/sv/utils/axi_slave_write_monitor/checkers/checker.sv"
+	`include "axi_uvc/sv/utils/axi_slave_write_monitor/checkers/create_checker.sv"
 	//==================== END MONITOR UTILS=============================
 
 
 	//==================CONFIGURATIONS==============================
-	`include "sv/utils/configuration/configuration_objects.sv"
-	`include "sv/utils/configuration/write_configuration_base.sv"
-	`include "sv/utils/configuration/write_configuration_wrapper.sv"
-	`include "configurations/register_configuration.sv"
-	`include "configurations/write_user_configuration.sv"
-	`include "sv/utils/axi_master_write_scheduler/correct_incorrect_value_randomization.sv"
+	`include "axi_uvc/sv/utils/configuration/configuration_objects.sv"
+	`include "axi_uvc/sv/utils/configuration/write_configuration_base.sv"
+	`include "axi_uvc/sv/utils/configuration/write_configuration_wrapper.sv"
+	`include "axi_uvc/configurations/register_configuration.sv"
+	`include "axi_uvc/configurations/write_user_configuration.sv"
+	`include "axi_uvc/sv/utils/axi_master_write_scheduler/correct_incorrect_value_randomization.sv"
 	//=================END CONFIGURATIONS===========================
 
 
 	//add include for master
-	`include "sv/master/axi_master_config.sv"
-	`include "sv/master/axi_master_write_agent.sv"
-	`include "sv/master/axi_master_write_driver.sv"
-	`include "sv/master/axi_master_write_monitor.sv"
-	`include "sv/master/axi_master_write_sequencer.sv"
-	`include "sv/master/axi_master_write_sequence_lib.sv"
+	`include "axi_uvc/sv/master/axi_master_config.sv"
+	`include "axi_uvc/sv/master/axi_master_write_agent.sv"
+	`include "axi_uvc/sv/master/axi_master_write_driver.sv"
+	`include "axi_uvc/sv/master/axi_master_write_monitor.sv"
+	`include "axi_uvc/sv/master/axi_master_write_sequencer.sv"
+	`include "axi_uvc/sv/master/axi_master_write_sequence_lib.sv"
 
 	//add include for slave
-	`include "sv/slave/axi_slave_config.sv"
-	`include "sv/slave/axi_slave_write_driver.sv"
-	`include "sv/slave/axi_slave_write_sequencer.sv"
-	`include "sv/slave/axi_slave_write_agent.sv"
-	`include "sv/slave/axi_slave_write_monitor.sv"
+	`include "axi_uvc/sv/slave/axi_slave_config.sv"
+	`include "axi_uvc/sv/slave/axi_slave_write_driver.sv"
+	`include "axi_uvc/sv/slave/axi_slave_write_sequencer.sv"
+	`include "axi_uvc/sv/slave/axi_slave_write_agent.sv"
+	`include "axi_uvc/sv/slave/axi_slave_write_monitor.sv"
 
 
-//	`include "sv/slave/axi_slave_write_sequence_lib.sv"
+//	`include "axi_uvc/sv/slave/axi_slave_write_sequence_lib.sv"
 
 `ifdef testing_includes
-	`include "axi_write_test/axi_master_write_test_config.sv"
-	`include "axi_write_test/axi_master_write_test_env.sv"
-	`include "axi_write_test/axi_write_test_tb.sv"
-	`include "axi_write_test/axi_master_write_test_lib.sv"
+	`include "axi_uvc/dev_test/axi_write_test/axi_master_write_test_config.sv"
+	`include "axi_uvc/dev_test/axi_write_test/axi_master_write_test_env.sv"
+	`include "axi_uvc/dev_test/axi_write_test/axi_write_test_tb.sv"
+	`include "axi_uvc/dev_test/axi_write_test/axi_master_write_test_lib.sv"
 
 
 `endif
 `endif
 
-//	`include "sv/slave/axi_slave_write_driver.sv"
-//	`include "sv/slave/axi_slave_write_monitor.sv"
-//	`include "sv/slave/axi_slave_write_sequencer.sv"
-//	`include "sv/slave/axi_slave_write_sequence_lib.sv"
+//	`include "axi_uvc/sv/slave/axi_slave_write_driver.sv"
+//	`include "axi_uvc/sv/slave/axi_slave_write_monitor.sv"
+//	`include "axi_uvc/sv/slave/axi_slave_write_sequencer.sv"
+//	`include "axi_uvc/sv/slave/axi_slave_write_sequence_lib.sv"
 
-//	`include "sv/slave/axi_slave_read_driver.sv"
-//	`include "sv/slave/axi_slave_read_sequencer.sv"
-//	`include "sv/slave/axi_slave_read_sequence_lib.sv"
+//	`include "axi_uvc/sv/slave/axi_slave_read_driver.sv"
+//	`include "axi_uvc/sv/slave/axi_slave_read_sequencer.sv"
+//	`include "axi_uvc/sv/slave/axi_slave_read_sequence_lib.sv"
 
 `ifdef andrea
 
@@ -304,40 +304,40 @@ package axi_pkg;
 	`endif
 
 	// ==================== MASTER ==============================
-	`include "sv/master/axi_master_config.sv"
-	`include "sv/master/axi_master_read_driver.sv"
-	`include "sv/master/axi_master_read_coverage_collector.sv"
-	`include "sv/master/axi_master_read_sequencer.sv"
-	`include "sv/master/axi_master_read_sequence_lib.sv"
-	`include "sv/master/axi_master_read_agent.sv"
-	`include "sv/master/axi_master_read_collector.sv"
-	`include "sv/master/axi_master_read_monitor.sv"
+	`include "axi_uvc/sv/master/axi_master_config.sv"
+	`include "axi_uvc/sv/master/axi_master_read_driver.sv"
+	`include "axi_uvc/sv/master/axi_master_read_coverage_collector.sv"
+	`include "axi_uvc/sv/master/axi_master_read_sequencer.sv"
+	`include "axi_uvc/sv/master/axi_master_read_sequence_lib.sv"
+	`include "axi_uvc/sv/master/axi_master_read_agent.sv"
+	`include "axi_uvc/sv/master/axi_master_read_collector.sv"
+	`include "axi_uvc/sv/master/axi_master_read_monitor.sv"
 	// ==========================================================
 
 	// ==================== SLAVE ===============================
-	`include "sv/slave/axi_slave_config.sv"
-	`include "sv/slave/axi_slave_read_driver.sv"
-	`include "sv/slave/axi_slave_read_coverage_collector.sv"
-	`include "sv/slave/axi_slave_read_sequencer.sv"
-	`include "sv/slave/axi_slave_read_sequence_lib.sv"
-	`include "sv/slave/axi_slave_read_agent.sv"
-	`include "sv/slave/axi_slave_read_monitor.sv"
-	`include "sv/slave/axi_slave_read_collector.sv"
+	`include "axi_uvc/sv/slave/axi_slave_config.sv"
+	`include "axi_uvc/sv/slave/axi_slave_read_driver.sv"
+	`include "axi_uvc/sv/slave/axi_slave_read_coverage_collector.sv"
+	`include "axi_uvc/sv/slave/axi_slave_read_sequencer.sv"
+	`include "axi_uvc/sv/slave/axi_slave_read_sequence_lib.sv"
+	`include "axi_uvc/sv/slave/axi_slave_read_agent.sv"
+	`include "axi_uvc/sv/slave/axi_slave_read_monitor.sv"
+	`include "axi_uvc/sv/slave/axi_slave_read_collector.sv"
 	// ==========================================================
 
 	// ==================== UTILS ===============================
-	`include "sv/utils/axi_master_read_response.sv"
-	`include "sv/utils/axi_slave_read_arbitration.sv"
-	`include "sv/utils/axi_mssg.sv"
-	`include "sv/utils/axi_slave_config_memory.sv"
-	`include "sv/utils/axi_address_calc.sv"
+	`include "axi_uvc/sv/utils/axi_master_read_response.sv"
+	`include "axi_uvc/sv/utils/axi_slave_read_arbitration.sv"
+	`include "axi_uvc/sv/utils/axi_mssg.sv"
+	`include "axi_uvc/sv/utils/axi_slave_config_memory.sv"
+	`include "axi_uvc/sv/utils/axi_address_calc.sv"
 	// ==========================================================
 
 	// ==================== TOP =================================
-	`include "sv/axi_virtual_sequencer.sv"
-	`include "sv/axi_virtual_seq_lib.sv"
-	`include "sv/axi_env.sv"
-	`include "sv/axi_read_frames.sv"
+	`include "axi_uvc/sv/axi_virtual_sequencer.sv"
+	`include "axi_uvc/sv/axi_virtual_seq_lib.sv"
+	`include "axi_uvc/sv/axi_env.sv"
+	`include "axi_uvc/sv/axi_read_frames.sv"
 	// ==========================================================
 
 `endif

@@ -19,8 +19,8 @@
 // -----------------------------------------------------------------------------
 
 `include "dut.v"    // design under test
-`include "sv/axi_if.sv"
-`include "sv/axi_pkg.sv"
+`include "axi_uvc/sv/axi_if.sv"
+`include "axi_uvc/sv/axi_pkg.sv"
 
 module axi_top;
 
@@ -35,7 +35,7 @@ module axi_top;
     reg reset;
 
     axi_if if0(.sig_reset(reset), .sig_clock(clock));
-  
+
     dut dut(.axi_clock(clock), .axi_reset(reset), .axi_if(if0) );
 
     initial begin
