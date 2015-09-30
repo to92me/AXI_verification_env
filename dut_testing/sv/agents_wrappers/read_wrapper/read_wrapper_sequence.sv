@@ -1,5 +1,5 @@
-`ifndef AXI_READ_WRAPPER_SEQUENCE_SVH
-`define AXI_READ_WRAPPER_SEQUENCE_SVH
+`ifndef AXI_READ_WRAPPER_SEQUENCE_SVH_
+`define AXI_READ_WRAPPER_SEQUENCE_SVH_
 
 
 class axi_read_wrapper_sequence extends uvm_sequence#(axi_read_whole_burst);
@@ -36,7 +36,7 @@ endclass : axi_read_wrapper_sequence
 
 //		    $display("UVM_DO_WITH_ REGISTER MODEL");
 
-		    `uvm_do_with(req,
+		    `uvm_do_on_with(req, p_sequencer.read_sequencer,
 							{	req.addr		== frame.addr;
 						    	//req.data[0] 	== frame.data[0];
 						    	req.len			== frame.len;

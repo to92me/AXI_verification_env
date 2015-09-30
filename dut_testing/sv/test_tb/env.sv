@@ -1,5 +1,5 @@
-`ifndef AXI_DUT_REGISTER_MODEL_ENV_SVH
-`define AXI_DUT_REGISTER_MODEL_ENV_SVH
+`ifndef AXI_DUT_REGISTER_MODEL_ENV_SVH_
+`define AXI_DUT_REGISTER_MODEL_ENV_SVH_
 
 
 typedef uvm_reg_predictor#(dut_frame) dut_register_model_predictor;

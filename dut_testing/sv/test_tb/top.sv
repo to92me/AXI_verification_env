@@ -7,7 +7,7 @@
 //UVC and REGISTER MODEL
 `include "axi_uvc/sv/axi_pkg.sv"
 `include "dut_register_layer/sv/dut_register_model_pkg.sv"
-`include "dut_testing/sv/test_env/register_model_env_pkg.sv"
+`include "dut_testing/sv/register_model_env_pkg.sv"
 
 
 //UVC VIF and DUT_REGISTER_MODEL VIF

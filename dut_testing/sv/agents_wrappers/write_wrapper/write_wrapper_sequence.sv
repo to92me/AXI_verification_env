@@ -1,5 +1,5 @@
-`ifndef AXI_WRITE_WRAPPER_SEQUENCE_SVH
-`define AXI_WRITE_WRAPPER_SEQUENCE_SVH
+`ifndef AXI_WRITE_WRAPPER_SEQUENCE_SVH_
+`define AXI_WRITE_WRAPPER_SEQUENCE_SVH_
 
 
 //------------------------------------------------------------------------------
@@ -41,7 +41,7 @@ endclass : axi_write_wrapper_sequence
 
 //			 		$display("data: %h", frame_axi.data[0]);
 
-			`uvm_do_with(req,
+			`uvm_do_on_with(req, p_sequencer.write_sequencer,
 					    	{	req.addr		== frame_axi.addr;
 						    	foreach(frame_axi.data[i])
 						    			req.data[i] 	== frame_axi.data[i];

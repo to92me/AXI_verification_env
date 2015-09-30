@@ -1,5 +1,5 @@
-`ifndef AXI_WRITE_WAPPER_AGENT_SVH
-`define AXI_WRITE_WAPPER_AGENT_SVH
+`ifndef AXI_WRITE_WAPPER_AGENT_SVH_
+`define AXI_WRITE_WAPPER_AGENT_SVH_
 
 //------------------------------------------------------------------------------
 //
@@ -51,7 +51,8 @@ class axi_write_wrapper_agent extends uvm_subscriber#(dut_frame);
 	function void connect_phase(uvm_phase phase);
 		super.connect_phase(phase);
 		wrapper_low_sequencer.upper_seq_item_port.connect(wrapper_top_sequencer.seq_item_export);
-		axi_write_agent_p.driver.seq_item_port.connect(wrapper_low_sequencer.seq_item_export);
+		wrapper_low_sequencer.setWriteSequencer(axi_write_agent_p.sequencer);
+//		axi_write_agent_p.driver.seq_item_port.connect(wrapper_low_sequencer.seq_item_export);
 	endfunction
 
 	function axi_write_wrapper_top_sequencer getTopSequencer();

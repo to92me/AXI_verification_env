@@ -1,5 +1,5 @@
-`ifndef AXI_WRITE_WRAPPER_LOW_SEQUENCER_SVH
-`define AXI_WRITE_WRAPPER_LOW_SEQUENCER_SVH
+`ifndef AXI_WRITE_WRAPPER_LOW_SEQUENCER_SVH_
+`define AXI_WRITE_WRAPPER_LOW_SEQUENCER_SVH_
 
 //------------------------------------------------------------------------------
 //
@@ -10,6 +10,7 @@
 class axi_write_wrapper_low_sequencer extends uvm_sequencer#(axi_frame);
 
 	uvm_seq_item_pull_port#(dut_frame)		upper_seq_item_port;
+	axi_master_write_sequencer				write_sequencer;
 
 
 	`uvm_component_utils(axi_write_wrapper_low_sequencer)
@@ -25,6 +26,10 @@ class axi_write_wrapper_low_sequencer extends uvm_sequencer#(axi_frame);
 	function void build_phase(uvm_phase phase);
 		super.build_phase(phase);
 	endfunction : build_phase
+
+	function void setWriteSequencer(input axi_master_write_sequencer sqr_instance);
+		this.write_sequencer = sqr_instance;
+	endfunction
 
 endclass : axi_write_wrapper_low_sequencer
 

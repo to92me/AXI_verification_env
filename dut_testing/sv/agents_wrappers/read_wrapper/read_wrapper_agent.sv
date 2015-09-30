@@ -1,5 +1,5 @@
-`ifndef AXI_READ_WAPPER_AGENT_SVH
-`define AXI_READ_WAPPER_AGENT_SVH
+`ifndef AXI_READ_WAPPER_AGENT_SVH_
+`define AXI_READ_WAPPER_AGENT_SVH_
 
 
 //------------------------------------------------------------------------------
@@ -46,7 +46,8 @@ class axi_read_wrapper_agent extends uvm_subscriber#(dut_frame);
 	function void connect_phase(input uvm_phase phase);
 	    super.connect_phase(phase);
 		wrapper_low_sequencer.upper_seq_item_port.connect(wrapper_top_sequencer.seq_item_export);
-		axi_read_agent_p.driver.seq_item_port.connect(wrapper_low_sequencer.seq_item_export);
+		wrapper_low_sequencer.setReadSequencer(axi_read_agent_p.sequencer);
+		//axi_read_agent_p.driver.seq_item_port.connect(wrapper_low_sequencer.seq_item_export);
 	endfunction
 
 	function axi_read_wrapper_top_sequencer getTopSequencer();

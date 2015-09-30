@@ -43,29 +43,29 @@ package register_model_env_pkg;
 	`include "dut_register_layer/sv/dut_register_model_pkg.sv"
 	import dut_register_model_pkg::*;
 
-	`include "dut_testing/sv/test_env/agents_wrappers/read_wrapper/read_wrapper_agent.sv"
-	`include "dut_testing/sv/test_env/agents_wrappers/read_wrapper/read_wrapper_low_sequencer.sv"
-	`include "dut_testing/sv/test_env/agents_wrappers/read_wrapper/read_wrapper_top_sequencer.sv"
-	`include "dut_testing/sv/test_env/agents_wrappers/read_wrapper/read_wrapper_sequence.sv"
-	`include "dut_testing/sv/test_env/agents_wrappers/read_wrapper/read_wrapper_monitor.sv"
+	`include "dut_testing/sv/agents_wrappers/read_wrapper/read_wrapper_agent.sv"
+	`include "dut_testing/sv/agents_wrappers/read_wrapper/read_wrapper_low_sequencer.sv"
+	`include "dut_testing/sv/agents_wrappers/read_wrapper/read_wrapper_top_sequencer.sv"
+	`include "dut_testing/sv/agents_wrappers/read_wrapper/read_wrapper_sequence.sv"
+	`include "dut_testing/sv/agents_wrappers/read_wrapper/read_wrapper_monitor.sv"
 
-	`include "dut_testing/sv/test_env/agents_wrappers/write_wrapper/write_wrapper_agent.sv"
-	`include "dut_testing/sv/test_env/agents_wrappers/write_wrapper/write_wrapper_low_sequencer.sv"
-	`include "dut_testing/sv/test_env/agents_wrappers/write_wrapper/write_wrapper_top_sequencer.sv"
-	`include "dut_testing/sv/test_env/agents_wrappers/write_wrapper/write_wrapper_monitor.sv"
-	`include "dut_testing/sv/test_env/agents_wrappers/write_wrapper/write_wrapper_sequence.sv"
+	`include "dut_testing/sv/agents_wrappers/write_wrapper/write_wrapper_agent.sv"
+	`include "dut_testing/sv/agents_wrappers/write_wrapper/write_wrapper_low_sequencer.sv"
+	`include "dut_testing/sv/agents_wrappers/write_wrapper/write_wrapper_top_sequencer.sv"
+	`include "dut_testing/sv/agents_wrappers/write_wrapper/write_wrapper_monitor.sv"
+	`include "dut_testing/sv/agents_wrappers/write_wrapper/write_wrapper_sequence.sv"
 
 
-	`include "dut_testing/sv/test_env/layering/lower_sequencer.sv"
-	`include "dut_testing/sv/test_env/layering/lower_sequence.sv"
-	`include "dut_testing/sv/test_env/layering/top_sequencer.sv"
-	`include "dut_testing/sv/test_env/layering/top_monitor.sv"
+	`include "dut_testing/sv/layering/lower_sequencer.sv"
+	`include "dut_testing/sv/layering/lower_sequence.sv"
+	`include "dut_testing/sv/layering/top_sequencer.sv"
+	`include "dut_testing/sv/layering/top_monitor.sv"
 
-	`include "dut_testing/sv/test_env/test_tb/config.sv"
-	`include "dut_testing/sv/test_env/test_tb/env.sv"
-	`include "dut_testing/sv/test_env/test_tb/tb.sv"
-	`include "dut_testing/sv/test_env/test_tb/test.sv"
-//	`include "dut_testing/sv/test_env/test_tb/top.sv"
+	`include "dut_testing/sv/test_tb/config.sv"
+	`include "dut_testing/sv/test_tb/env.sv"
+	`include "dut_testing/sv/test_tb/tb.sv"
+	`include "dut_testing/sv/test_tb/test.sv"
+//	`include "dut_testing/sv/test_tb/top.sv"
 
 
 	//test
