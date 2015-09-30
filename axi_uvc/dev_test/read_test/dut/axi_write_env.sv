@@ -1,11 +1,46 @@
+// -----------------------------------------------------------------------------
+/**
+* Project : AXI UVC
+*
+* File : axi_write_env.sv
+*
+* Language : SystemVerilog
+*
+* Company : Elsys Eastern Europe
+*
+* Author : Andrea Erdeljan
+*
+* E-Mail : andrea.erdeljan@elsys-eastern.com
+*
+* Mentor : Darko Tomusilovic
+*
+* Description : environment for write
+*
+* Classes :	axi_write_env
+**/
+// -----------------------------------------------------------------------------
+
 `ifndef AXI_WRITE_ENV_SVH
 `define AXI_WRITE_ENV_SVH
-//------------------------------------------------------------------------------
-//
-// CLASS: uvc_company_uvc_name_env
-//
-//------------------------------------------------------------------------------
 
+//------------------------------------------------------------------------------
+//
+// CLASS: axi_write_env
+//
+//------------------------------------------------------------------------------
+/**
+* Description : contains agents, configuration - write UVC
+*
+* Functions :	1. new (string name, uvm_component parent);
+*				2. void build_phase(uvm_phase phase)
+*				3. void connect_phase(uvm_phase phase)
+*				4. void start_of_simulation_phase(uvm_phase phase)
+*				5. void update_config(axi_config config_obj)
+*
+* Tasks :	1. run_phase(uvm_phase phase)
+*			2. update_vif_enables()
+**/
+// -----------------------------------------------------------------------------
 class axi_write_env extends uvm_env;
 
 	// Virtual Interface variable
@@ -13,27 +48,23 @@ class axi_write_env extends uvm_env;
 
 	bit 							checks_enable 		= 1;
 	bit 							coverage_enable 	= 1;
-	axi_read_test_config_dut 			config_obj;
+	dut_config 			config_obj;
 	axi_master_write_agent 			master;
 	axi_slave_write_agent 			slave;
 	axi_write_configuration_wrapper configuration_wrapper;
 	axi_write_conf					uvc_configuration;
 
-
-
 	// Provide implementations of virtual methods such as get_type_name and create
-`uvm_component_utils_begin(axi_write_env)
-	 `uvm_field_int(checks_enable, UVM_DEFAULT | UVM_UNSIGNED)
-	 `uvm_field_int(coverage_enable, UVM_DEFAULT | UVM_UNSIGNED)
-	 `uvm_field_object(config_obj, UVM_DEFAULT)
-	 `uvm_field_object(master, UVM_DEFAULT)
- `uvm_component_utils_end
-
+	`uvm_component_utils_begin(axi_write_env)
+		`uvm_field_int(checks_enable, UVM_DEFAULT | UVM_UNSIGNED)
+		`uvm_field_int(coverage_enable, UVM_DEFAULT | UVM_UNSIGNED)
+		`uvm_field_object(config_obj, UVM_DEFAULT)
+		`uvm_field_object(master, UVM_DEFAULT)
+	`uvm_component_utils_end
 
 	// new - constructor
 	function new(string name, uvm_component parent);
 		super.new(name, parent);
-
 	endfunction : new
 
 	extern virtual function void build_phase(uvm_phase phase);
@@ -43,7 +74,6 @@ class axi_write_env extends uvm_env;
 	extern task run_phase(uvm_phase phase);
 	extern task update_vif_enables();
 
-
 endclass : axi_write_env
 
 
@@ -52,9 +82,9 @@ function void axi_write_env::build_phase(uvm_phase phase);
 		super.build_phase(phase);
 
 		if(config_obj == null) //begin
-			if (!uvm_config_db#(axi_read_test_config_dut)::get(this, "", "axi_config", config_obj)) begin
+			if (!uvm_config_db#(dut_config)::get(this, "", "axi_config", config_obj)) begin
 				`uvm_info("NOCONFIG", "Using default_axi_config", UVM_MEDIUM)
-				$cast(config_obj, factory.create_object_by_name("axi_read_test_config_dut","config_obj"));
+				$cast(config_obj, factory.create_object_by_name("dut_config","config_obj"));
 			end
 
 		uvm_config_object::set(this, "*", "axi_config", config_obj);
@@ -74,8 +104,6 @@ function void axi_write_env::build_phase(uvm_phase phase);
 			slave = axi_slave_write_agent::type_id::create($sformatf("slave_write_agent[%0d]", i), this);
 		end
 
-
-
 endfunction : build_phase
 
 
@@ -85,15 +113,15 @@ function void axi_write_env::connect_phase(input uvm_phase phase);
 		if(!uvm_config_db#(virtual axi_if)::get(this, "", "vif", vif))
 			`uvm_fatal("NOVIF",{"virtual interface must be set for: ",get_full_name(),".vif"});
 
-	endfunction
+endfunction : connect_phase
 
 
-	// UVM start_of_simulation_phase
-	function void axi_write_env::start_of_simulation_phase(uvm_phase phase);
-		set_report_id_action_hier("CFGOVR", UVM_DISPLAY);
-		set_report_id_action_hier("CFGSET", UVM_DISPLAY);
-		check_config_usage();
-	endfunction : start_of_simulation_phase
+// UVM start_of_simulation_phase
+function void axi_write_env::start_of_simulation_phase(uvm_phase phase);
+	set_report_id_action_hier("CFGOVR", UVM_DISPLAY);
+	set_report_id_action_hier("CFGSET", UVM_DISPLAY);
+	check_config_usage();
+endfunction : start_of_simulation_phase
 
 // update_config() method
 function void axi_write_env::update_config(axi_config config_obj);
@@ -113,9 +141,9 @@ endtask : update_vif_enables
 
 //UVM run_phase()
 task axi_write_env::run_phase(uvm_phase phase);
-  fork
-    update_vif_enables();
-  join
+	fork
+    	update_vif_enables();
+	join
 endtask : run_phase
 
 `endif

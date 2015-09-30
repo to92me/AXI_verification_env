@@ -2,7 +2,7 @@
 /**
 * Project : AXI UVC
 *
-* File : axi_read_slave_bad_resp.sv
+* File : axi_read_all_valid_frames.sv
 *
 * Language : SystemVerilog
 *
@@ -16,42 +16,24 @@
 *
 * Description : one test case
 *
-* Classes : 1. axi_read_slave_bad_resp
-*           2. axi_read_single_frame_bad_resp
+* Classes : axi_read_all_valid_frames
 **/
 // -----------------------------------------------------------------------------
 
 //------------------------------------------------------------------------------
 //
-// Class: axi_read_single_frame_bad_resp
+// TEST: axi_read_all_valid_frames
 //
 //------------------------------------------------------------------------------
 /**
-* Description : single frame with bad response signal
+* Description : test with where all the generated frames follow protocol
 **/
 // -----------------------------------------------------------------------------
-class axi_read_single_frame_bad_resp extends axi_pkg::axi_read_single_addr;
+class axi_read_all_valid_frames extends axi_read_base_test;
 
-    `uvm_object_utils(axi_read_single_frame_bad_resp)
+    `uvm_component_utils(axi_read_all_valid_frames)
 
-    constraint resp_ct {id_mode == GOOD_ID; resp_mode == BAD_RESP; last_mode == GOOD_LAST_BIT; correct_lane == 1; read_enable == 0;}
-    
-endclass : axi_read_single_frame_bad_resp
-
-//------------------------------------------------------------------------------
-//
-// TEST: axi_read_slave_bad_resp
-//
-//------------------------------------------------------------------------------
-/**
-* Description : test where all the single frames send bad resp signal
-**/
-// -----------------------------------------------------------------------------
-class axi_read_slave_bad_resp extends axi_read_base_test;
-
-    `uvm_component_utils(axi_read_slave_bad_resp)
-
-    function new(string name = "axi_read_slave_bad_resp", uvm_component parent);
+    function new(string name = "axi_read_all_valid_frames", uvm_component parent);
         super.new(name,parent);
     endfunction : new
 
@@ -72,8 +54,8 @@ class axi_read_slave_bad_resp extends axi_read_base_test;
         uvm_config_int::set(this, "tb0.axi0.read_slave*.sequencer.arbit", "region_enable", 0);
 
         // type overrides
-        set_type_override_by_type(axi_pkg::axi_read_burst_frame::get_type(), axi_read_valid_burst_frame::get_type());
-        set_type_override_by_type(axi_pkg::axi_read_single_addr::get_type(), axi_read_single_frame_bad_resp::get_type());
+        set_type_override_by_type(axi_pkg::axi_read_whole_burst::get_type(), axi_read_valid_burst_frame::get_type());
+        set_type_override_by_type(axi_pkg::axi_read_single_addr::get_type(), axi_read_valid_single_frame::get_type());
 
         // sequences
         uvm_config_wrapper::set(this, "tb0.virtual_seqr.run_phase", "default_sequence",
@@ -85,4 +67,4 @@ class axi_read_slave_bad_resp extends axi_read_base_test;
 
     endfunction : build_phase
 
-endclass : axi_read_slave_bad_resp
+endclass : axi_read_all_valid_frames

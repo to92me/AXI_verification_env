@@ -12,12 +12,8 @@ import uvm_pkg::*;            // import the UVM library
 
 interface axi_if (input sig_reset, input sig_clock);
 
-  parameter ADDR_WIDTH = 64;
-  parameter DATA_WIDTH = 16;
-  parameter ID_WIDTH = 32;
-
-  //parameter ADDR_WIDTH = 32;	// Width of the address bus
-  //parameter DATA_WIDTH = 64;	// Width of the system data buses
+  parameter ADDR_WIDTH = 64;	// Width of the address bus
+  parameter DATA_WIDTH = 16;	// Width of the system data buses
   parameter RID_WIDTH = 4;	// Number of read channel ID bits required.
   parameter WID_WIDTH = 4;	// Number of write channel ID bits required.
   parameter MAXRBURSTS = 16;	// Size of FIFOs for storing outstanding read bursts. This must be greater than or equal to the maximum number of outstanding read bursts that can be active at the slave interface

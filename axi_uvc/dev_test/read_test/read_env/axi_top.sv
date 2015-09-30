@@ -18,9 +18,10 @@
 **/
 // -----------------------------------------------------------------------------
 
-`include "dut.v"    // design under test
+`include "axi_uvc/dev_test/read_test/read_env/dut.v"    // design under test
 `include "axi_uvc/sv/axi_if.sv"
 `include "axi_uvc/sv/axi_pkg.sv"
+`include "axi_uvc/dev_test/read_test/read_env/read_test_pkg.sv"
 
 module axi_top;
 
@@ -29,7 +30,9 @@ module axi_top;
 
     import axi_pkg::*;
 
-    `include "tests/axi_test_lib.sv"
+    import read_test_pkg::*;
+
+    `include "axi_uvc/dev_test/read_test/read_env/tests/axi_test_lib.sv"
 
     reg clock;
     reg reset;

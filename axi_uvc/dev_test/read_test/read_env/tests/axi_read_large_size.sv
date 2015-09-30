@@ -2,7 +2,7 @@
 /**
 * Project : AXI UVC
 *
-* File : axi_read_slave_bad_id.sv
+* File : axi_read_large_size.sv
 *
 * Language : SystemVerilog
 *
@@ -16,42 +16,42 @@
 *
 * Description : one test case
 *
-* Classes : 1. axi_read_slave_bad_id
-*           2. axi_read_single_frame_bad_id
+* Classes : 1. axi_read_large_size
+*           2. axi_read_whole_burst_large_size
 **/
 // -----------------------------------------------------------------------------
 
 //------------------------------------------------------------------------------
 //
-// Class: axi_read_single_frame_bad_id
+// Class: axi_read_whole_burst_large_size
 //
 //------------------------------------------------------------------------------
 /**
-* Description : single frame with bad id
+* Description : burst frame with size larger than address boundary
 **/
 // -----------------------------------------------------------------------------
-class axi_read_single_frame_bad_id extends axi_pkg::axi_read_single_addr;
+class axi_read_whole_burst_large_size extends axi_pkg::axi_read_whole_burst;
 
-    `uvm_object_utils(axi_read_single_frame_bad_id)
+    `uvm_object_utils(axi_read_whole_burst_large_size)
 
-    constraint id_ct {id_mode == BAD_ID; resp_mode == GOOD_RESP; last_mode == GOOD_LAST_BIT; correct_lane == 1; read_enable == 0;}
-    
-endclass : axi_read_single_frame_bad_id
+    constraint size_ct {size > $clog2(DATA_WIDTH / 8);}
+
+endclass : axi_read_whole_burst_large_size
 
 //------------------------------------------------------------------------------
 //
-// TEST: axi_read_slave_bad_id
+// TEST: axi_read_large_size
 //
 //------------------------------------------------------------------------------
 /**
-* Description : test where slave responds with random id
+* Description : test size larger than address boundary
 **/
 // -----------------------------------------------------------------------------
-class axi_read_slave_bad_id extends axi_read_base_test;
+class axi_read_large_size extends axi_read_base_test;
 
-    `uvm_component_utils(axi_read_slave_bad_id)
+    `uvm_component_utils(axi_read_large_size)
 
-    function new(string name = "axi_read_slave_bad_id", uvm_component parent);
+    function new(string name = "axi_read_large_size", uvm_component parent);
         super.new(name,parent);
     endfunction : new
 
@@ -63,21 +63,21 @@ class axi_read_slave_bad_id extends axi_read_base_test;
         // perform checks in monitor
         uvm_config_int::set(this, "tb0.axi0.*", "checks_enable", 1);
         // early termination of bursts
-        uvm_config_int::set(this, "*", "terminate_enable", 0);
+        uvm_config_int::set(this, "*", "terminate_enable", 1);
         // randomizing ready signal for master
         uvm_config_int::set(this, "tb0.axi0.read_master.driver", "master_ready_rand_enable", 1);
         // radnomizing ready signal for slave
         uvm_config_int::set(this, "tb0.axi0.read_slave*.driver", "slave_ready_rand_enable", 1);
         // actions based on region signal
-        uvm_config_int::set(this, "tb0.axi0.read_slave*.sequencer.arbit", "region_enable", 0);
+        uvm_config_int::set(this, "tb0.axi0.read_slave*.sequencer.arbit", "region_enable", 1);
 
         // type overrides
-        set_type_override_by_type(axi_pkg::axi_read_burst_frame::get_type(), axi_read_valid_burst_frame::get_type());
-        set_type_override_by_type(axi_pkg::axi_read_single_addr::get_type(), axi_read_single_frame_bad_id::get_type());
+        set_type_override_by_type(axi_pkg::axi_read_whole_burst::get_type(), axi_read_whole_burst_large_size::get_type());
+        set_type_override_by_type(axi_pkg::axi_read_single_addr::get_type(), axi_read_valid_single_frame::get_type());
 
         // sequences
         uvm_config_wrapper::set(this, "tb0.virtual_seqr.run_phase", "default_sequence",
-                                                     virtual_transfer_multiple_addr::get_type());
+                                                     virtual_transfer_single_burst::get_type());
         uvm_config_wrapper::set(this, "tb0.axi0.read_slave*.sequencer.run_phase", "default_sequence",
                                                      axi_slave_read_simple_two_phase_seq::get_type());
 
@@ -85,4 +85,4 @@ class axi_read_slave_bad_id extends axi_read_base_test;
 
     endfunction : build_phase
 
-endclass : axi_read_slave_bad_id
+endclass : axi_read_large_size

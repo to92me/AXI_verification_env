@@ -23,8 +23,6 @@
 `ifndef AXI_MASTER_READ_AGENT_SV
 `define AXI_MASTER_READ_AGENT_SV
 
-
-
 //------------------------------------------------------------------------------
 //
 // CLASS: axi_master_read_agent

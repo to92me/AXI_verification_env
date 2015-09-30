@@ -2,7 +2,7 @@
 /**
 * Project : AXI UVC
 *
-* File : axi_read_counter_tb.sv
+* File : dut_tb.sv
 *
 * Language : SystemVerilog
 *
@@ -16,19 +16,19 @@
 *
 * Description : test bench
 *
-* Classes : axi_read_counter_tb
+* Classes : dut_tb
 **/
 // -----------------------------------------------------------------------------
 
-`ifndef axi_read_counter_tb_SV
-`define axi_read_counter_tb_SV
+`ifndef DUT_TB_SV
+`define DUT_TB_SV
 
 `include "axi_uvc/sv/axi_virtual_sequencer.sv"
 `include "axi_uvc/sv/axi_virtual_seq_lib.sv"
 
 //------------------------------------------------------------------------------
 //
-// CLASS: axi_read_counter_tb
+// CLASS: dut_tb
 //
 //------------------------------------------------------------------------------
 /**
@@ -39,42 +39,40 @@
 *             3. connect_phase(uvm_phase phase)
 **/
 // -----------------------------------------------------------------------------
-class axi_read_counter_tb extends uvm_env;
+class dut_tb extends uvm_env;
 
-  // axi read environment
-  axi_env axi0;
+    // axi read environment
+    axi_read_env axi0;
 
-  // WRITE
-  axi_write_env env;
-  axi_write_configuration_wrapper configuration_wrapper;
-  axi_write_conf uvc_configuration;
+    // axi write environment and configuration
+    axi_write_env env;
+    axi_write_configuration_wrapper configuration_wrapper;
+    axi_write_conf uvc_configuration;
 
-  // configuration object
-  axi_read_test_config_dut config_obj;
+    // configuration object
+    dut_config config_obj;
 
-  // virtual seqr
-  axi_virtual_sequencer virtual_seqr;
+    // virtual seqr
+    axi_virtual_sequencer virtual_seqr;
 
-  `uvm_component_utils_begin(axi_read_counter_tb)
-    `uvm_field_object(axi0, UVM_ALL_ON)
-    `uvm_field_object(config_obj, UVM_ALL_ON)
+    `uvm_component_utils_begin(dut_tb)
+        `uvm_field_object(axi0, UVM_ALL_ON)
+        `uvm_field_object(config_obj, UVM_ALL_ON)
+        `uvm_field_object(env, UVM_ALL_ON)
+        `uvm_field_object(configuration_wrapper, UVM_DEFAULT)
+        `uvm_field_object(uvc_configuration, UVM_DEFAULT)
+    `uvm_component_utils_end
 
-    // WRITE
-       `uvm_field_object(env, UVM_ALL_ON)
-      `uvm_field_object(configuration_wrapper, UVM_DEFAULT)
-      `uvm_field_object(uvc_configuration, UVM_DEFAULT)
-  `uvm_component_utils_end
+    // Constructor - required syntax for UVM automation and utilities
+    function new (string name, uvm_component parent);
+        super.new(name, parent);
+    endfunction : new
 
-  // Constructor - required syntax for UVM automation and utilities
-  function new (string name, uvm_component parent);
-    super.new(name, parent);
-  endfunction : new
+    // Additional class methods
+    extern virtual function void build_phase(uvm_phase phase);
+    extern virtual function void connect_phase(uvm_phase phase);
 
-  // Additional class methods
-  extern virtual function void build_phase(uvm_phase phase);
-  extern virtual function void connect_phase(uvm_phase phase);
-
-endclass : axi_read_counter_tb
+endclass : dut_tb
 
 //------------------------------------------------------------------------------
 /**
@@ -85,25 +83,23 @@ endclass : axi_read_counter_tb
 * Return :  void
 **/
 //------------------------------------------------------------------------------
-  function void axi_read_counter_tb::build_phase(uvm_phase phase);
+function void dut_tb::build_phase(uvm_phase phase);
     super.build_phase(phase);
 
-    config_obj = axi_read_test_config_dut::type_id::create("config_obj");
+    config_obj = dut_config::type_id::create("config_obj");
     uvm_config_db#(axi_config)::set(this, "*", "axi_config", config_obj);
 
-    axi0 = axi_env::type_id::create("axi0", this);
+    axi0 = axi_read_env::type_id::create("axi0", this);
     virtual_seqr = axi_virtual_sequencer::type_id::create("virtual_seqr", this);
 
-    // WRITE
     configuration_wrapper = axi_write_configuration_wrapper::getWraperInstance(this);
     uvc_configuration = configuration_wrapper.generateConfigurationObject();
 
-        uvm_config_db#(axi_write_conf)::set(this, "*", "uvc_write_config", uvc_configuration);
+    uvm_config_db#(axi_write_conf)::set(this, "*", "uvc_write_config", uvc_configuration);
 
-        env  = axi_write_env::type_id::create("env", this);
+    env  = axi_write_env::type_id::create("env", this);
 
-
-  endfunction : build_phase
+endfunction : build_phase
 
 //------------------------------------------------------------------------------
 /**
@@ -113,10 +109,10 @@ endclass : axi_read_counter_tb
 * Return :  void
 **/
 //------------------------------------------------------------------------------
-  function void axi_read_counter_tb::connect_phase(uvm_phase phase);
+function void dut_tb::connect_phase(uvm_phase phase);
     super.connect_phase(phase);
     virtual_seqr.read_seqr = axi0.read_master.sequencer;
     virtual_seqr.write_seqr = env.master.sequencer;
-  endfunction : connect_phase
+endfunction : connect_phase
 
-`endif // axi_read_counter_tb_SV
+`endif

@@ -2,7 +2,7 @@
 /**
 * Project : AXI UVC
 *
-* File : axi_read_incr_type_boundary.sv
+* File : axi_read_reserved_type.sv
 *
 * Language : SystemVerilog
 *
@@ -16,42 +16,42 @@
 *
 * Description : one test case
 *
-* Classes : 1. axi_read_incr_type_boundary
-*           2. axi_read_burst_frame_incr_type_bad_boundary
+* Classes : 1. axi_read_reserved_type
+*           2. axi_read_whole_burst_reserved_type
 **/
 // -----------------------------------------------------------------------------
 
 //------------------------------------------------------------------------------
 //
-// Class: axi_read_burst_frame_incr_type_bad_boundary
+// Class: axi_read_whole_burst_reserved_type
 //
 //------------------------------------------------------------------------------
 /**
-* Description : burst frame incr burst type and crossing 4kb boundary
+* Description : burst frame with reserved burst type
 **/
 // -----------------------------------------------------------------------------
-class axi_read_burst_frame_incr_type_bad_boundary extends axi_pkg::axi_read_burst_frame;
+class axi_read_whole_burst_reserved_type extends axi_pkg::axi_read_whole_burst;
 
-    `uvm_object_utils(axi_read_burst_frame_incr_type_bad_boundary)
+    `uvm_object_utils(axi_read_whole_burst_reserved_type)
 
-    constraint incr_ct {burst_type == INCR; (len * (2**size)) >= 4096;}
+    constraint reserved_ct {burst_type == Reserved;}
 
-endclass : axi_read_burst_frame_incr_type_bad_boundary
+endclass : axi_read_whole_burst_reserved_type
 
 //------------------------------------------------------------------------------
 //
-// TEST: axi_read_incr_type_boundary
+// TEST: axi_read_reserved_type
 //
 //------------------------------------------------------------------------------
 /**
-* Description : test 4kb address boundary
+* Description : test reserved burst type
 **/
 // -----------------------------------------------------------------------------
-class axi_read_incr_type_boundary extends axi_read_base_test;
+class axi_read_reserved_type extends axi_read_base_test;
 
-    `uvm_component_utils(axi_read_incr_type_boundary)
+    `uvm_component_utils(axi_read_reserved_type)
 
-    function new(string name = "axi_read_incr_type_boundary", uvm_component parent);
+    function new(string name = "axi_read_reserved_type", uvm_component parent);
         super.new(name,parent);
     endfunction : new
 
@@ -72,7 +72,7 @@ class axi_read_incr_type_boundary extends axi_read_base_test;
         uvm_config_int::set(this, "tb0.axi0.read_slave*.sequencer.arbit", "region_enable", 1);
 
         // type overrides
-        set_type_override_by_type(axi_pkg::axi_read_burst_frame::get_type(), axi_read_burst_frame_incr_type_bad_boundary::get_type());
+        set_type_override_by_type(axi_pkg::axi_read_whole_burst::get_type(), axi_read_whole_burst_reserved_type::get_type());
         set_type_override_by_type(axi_pkg::axi_read_single_addr::get_type(), axi_read_valid_single_frame::get_type());
 
         // sequences
@@ -85,4 +85,4 @@ class axi_read_incr_type_boundary extends axi_read_base_test;
 
     endfunction : build_phase
 
-endclass : axi_read_incr_type_boundary
+endclass : axi_read_reserved_type

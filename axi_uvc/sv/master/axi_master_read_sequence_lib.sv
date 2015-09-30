@@ -152,6 +152,7 @@ endclass : axi_master_read_multiple_addr
 
 		// if there was an error put the burst in the error queue so it will be sent agian
 		if (rsp.valid == FRAME_NOT_VALID) begin
+			rsp.single_frames.delete();	// delete the error frames
 			error_bursts.push_back(rsp);
 		end
 

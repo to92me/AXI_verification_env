@@ -19,7 +19,7 @@
 * Classes :	1. virtual_base_sequence
 *			2. virtual_transfer_multiple_addr
 *			3. virtual_transfer_single_burst
-*			4. virtual_transfer_dut_counter
+*			4. virtual_dut_seq
 **/
 // -----------------------------------------------------------------------------
 
@@ -167,23 +167,23 @@ endclass : virtual_transfer_single_burst
 
 //------------------------------------------------------------------------------
 //
-// SEQUENCE: virtual_transfer_dut_counter
+// SEQUENCE: virtual_dut_seq
 //
 //------------------------------------------------------------------------------
 /**
 * Description : for dut
 *
-* Functions :	1. new(string name="virtual_transfer_dut_counter")
+* Functions :	1. new(string name="virtual_dut_seq")
 *
 * Tasks :	1. body()
 **/
 // -----------------------------------------------------------------------------
-class virtual_transfer_dut_counter extends virtual_base_sequence;
+class virtual_dut_seq extends virtual_base_sequence;
 
-	`uvm_object_utils(virtual_transfer_dut_counter)
+	`uvm_object_utils(virtual_dut_seq)
 
 	// new - constructor
-	function new(string name="virtual_transfer_dut_counter");
+	function new(string name="virtual_dut_seq");
 		super.new(name);
 	endfunction
 
@@ -210,11 +210,10 @@ class virtual_transfer_dut_counter extends virtual_base_sequence;
 		// read counter
 		`uvm_do_on_with(read_seq, p_sequencer.read_seqr, {count == 1; address == 16;})
 		// clear interrupt (IIR)
-		`uvm_do_on_with(read_seq, p_sequencer.read_seqr, {count == 1; address == 12;
-		})
+		`uvm_do_on_with(read_seq, p_sequencer.read_seqr, {count == 1; address == 12;})
 
 	endtask
 
-endclass : virtual_transfer_dut_counter
+endclass : virtual_dut_seq
 
 `endif

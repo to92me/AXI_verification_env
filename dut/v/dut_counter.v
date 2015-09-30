@@ -18,7 +18,7 @@
 **/
 // -----------------------------------------------------------------------------
 
-`include "dut/synchronizer.v"
+`include "dut/v/synchronizer.v"
 
 module dut_counter #
 	(
