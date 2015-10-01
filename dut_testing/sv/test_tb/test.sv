@@ -3,28 +3,19 @@
 
 class dut_register_model_test_base extends uvm_test;
 
-	// TB instance
 	dut_register_model_tb tb0;
-
-	// Table printer instance(optional)
 	uvm_table_printer printer;
-
-	// TODO: Add fields here
-
 	dut_register_block						register_model;
 	dut_register_model_test_sequence		register_model_test_seq;
 
-
 	`uvm_component_utils(dut_register_model_test_base)
 
-	// new - constructor
 	function new(string name = "dut_register_model_test_base", uvm_component parent);
 		super.new(name,parent);
 		$display("TOME");
 		printer = new();
 	endfunction: new
 
-	// build_phase
 	virtual function void build_phase(uvm_phase phase);
 		super.build_phase(phase);
 
@@ -39,17 +30,12 @@ class dut_register_model_test_base extends uvm_test;
 
 		 uvm_config_int::set(this, "*", "master_ready_rand_enable", 0);
 
-//		set_config_string("*tb0.*", "axi_write_configuration", "FullSpeed");
-
-		// added for register model
 		register_model_test_seq = dut_register_model_test_sequence::type_id::create(.name("dut_register_model_test_sequence"),
 																					.parent(this));
 		register_model_test_seq.register_model = register_model;
-//		register_model_test_seq.p_sequencer = tb0.dut_test_env.top_sequencer;
 
 		set_config_string("*tb0.env.DutRegisterModelTopSequencer.run_phase", "default_sequence", "dut_register_model_test_sequence");
 
-//
 //		uvm_config_wrapper::set(this, "tb0.env.DutRegisterModelTopSequencer.run_phase",
 //          "default_sequence", dut_register_model_test_sequence::get_type());
 
@@ -69,10 +55,6 @@ class dut_register_model_test_base extends uvm_test;
 	// run_phase
 	task run_phase(uvm_phase phase);
 		super.run_phase(phase);
-
-		//register_model_test_seq.start(tb0.dut_test_env.top_sequencer);
-//		register_model_test_seq.start(tb0.dut_test_env.top_sequencer);
-		// Print the UVM instance tree at the beginning of simulation (optional)
 		printer.knobs.depth = 5;
 //		this.print(printer);
 	endtask
@@ -81,8 +63,6 @@ class dut_register_model_test_base extends uvm_test;
 			phase.raise_objection(this);
 			register_model_test_seq.start(tb0.dut_test_env.top_sequencer);
 			phase.drop_objection(this);
-
-//			register_model_test_seq.body();
 	endtask
 
 

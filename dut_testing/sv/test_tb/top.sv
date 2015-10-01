@@ -2,7 +2,7 @@
 `define DUT_REFERENCE_MODEL_TOP_SVH__
 
 // DUT
-`include "dut/dut_counter.v"
+`include "dut/v/dut_counter.v"
 
 //UVC and REGISTER MODEL
 `include "axi_uvc/sv/axi_pkg.sv"
@@ -19,9 +19,8 @@ module dut_register_model_top;
     import uvm_pkg::*;
     `include "uvm_macros.svh"
 
-
     import axi_pkg::*;
-//
+
 	import dut_register_model_pkg::*;
 
 	import register_model_env_pkg::*;
@@ -29,8 +28,6 @@ module dut_register_model_top;
     reg aclk;
     reg reset;
     reg fclk;
-    //reg irq_o;
-    //reg dout_o;
     reg counter_reset;
 
     axi_if if0(.sig_reset(reset), .sig_clock(aclk));
@@ -99,8 +96,6 @@ module dut_register_model_top;
     );
 
     initial begin
-//	    $display("TOME TOME TOME ");
-
         uvm_config_db#(virtual axi_if)::set(null,"uvm_test_top.*","vif", if0);
 	    uvm_config_db#(virtual dut_helper_vif)::set(null,"uvm_test_top.*","dut_vif", if1);
         run_test("dut_register_model_test_base");
@@ -113,10 +108,12 @@ module dut_register_model_top;
 	    #5 reset <= 1'b1;
     end
 
-    //Generate Clocks
+    //Generate f clock
     always begin
         #10 fclk = ~fclk;
     end
+
+    //Generate a clock
     always begin
         #5 aclk = ~aclk;
     end

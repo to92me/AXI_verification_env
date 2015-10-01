@@ -9,11 +9,8 @@
 
 class axi_read_wrapper_monitor extends uvm_monitor;
 
-
-
 	uvm_analysis_imp#(.T(axi_read_whole_burst), .IMP(axi_read_wrapper_monitor))  	read_monitor_import;
 	uvm_analysis_port#(.T(dut_frame))												wrapper_port;
-
 
 	`uvm_component_utils(axi_read_wrapper_monitor)
 

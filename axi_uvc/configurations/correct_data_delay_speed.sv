@@ -16,8 +16,6 @@ endfunction : new
 
 function void setConfigurations();
 
-//$display("Correct data delay data speed ");
-
 registerConfiguration("general", "do_coverage", 		TRUE);
 registerConfiguration("general", "do_checks", 			TRUE);
 registerConfiguration("general", "correct_driving_vif", TRUE);
