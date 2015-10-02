@@ -35,7 +35,7 @@ class dut_register_model_env extends uvm_env;
 	dut_register_model_adapter			adapter;
 	dut_register_block					register_block;
 	uvm_reg_map 						register_map;
-	dut_referece_model					reference_model;
+	dut_reference_model					reference_model;
 
 
 
@@ -83,7 +83,7 @@ function void dut_register_model_env::build_phase(uvm_phase phase);
 		adapter					= dut_register_model_adapter::type_id::create(	"DutRegisterModelAdapter", 	this);
 
 		register_map 			= register_block.get_default_map();
-		reference_model			= dut_referece_model::type_id::create(			"DutRegisterModelBlock", 	this);
+		reference_model			= dut_reference_model::type_id::create(			"DutRegisterModelBlock", 	this);
 		reference_model.dut_register_model = register_block;
 
 		low_sequencer			= dut_register_model_lower_sequencer::type_id::create(	"DutRegisterModelLowSequencer", this);

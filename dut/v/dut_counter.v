@@ -409,6 +409,7 @@ module dut_counter #
         MATCH <= 0;
         CFG <= 0;
         irq_o <= 0;
+        dout_o <= 0;
         nrst <= 0;
 		cfg0_async <= 0;
 		cfg1_async <= 0;
@@ -456,6 +457,7 @@ always @(posedge AXI_ACLK) begin
         MATCH <= 0;
         CFG <= 0;
         irq_o <= 0;
+        dout_o <= 0;
         nrst <= 0;
 		cfg0_async <= 0;
 		cfg1_async <= 0;

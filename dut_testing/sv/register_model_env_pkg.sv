@@ -4,7 +4,8 @@
 * uvc_company = uvc_company, uvc_name = uvc_name uvc_if = uvc_if
 *******************************************************************************/
 
-// Include interface
+`ifndef REGISTER_MODEL_ENV_PKG_SV
+`define REGISTER_MODEL_ENV_PKG_SV
 
 package register_model_env_pkg;
 
@@ -32,6 +33,11 @@ package register_model_env_pkg;
 
 
 	typedef class dut_register_model_test_sequence;
+	typedef class dut_register_model_base_sequence;
+
+
+	// ZA TEST_PKG
+	typedef class count_seq;
 
 
 	import uvm_pkg::*;
@@ -42,6 +48,9 @@ package register_model_env_pkg;
 //
 	`include "dut_register_layer/sv/dut_register_model_pkg.sv"
 	import dut_register_model_pkg::*;
+
+	//`include "dut_testing/testing/test_pkg.sv"
+	//import test_pkg::*;
 
 	`include "dut_testing/sv/agents_wrappers/read_wrapper/read_wrapper_agent.sv"
 	`include "dut_testing/sv/agents_wrappers/read_wrapper/read_wrapper_low_sequencer.sv"
@@ -71,6 +80,11 @@ package register_model_env_pkg;
 	//test
 	`include "dut_testing/testing/sequences/dut_register_model_base_sequence.sv"
 
+	// ZA TEST_PKG!!!!!!1
+	`include "dut_testing/testing/sequences/count_seq.sv"
+
 
 
 endpackage
+
+`endif

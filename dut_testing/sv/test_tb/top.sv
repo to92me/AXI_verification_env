@@ -31,7 +31,7 @@ module dut_register_model_top;
     reg counter_reset;
 
     axi_if if0(.sig_reset(reset), .sig_clock(aclk));
-	dut_helper_vif if1(.sig_fclock(fclk));
+	dut_helper_vif if1(.sig_fclock(fclk), .sig_aclock(aclk), .sig_reset(reset));
 
     dut_counter # (
         .ID_WIDTH(RID_WIDTH),
