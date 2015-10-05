@@ -1,24 +1,4 @@
-// -----------------------------------------------------------------------------
-/**
-* Project : AXI UVC
-*
-* File : reference_model.sv
-*
-* Language : SystemVerilog
-*
-* Company : Elsys Eastern Europe
-*
-* Author : Andrea Erdeljan
-*
-* E-Mail : andrea.erdeljan@elsys-eastern.com
-*
-* Mentor : Darko Tomusilovic
-*
-* Description : reference model - implements DUT logic
-*
-* Classes : dut_reference_model
-**/
-// -----------------------------------------------------------------------------
+
 
 `ifndef DUT_REFERECE_MODEL_SV
 `define DUT_REFERECE_MODEL_SV
@@ -147,6 +127,7 @@ endclass : dut_reference_model
 				void'(IIR_p	 .predict(0));
 				void'(MATCH_p.predict(0));
 				void'(COUNTER_p.predict(0));
+				internal_counter = 0;
 			end
 			else begin
 				if(CFG_counter_enable_p.value == 1) begin
@@ -154,8 +135,14 @@ endclass : dut_reference_model
 					if (CFG_direction_p.value) begin
 						internal_counter--;
 						void'(COUNT_counter.predict(internal_counter));
-						if(internal_counter == 'hffff)
+						if(internal_counter == 'hffff) begin
 							void'(RIS_underflow_p.predict(1));
+							if(IM_underflow_p.value == 1) begin
+								void'(MIS_underflow_p.predict(1));
+								if(IIR_interrupt_priority_p.value < 1 )
+									void'(IIR_interrupt_priority_p.predict(1));
+							end
+						end
 					end
 					// up
 					else begin
@@ -163,36 +150,25 @@ endclass : dut_reference_model
 						void'(COUNT_counter.predict(internal_counter));
 						if(internal_counter == 0)
 							void'(RIS_overflow_p.predict(1));
+							if(IM_overflow_p.value == 1) begin
+								void'(MIS_overflow_p.predict(1));
+								if(IIR_interrupt_priority_p.value < 2)
+									void'(IIR_interrupt_priority_p.predict(2));
+							end
 					end
 				end // if counter_enable == 1 end
 				
 				// check for match interrupt
-				if(MATCH_compare_p.value == COUNT_counter.value)		
+				if(MATCH_compare_p.value == COUNT_counter.value) begin		
 					void'(RIS_match_p.predict(1));
-
-				// register assigments - MIS and IIR based on RIS and IM
-				if(RIS_overflow_p.value) begin
-					if(IM_overflow_p.value == 1) begin
-						void'(MIS_overflow_p.predict(1));
-						if(IIR_interrupt_priority_p.value < 2)
-							void'(IIR_interrupt_priority_p.predict(2));
-					end
-				end
-				if(RIS_underflow_p.value) begin
-					if(IM_underflow_p.value == 1) begin
-						void'(MIS_underflow_p.predict(1));
-						if(IIR_interrupt_priority_p.value < 1 )
-							void'(IIR_interrupt_priority_p.predict(1));
-						end
-				end
-				if(RIS_match_p.value) begin
 					if(IM_match_p.value == 1) begin
 						void'(MIS_match_p.predict(1));
-						void'(IIR_interrupt_priority_p.predict(3));
+						void'(IIR_interrupt_priority_p.predict(4));
 					end
 				end
+
 			end // else (no reset)
-		end // foreve begin end
+		end // forever begin end
 	endtask : counter_main_loop
 
 //------------------------------------------------------------------------------

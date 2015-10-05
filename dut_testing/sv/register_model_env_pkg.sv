@@ -38,7 +38,7 @@ package register_model_env_pkg;
 
 	// ZA TEST_PKG
 	typedef class count_seq;
-
+	typedef class swreset_seq;
 
 	import uvm_pkg::*;
 	`include "uvm_macros.svh"
@@ -82,6 +82,7 @@ package register_model_env_pkg;
 
 	// ZA TEST_PKG!!!!!!1
 	`include "dut_testing/testing/sequences/count_seq.sv"
+	`include "dut_testing/testing/sequences/swreset_seq.sv"
 
 
 
