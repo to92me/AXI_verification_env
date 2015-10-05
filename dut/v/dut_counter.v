@@ -512,16 +512,16 @@ always @(posedge AXI_ACLK) begin
 	    				IIR[2:0] <= 3'b010;
 	    			end
 	    	3'b100: begin
-	    				IIR[2:0] <= 3'b100;
+	    				IIR[2:0] <= 3'b011;
 	    			end
 	    	3'b101: begin
-	    				IIR[2:0] <= 3'b100;
+	    				IIR[2:0] <= 3'b011;
 	    			end
 	    	3'b110: begin
-	    				IIR[2:0] <= 3'b100;
+	    				IIR[2:0] <= 3'b011;
 	    			end
 	    	3'b111: begin
-	    				IIR[2:0] <= 3'b100;
+	    				IIR[2:0] <= 3'b011;
 	    			end
 	    endcase
 

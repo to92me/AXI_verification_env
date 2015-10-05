@@ -138,8 +138,11 @@ class dut_testing_logger;
 	true_false_enum					print_all_actions;
 	string 							name;
 	dut_testing_logger_package		actions_queue[$];
+<<<<<<< HEAD
 	true_false_enum					error_happed = FALSE;
 	int 							skipped_actions;
+=======
+>>>>>>> 1a13e462d2ddb27202327d51a2124cce6d6c4e97
 
 
 
@@ -300,7 +303,6 @@ endclass : dut_testing_logger
 
 	function void dut_testing_logger::printErrors();
 	   int i;
-
 		foreach(actions_queue[i])
 			begin
 				if(actions_queue[i].getStatus() != UVM_IS_OK /*|| actions_queue[i].getStatus() == UVM_HAS_X*/)
