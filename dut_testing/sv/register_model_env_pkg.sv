@@ -1,8 +1,5 @@
-/******************************************************************************
-* DVT CODE TEMPLATE: top package
-* Created by root on Sep 23, 2015
-* uvc_company = uvc_company, uvc_name = uvc_name uvc_if = uvc_if
-*******************************************************************************/
+`ifndef REGISTER_MODEL_ENV_PKG_SVH
+`define REGISTER_MODEL_ENV_PKG_SVH
 
 // Include interface
 
@@ -30,8 +27,11 @@ package register_model_env_pkg;
 	typedef class dut_register_model_tb;
 	typedef class dut_register_model_test_base;
 
-
 	typedef class dut_register_model_test_sequence;
+	typedef class dut_tesgin_logger_test_sequence;
+
+	typedef	class dut_testing_logger_package;
+	typedef class dut_testing_logger;
 
 
 	import uvm_pkg::*;
@@ -67,10 +67,13 @@ package register_model_env_pkg;
 	`include "dut_testing/sv/test_tb/test.sv"
 //	`include "dut_testing/sv/test_tb/top.sv"
 
+	`include "dut_testing/sv/utils/logger.sv"
+
 
 	//test
 	`include "dut_testing/testing/sequences/dut_register_model_base_sequence.sv"
 
-
-
 endpackage
+
+
+`endif

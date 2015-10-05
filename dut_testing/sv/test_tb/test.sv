@@ -7,6 +7,7 @@ class dut_register_model_test_base extends uvm_test;
 	uvm_table_printer printer;
 	dut_register_block						register_model;
 	dut_register_model_test_sequence		register_model_test_seq;
+	dut_tesgin_logger_test_sequence			register_model_logger_seq;
 
 	`uvm_component_utils(dut_register_model_test_base)
 
@@ -21,6 +22,7 @@ class dut_register_model_test_base extends uvm_test;
 
 		register_model	= dut_register_block::type_id::create("DutRegisterModelBlock", 	this);
 		register_model.build();
+		//register_model.
 
 		set_config_int("*", "recording_detail", UVM_FULL);
 		uvm_config_int::set(this, "tb0.*", "coverage_enable", 1);
@@ -33,6 +35,10 @@ class dut_register_model_test_base extends uvm_test;
 		register_model_test_seq = dut_register_model_test_sequence::type_id::create(.name("dut_register_model_test_sequence"),
 																					.parent(this));
 		register_model_test_seq.register_model = register_model;
+
+		register_model_logger_seq = dut_tesgin_logger_test_sequence::type_id::create("register_model_logger_seq", this);
+		register_model_logger_seq.register_model = register_model;
+
 
 		set_config_string("*tb0.env.DutRegisterModelTopSequencer.run_phase", "default_sequence", "dut_register_model_test_sequence");
 
@@ -61,7 +67,8 @@ class dut_register_model_test_base extends uvm_test;
 
 	task main_phase(uvm_phase phase);
 			phase.raise_objection(this);
-			register_model_test_seq.start(tb0.dut_test_env.top_sequencer);
+			//register_model_test_seq.start(tb0.dut_test_env.top_sequencer);
+			register_model_logger_seq.start(tb0.dut_test_env.top_sequencer);
 			phase.drop_objection(this);
 	endtask
 

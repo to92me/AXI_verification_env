@@ -1,23 +1,432 @@
 `ifndef DUT_TESTING_LOGGER
 `define DUT_TESTING_LOGGER
 
+typedef enum{
+	READ 	= 0,
+	WRITE 	= 1,
+	MIRROR	= 2,
+	SET		= 3,
+	GET 	= 4,
+	UPDATE  = 5,
+	CHECK	= 6
+} reg_action_enum;
 
 
-class dut_testing_logger extends uvm_component;
+class dut_testing_logger_package;
+	uvm_status_e				status;
+	string 						name;
+	bit[DATA_WIDTH - 1 : 0]		data;
+	reg_action_enum				action;
+	int 						ored_number;
+	int 						begin_time;
+	int 						end_time;
+	reg_action_enum				falid_action;
+	bit[DATA_WIDTH - 1 : 0]		expected_data;
+	bit[DATA_WIDTH - 1 : 0]		got_data;
+	true_false_enum				error_happed = FALSE;
 
-	`uvm_component_utils(dut_testing_logger)
+	// Get action
+	function reg_action_enum getAction();
+		return action;
+	endfunction
 
-	function new (string name, uvm_component parent);
-		super.new(name, parent);
-	endfunction : new
+	// Set action
+	function void setAction(reg_action_enum action);
+		this.action = action;
+	endfunction
 
-	function void build_phase(uvm_phase phase);
-		super.build_phase(phase);
-	endfunction : build_phase
+	// Get begin_time
+	function int getBegin_time();
+		return begin_time;
+	endfunction
+
+	// Set begin_time
+	function void setBegin_time(int begin_time);
+		this.begin_time = begin_time;
+	endfunction
+
+	// Get data
+	function bit[DATA_WIDTH-1:0] getData();
+		return data;
+	endfunction
+
+	// Set data
+	function void setData(bit[DATA_WIDTH-1:0] data);
+		this.data = data;
+	endfunction
+
+	// Get end_time
+	function int getEnd_time();
+		return end_time;
+	endfunction
+
+	// Set end_timesuper
+	function void setEnd_time(int end_time);
+		this.end_time = end_time;
+	endfunction
+
+	// Get name
+	function string getName();
+		return name;
+	endfunction
+
+	// Set name
+	function void setName(string name);
+		this.name = name;
+	endfunction
+
+	// Get ored_number
+	function int getOred_number();
+		return ored_number;
+	endfunction
+
+	// Set ored_number
+	function void setOred_number(int ored_number);
+		this.ored_number = ored_number;
+	endfunction
+
+	// Get status
+	function uvm_status_e getStatus();
+		return status;
+	endfunction
+
+	// Set status
+	function void setStatus(uvm_status_e status);
+		this.status = status;
+	endfunction
+
+	// Get falid_action
+	function reg_action_enum getFalid_action();
+		return falid_action;
+	endfunction
+
+	// Set falid_action
+	function void setFalid_action(reg_action_enum falid_action);
+		this.falid_action = falid_action;
+	endfunction
+
+	// Get expected_data
+	function bit[DATA_WIDTH-1:0] getExpected_data();
+		return expected_data;
+	endfunction
+
+	// Set expected_data
+	function void setExpected_data(bit[DATA_WIDTH-1:0] expected_data);
+		this.expected_data = expected_data;
+	endfunction
+
+	// Get got_data
+	function bit[DATA_WIDTH-1:0] getGot_data();
+		return got_data;
+	endfunction
+
+	// Set got_data
+	function void setGot_data(bit[DATA_WIDTH-1:0] got_data);
+		this.got_data = got_data;
+	endfunction
 
 
+
+
+endclass
+
+
+class dut_testing_logger;
+
+	true_false_enum 				configured;						//this is true if logger is configured ( called function configure )
+	true_false_enum 				end_on_UVM_NOT_OK;
+	true_false_enum					print_status_on_end;
+	true_false_enum					print_all_actions;
+	string 							name;
+	dut_testing_logger_package		actions_queue[$];
+
+
+
+	function new ();
+
+	endfunction
+
+
+
+	extern function void configure(input string name, true_false_enum end_at_first_UVM_NOT_OK = FALSE, true_false_enum print_all_actions = FALSE, true_false_enum print_status_on_end_of_simulation = TRUE);
+	extern task reg_do(input uvm_reg reg_p, reg_action_enum action = MIRROR,bit[DATA_WIDTH - 1 : 0] data, output bit[DATA_WIDTH - 1 : 0] read_data);
+	extern function void printAll();
+	extern function void print_errors();
+	extern function dut_testing_logger_package	getErrorLog();
+//	extern function void updateAll(); // TODO
+	extern function void printStatus();
+
+
+	extern local function void printLog(input dut_testing_logger_package to_print);
+	extern local function void printBeginHeader(input string sequence_name);
+	extern local function void printEndHeader(input string sequence_name);
+	extern local function void printEndStatus();
+	extern local function string getActionString(input reg_action_enum action);
+	extern local function string getStatusString(input uvm_status_e status);
 
 endclass : dut_testing_logger
+
+
+	function void dut_testing_logger::configure(input string name,  true_false_enum end_at_first_UVM_NOT_OK, true_false_enum print_all_actions,  true_false_enum print_status_on_end_of_simulation);
+	    //set that logger is configured
+	    this.configured			= TRUE;
+		this.name				= name;
+		this.end_on_UVM_NOT_OK	= end_at_first_UVM_NOT_OK;
+		this.print_status_on_end= print_status_on_end_of_simulation;
+		this.print_all_actions	= print_all_actions;
+	endfunction
+
+	task dut_testing_logger::reg_do(input uvm_reg reg_p, input reg_action_enum action,bit[DATA_WIDTH-1:0] data, output bit[DATA_WIDTH-1:0] read_data);
+		bit[DATA_WIDTH-1:0] tmp_data;
+		dut_testing_logger_package log = new();
+		log.setName(reg_p.get_name());
+		log.setAction(action);
+		log.setOred_number(actions_queue.size());
+
+		case (action)
+// READ
+			READ:
+			begin
+				log.setBegin_time($time);
+				reg_p.read(log.status, data);
+				log.setEnd_time($time);
+				log.setData(data);
+				if(log.getStatus() == UVM_NOT_OK)
+					begin
+						log.setFalid_action(READ);
+					end
+			end
+
+
+//WRITE
+			WRITE:
+			begin
+				log.setBegin_time($time);
+				reg_p.write(log.status,data);
+				log.setEnd_time($time);
+				log.setData(data);
+				if(log.getStatus() == UVM_NOT_OK)
+					begin
+						log.setFalid_action(WRITE);
+					end
+			end
+
+
+//MIRROR
+			MIRROR:
+			begin
+				bit[DATA_WIDTH - 1 : 0]  	mirrored_tmp;
+				mirrored_tmp = reg_p.get_mirrored_value();
+
+				log.setBegin_time($time);
+				//reg_p.mirror(log.status, UVM_CHECK); // ne moze jer ne mogu da dobijem da je check OK ili nije
+				reg_p.read(log.status, data);
+				log.setEnd_time($time);
+
+				if(data != mirrored_tmp)
+					begin
+						log.setExpected_data(mirrored_tmp);
+						log.setGot_data(data);
+						log.setStatus(UVM_NOT_OK);
+						log.setFalid_action(CHECK);
+					end
+				else
+					begin
+						// da li treba nesto da se uradi ?? // TODO
+					end
+				log.setData(reg_p.get_mirrored_value());
+			end
+
+
+//SET
+			SET:
+			begin
+				log.setBegin_time($time);
+				reg_p.set(data);
+				log.setEnd_time($time);
+				log.setData(data);
+				log.setStatus(UVM_IS_OK);
+			end
+
+//GET
+			GET:
+			begin
+				log.setBegin_time($time);
+				data = reg_p.get();
+				log.setEnd_time($time);
+				log.setData(data);
+				log.setStatus(UVM_IS_OK);
+			end
+
+//UPDATE
+			UPDATE:
+			begin
+				log.setBegin_time($time);
+				reg_p.update(log.status);
+				log.setEnd_time($time);
+				log.setData(data);
+			end
+
+		endcase
+
+		if(this.print_all_actions == TRUE)
+			begin
+				printLog(log);
+			end
+
+		actions_queue.push_back(log);
+
+	endtask
+
+
+	function void dut_testing_logger::print_errors();
+	   int i;
+
+		foreach(actions_queue[i])
+			begin
+				if(actions_queue[i].getStatus() == UVM_NOT_OK || actions_queue[i].getStatus() == UVM_HAS_X);
+				begin
+					printLog(actions_queue[i]);
+				end
+			end
+	endfunction
+
+	function void dut_testing_logger::printAll();
+		int i;
+	   	foreach(actions_queue[i])
+			begin
+				printLog(actions_queue[i]);
+			end
+	endfunction
+
+	function void dut_testing_logger::printBeginHeader(input string sequence_name);
+	   	$display("");
+		$display("======================================================================================================================================");
+		$display("==                               		sequence:    %s                                                                       " ,sequence_name);
+		$display("======================================================================================================================================");
+
+	endfunction
+
+	function void dut_testing_logger::printEndHeader(input string sequence_name);
+		$display("======================================================================================================================================");
+		$display("==                               		END:    %s                                                                       ",sequence_name);
+		$display("======================================================================================================================================");
+		$display("");
+	endfunction
+
+
+	function void dut_testing_logger::printLog(input dut_testing_logger_package to_print);
+		string status_string = this.getStatusString(to_print.getStatus());
+		string action_string = this.getActionString(to_print.getAction());
+
+		$display("%s \t[REG]: action: %s, \tvalue: %0d, \tbegin time: %5d, \t\tend time : %5d, \torded of actions: %0d, \t\tstatus ------------------- %s",to_print.getName(),
+					action_string, to_print.getData(), to_print.getBegin_time(), to_print.getEnd_time(),to_print.getOred_number(), status_string);
+
+		if(to_print.getFalid_action() == CHECK)
+			begin
+				$display("        : expected value: %0d, got_value: %0d,  faild action: CHECK ", to_print.getExpected_data(), to_print.getGot_data());
+			end
+	endfunction
+
+	function string dut_testing_logger::getActionString(input reg_action_enum action);
+	    case (action)
+
+		    READ:
+		    begin
+			    return "READ";
+		    end
+
+			WRITE:
+			begin
+				return "WRITE";
+			end
+
+			MIRROR:
+			begin
+				return "MIRROR";
+			end
+
+			SET:
+			begin
+				return "SET";
+			end
+
+			GET:
+			begin
+				return "GET";
+			end
+
+			UPDATE:
+			begin
+				return "UPDATE";
+			end
+
+			CHECK:
+			begin
+				return "CHECK";
+			end
+
+	    endcase
+	endfunction
+
+	function string dut_testing_logger::getStatusString(input uvm_status_e status);
+	   case(status)
+		   UVM_IS_OK:
+		   begin
+			   return "OK";
+		   end
+
+		   UVM_NOT_OK:
+		   begin
+			   return "FAILD";
+		   end
+
+		   default:
+		   begin
+			    return "FAILD";
+		   end
+
+	   endcase
+	endfunction
+
+	function dut_testing_logger_package dut_testing_logger::getErrorLog();
+	   $display("TODO RETURN ERROR LOG DATA ");
+	endfunction
+
+	function void dut_testing_logger::printEndStatus();
+		int ok_number	 = 0;
+		int error_number = 0;
+		int i;
+		foreach(actions_queue[i])
+			begin
+				if(actions_queue[i].getStatus == UVM_IS_OK)
+					begin
+						ok_number++;
+					end
+				else
+					begin
+						error_number++;
+					end
+			end
+
+		if(error_number == 0)
+			begin
+				$display("--------------------------------------SEQUENCE OK ! , NO ERRORS ----------------------------------");
+			end
+		else
+			begin
+
+			end
+	endfunction
+
+
+	function void dut_testing_logger::printStatus();
+		this.printBeginHeader(this.name);
+		this.printAll();
+		printEndStatus();
+		this.printEndHeader(this.name);
+	endfunction
+
 
 
 `endif
