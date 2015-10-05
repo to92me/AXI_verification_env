@@ -23,7 +23,6 @@ class dut_testing_logger_package;
 	reg_action_enum				falid_action;
 	bit[DATA_WIDTH - 1 : 0]		expected_data;
 	bit[DATA_WIDTH - 1 : 0]		got_data;
-	true_false_enum				error_happed = FALSE;
 
 	// Get action
 	function reg_action_enum getAction();
@@ -139,6 +138,7 @@ class dut_testing_logger;
 	true_false_enum					print_all_actions;
 	string 							name;
 	dut_testing_logger_package		actions_queue[$];
+	true_false_enum					error_happed = FALSE;
 
 
 
@@ -179,9 +179,16 @@ endclass : dut_testing_logger
 	task dut_testing_logger::reg_do(input uvm_reg reg_p, input reg_action_enum action,bit[DATA_WIDTH-1:0] data, output bit[DATA_WIDTH-1:0] read_data);
 		bit[DATA_WIDTH-1:0] tmp_data;
 		dut_testing_logger_package log = new();
+
+		if(error_happed == TRUE && end_on_UVM_NOT_OK == TRUE)
+			begin
+				return;
+			end
+
 		log.setName(reg_p.get_name());
 		log.setAction(action);
 		log.setOred_number(actions_queue.size());
+
 
 		case (action)
 // READ
@@ -265,6 +272,7 @@ endclass : dut_testing_logger
 				reg_p.update(log.status);
 				log.setEnd_time($time);
 				log.setData(data);
+				log.setStatus(UVM_IS_OK);
 			end
 
 		endcase
@@ -274,6 +282,10 @@ endclass : dut_testing_logger
 				printLog(log);
 			end
 
+		if(log.getStatus == UVM_NOT_OK)
+			begin
+				error_happed = TRUE;
+			end
 		actions_queue.push_back(log);
 
 	endtask
@@ -415,7 +427,9 @@ endclass : dut_testing_logger
 			end
 		else
 			begin
-
+				$display("------------------------------SEQUENCE ERROR : %0d times, OK %0d transactions ---------------------", error_number, ok_number);
+				print_errors();
+				$display("---------------------------------------------------------------------------------------------------");
 			end
 	endfunction
 

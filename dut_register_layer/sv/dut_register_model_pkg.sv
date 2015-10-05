@@ -24,6 +24,9 @@ package dut_register_model_pkg;
 	typedef class COUNT;
 	typedef class dut_register_block;
 	typedef class dut_frame;
+	typedef class IM_overflow_cb;
+	typedef class IM_underflow_cb;
+	typedef class IM_match_cb;
 
 	//includes from uvc
 	//typedef class axi_frame;
