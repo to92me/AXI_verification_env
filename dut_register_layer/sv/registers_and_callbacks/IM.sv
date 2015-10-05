@@ -42,6 +42,11 @@ class IM extends uvm_reg;
 							.has_reset					(1						),
 							.is_rand					(0						),
 							.individually_accessible 	(1						) );
+		begin
+			IM_underflow_cb _IM_underflow_cb = new("IM_underflow_cb");
+			uvm_reg_field_cb::add(underflow, _IM_underflow_cb);
+		end
+		underflow.set_compare(UVM_CHECK);
 
 		overflow = uvm_reg_field::type_id::create(overflow_string);
 		overflow.configure(.parent						(this					),
@@ -53,6 +58,11 @@ class IM extends uvm_reg;
 							.has_reset					(1						),
 							.is_rand					(0						),
 							.individually_accessible 	(1						) );
+		begin
+			IM_overflow_cb _IM_overflow_cb = new("IM_overflow_cb");
+			uvm_reg_field_cb::add(overflow, _IM_overflow_cb);
+		end
+		overflow.set_compare(UVM_CHECK);
 
 		match = uvm_reg_field::type_id::create(match_string);
 		match.configure(.parent							(this					),
@@ -64,6 +74,11 @@ class IM extends uvm_reg;
 							.has_reset					(1						),
 							.is_rand					(0						),
 							.individually_accessible 	(1						) );
+		begin
+			IM_match_cb _IM_match_cb = new("IM_match_cb");
+			uvm_reg_field_cb::add(match, _IM_match_cb);
+		end
+		match.set_compare(UVM_CHECK);
 
 		reserved = uvm_reg_field::type_id::create(reserved_string);
 		reserved.configure(.parent						(this					),

@@ -1,6 +1,9 @@
 `ifndef DUT_REGISTER_MODEL_SEQUENCE_BASE_SVH
 `define DUT_REGISTER_MODEL_SEQUENCE_BASE_SVH
 
+
+
+
 //------------------------------------------------------------------------------
 //
 // CLASS: uvc_company_uvc_name_base_seq
@@ -8,9 +11,14 @@
 //------------------------------------------------------------------------------
 class dut_register_model_base_sequence extends uvm_sequence #(dut_frame);
 
+	dut_testing_logger			log;
+	dut_register_block			register_model;
+
+
 	// new - constructor
 	function new(string name="dut_register_model_base_sequence");
 		super.new(name);
+		log = new();
 	endfunction
 
 
@@ -52,9 +60,7 @@ endclass : dut_register_model_base_sequence
 //------------------------------------------------------------------------------
 class dut_register_model_test_sequence extends dut_register_model_base_sequence;
 
-	dut_register_block		register_model;
 	uvm_status_e			status;
-
 
 	`uvm_object_utils(dut_register_model_test_sequence)
 
@@ -120,4 +126,30 @@ class dut_register_model_test_sequence extends dut_register_model_base_sequence;
 endclass : dut_register_model_test_sequence
 
 
+
+class dut_tesgin_logger_test_sequence extends dut_register_model_base_sequence;
+
+	`uvm_object_utils(dut_tesgin_logger_test_sequence)
+
+	function new(string name = "dut_tesgin_logger_test_sequence");
+	 	super.new(name);
+	endfunction
+
+	virtual task body();
+
+		log.configure("dut_tesgin_logger_test_sequence", TRUE, TRUE, TRUE);
+
+
+		log.reg_do(register_model.IM_reg 	, WRITE, 3'b111);
+		log.reg_do(register_model.MATCH_reg	, WRITE, 50);
+		log.reg_do(register_model.CFG_reg	, WRITE, 3 );
+
+		#100000
+		log.reg_do(register_model.MIS_reg , MIRROR, 0);
+
+		log.printStatus();
+
+	endtask
+
+endclass
 `endif
