@@ -149,7 +149,7 @@ class dut_testing_logger;
 
 
 	extern function void configure(input string name, true_false_enum end_at_first_UVM_NOT_OK = FALSE, true_false_enum print_all_actions = FALSE, true_false_enum print_status_on_end_of_simulation = TRUE);
-	extern task reg_do(input uvm_reg reg_p, reg_action_enum action = MIRROR,bit[DATA_WIDTH - 1 : 0] data, output bit[DATA_WIDTH - 1 : 0] read_data);
+	extern task reg_do(input uvm_reg reg_p, reg_action_enum action = MIRROR,bit[DATA_WIDTH - 1 : 0] data, output bit[DATA_WIDTH-1:0] read_data);
 	extern function void printAll();
 	extern function void print_errors();
 	extern function dut_testing_logger_package	getErrorLog();

@@ -30,6 +30,7 @@ package register_model_env_pkg;
 
 	typedef class dut_register_model_test_sequence;
 	typedef class dut_register_model_base_sequence;
+	typedef class dut_tesgin_logger_test_sequence;
 
 	typedef	class dut_testing_logger_package;
 	typedef class dut_testing_logger;
