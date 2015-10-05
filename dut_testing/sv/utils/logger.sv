@@ -139,6 +139,7 @@ class dut_testing_logger;
 	string 							name;
 	dut_testing_logger_package		actions_queue[$];
 	true_false_enum					error_happed = FALSE;
+	int 							skipped_actions;
 
 
 
@@ -151,7 +152,7 @@ class dut_testing_logger;
 	extern function void configure(input string name, true_false_enum end_at_first_UVM_NOT_OK = FALSE, true_false_enum print_all_actions = FALSE, true_false_enum print_status_on_end_of_simulation = TRUE);
 	extern task reg_do(input uvm_reg reg_p, reg_action_enum action = MIRROR,bit[DATA_WIDTH - 1 : 0] data, output bit[DATA_WIDTH-1:0] read_data);
 	extern function void printAll();
-	extern function void print_errors();
+	extern function void printErrors();
 	extern function dut_testing_logger_package	getErrorLog();
 //	extern function void updateAll(); // TODO
 	extern function void printStatus();
@@ -182,6 +183,11 @@ endclass : dut_testing_logger
 
 		if(error_happed == TRUE && end_on_UVM_NOT_OK == TRUE)
 			begin
+				if(skipped_actions < 1)
+					begin
+						$display("Beacuse Error happened skipping actions");
+					end
+				skipped_actions++;
 				return;
 			end
 
@@ -210,6 +216,7 @@ endclass : dut_testing_logger
 			begin
 				log.setBegin_time($time);
 				reg_p.write(log.status,data);
+
 				log.setEnd_time($time);
 				log.setData(data);
 				if(log.getStatus() == UVM_NOT_OK)
@@ -291,12 +298,11 @@ endclass : dut_testing_logger
 	endtask
 
 
-	function void dut_testing_logger::print_errors();
+	function void dut_testing_logger::printErrors();
 	   int i;
-
 		foreach(actions_queue[i])
 			begin
-				if(actions_queue[i].getStatus() == UVM_NOT_OK || actions_queue[i].getStatus() == UVM_HAS_X);
+				if(actions_queue[i].getStatus() != UVM_IS_OK /*|| actions_queue[i].getStatus() == UVM_HAS_X*/)
 				begin
 					printLog(actions_queue[i]);
 				end
@@ -313,16 +319,16 @@ endclass : dut_testing_logger
 
 	function void dut_testing_logger::printBeginHeader(input string sequence_name);
 	   	$display("");
-		$display("======================================================================================================================================");
-		$display("==                               		sequence:    %s                                                                       " ,sequence_name);
-		$display("======================================================================================================================================");
+		$display("==================================================================================================================================================================");
+		$display("==                               								sequence:    %s                                                                       " ,sequence_name);
+		$display("==================================================================================================================================================================");
 
 	endfunction
 
 	function void dut_testing_logger::printEndHeader(input string sequence_name);
-		$display("======================================================================================================================================");
-		$display("==                               		END:    %s                                                                       ",sequence_name);
-		$display("======================================================================================================================================");
+		$display("==================================================================================================================================================================");
+		$display("==                               								END:    %s                                                                       ",sequence_name);
+		$display("==================================================================================================================================================================");
 		$display("");
 	endfunction
 
@@ -331,7 +337,7 @@ endclass : dut_testing_logger
 		string status_string = this.getStatusString(to_print.getStatus());
 		string action_string = this.getActionString(to_print.getAction());
 
-		$display("%s \t[REG]: action: %s, \tvalue: %0d, \tbegin time: %5d, \t\tend time : %5d, \torded of actions: %0d, \t\tstatus ------------------- %s",to_print.getName(),
+		$display("%s \t[REG]: action: %s, \tvalue: %0d, \tbegin time: %5d, \t\tend time : %5d, \torder of actions: %0d, \t\tstatus ------------------- %s",to_print.getName(),
 					action_string, to_print.getData(), to_print.getBegin_time(), to_print.getEnd_time(),to_print.getOred_number(), status_string);
 
 		if(to_print.getFalid_action() == CHECK)
@@ -411,7 +417,7 @@ endclass : dut_testing_logger
 		int i;
 		foreach(actions_queue[i])
 			begin
-				if(actions_queue[i].getStatus == UVM_IS_OK)
+				if(actions_queue[i].getStatus() == UVM_IS_OK)
 					begin
 						ok_number++;
 					end
@@ -420,16 +426,18 @@ endclass : dut_testing_logger
 						error_number++;
 					end
 			end
-
+		$display("");
 		if(error_number == 0)
 			begin
-				$display("--------------------------------------SEQUENCE OK ! , NO ERRORS ----------------------------------");
+				$display("-----------------------------------------------------------------------------SEQUENCE OK ! , NO ERRORS --------------------------------------------------------------");
 			end
 		else
 			begin
-				$display("------------------------------SEQUENCE ERROR : %0d times, OK %0d transactions ---------------------", error_number, ok_number);
-				print_errors();
-				$display("---------------------------------------------------------------------------------------------------");
+				$display("---------------------------------------------------------SEQUENCE ERROR : %0d action(s), OK %0d action(s), SKIPPED %0d action(s)--------------------------------------", error_number, ok_number, skipped_actions);
+				$display("");
+				printErrors();
+				$display("");
+				$display("----------------------------------------------------------------------------------------------------------------------------------------------------------------------");
 			end
 	endfunction
 

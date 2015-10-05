@@ -72,11 +72,11 @@ function void dut_register_model_adapter::bus2reg(input uvm_sequence_item bus_it
 	if(bus_frame.resp == OKAY || bus_frame.resp == EXOKAY)
 		begin
 			rw.status = UVM_IS_OK;
-			//$display("UVM_IS_OK");
+			$display("UVM_IS_OK");
 		end
 	else
 		begin
-			//$display("UVM_NOT_OK");
+			$display("UVM_NOT_OK");
 			rw.status = UVM_NOT_OK;
 		end
 
