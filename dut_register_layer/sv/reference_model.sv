@@ -163,7 +163,7 @@ endclass : dut_reference_model
 					void'(RIS_match_p.predict(1));
 					if(IM_match_p.value == 1) begin
 						void'(MIS_match_p.predict(1));
-						void'(IIR_interrupt_priority_p.predict(4));
+						void'(IIR_interrupt_priority_p.predict(3));
 					end
 				end
 

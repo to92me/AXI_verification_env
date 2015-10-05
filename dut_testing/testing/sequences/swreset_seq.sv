@@ -71,10 +71,7 @@ class swreset_seq extends register_model_env_pkg::dut_register_model_base_sequen
 		// read RIS, MIS, IM, MATCH and LOAD
 		register_model.RIS_reg.mirror(status, UVM_CHECK);
 		register_model.MIS_reg.mirror(status, UVM_CHECK);
-		$display("==============================================================================================================================================================");
-		//register_model.IM_reg.mirror(status, UVM_CHECK);
-		do_read(register_model.IM_reg);
-		$display("==============================================================================================================================================================");
+		register_model.IM_reg.mirror(status, UVM_CHECK);
 		register_model.MATCH_reg.mirror(status, UVM_CHECK);
 		register_model.LOAD_reg.mirror(status, UVM_CHECK);
 

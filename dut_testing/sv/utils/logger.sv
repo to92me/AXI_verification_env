@@ -138,7 +138,6 @@ class dut_testing_logger;
 	true_false_enum					print_all_actions;
 	string 							name;
 	dut_testing_logger_package		actions_queue[$];
-	true_false_enum					error_happed = FALSE;
 
 
 
