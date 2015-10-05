@@ -1,37 +1,67 @@
-`ifndef DUT_REGISTER_MODEL_REFERECE_MODEL_SVH_TOME
-`define DUT_REGISTER_MODEL_REFERECE_MODEL_SVH_TOME
+// -----------------------------------------------------------------------------
+/**
+* Project : AXI UVC
+*
+* File : reference_model.sv
+*
+* Language : SystemVerilog
+*
+* Company : Elsys Eastern Europe
+*
+* Author : Andrea Erdeljan
+*
+* E-Mail : andrea.erdeljan@elsys-eastern.com
+*
+* Mentor : Darko Tomusilovic
+*
+* Description : reference model - implements DUT logic
+*
+* Classes : dut_reference_model
+**/
+// -----------------------------------------------------------------------------
+
+`ifndef DUT_REFERECE_MODEL_SV
+`define DUT_REFERECE_MODEL_SV
+
+parameter TOLERANCE = 10;
 
 //------------------------------------------------------------------------------
 //
-// CLASS: uvc_company_uvc_name_component
+// CLASS: dut_reference_model
 //
 //------------------------------------------------------------------------------
-
-
-
-class dut_referece_model extends uvm_component;
-
+/**
+* Description : reference model - implements DUT logic
+*
+* Functions :	1. new(string name, uvm_component parent)
+*				2. void build_phase(uvm_phase phase)
+*
+* Tasks :	1. main()
+*			2. counter_main_loop()
+*			3. init()
+*			4. update_vif_checks()
+**/
+// -----------------------------------------------------------------------------
+class dut_reference_model extends uvm_component;
 
 	dut_register_block  dut_register_model;
 
-	event clock;
-	int clock_frek;
 	uvm_reg_map 	dut_register_map;
 
+	// registers
 	uvm_reg MATCH_p;
 	uvm_reg	SWRESET_p;
 	uvm_reg COUNTER_p;
 	uvm_reg CFG_p;
-
 	uvm_reg RIS_p;
 	uvm_reg MIS_p;
 	uvm_reg IM_p;
 	uvm_reg IIR_p;
+	uvm_reg LOAD_p;
 
-
+	// register fields
 	uvm_reg_field CFG_counter_enable_p;
 	uvm_reg_field CFG_direction_p;
-
 
 	uvm_reg_field RIS_overflow_p;
 	uvm_reg_field RIS_underflow_p;
@@ -49,14 +79,14 @@ class dut_referece_model extends uvm_component;
 
 	uvm_reg_field MATCH_compare_p;
 
+	uvm_reg_field LOAD_compare_p;
+
 	uvm_reg_field COUNT_counter;
 
-
+	// virtual interface
 	virtual interface dut_helper_vif vif;
 
-
-`uvm_component_utils_begin(dut_referece_model)
- `uvm_component_utils_end
+	`uvm_component_utils(dut_reference_model)
 
 	// new - constructor
 	function new (string name, uvm_component parent);
@@ -71,111 +101,110 @@ class dut_referece_model extends uvm_component;
 	endfunction : build_phase
 
 	extern task main();
-	extern task refereceModelMain();
+	extern task counter_main_loop();
 	extern task init();
+	extern task update_vif_checks();
 
-endclass : dut_referece_model
+endclass : dut_reference_model
 
-	task dut_referece_model::main();
+//------------------------------------------------------------------------------
+/**
+* Task : main
+* Purpose : main loop - initializes registers and starts the counter loop and
+*			updates vif signal checks
+* Inputs :
+* Outputs :
+* Ref :
+**/
+//------------------------------------------------------------------------------
+	task dut_reference_model::main();
 		this.init();
 	    fork
-		    this.refereceModelMain();
+		    this.counter_main_loop();
+		    this.update_vif_checks();
 	    join
 	endtask
 
-
-
-	task dut_referece_model::refereceModelMain();
+//------------------------------------------------------------------------------
+/**
+* Task : counter_main_loop
+* Purpose : impements counter logic from the DUT and predicts register values
+* Inputs :
+* Outputs :
+* Ref :
+**/
+//------------------------------------------------------------------------------
+	task dut_reference_model::counter_main_loop();
 		bit[15 : 0] internal_counter;
 		forever begin
 			@(posedge vif.sig_fclock);
-			if(CFG_counter_enable_p.value == 1)
-				begin
-					case(CFG_direction_p.value)
-
-// UP DIRECTION
-						0:
-						begin
-							internal_counter++;
-							void'(COUNT_counter.predict(internal_counter));
-							if(internal_counter == 0)
-								begin
-									void'(RIS_overflow_p.predict(1));
-									if(IM_overflow_p.value == 1)
-										begin
-											void'(MIS_overflow_p.predict(1));
-											if(IIR_interrupt_priority_p.value < 2)
-												void'(IIR_interrupt_priority_p.predict(2));
-										end
-								end
-
-							if(internal_counter == MATCH_compare_p.value)
-								begin
-									void'(RIS_match_p.predict(1));
-									if(IM_match_p.value == 1)
-										begin
-											void'(MIS_match_p.predict(1));
-											void'(IIR_interrupt_priority_p.predict(3));
-										end
-								end
-						end
-
-// DOWN DIRECTION
-
-						1:
-						begin
-							internal_counter--;
-							void'(COUNT_counter.predict(internal_counter));
-							if(internal_counter == 'hffff)
-								begin
-									void'(RIS_underflow_p.predict(1));
-									if(IM_underflow_p.value == 1)
-										begin
-											void'(MIS_underflow_p.predict(1));
-											if(IIR_interrupt_priority_p.value < 1 )
-												void'(IIR_interrupt_priority_p.predict(1));
-										end
-								end
-
-							if(internal_counter == MATCH_compare_p.value)
-								begin
-									void'(RIS_match_p.predict(1));
-									if(IM_match_p.value == 1)
-										begin
-											void'(MIS_match_p.predict(1));
-											void'(IIR_interrupt_priority_p.predict(3));
-										end
-								end
-
-						end
-					endcase
-
+			if (vif.sig_reset == 0) begin
+				void'(RIS_p	 .predict(0));
+				void'(IM_p	 .predict(0));
+				void'(MIS_p	 .predict(0));
+				void'(LOAD_p .predict(0));
+				void'(CFG_p	 .predict(0));
+				void'(IIR_p	 .predict(0));
+				void'(MATCH_p.predict(0));
+				void'(COUNTER_p.predict(0));
+			end
+			else begin
+				if(CFG_counter_enable_p.value == 1) begin
+					// down
+					if (CFG_direction_p.value) begin
+						internal_counter--;
+						void'(COUNT_counter.predict(internal_counter));
+						if(internal_counter == 'hffff)
+							void'(RIS_underflow_p.predict(1));
+					end
+					// up
+					else begin
+						internal_counter++;
+						void'(COUNT_counter.predict(internal_counter));
+						if(internal_counter == 0)
+							void'(RIS_overflow_p.predict(1));
+					end
 				end // if counter_enable == 1 end
-			else
-				begin
-					if(MATCH_compare_p.value == COUNT_counter.value)
-						begin
-							void'(RIS_match_p.predict(1));
-							if(IM_match_p.value == 1)
-								begin
-									void'(MIS_match_p.predict(1));
-									void'(IIR_interrupt_priority_p.predict(3));
-								end
+				
+				// check for match interrupt
+				if(MATCH_compare_p.value == COUNT_counter.value)		
+					void'(RIS_match_p.predict(1));
 
-						end
-					//if() // TODO
-					// dodati scenario i
-					// da je pod default active
-					// dodati u dut helper if DOUT_O
-					// dodati IRQ;
-					// dodati checkere za signale  DOUT_O i IRQ
-					//
+				// register assigments - MIS and IIR based on RIS and IM
+				if(RIS_overflow_p.value) begin
+					if(IM_overflow_p.value == 1) begin
+						void'(MIS_overflow_p.predict(1));
+						if(IIR_interrupt_priority_p.value < 2)
+							void'(IIR_interrupt_priority_p.predict(2));
+					end
 				end
-
+				if(RIS_underflow_p.value) begin
+					if(IM_underflow_p.value == 1) begin
+						void'(MIS_underflow_p.predict(1));
+						if(IIR_interrupt_priority_p.value < 1 )
+							void'(IIR_interrupt_priority_p.predict(1));
+						end
+				end
+				if(RIS_match_p.value) begin
+					if(IM_match_p.value == 1) begin
+						void'(MIS_match_p.predict(1));
+						void'(IIR_interrupt_priority_p.predict(3));
+					end
+				end
+			end // else (no reset)
 		end // foreve begin end
-	endtask
+	endtask : counter_main_loop
 
-	task dut_referece_model::init();
+//------------------------------------------------------------------------------
+/**
+* Task : init
+* Purpose : initialize - get register map and registers
+* Inputs :
+* Outputs :
+* Ref :
+**/
+//------------------------------------------------------------------------------
+	task dut_reference_model::init();
 		dut_register_map = 	dut_register_model.get_default_map();
 
 		SWRESET_p 	= dut_register_map.get_reg_by_offset(SWRESET_address_offset);
@@ -199,8 +228,8 @@ endclass : dut_referece_model
 
 
 		IM_p		= dut_register_map.get_reg_by_offset(IM_address_offset);
-		$cast(IM_overflow_p, 	IM_p.get_field_by_name(underflow_string));
-		$cast(IM_underflow_p, 	IM_p.get_field_by_name(overflow_string));
+		$cast(IM_overflow_p, 	IM_p.get_field_by_name(overflow_string));
+		$cast(IM_underflow_p, 	IM_p.get_field_by_name(underflow_string));
 		$cast(IM_match_p,		IM_p.get_field_by_name(match_string));
 
 		IIR_p 		= dut_register_map.get_reg_by_offset(IIR_address_offset);
@@ -209,8 +238,74 @@ endclass : dut_referece_model
 		MATCH_p		= dut_register_map.get_reg_by_offset(MATCH_address_offset);
 		$cast(MATCH_compare_p, MATCH_p.get_field_by_name(compare_string));
 
+		LOAD_p 		= dut_register_map.get_reg_by_offset(LOAD_address_offset);
+		$cast(LOAD_compare_p, LOAD_p.get_field_by_name(compare_string));
+	endtask : init
 
-	endtask
+//------------------------------------------------------------------------------
+/**
+* Task : update_vif_checks
+* Purpose : update flags used to check vif signals
+* Inputs :
+* Outputs :
+* Ref :
+**/
+//------------------------------------------------------------------------------
+	task dut_reference_model::update_vif_checks();
+		forever begin
 
+			// DOUT_O and IRQ_O are sensitive to the AXI_ACLK signal
+			@(posedge vif.sig_aclock);
+
+			// note: the & 'hffff mask is used because counter is 16-bit so it should always be compared against 16-bit values
+			// MATCH or LOAD - TOLERANCE = more that 16-bits
+
+			// if the coutner near interrupt generation the asserton should not be checked
+			// near underflow or overflow
+			if ((COUNT_counter.value > ('hffff - TOLERANCE)) || (COUNT_counter.value < TOLERANCE) || ((COUNT_counter.value < MATCH_compare_p.value + 5) && (COUNT_counter.value > MATCH_compare_p.value - 5)))
+				vif.irq_check = 0;
+			else begin
+				// near match
+				if((MATCH_compare_p.value >= TOLERANCE) && (MATCH_compare_p.value <= ('hffff - TOLERANCE))) begin
+					if (COUNT_counter.value inside {[((MATCH_compare_p.value - TOLERANCE) & 'hffff) : ((MATCH_compare_p.value + TOLERANCE) & 'hffff)]})
+						vif.irq_check = 0;
+					else
+						vif.irq_check = 1;
+				end
+				else begin
+					if(COUNT_counter.value inside {[0 : ((MATCH_compare_p.value + TOLERANCE) & 'hffff)], [((MATCH_compare_p.value - TOLERANCE) & 'hffff) : 'hffff]})
+						vif.irq_check = 0;
+					else
+						vif.irq_check = 1;
+				end
+			end
+
+			// if the coutner is near the LOAD value, the asserton should not be checked
+			if((LOAD_compare_p.value >= TOLERANCE) && (LOAD_compare_p.value <= ('hffff - TOLERANCE))) begin
+				if (COUNT_counter.value inside {[((LOAD_compare_p.value - TOLERANCE) & 'hffff) : ((LOAD_compare_p.value + TOLERANCE) & 'hffff)]})
+					vif.dout_check = 0;
+				else
+					vif.dout_check = 1;
+			end
+			else begin
+				if(COUNT_counter.value inside {[0 : ((LOAD_compare_p.value + TOLERANCE) & 'hffff)], [((LOAD_compare_p.value - TOLERANCE) & 'hffff) : 'hffff]})
+					vif.dout_check = 0;
+				else begin
+					vif.dout_check = 1;
+				end
+			end			
+
+			// get value for output signals
+			if (MIS_overflow_p.value || MIS_match_p.value || MIS_underflow_p.value)
+				vif.irq_value = 1;
+			else
+				vif.irq_value = 0;
+
+			if (COUNT_counter.value > LOAD_compare_p.value)
+				vif.dout_value = 1;
+			else
+				vif.dout_value = 0;
+		end
+	endtask : update_vif_checks
 
 `endif

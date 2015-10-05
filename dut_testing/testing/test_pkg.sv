@@ -1,5 +1,3 @@
-`ifndef DUT_REGISTER_MODEL_TEST_PKG_SVH_
-`define DUT_REGISTER_MODEL_TEST_PKG_SVH_
 
 package dut_testing_test_and_seqs_pkq;
 
