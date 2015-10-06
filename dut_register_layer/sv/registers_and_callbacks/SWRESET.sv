@@ -82,6 +82,7 @@ class SWRESET_reset_passcode_cb extends uvm_reg_cbs;
 	if(kind == UVM_PREDICT_WRITE && value == 'h5A)
 		begin
 			// is passcode is correct everything will be reseted // VIDETI DA LI CE PROCI
+			$display("RESET");
 			void'(RIS_p	 .predict(0));
 			void'(IM_p	 .predict(0));
 			void'(MIS_p	 .predict(0));

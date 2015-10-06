@@ -28,6 +28,7 @@ endclass : axi_read_wrapper_sequence
 	task axi_read_wrapper_sequence::body();
 	    forever begin
 		    dut_frame frame;
+		    int i;
 
 
 		    p_sequencer.upper_seq_item_port.get_next_item(frame);
@@ -51,9 +52,26 @@ endclass : axi_read_wrapper_sequence
 
 		    // TODO
 		    // budj treba da se reis da se prosledjuje sve kao u write, ne znam trenutno kako
-		    frame.data[0] = req.single_frames[0].data;
-			frame.resp 	  = req.single_frames[0].resp;
 
+		    frame.resp   = OKAY;
+
+		    frame.data.delete();
+
+		foreach(req.single_frames[i])
+			begin
+
+			// copy data
+			frame.data.push_back(req.single_frames[i].data);
+
+			// if resp is error set it to unique resp
+			if((req.single_frames[i].resp == SLVERR) || (req.single_frames[i].resp == DECERR))
+				frame.resp   = req.single_frames[i].resp;
+
+			// if there is no error but exokay set it to unique resp
+			if(req.single_frames[i].resp == EXOKAY && frame.resp == OKAY)
+				frame.resp = EXOKAY;
+
+			end
 
 		    p_sequencer.upper_seq_item_port.item_done();
 

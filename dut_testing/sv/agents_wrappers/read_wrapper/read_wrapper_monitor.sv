@@ -34,13 +34,31 @@ endclass : axi_read_wrapper_monitor
 
 	function void axi_read_wrapper_monitor::write(input axi_read_whole_burst input_read_frame);
 	    dut_frame export_frame;
+		int i;
 
 		export_frame = new();
 
 		export_frame.rw 	= AXI_READ;
 		export_frame.addr 	= input_read_frame.addr;
-		export_frame.data.push_front(input_read_frame.single_frames[0].data);
 		export_frame.id		= input_read_frame.id;
+
+		export_frame.resp   = OKAY;
+
+		foreach(input_read_frame.single_frames[i])
+			begin
+
+			// copy data
+			export_frame.data.push_back(input_read_frame.single_frames[i].data);
+
+			// if resp is error set it to unique resp
+			if((input_read_frame.single_frames[i].resp == SLVERR) || (input_read_frame.single_frames[i].resp == DECERR))
+				export_frame.resp   = input_read_frame.single_frames[i].resp;
+
+			// if there is no error but exokay set it to unique resp
+			if(input_read_frame.single_frames[i].resp == EXOKAY && export_frame.resp == OKAY)
+				export_frame.resp = EXOKAY;
+
+			end
 
 		wrapper_port.write(export_frame);
 	endfunction

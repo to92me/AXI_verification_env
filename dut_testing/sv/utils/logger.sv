@@ -201,9 +201,10 @@ endclass : dut_testing_logger
 			READ:
 			begin
 				log.setBegin_time($time);
-				reg_p.read(log.status, data);
+				reg_p.read(log.status, tmp_data);
 				log.setEnd_time($time);
-				log.setData(data);
+				log.setData(tmp_data);
+				read_data = tmp_data;
 				if(log.getStatus() == UVM_NOT_OK)
 					begin
 						log.setFalid_action(READ);
@@ -234,13 +235,14 @@ endclass : dut_testing_logger
 
 				log.setBegin_time($time);
 				//reg_p.mirror(log.status, UVM_CHECK); // ne moze jer ne mogu da dobijem da je check OK ili nije
-				reg_p.read(log.status, data);
+				reg_p.read(log.status, tmp_data);
 				log.setEnd_time($time);
+				log.setData(tmp_data);
 
-				if(data != mirrored_tmp)
+				if(tmp_data != mirrored_tmp)
 					begin
 						log.setExpected_data(mirrored_tmp);
-						log.setGot_data(data);
+						log.setGot_data(tmp_data);
 						log.setStatus(UVM_NOT_OK);
 						log.setFalid_action(CHECK);
 					end
@@ -248,7 +250,7 @@ endclass : dut_testing_logger
 					begin
 						// da li treba nesto da se uradi ?? // TODO
 					end
-				log.setData(reg_p.get_mirrored_value());
+//				log.setData(reg_p.get_mirrored_value());
 			end
 
 
@@ -320,16 +322,16 @@ endclass : dut_testing_logger
 
 	function void dut_testing_logger::printBeginHeader(input string sequence_name);
 	   	$display("");
-		$display("==================================================================================================================================================================");
-		$display("==                               								sequence:    %s                                                                       " ,sequence_name);
-		$display("==================================================================================================================================================================");
+		$display("================================================================================================================================================================================");
+		$display("==                               				sequence:    %s                                                                  " ,sequence_name);
+		$display("================================================================================================================================================================================");
 
 	endfunction
 
 	function void dut_testing_logger::printEndHeader(input string sequence_name);
-		$display("==================================================================================================================================================================");
-		$display("==                               								END:    %s                                                                       ",sequence_name);
-		$display("==================================================================================================================================================================");
+		$display("================================================================================================================================================================================");
+		$display("==                               				END:    %s                                                                       ",sequence_name);
+		$display("================================================================================================================================================================================");
 		$display("");
 	endfunction
 
@@ -338,7 +340,7 @@ endclass : dut_testing_logger
 		string status_string = this.getStatusString(to_print.getStatus());
 		string action_string = this.getActionString(to_print.getAction());
 
-		$display("%s \t[REG]: action: %s, \tvalue: %0d, \tbegin time: %5d, \t\tend time : %5d, \torder of actions: %0d, \t\tstatus ------------------- %s",to_print.getName(),
+		$display("%s \t[REG]: action: %s, \tvalue: %0d, \tbegin time: %5d, \tend time : %5d, \torder of actions: %0d, \t\t\tstatus ------------------- %s",to_print.getName(),
 					action_string, to_print.getData(), to_print.getBegin_time(), to_print.getEnd_time(),to_print.getOred_number(), status_string);
 
 		if(to_print.getFalid_action() == CHECK)
@@ -430,15 +432,15 @@ endclass : dut_testing_logger
 		$display("");
 		if(error_number == 0)
 			begin
-				$display("-----------------------------------------------------------------------------SEQUENCE OK ! , NO ERRORS --------------------------------------------------------------");
+				$display("-----------------------------------------------------------------------------SEQUENCE OK ! , NO ERRORS -------------------------------------------------------------------------");
 			end
 		else
 			begin
-				$display("---------------------------------------------------------SEQUENCE ERROR : %0d action(s), OK %0d action(s), SKIPPED %0d action(s)--------------------------------------", error_number, ok_number, skipped_actions);
+				$display("---------------------------------------------------------SEQUENCE ERROR : %0d action(s), OK %0d action(s), SKIPPED %0d action(s)-------------------------------------------------", error_number, ok_number, skipped_actions);
 				$display("");
 				printErrors();
 				$display("");
-				$display("----------------------------------------------------------------------------------------------------------------------------------------------------------------------");
+				$display("---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------");
 			end
 	endfunction
 

@@ -56,7 +56,7 @@ endclass : dut_register_model_lower_sequence
 				    // constrin all fields to recieved frame fiels
 				    `uvm_do_on_with(req,p_sequencer.read_sequencer,
 					    	{	req.addr		== frame.addr;
-						    	//req.data[0] 	== frame.data[0];
+//						    	req.data[0] 	== frame.data[0];
 						    	req.len			== frame.len;
 								req.size 		== frame.size;
 						    	req.burst_type 	== frame.burst_type;
