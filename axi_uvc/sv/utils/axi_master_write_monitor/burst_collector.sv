@@ -86,6 +86,8 @@ task axi_master_write_burst_collector::pushResponseItem(input axi_write_response
 
 	checkForId(mssg.id, index);
 
+	burst_queue[index].resp = mssg.getResp();
+
     if(index != -1)
 	    begin
 		    main_monitor_instance.sendBurst(burst_queue[index]);

@@ -139,15 +139,19 @@ class dut_tesgin_logger_test_sequence extends dut_register_model_base_sequence;
 		int tmp;
 		uvm_status_e	status;
 
-		log.configure("dut_tesgin_logger_test_sequence", TRUE, FALSE, TRUE);
+		log.configure("dut_tesgin_logger_test_sequence", TRUE, TRUE, TRUE);
+
+		#200
+
 
 		log.reg_do(register_model.IM_reg 	, WRITE, 3'b111);
-		log.reg_do(register_model.MATCH_reg	, WRITE, 50);
+//		log.reg_do(register_model.MATCH_reg	, WRITE, 50);
 		log.reg_do(register_model.CFG_reg	, WRITE, 3 );
 
 		#100000
 		log.reg_do(register_model.MIS_reg , MIRROR, 0);
 //		log.reg_do(register_model.COUNT_reg, MIRROR, 0);
+		log.reg_do(register_model.MIS_reg , READ, 0, tmp);
 
 		log.reg_do(register_model.IM_reg 	, WRITE, 3'b111);
 

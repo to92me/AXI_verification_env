@@ -60,7 +60,7 @@ class MIS extends uvm_reg;
 			MIS_overflow_cb _MIS_overflow_cb = new("MIS_overflow_cb");
 			uvm_reg_field_cb::add(overflow, _MIS_overflow_cb);
 		end
-		overflow.set_compare(UVM_CHECK);
+
 
 		match = uvm_reg_field::type_id::create(match_string);
 		match.configure(.parent							(this					),
@@ -125,7 +125,7 @@ class MIS_overflow_cb extends uvm_reg_cbs;
 
 	 this.init(map);
 
-	 if(kind == UVM_WRITE && value == 1)
+	 if(kind == UVM_PREDICT_WRITE && value == 1)
 		 begin
 			 if(IIR_interrupt_priority_p.value == 1)
 				 begin

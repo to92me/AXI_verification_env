@@ -33,7 +33,9 @@ function uvm_sequence_item dut_register_model_adapter::reg2bus(const ref uvm_reg
 	//specific to dut_reqister and operation
 	reg_frame.addr = rw.addr;
 	reg_frame.rw = (rw.kind == UVM_READ)? AXI_READ : AXI_WRITE;
-	reg_frame.data[0] = rw.data;
+
+	if(rw.kind == UVM_WRITE)
+		reg_frame.data[0] = rw.data;
 
 	//dut burst configuration
 	reg_frame.burst_type = FIXED;
@@ -57,6 +59,8 @@ endfunction
 
 function void dut_register_model_adapter::bus2reg(input uvm_sequence_item bus_item, ref uvm_reg_bus_op rw);
     dut_frame	bus_frame;
+	int i;
+//	$display("BUS2REG");
 
 	if(! $cast(bus_frame, bus_item))
 		`uvm_error(get_name(),"Monitor item can not be cast to axi_frame")
@@ -64,19 +68,20 @@ function void dut_register_model_adapter::bus2reg(input uvm_sequence_item bus_it
 	rw.addr = bus_frame.addr;
 	rw.kind = (bus_frame.rw == AXI_READ)? UVM_READ : UVM_WRITE ;
 
+
 	rw.data = bus_frame.data.pop_front();
 
 	if(bus_frame.data.size > 0)
-		`uvm_warning(get_name(),"Has recieved axi_frame that contains more than one data in queue! Adpter is using just firs one");
+		`uvm_warning(get_name(),"Has recieved axi_frame that contains more than one data in queue! Adpter is using just first one");
 	rw.n_bits = 16;
 	if(bus_frame.resp == OKAY || bus_frame.resp == EXOKAY)
 		begin
 			rw.status = UVM_IS_OK;
-			$display("UVM_IS_OK");
+//			$display("UVM_IS_OK");
 		end
 	else
 		begin
-			$display("UVM_NOT_OK");
+//			$display("UVM_NOT_OK");
 			rw.status = UVM_NOT_OK;
 		end
 
