@@ -261,7 +261,7 @@ class MIS_match_cb extends uvm_reg_cbs;
 		this.init(map);
 
 
-		if(kind == UVM_PREDICT_WRITE  && value == 1);
+		if(kind == UVM_PREDICT_WRITE  && value == 1)
 		begin
 			if(RIS_match_p.value != 0)
 				void'(RIS_match_p.predict(0));
