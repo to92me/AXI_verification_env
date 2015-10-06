@@ -61,6 +61,7 @@ class axi_read_wrapper_agent extends uvm_subscriber#(dut_frame);
 	    super.connect_phase(phase);
 		wrapper_low_sequencer.upper_seq_item_port.connect(wrapper_top_sequencer.seq_item_export);
 		wrapper_low_sequencer.setReadSequencer(axi_read_agent_p.sequencer);
+		axi_read_agent_p.monitor.burst_collected_port.connect(wrapper_monitor.read_monitor_import);
 	endfunction
 
 	function axi_read_wrapper_top_sequencer getTopSequencer();

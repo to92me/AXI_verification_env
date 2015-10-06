@@ -145,14 +145,9 @@ class dut_tesgin_logger_test_sequence extends dut_register_model_base_sequence;
 		log.reg_do(register_model.MATCH_reg	, WRITE, 50);
 		log.reg_do(register_model.CFG_reg	, WRITE, 3 );
 
-		register_model.CFG_reg.write(status, 3 );
-		$display("mirror: %d", register_model.CFG_reg.get_mirrored_value());
-		register_model.CFG_reg.read(status, tmp );
-		$display("%5d", tmp);
-
 		#100000
 		log.reg_do(register_model.MIS_reg , MIRROR, 0);
-		log.reg_do(register_model.COUNT_reg, MIRROR, 0);
+//		log.reg_do(register_model.COUNT_reg, MIRROR, 0);
 
 		log.reg_do(register_model.IM_reg 	, WRITE, 3'b111);
 

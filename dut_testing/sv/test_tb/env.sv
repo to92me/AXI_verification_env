@@ -104,8 +104,8 @@ function void dut_register_model_env::connect_phase(input uvm_phase phase);
 		low_sequencer.setReadSequncer(wrapper_read_agent.getTopSequencer());
 		low_sequencer.setWriteSequencer(wrapper_write_agent.getTopSequencer());
 
-		wrapper_write_agent.wrapper_monitor.wrapper_port.connect(monitor.read_monitor_import);
-		wrapper_read_agent.wrapper_monitor.wrapper_port.connect(monitor.write_monitor_import);
+		wrapper_write_agent.wrapper_monitor.wrapper_port.connect(monitor.write_monitor_import);
+		wrapper_read_agent.wrapper_monitor.wrapper_port.connect(monitor.read_monitor_import);
 
 		predictor.map 		= register_map;
 		predictor.adapter	= adapter;

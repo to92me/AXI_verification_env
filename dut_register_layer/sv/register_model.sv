@@ -111,7 +111,7 @@ class dut_register_block extends uvm_reg_block;
 		dut_map.add_reg(IIR_reg,	IIR_address_offset,		"RO");
 		dut_map.add_reg(MATCH_reg,	MATCH_address_offset,	"RW");
 		dut_map.add_reg(COUNT_reg,	COUNT_address_offset,	"RO");
-
+		dut_map.set_check_on_read(1);
 		// this is final configuration so lock it
 		lock_model();
 

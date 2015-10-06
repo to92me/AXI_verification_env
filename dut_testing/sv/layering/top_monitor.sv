@@ -45,6 +45,8 @@ endclass : dut_register_model_top_monitor
 
 	function void dut_register_model_top_monitor::write(input dut_frame frame);
 
+		$display("MONITOR");
+
 		top_monitor_port.write(frame);
 
 	endfunction

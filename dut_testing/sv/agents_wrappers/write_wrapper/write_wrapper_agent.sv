@@ -52,7 +52,7 @@ class axi_write_wrapper_agent extends uvm_subscriber#(dut_frame);
 		super.connect_phase(phase);
 		wrapper_low_sequencer.upper_seq_item_port.connect(wrapper_top_sequencer.seq_item_export);
 		wrapper_low_sequencer.setWriteSequencer(axi_write_agent_p.sequencer);
-//		axi_write_agent_p.driver.seq_item_port.connect(wrapper_low_sequencer.seq_item_export);
+		axi_write_agent_p.monitor.burst_port.connect(wrapper_monitor.write_monitor_import);
 	endfunction
 
 	function axi_write_wrapper_top_sequencer getTopSequencer();

@@ -246,7 +246,7 @@ class MIS_match_cb extends uvm_reg_cbs;
 		$cast(MIS_underflow_p, MIS_p.get_field_by_name(underflow_string));
 
 		IIR_p = map.get_reg_by_offset(IIR_address_offset);
-		$cast(IIR_interrupt_priority_p, IIR_p.get_field_by_name(underflow_string));
+		$cast(IIR_interrupt_priority_p, IIR_p.get_field_by_name(interrupt_priority_string));
 
 	endfunction
 
