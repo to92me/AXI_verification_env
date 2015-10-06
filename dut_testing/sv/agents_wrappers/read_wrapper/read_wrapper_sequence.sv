@@ -55,7 +55,7 @@ endclass : axi_read_wrapper_sequence
 			frame.resp 	  = req.single_frames[0].resp;
 
 
-		    p_sequencer.upper_seq_item_port.item_done(frame);
+		    p_sequencer.upper_seq_item_port.item_done();
 
 	    end
 	endtask

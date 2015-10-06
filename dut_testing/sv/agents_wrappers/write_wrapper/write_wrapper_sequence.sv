@@ -71,7 +71,7 @@ endclass : axi_write_wrapper_sequence
 
 			frame_dut.resp = frame_axi.resp;
 
-			p_sequencer.upper_seq_item_port.item_done(frame_dut);
+			p_sequencer.upper_seq_item_port.item_done();
 		end
 	endtask
 
