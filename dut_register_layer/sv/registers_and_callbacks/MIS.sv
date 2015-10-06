@@ -132,8 +132,10 @@ class MIS_overflow_cb extends uvm_reg_cbs;
 					 void'(IIR_interrupt_priority_p.predict(0));
 				 end
 
-				 void'(RIS_overflow_p.predict(0));
-				 void'(fld.predict(0));
+				 if(RIS_overflow_p.value != 0)
+					 void'(RIS_overflow_p.predict(0));
+				 if(fld.value != 0)
+					 void'(fld.predict(0));
 				 value = 0;
 		 end
  	endfunction
@@ -187,8 +189,10 @@ class MIS_underflow_cb extends uvm_reg_cbs;
 			begin
 				if(RIS_underflow_p.value == 1)
 					begin
-						void'(RIS_underflow_p.predict(0));
-						void'(fld.predict(0));
+						if(RIS_underflow_p.value != 0)
+							void'(RIS_underflow_p.predict(0));
+						if(fld.value != 0)
+							void'(fld.predict(0));
 
 						if(IIR_interrupt_priority_p.value < 3)
 							begin
@@ -259,8 +263,11 @@ class MIS_match_cb extends uvm_reg_cbs;
 
 		if(kind == UVM_PREDICT_WRITE  && value == 1);
 		begin
-			void'(RIS_match_p.predict(0));
-			void'(MIS_match_p.predict(0));
+			if(RIS_match_p.value != 0)
+				void'(RIS_match_p.predict(0));
+			if(MIS_match_p.value != 0)
+				void'(MIS_match_p.predict(0));
+
 			if(MIS_underflow_p.value == 1)
 				begin
 					void'(IIR_interrupt_priority_p.predict(0));
