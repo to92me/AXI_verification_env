@@ -59,12 +59,9 @@ class swreset_seq extends register_model_env_pkg::dut_register_model_base_sequen
 		register_model.CFG_reg.write(status, 3);
 		// enable IM
 		register_model.IM_reg.write(status, 15);
-		register_model.IM_reg.predict(7, .kind(UVM_PREDICT_WRITE), .map(register_model.dut_map));
 		// set MATCH and LOAD
 		register_model.MATCH_reg.write(status, 'hff5a);
-		register_model.MATCH_reg.predict('hff5a, .kind(UVM_PREDICT_WRITE), .map(register_model.dut_map));
 		register_model.LOAD_reg.write(status, 'hff5a);
-		register_model.LOAD_reg.predict('hff5a, .kind(UVM_PREDICT_WRITE), .map(register_model.dut_map));
 
 		#1000
 		// read from SWRESET
@@ -96,7 +93,6 @@ class swreset_seq extends register_model_env_pkg::dut_register_model_base_sequen
 		#1000
 		// write correct code to SWRESET
 		register_model.SWRESET_reg.write(status, 'h005a);
-		register_model.SWRESET_reg.predict('h005a, .kind(UVM_PREDICT_WRITE), .map(register_model.dut_map));
 
 		#1000
 		// check RIS, MIS, IM, MATCH and LOAD - they should reset

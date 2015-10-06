@@ -77,21 +77,25 @@ class SWRESET_reset_passcode_cb extends uvm_reg_cbs;
                                       input uvm_path_e     path,
                                       input uvm_reg_map    map);
 
-	this.init(map);
+		this.init(map);
 
-	if(kind == UVM_PREDICT_WRITE && value == 'h5A)
-		begin
-			// is passcode is correct everything will be reseted // VIDETI DA LI CE PROCI
-			$display("RESET");
-			void'(RIS_p	 .predict(0));
-			void'(IM_p	 .predict(0));
-			void'(MIS_p	 .predict(0));
-			void'(LOAD_p .predict(0));
-			void'(CFG_p	 .predict(0));
-			void'(IIR_p	 .predict(0));
-			void'(MATCH_p.predict(0));
-			void'(COUNT_p.predict(0));
+		if(kind == UVM_PREDICT_WRITE) begin
+			// write predicts the value that is written, but SWRESET reg
+			// should always be 0
 			void'(fld.predict(0));
+
+			if(value == 'h5A) begin
+				// is passcode is correct everything will be reset
+				void'(RIS_p	 .predict(0));
+				void'(IM_p	 .predict(0));
+				void'(MIS_p	 .predict(0));
+				void'(LOAD_p .predict(0));
+				void'(CFG_p	 .predict(0));
+				void'(IIR_p	 .predict(0));
+				void'(MATCH_p.predict(0));
+				void'(COUNT_p.predict(0));
+			end
+			
 			value = 0;
 		end
 
