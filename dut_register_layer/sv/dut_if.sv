@@ -1,9 +1,37 @@
 `ifndef DUT_VIF_SVH
 `define DUT_VIF_SVH
 
+/**
+* Project : DUT register model
+*
+* File : CFG.sv
+*
+* Language : SystemVerilog
+*
+* Company : Elsys Eastern Europe
+*
+* Authors : Tomislav Tumbas
+* 		    Andrea Erdeljan
+*
+* E-Mail : tomislav.tumbas@elsys-eastern.com
+*
+* Mentor : Darko Tomusilovic
+*
+* Description : dut_helper_vif
+*
+*
+**/
+
 //------------------------------------------------------------------------------
 //
 // INTERFACE: dut_helper_vif
+//
+//------------------------------------------------------------------------------
+//
+// DESCRIPTION:
+//			hepler interface are sgnals that DUT is using beside standard AXI
+//			interface
+//	 		this interface contains corresponding assertions
 //
 //------------------------------------------------------------------------------
 

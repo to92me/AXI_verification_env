@@ -149,7 +149,7 @@ class dut_testing_logger;
 
 
 
-	extern function void configure(input string name, true_false_enum end_at_first_UVM_NOT_OK = FALSE, true_false_enum print_all_actions = FALSE, true_false_enum print_status_on_end_of_simulation = TRUE);
+	extern function void configure(input string name, true_false_enum end_at_first_UVM_NOT_OK = FALSE, true_false_enum print_all_actions = FALSE);
 	extern task reg_do(input uvm_reg reg_p, reg_action_enum action = MIRROR,bit[DATA_WIDTH - 1 : 0] data, output bit[DATA_WIDTH-1:0] read_data);
 	extern function void printAll();
 	extern function void printErrors();
@@ -168,12 +168,11 @@ class dut_testing_logger;
 endclass : dut_testing_logger
 
 
-	function void dut_testing_logger::configure(input string name,  true_false_enum end_at_first_UVM_NOT_OK, true_false_enum print_all_actions,  true_false_enum print_status_on_end_of_simulation);
+	function void dut_testing_logger::configure(input string name,  true_false_enum end_at_first_UVM_NOT_OK, true_false_enum print_all_actions  );
 	    //set that logger is configured
 	    this.configured			= TRUE;
 		this.name				= name;
 		this.end_on_UVM_NOT_OK	= end_at_first_UVM_NOT_OK;
-		this.print_status_on_end= print_status_on_end_of_simulation;
 		this.print_all_actions	= print_all_actions;
 	endfunction
 

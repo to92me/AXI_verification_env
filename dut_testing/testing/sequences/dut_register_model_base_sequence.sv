@@ -29,7 +29,6 @@ class dut_register_model_base_sequence extends uvm_sequence #(dut_frame);
 
 
 	virtual task pre_body();
-		$display("PRE BODY");
 
 	if (starting_phase != null) begin
         starting_phase.raise_objection(this, {"Executing sequence '", get_full_name(), "'"});
@@ -40,7 +39,6 @@ class dut_register_model_base_sequence extends uvm_sequence #(dut_frame);
 
 
 	virtual task post_body();
-		$display("POST BODY");
 
 		 if (starting_phase != null) begin
         starting_phase.drop_objection(this, {"Completed sequence '",
@@ -139,7 +137,7 @@ class dut_tesgin_logger_test_sequence extends dut_register_model_base_sequence;
 		int tmp;
 		uvm_status_e	status;
 
-		log.configure("dut_tesgin_logger_test_sequence", TRUE, TRUE, TRUE);
+		log.configure("dut_tesgin_logger_test_sequence", TRUE, TRUE);
 
 		#200
 

@@ -1,17 +1,43 @@
 `ifndef SWRESET_REGISTER_SVH
 `define SWRESET_REGISTER_SVH
-//------------------------------------------------------------------------------
-//
-// CLASS: uvc_company_uvc_name_component
-//
-//------------------------------------------------------------------------------
 
 
-//============================== SWRESET SPEC ==================================================
-//- SWRESET registar - ispravan upis sifre 0x5a resetuje sve registre
+/**
+* Project : DUT register model
+*
+* File : MIS.sv
+*
+* Language : SystemVerilog
+*
+* Company : Elsys Eastern Europe
+*
+* Author : Tomislav Tumbas
+*
+* E-Mail : tomislav.tumbas@elsys-eastern.com
+*
+* Mentor : Darko Tomusilovic
+*
+* Description : MIS register model
+*
+*
+**/
+
+
+//-------------------------------------------------------------------------------------
+//
+// CLASS: RIS
+//
+//--------------------------------------------------------------------------------------
+// DESCRIPTION:
+//			RIS register, represents image of dut RIS register written in uvm
+//
+//
+// SPECIFICATION:
+//	 		- SWRESET registar - ispravan upis sifre 0x5a resetuje sve registre
 //                                  - neispravan upis sifre ne radi nista
 //                                  - citanjem registra dobija se vrednost 0
-//===========================================================================================
+//-------------------------------------------------------------------------------------
+
 
 class SWRESET extends uvm_reg;
 	rand uvm_reg_field reset_passcode;
@@ -40,6 +66,21 @@ class SWRESET extends uvm_reg;
 	endfunction
 
 endclass
+
+//-------------------------------------------------------------------------------------
+//
+// CLASS: SWRESET_reset_passcode_cb
+//
+//--------------------------------------------------------------------------------------
+// DESCRIPTION:
+//			SWRESET_reset_passcode_cb is callback that is called after calling predict on SWRESET register that changes
+//			corresponding values in register model
+//
+//
+// SPECIFICATION:
+//			if writing to SWRESET 0x5A then register model will be reseted
+//
+//-------------------------------------------------------------------------------------
 
 class SWRESET_reset_passcode_cb extends uvm_reg_cbs;
 	uvm_reg		IIR_p;
@@ -95,7 +136,7 @@ class SWRESET_reset_passcode_cb extends uvm_reg_cbs;
 				void'(MATCH_p.predict(0));
 				void'(COUNT_p.predict(0));
 			end
-			
+
 			value = 0;
 		end
 

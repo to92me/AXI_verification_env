@@ -1,6 +1,28 @@
 `ifndef DUT_REGISTER_MODEL_TYPES_SVH
 `define DUT_REGISTER_MODEL_TYPES_SVH
 
+/**
+* Project :types
+*
+* File : types.sv
+*
+* Language : SystemVerilog
+*
+* Company : Elsys Eastern Europe
+*
+* Author : Tomislav Tumbas
+*
+* E-Mail : tomislav.tumbas@elsys-eastern.com
+*
+* Mentor : Darko Tomusilovic
+*
+* Description :types
+*
+*
+**/
+
+
+
 
 	// RIS parameters
 	parameter RIS_address_offset  		=	'h0;

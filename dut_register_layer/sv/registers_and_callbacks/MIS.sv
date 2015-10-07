@@ -1,17 +1,45 @@
 `ifndef MIS_REGISTER_SVH
 `define MIS_REGISTER_SVH
-//------------------------------------------------------------------------------
+
+
+/**
+* Project : DUT register model
+*
+* File : MIS.sv
+*
+* Language : SystemVerilog
+*
+* Company : Elsys Eastern Europe
+*
+* Author : Tomislav Tumbas
+*
+* E-Mail : tomislav.tumbas@elsys-eastern.com
+*
+* Mentor : Darko Tomusilovic
+*
+* Description : MIS register model
+*
+*
+**/
+
+
+//-------------------------------------------------------------------------------------
 //
-// CLASS: uvc_company_uvc_name_component
+// CLASS: MIS
 //
-//------------------------------------------------------------------------------
-//============================== MIS SPEC ==================================================
-//- MIS - masked interrupt status 		- bit 0 - overflow
-//                                      - bit 1 - underflow
+//--------------------------------------------------------------------------------------
+// DESCRIPTION:
+//			MIS register, represents image of dut MIS register written in uvm
 //
-//- MIS ima i dodatnu funkcionalnost - upis 1 na odgovarajucu bit lokaciju brise flag i u RIS
-// i u MIS registru; upis 0 ne radi nista
-//=========================================================================================
+//
+// SPECIFICATION:
+//	  MIS - masked interrupt status 		- bit 0 - overflow
+//                                      	- bit 1 - underflow
+//
+//		- MIS ima i dodatnu funkcionalnost - upis 1 na odgovarajucu bit lokaciju brise flag i u RIS
+// 		i u MIS registru; upis 0 ne radi nista
+//-------------------------------------------------------------------------------------
+
 
 
 class MIS extends uvm_reg;
@@ -92,7 +120,21 @@ class MIS extends uvm_reg;
 	endfunction
 endclass
 
-// MIS "CALLBACK"
+//-------------------------------------------------------------------------------------
+//
+// CLASS: MIS_overflow_cb
+//
+//--------------------------------------------------------------------------------------
+// DESCRIPTION:
+//			MIS_overflow_cb is callback that is called after calling predict on MIS register that changes
+//			corresponding values in register model
+//
+//
+// SPECIFICATION:
+//			if writing to MIS_overflow then MIS_overflow and RIS_overflow will change to 0 and
+//			IIR will change to corresponding value
+//
+//-------------------------------------------------------------------------------------
 
 class MIS_overflow_cb extends uvm_reg_cbs;
 
@@ -140,6 +182,22 @@ class MIS_overflow_cb extends uvm_reg_cbs;
 		 end
  	endfunction
 endclass
+
+//-------------------------------------------------------------------------------------
+//
+// CLASS: MIS_underflow_cb
+//
+//--------------------------------------------------------------------------------------
+// DESCRIPTION:
+//			MIS_underflow_cb is callback that is called after calling predict on MIS register that changes
+//			corresponding values in register model
+//
+//
+// SPECIFICATION:
+//			if writing to MIS_underflow then MIS_underflow and RIS_underflow will change to 0 and
+//			IIR will change to corresponding value
+//
+//-------------------------------------------------------------------------------------
 
 class MIS_underflow_cb extends uvm_reg_cbs;
 
@@ -212,6 +270,21 @@ class MIS_underflow_cb extends uvm_reg_cbs;
 	endfunction
 endclass
 
+//-------------------------------------------------------------------------------------
+//
+// CLASS: MIS_match_cb
+//
+//--------------------------------------------------------------------------------------
+// DESCRIPTION:
+//			MIS_match_cb is callback that is called after calling predict on MIS register that changes
+//			corresponding values in register model
+//
+//
+// SPECIFICATION:
+//			if writing to MIS_match then MIS_match and RIS_match will change to 0 and
+//			IIR will change to corresponding value
+//
+//-------------------------------------------------------------------------------------
 
 class MIS_match_cb extends uvm_reg_cbs;
 

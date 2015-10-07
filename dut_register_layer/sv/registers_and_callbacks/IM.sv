@@ -1,19 +1,45 @@
 `ifndef IM_REGISTER_SVH_
 `define IM_REGISTER_SVH_
 
-//------------------------------------------------------------------------------
-//
-// CLASS: uvc_company_uvc_name_component
-//
-//------------------------------------------------------------------------------
+/**
+* Project : DUT register model
+*
+* File : IM.sv
+*
+* Language : SystemVerilog
+*
+* Company : Elsys Eastern Europe
+*
+* Author : Tomislav Tumbas
+*
+* E-Mail : tomislav.tumbas@elsys-eastern.com
+*
+* Mentor : Darko Tomusilovic
+*
+* Description : IM register model
+*
+*
+**/
 
 
-//============================== IM SPEC ==================================================
-//- IM - interrupt enable - bit 0 - overflow
-//                                     - bit 1 - underflow
-//                                     - ta dva polja su read-write, ostala su read-only
-// ne menja ga hardwer
-//=========================================================================================
+//-------------------------------------------------------------------------------------
+//
+// CLASS: IM
+//
+//--------------------------------------------------------------------------------------
+// DESCRIPTION:
+//			IM register, represents image of dut IM register written in uvm
+//
+//
+// SPECIFICATION:
+//	 	IM - interrupt enable - bit 0
+//				 - overflow
+//               - bit 1 - underflow
+//               - ta dva polja su read-write, ostala su read-only
+// 				ne menja ga hardwer
+//-------------------------------------------------------------------------------------
+
+
 
 class IM extends uvm_reg;
 	rand uvm_reg_field underflow;
@@ -94,6 +120,21 @@ class IM extends uvm_reg;
 endclass
 
 
+//-------------------------------------------------------------------------------------
+//
+// CLASS: IM_overflow_cb
+//
+//--------------------------------------------------------------------------------------
+// DESCRIPTION:
+//			IM_overflow_cb is callback that is called after calling predict on IM register that changes
+//			corresponding values in register model
+//
+//
+// SPECIFICATION:
+//			if in IM_overflow is written 1 then if RIS_overflow is 1 this callback will
+//			change MIS_overflow to 1 and IIR to corresponding value
+//
+//-------------------------------------------------------------------------------------
 
 
 class IM_overflow_cb extends uvm_reg_cbs;
@@ -151,6 +192,21 @@ class IM_overflow_cb extends uvm_reg_cbs;
 
 endclass
 
+//-------------------------------------------------------------------------------------
+//
+// CLASS: IM_underflow_cb
+//
+//--------------------------------------------------------------------------------------
+// DESCRIPTION:
+//			IM_underflow_cb is callback that is called after calling predict on IM register that changes
+//			corresponding values in register model
+//
+//
+// SPECIFICATION:
+//			if in IM_underflow is written 1 then if RIS_underflow is 1 this callback will
+//			change MIS_overflow to 1 and IIR to corresponding value
+//
+//-------------------------------------------------------------------------------------
 
 class IM_underflow_cb extends uvm_reg_cbs;
 	uvm_reg 		RIS_p;
@@ -205,6 +261,21 @@ class IM_underflow_cb extends uvm_reg_cbs;
 
 endclass
 
+//-------------------------------------------------------------------------------------
+//
+// CLASS: IM_match_cb
+//
+//--------------------------------------------------------------------------------------
+// DESCRIPTION:
+//			IM_match_cb is callback that is called after calling predict on IM register that changes
+//			corresponding values in register model
+//
+//
+// SPECIFICATION:
+//			if in IM_match is written 1 then if RIS_match is 1 this callback will
+//			change MIS_match to 1 and IIR to corresponding value
+//
+//-------------------------------------------------------------------------------------
 
 class IM_match_cb extends uvm_reg_cbs;
 	uvm_reg 		RIS_p;

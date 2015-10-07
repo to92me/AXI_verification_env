@@ -1,7 +1,41 @@
 `ifndef RIS_REGISTER_SVH
 `define RIS_REGISTER_SVH
 
+/**
+* Project : DUT register model
+*
+* File : MIS.sv
+*
+* Language : SystemVerilog
+*
+* Company : Elsys Eastern Europe
+*
+* Author : Tomislav Tumbas
+*
+* E-Mail : tomislav.tumbas@elsys-eastern.com
+*
+* Mentor : Darko Tomusilovic
+*
+* Description : MIS register model
+*
+*
+**/
 
+
+//-------------------------------------------------------------------------------------
+//
+// CLASS: MIS
+//
+//--------------------------------------------------------------------------------------
+// DESCRIPTION:
+//			MIS register, represents image of dut MIS register written in uvm
+//
+//
+// SPECIFICATION:
+//	 		 RIS- bit 0 - overflow
+//        		- bit 1 - underflow
+//          	- registar je read-only, polja setuje hardver
+//-------------------------------------------------------------------------------------
 
 //============================== RIS SPEC ================================================
 //- RIS - bit 0 - overflow

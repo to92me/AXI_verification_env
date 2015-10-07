@@ -1,14 +1,43 @@
 `ifndef IIR_REGISTER_SVH
 `define IIR_REGISTER_SCH
 
+/**
+* Project : DUT register model
+*
+* File : IIR.sv
+*
+* Language : SystemVerilog
+*
+* Company : Elsys Eastern Europe
+*
+* Author : Tomislav Tumbas
+*
+* E-Mail : tomislav.tumbas@elsys-eastern.com
+*
+* Mentor : Darko Tomusilovic
+*
+* Description : IIR register model
+*
+*
+**/
 
 
-//============================== IIR SPEC ==================================================
-//- interrupt index registar - registar prioriteta - npr u slucaju da je bit 0 u MIS aktivan, ovaj registar bi imao vrednost 1
-//                                                                       - u slucaju da je bit 1 u MIS aktivan, ovaj registar bi imao vrednost 2
-//                                                                       - u slucaju da je bit 0 i 1 u MIS aktivan, ovaj registar bi opet imao vrednost 2, znaci bit 1 bi se
-//                                                                               proglasio za interrupt viseg prioriteta
-//===========================================================================================
+//-------------------------------------------------------------------------------------
+//
+// CLASS: IIR
+//
+//--------------------------------------------------------------------------------------
+// DESCRIPTION:
+//			IIR register, represents image of dut IIR register written in uvm
+//
+//
+// SPECIFICATION:
+//			 interrupt index registar - registar prioriteta - npr u slucaju da je bit 0 u MIS aktivan, ovaj registar bi imao vrednost 1
+//            - u slucaju da je bit 1 u MIS aktivan, ovaj registar bi imao vrednost 2
+//            - u slucaju da je bit 0 i 1 u MIS aktivan, ovaj registar bi opet imao vrednost 2, znaci bit 1 bi se
+//         		  proglasio za interrupt viseg prioriteta
+//-------------------------------------------------------------------------------------
+
 
 
 class IIR extends uvm_reg;
@@ -52,6 +81,22 @@ class IIR extends uvm_reg;
 	endfunction
 
 endclass
+
+//-------------------------------------------------------------------------------------
+//
+// CLASS: IIR_interrupt_priority_cb
+//
+//--------------------------------------------------------------------------------------
+// DESCRIPTION:
+//			IIR_interrupt_priority_cb is callback that is called after calling predict on IIR register that changes
+//			corresponding values in register model
+//
+//
+// SPECIFICATION:
+//			ako se cita IIR treba da se spusti interrupt najveceg prioriteta
+//
+//
+//-------------------------------------------------------------------------------------
 
 
 class IIR_interrupt_priority_cb extends uvm_reg_cbs;

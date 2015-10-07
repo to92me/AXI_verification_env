@@ -2,11 +2,41 @@
 `define LOAD_REGISTER_SVH
 
 
+/**
+* Project : DUT register model
+*
+* File : LOAD.sv
+*
+* Language : SystemVerilog
+*
+* Company : Elsys Eastern Europe
+*
+* Author : Tomislav Tumbas
+*
+* E-Mail : tomislav.tumbas@elsys-eastern.com
+*
+* Mentor : Darko Tomusilovic
+*
+* Description : LOAD register model
+*
+*
+**/
 
-//============================== LOAD SPEC ==================================================
-//- LOAD registar - 16bitna vrednost sa kojom se poredi brojac
+
+//-------------------------------------------------------------------------------------
+//
+// CLASS: LOAD
+//
+//--------------------------------------------------------------------------------------
+// DESCRIPTION:
+//			LOAD register, represents image of dut LOAD register written in uvm
+//
+//
+// SPECIFICATION:
+//	 	//- LOAD registar - 16bitna vrednost sa kojom se poredi brojac
 //                           - registar je read-write
-//=========================================================================================
+//-------------------------------------------------------------------------------------
+
 
 class LOAD extends uvm_reg;
  	rand uvm_reg_field compare;

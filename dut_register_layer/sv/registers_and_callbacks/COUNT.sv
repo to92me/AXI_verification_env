@@ -1,12 +1,42 @@
 `ifndef COUNT_REGISTER_SVH
 `define COUNT_REGISTER_SVH
 
+/**
+* Project : DUT register model
+*
+* File : COUNTER.sv
+*
+* Language : SystemVerilog
+*
+* Company : Elsys Eastern Europe
+*
+* Author : Tomislav Tumbas
+*
+* E-Mail : tomislav.tumbas@elsys-eastern.com
+*
+* Mentor : Darko Tomusilovic
+*
+* Description : COUNTER register model
+*
+* Classes :	1. COUNTER
+*
+**/
 
 
-//============================== COUNTER ==================================================
+//-------------------------------------------------------------------------------------
+//
+// CLASS: COUNTER
+//
+//--------------------------------------------------------------------------------------
+// DESCRIPTION:
+//			COUNTER register, represents image of dut COUNTER register written in uvm
 //
 //
-//===========================================================================================
+// SPECIFICATION:
+//			COUNTER, standard counter.
+//
+//
+//-------------------------------------------------------------------------------------
 
 class COUNT extends uvm_reg;
 	uvm_reg_field counter;

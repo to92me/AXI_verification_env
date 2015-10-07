@@ -1,19 +1,44 @@
 `ifndef CFG_REGISTER_SVH
 `define CFG_REGISTER_SVH
 
-//------------------------------------------------------------------------------
+/**
+* Project : DUT register model
+*
+* File : CFG.sv
+*
+* Language : SystemVerilog
+*
+* Company : Elsys Eastern Europe
+*
+* Author : Tomislav Tumbas
+*
+* E-Mail : tomislav.tumbas@elsys-eastern.com
+*
+* Mentor : Darko Tomusilovic
+*
+* Description : CFG register model
+*
+*
+**/
+
+
+//-------------------------------------------------------------------------------------
 //
-// CLASS: uvc_company_uvc_name_component
+// CLASS: CFG
 //
-//------------------------------------------------------------------------------
+//--------------------------------------------------------------------------------------
+// DESCRIPTION:
+//			CFG register, represents image of dut CFR register written in uvm
+//
+//
+// SPECIFICATION:
+//
+//				CFG registar - bit 0 - counter enable - enable-uje brojanje
+//                 - bit 1 - up/down - vrednost 0 je up; vrednost 1 je down
+//                 - polja su read-write, ostala su read-only
+//
+//-------------------------------------------------------------------------------------
 
-
-
-//============================== CFG SPEC ==================================================
-//- CFG registar - bit 0 - counter enable - enable-uje brojanje
-//                        - bit 1 - up/down - vrednost 0 je up; vrednost 1 je down
-//                        - polja su read-write, ostala su read-only
-//===========================================================================================
 
 
 class CFG extends uvm_reg;

@@ -5,23 +5,39 @@
 
 parameter TOLERANCE = 10;
 
-//------------------------------------------------------------------------------
+/**
+* Project : DUT_ register model
+*
+* File : reference_model.sv
+*
+* Language : SystemVerilog
+*
+* Company : Elsys Eastern Europe
+*
+* Author : Tomislav Tumbas
+*
+* E-Mail : tomislav.tumbas@elsys-eastern.com
+*
+* Mentor : Darko Tomusilovic
+*
+* Description : dut reference model
+*
+* Classes :	1. dut_reference_model
+*
+**/
+
+//-------------------------------------------------------------------------------------
 //
 // CLASS: dut_reference_model
 //
-//------------------------------------------------------------------------------
-/**
-* Description : reference model - implements DUT logic
-*
-* Functions :	1. new(string name, uvm_component parent)
-*				2. void build_phase(uvm_phase phase)
-*
-* Tasks :	1. main()
-*			2. counter_main_loop()
-*			3. init()
-*			4. update_vif_checks()
-**/
-// -----------------------------------------------------------------------------
+//--------------------------------------------------------------------------------------
+// DESCRIPTION:
+//			this calss is mirror of DUT.
+// 			for specification of DUT check DUT specification
+//
+//-------------------------------------------------------------------------------------
+
+
 class dut_reference_model extends uvm_component;
 
 	dut_register_block  dut_register_model;
@@ -87,16 +103,7 @@ class dut_reference_model extends uvm_component;
 
 endclass : dut_reference_model
 
-//------------------------------------------------------------------------------
-/**
-* Task : main
-* Purpose : main loop - initializes registers and starts the counter loop and
-*			updates vif signal checks
-* Inputs :
-* Outputs :
-* Ref :
-**/
-//------------------------------------------------------------------------------
+
 	task dut_reference_model::main();
 		this.init();
 	    fork
@@ -105,15 +112,7 @@ endclass : dut_reference_model
 	    join
 	endtask
 
-//------------------------------------------------------------------------------
-/**
-* Task : counter_main_loop
-* Purpose : impements counter logic from the DUT and predicts register values
-* Inputs :
-* Outputs :
-* Ref :
-**/
-//------------------------------------------------------------------------------
+
 	task dut_reference_model::counter_main_loop();
 		bit[15 : 0] internal_counter;
 		forever begin
@@ -157,9 +156,9 @@ endclass : dut_reference_model
 							end
 					end
 				end // if counter_enable == 1 end
-				
+
 				// check for match interrupt
-				if(MATCH_compare_p.value == COUNT_counter.value) begin		
+				if(MATCH_compare_p.value == COUNT_counter.value) begin
 					void'(RIS_match_p.predict(1));
 					if(IM_match_p.value == 1) begin
 						void'(MIS_match_p.predict(1));
@@ -171,15 +170,7 @@ endclass : dut_reference_model
 		end // forever begin end
 	endtask : counter_main_loop
 
-//------------------------------------------------------------------------------
-/**
-* Task : init
-* Purpose : initialize - get register map and registers
-* Inputs :
-* Outputs :
-* Ref :
-**/
-//------------------------------------------------------------------------------
+
 	task dut_reference_model::init();
 		dut_register_map = 	dut_register_model.get_default_map();
 
@@ -218,15 +209,7 @@ endclass : dut_reference_model
 		$cast(LOAD_compare_p, LOAD_p.get_field_by_name(compare_string));
 	endtask : init
 
-//------------------------------------------------------------------------------
-/**
-* Task : update_vif_checks
-* Purpose : update flags used to check vif signals
-* Inputs :
-* Outputs :
-* Ref :
-**/
-//------------------------------------------------------------------------------
+
 	task dut_reference_model::update_vif_checks();
 		forever begin
 
@@ -269,7 +252,7 @@ endclass : dut_reference_model
 				else begin
 					vif.dout_check = 1;
 				end
-			end			
+			end
 
 			// get value for output signals
 			if (MIS_overflow_p.value || MIS_match_p.value || MIS_underflow_p.value)

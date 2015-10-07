@@ -2,40 +2,37 @@
 `define DUT_REGISTER_MODEL_SVH_
 
 
+/**
+* Project : DUT_ register model
+*
+* File : register_block.sv
+*
+* Language : SystemVerilog
+*
+* Company : Elsys Eastern Europe
+*
+* Author : Tomislav Tumbas
+*
+* E-Mail : tomislav.tumbas@elsys-eastern.com
+*
+* Mentor : Darko Tomusilovic
+*
+* Description :dut_register_block
+*
+*
+**/
 
-//========================================== SPEC ===========================================================
-//- RIS - bit 0 - overflow
-//          - bit 1 - underflow
-//          - registar je read-only, polja setuje hardver
+//-------------------------------------------------------------------------------------
 //
-//- IM - interrupt enable - bit 0 - overflow
-//                                     - bit 1 - underflow
-//                                     - ta dva polja su read-write, ostala su read-only
+// CLASS: dut_register_block
 //
-//- MIS - masked interrupt status - bit 0 - overflow
-//                                                   - bit 1 - underflow
-//
-//- MIS ima i dodatnu funkcionalnost - upis 1 na odgovarajucu bit lokaciju brise flag i u RIS i u MIS registru; upis 0 ne radi nista
-//
-//- LOAD registar - 16bitna vrednost sa kojom se poredi brojac
-//                           - registar je read-write
-//
-//- CFG registar - bit 0 - counter enable - enable-uje brojanje
-//                        - bit 1 - up/down - vrednost 0 je up; vrednost 1 je down
-//                        - polja su read-write, ostala su read-only
-//
-//- SWRESET registar - ispravan upis sifre 0x5a resetuje sve registre
-//                                  - neispravan upis sifre ne radi nista
-//                                  - citanjem registra dobija se vrednost 0
-//===========================================================================================================
+//--------------------------------------------------------------------------------------
+// DESCRIPTION:
+//			this class is complete uvm register model that represents complete model of
+//			DUT registers
+//-------------------------------------------------------------------------------------
 
 
-
-// ================================================================================================================
-//
-//											****REG_BLOCK*****
-//
-// ================================================================================================================
 
 class dut_register_block extends uvm_reg_block;
 

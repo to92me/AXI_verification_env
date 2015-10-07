@@ -2,11 +2,36 @@
 `define DUT_ADAPTER_SVH_
 
 
-//------------------------------------------------------------------------------
+/**
+* Project : DUT register model
+*
+* File : adapter.sv
+*
+* Language : SystemVerilog
+*
+* Company : Elsys Eastern Europe
+*
+* Author : Tomislav Tumbas
+*
+* E-Mail : tomislav.tumbas@elsys-eastern.com
+*
+* Mentor : Darko Tomusilovic
+*
+* Description : uvm adapter than is registred to uvm predictor
+*
+**/
+
+
+//-------------------------------------------------------------------------------------
 //
-// CLASS: uvc_company_uvc_name_component
+// CLASS: dut_register_model_adapter
 //
-//------------------------------------------------------------------------------
+//--------------------------------------------------------------------------------------
+// DESCRIPTION:
+//			dut_register_model_adapter is uvm adapter used for transorming dut register
+//			model transfer item to dut transfer item ( dut_frame )
+//
+//-------------------------------------------------------------------------------------
 
 class dut_register_model_adapter extends uvm_reg_adapter;
 
