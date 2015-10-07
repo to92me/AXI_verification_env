@@ -118,6 +118,8 @@ function void dut_register_model_env::connect_phase(input uvm_phase phase);
 
 		low_sequencer.upper_seq_item_port.connect(top_sequencer.seq_item_export);
 
+		write_agent.monitor.burst_port.connect(reference_model.write_monitor_import);
+
 	endfunction
 
 

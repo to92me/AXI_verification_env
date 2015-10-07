@@ -3,13 +3,8 @@
 `ifndef DUT_REFERECE_MODEL_SV
 `define DUT_REFERECE_MODEL_SV
 
-parameter TOLERANCE = 10;
+parameter TOLERANCE = 8;
 
-//------------------------------------------------------------------------------
-//
-// CLASS: dut_reference_model
-//
-//------------------------------------------------------------------------------
 /**
 * Project : DUT_ register model
 *
@@ -23,11 +18,17 @@ parameter TOLERANCE = 10;
 *
 * E-Mail : tomislav.tumbas@elsys-eastern.com
 *
+<<<<<<< HEAD
 * Mentor : Darko Tomusilovic
 *
 * Description : dut reference model
 *
 * Classes :	1. dut_reference_model
+=======
+* Functions :	1. new(string name, uvm_component parent)
+*				2. void build_phase(uvm_phase phase)
+*				3. void write(input axi_frame axi_frame)
+>>>>>>> 9f8a5162102ae295edd3f7e67df3ffb690091a33
 *
 **/
 
@@ -41,6 +42,7 @@ parameter TOLERANCE = 10;
 // 			for specification of DUT check DUT specification
 //
 //-------------------------------------------------------------------------------------
+
 
 class dut_reference_model extends uvm_component;
 
@@ -112,6 +114,7 @@ class dut_reference_model extends uvm_component;
 
 endclass : dut_reference_model
 
+
 	task dut_reference_model::main();
 		this.init();
 	    fork
@@ -119,6 +122,7 @@ endclass : dut_reference_model
 		    this.update_vif_checks();
 	    join
 	endtask
+
 
 	task dut_reference_model::counter_main_loop();
 		bit[15 : 0] internal_counter;
@@ -167,12 +171,19 @@ endclass : dut_reference_model
 
 				// check for match interrupt
 				if(MATCH_compare_p.value == COUNT_counter.value) begin
-					if (!RIS_match_p.value)	begin
+<<<<<<< HEAD
+					void'(RIS_match_p.predict(1));
+					if(IM_match_p.value == 1) begin
+						void'(MIS_match_p.predict(1));
+						void'(IIR_interrupt_priority_p.predict(3));
+=======
+					if (!RIS_match_p.value)	begin	
 						void'(RIS_match_p.predict(1));
 						if(IM_match_p.value == 1) begin
 							void'(MIS_match_p.predict(1));
 							void'(IIR_interrupt_priority_p.predict(3));
 						end
+>>>>>>> 9f8a5162102ae295edd3f7e67df3ffb690091a33
 					end
 				end
 
@@ -219,6 +230,7 @@ endclass : dut_reference_model
 		$cast(LOAD_compare_p, LOAD_p.get_field_by_name(compare_string));
 	endtask : init
 
+
 	task dut_reference_model::update_vif_checks();
 		fork
 			// irq and dout check
@@ -262,7 +274,7 @@ endclass : dut_reference_model
 					else begin
 						vif.dout_check = 1;
 					end
-				end
+				end			
 
 				// get value for output signals
 				if (MIS_overflow_p.value || MIS_match_p.value || MIS_underflow_p.value)
@@ -275,6 +287,27 @@ endclass : dut_reference_model
 				else
 					vif.dout_value = 0;
 			end
+<<<<<<< HEAD
+			else begin
+				if(COUNT_counter.value inside {[0 : ((LOAD_compare_p.value + TOLERANCE) & 'hffff)], [((LOAD_compare_p.value - TOLERANCE) & 'hffff) : 'hffff]})
+					vif.dout_check = 0;
+				else begin
+					vif.dout_check = 1;
+				end
+			end
+
+			// get value for output signals
+			if (MIS_overflow_p.value || MIS_match_p.value || MIS_underflow_p.value)
+				vif.irq_value = 1;
+			else
+				vif.irq_value = 0;
+
+			if (COUNT_counter.value > LOAD_compare_p.value)
+				vif.dout_value = 1;
+			else
+				vif.dout_value = 0;
+		end
+=======
 
 			// swreset check
 			forever begin
@@ -285,6 +318,7 @@ endclass : dut_reference_model
 				vif.swreset_value = 0;
 			end
 		join
+>>>>>>> 9f8a5162102ae295edd3f7e67df3ffb690091a33
 	endtask : update_vif_checks
 
 //------------------------------------------------------------------------------

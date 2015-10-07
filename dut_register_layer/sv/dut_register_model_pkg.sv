@@ -28,8 +28,6 @@ package dut_register_model_pkg;
 	typedef class IM_underflow_cb;
 	typedef class IM_match_cb;
 
-	//includes from uvc
-	//typedef class axi_frame;
 
 	`include "axi_uvc/sv/axi_pkg.sv"
 	import axi_pkg::*;
@@ -44,7 +42,6 @@ package dut_register_model_pkg;
 	`include "dut_register_layer/sv/frame.sv"
 	`include "dut_register_layer/sv/reference_model.sv"
 	`include "dut_register_layer/sv/register_model.sv"
-//	`include "dut_register_layer/sv/sequencer.sv"
 
 	`include "dut_register_layer/sv/registers_and_callbacks/RIS.sv"
 	`include "dut_register_layer/sv/registers_and_callbacks/IM.sv"
@@ -55,9 +52,6 @@ package dut_register_model_pkg;
 	`include "dut_register_layer/sv/registers_and_callbacks/IIR.sv"
 	`include "dut_register_layer/sv/registers_and_callbacks/MATCH.sv"
 	`include "dut_register_layer/sv/registers_and_callbacks/COUNT.sv"
-
-
-//	`include "axi_uvc/sv/axi_frame.sv"
 
 
 endpackage

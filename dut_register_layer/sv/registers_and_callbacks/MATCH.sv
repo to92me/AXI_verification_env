@@ -2,11 +2,41 @@
 `define MATCH_REGISTER_SVH
 
 
-//============================== MATCH SPEC ==================================================
+/**
+* Project : DUT register model
+*
+* File : MATCH.sv
+*
+* Language : SystemVerilog
+*
+* Company : Elsys Eastern Europe
+*
+* Author : Tomislav Tumbas
+*
+* E-Mail : tomislav.tumbas@elsys-eastern.com
+*
+* Mentor : Darko Tomusilovic
+*
+* Description : MATCH register model
+*
+*
+**/
+
+
+//-------------------------------------------------------------------------------------
 //
-//- match registar i match interrupt - u registar bi bila upisana neka vrednost - kad brojac dostigne tu vrednost, generisao bi se interrupt//
+// CLASS: MATCH
 //
-//===========================================================================================
+//--------------------------------------------------------------------------------------
+// DESCRIPTION:
+//			MATCH register, represents image of dut MATCH register written in uvm
+//
+//
+// SPECIFICATION:
+//	 	- match registar i match interrupt - u registar bi bila upisana neka vrednost 
+//		- kad brojac dostigne tu vrednost, generisao bi se interrupt
+//-------------------------------------------------------------------------------------
+
 
 class MATCH extends uvm_reg;
 	rand uvm_reg_field match;

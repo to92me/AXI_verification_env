@@ -154,17 +154,20 @@ class IIR_interrupt_priority_cb extends uvm_reg_cbs;
 
 					if(MIS_underflow_p.value == 1)
 						begin
-							void'(fld.predict(2));
+							//void'(fld.predict(2));
+							value = 2;
 						end
 
 					else if(MIS_overflow_p.value == 1)
 						begin
-						void'(fld.predict(1));
+						//void'(fld.predict(1));
+							value = 1;
 						end
 
 					else
 						begin
-							void'(fld.predict(0));
+							//void'(fld.predict(0));
+							value = 0;
 						end
 				end
 
@@ -179,11 +182,13 @@ class IIR_interrupt_priority_cb extends uvm_reg_cbs;
 
 				 if(MIS_overflow_p.value == 1)
 						begin
-						void'(fld.predict(1));
+						//void'(fld.predict(1));
+						value = 1;
 						end
 				 else
 					 begin
-						 void'(fld.predict(0));
+						// void'(fld.predict(0));
+						value = 0;
 					 end
 				end
 
@@ -196,7 +201,8 @@ class IIR_interrupt_priority_cb extends uvm_reg_cbs;
 							 void'(MIS_overflow_p.predict(0));
 						end
 
-					 void'(fld.predict(0));
+					 //void'(fld.predict(0));
+						value = 0;
 				end
 
 				0:

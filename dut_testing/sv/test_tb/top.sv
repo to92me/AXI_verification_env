@@ -92,7 +92,8 @@ module dut_register_model_top;
         .FCLK(fclk),
         .IRQ_O(if1.irq),
         .DOUT_O(if1.dout),
-        .RESET_I(counter_reset)
+        .RESET_I(counter_reset),
+        .SWRESET_O(if1.swreset)
     );
 
     initial begin

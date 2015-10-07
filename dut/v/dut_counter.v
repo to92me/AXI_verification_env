@@ -175,6 +175,7 @@ module dut_counter #
 		input wire FCLK, // used for counting
     	output wire IRQ_O,   // active when any bit in MIS is active
     	output wire DOUT_O,  // active when count > LOAD
+    	output wire SWRESET_O,	// active when SWRESET is active
     	input wire RESET_I	// reset counter on rising edge
 	);
 
@@ -373,6 +374,7 @@ module dut_counter #
 	assign AXI_RID = AXI_ARID;
 	assign IRQ_O = irq_o;
 	assign DOUT_O = dout_o;
+	assign SWRESET_O = nrst;
 
 	// start state
 	initial begin
@@ -561,7 +563,7 @@ always @(posedge AXI_ACLK) begin
 							//3'b000:	// no interrupts
 							3'b001:	RIS[0] <= 0;
 							3'b010: RIS[1] <= 0;
-							3'b100: RIS[2] <= 0;
+							3'b011: RIS[2] <= 0;
 						endcase
 						axi_rdata <= IIR;
 					end

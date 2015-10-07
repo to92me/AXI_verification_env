@@ -4,7 +4,7 @@
 /**
 * Project : DUT register model
 *
-* File : MIS.sv
+* File : RIS.sv
 *
 * Language : SystemVerilog
 *
@@ -16,7 +16,7 @@
 *
 * Mentor : Darko Tomusilovic
 *
-* Description : MIS register model
+* Description : RIS register model
 *
 *
 **/
@@ -24,11 +24,11 @@
 
 //-------------------------------------------------------------------------------------
 //
-// CLASS: MIS
+// CLASS: RIS
 //
 //--------------------------------------------------------------------------------------
 // DESCRIPTION:
-//			MIS register, represents image of dut MIS register written in uvm
+//			RIS register, represents image of dut RIS register written in uvm
 //
 //
 // SPECIFICATION:
@@ -36,12 +36,6 @@
 //        		- bit 1 - underflow
 //          	- registar je read-only, polja setuje hardver
 //-------------------------------------------------------------------------------------
-
-//============================== RIS SPEC ================================================
-//- RIS - bit 0 - overflow
-//          - bit 1 - underflow
-//          - registar je read-only, polja setuje hardver
-//=========================================================================================
 
 
 class RIS extends uvm_reg;

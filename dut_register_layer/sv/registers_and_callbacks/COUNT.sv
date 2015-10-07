@@ -18,8 +18,6 @@
 *
 * Description : COUNTER register model
 *
-* Classes :	1. COUNTER
-*
 **/
 
 
