@@ -3,7 +3,7 @@
 `ifndef DUT_REFERECE_MODEL_SV
 `define DUT_REFERECE_MODEL_SV
 
-parameter TOLERANCE = 10;
+parameter TOLERANCE = 8;
 
 //------------------------------------------------------------------------------
 //
@@ -15,6 +15,7 @@ parameter TOLERANCE = 10;
 *
 * Functions :	1. new(string name, uvm_component parent)
 *				2. void build_phase(uvm_phase phase)
+*				3. void write(input axi_frame axi_frame)
 *
 * Tasks :	1. main()
 *			2. counter_main_loop()
@@ -66,11 +67,15 @@ class dut_reference_model extends uvm_component;
 	// virtual interface
 	virtual interface dut_helper_vif vif;
 
+	uvm_analysis_imp#(.T(axi_frame), .IMP(dut_reference_model))  	write_monitor_import;
+	event swreset_event;
+
 	`uvm_component_utils(dut_reference_model)
 
 	// new - constructor
 	function new (string name, uvm_component parent);
 		super.new(name, parent);
+		write_monitor_import 	= new("write_monitor_import", 	this);
 	endfunction : new
 
 	// build_phase
@@ -84,6 +89,7 @@ class dut_reference_model extends uvm_component;
 	extern task counter_main_loop();
 	extern task init();
 	extern task update_vif_checks();
+	extern function void write(input axi_frame axi_frame);
 
 endclass : dut_reference_model
 
@@ -148,22 +154,25 @@ endclass : dut_reference_model
 					else begin
 						internal_counter++;
 						void'(COUNT_counter.predict(internal_counter));
-						if(internal_counter == 0)
+						if(internal_counter == 0) begin
 							void'(RIS_overflow_p.predict(1));
 							if(IM_overflow_p.value == 1) begin
 								void'(MIS_overflow_p.predict(1));
 								if(IIR_interrupt_priority_p.value < 2)
 									void'(IIR_interrupt_priority_p.predict(2));
 							end
+						end
 					end
 				end // if counter_enable == 1 end
 				
 				// check for match interrupt
-				if(MATCH_compare_p.value == COUNT_counter.value) begin		
-					void'(RIS_match_p.predict(1));
-					if(IM_match_p.value == 1) begin
-						void'(MIS_match_p.predict(1));
-						void'(IIR_interrupt_priority_p.predict(3));
+				if(MATCH_compare_p.value == COUNT_counter.value) begin
+					if (!RIS_match_p.value)	begin	
+						void'(RIS_match_p.predict(1));
+						if(IM_match_p.value == 1) begin
+							void'(MIS_match_p.predict(1));
+							void'(IIR_interrupt_priority_p.predict(3));
+						end
 					end
 				end
 
@@ -228,60 +237,86 @@ endclass : dut_reference_model
 **/
 //------------------------------------------------------------------------------
 	task dut_reference_model::update_vif_checks();
-		forever begin
+		fork
+			// irq and dout check
+			forever begin
+				// DOUT_O and IRQ_O are sensitive to the AXI_ACLK signal
+				@(posedge vif.sig_aclock);
 
-			// DOUT_O and IRQ_O are sensitive to the AXI_ACLK signal
-			@(posedge vif.sig_aclock);
+				// note: the & 'hffff mask is used because counter is 16-bit so it should always be compared against 16-bit values
+				// MATCH or LOAD - TOLERANCE = more that 16-bits
 
-			// note: the & 'hffff mask is used because counter is 16-bit so it should always be compared against 16-bit values
-			// MATCH or LOAD - TOLERANCE = more that 16-bits
+				// if the coutner near interrupt generation the asserton should not be checked
+				// near underflow or overflow
+				if ((COUNT_counter.value > ('hffff - TOLERANCE)) || (COUNT_counter.value < TOLERANCE) || ((COUNT_counter.value < MATCH_compare_p.value + 5) && (COUNT_counter.value > MATCH_compare_p.value - 5)))
+					vif.irq_check = 0;
+				else begin
+					// near match
+					if((MATCH_compare_p.value >= TOLERANCE) && (MATCH_compare_p.value <= ('hffff - TOLERANCE))) begin
+						if (COUNT_counter.value inside {[((MATCH_compare_p.value - TOLERANCE) & 'hffff) : ((MATCH_compare_p.value + TOLERANCE) & 'hffff)]})
+							vif.irq_check = 0;
+						else
+							vif.irq_check = 1;
+					end
+					else begin
+						if(COUNT_counter.value inside {[0 : ((MATCH_compare_p.value + TOLERANCE) & 'hffff)], [((MATCH_compare_p.value - TOLERANCE) & 'hffff) : 'hffff]})
+							vif.irq_check = 0;
+						else
+							vif.irq_check = 1;
+					end
+				end
 
-			// if the coutner near interrupt generation the asserton should not be checked
-			// near underflow or overflow
-			if ((COUNT_counter.value > ('hffff - TOLERANCE)) || (COUNT_counter.value < TOLERANCE) || ((COUNT_counter.value < MATCH_compare_p.value + 5) && (COUNT_counter.value > MATCH_compare_p.value - 5)))
-				vif.irq_check = 0;
-			else begin
-				// near match
-				if((MATCH_compare_p.value >= TOLERANCE) && (MATCH_compare_p.value <= ('hffff - TOLERANCE))) begin
-					if (COUNT_counter.value inside {[((MATCH_compare_p.value - TOLERANCE) & 'hffff) : ((MATCH_compare_p.value + TOLERANCE) & 'hffff)]})
-						vif.irq_check = 0;
+				// if the coutner is near the LOAD value, the asserton should not be checked
+				if((LOAD_compare_p.value >= TOLERANCE) && (LOAD_compare_p.value <= ('hffff - TOLERANCE))) begin
+					if (COUNT_counter.value inside {[((LOAD_compare_p.value - TOLERANCE) & 'hffff) : ((LOAD_compare_p.value + TOLERANCE) & 'hffff)]})
+						vif.dout_check = 0;
 					else
-						vif.irq_check = 1;
+						vif.dout_check = 1;
 				end
 				else begin
-					if(COUNT_counter.value inside {[0 : ((MATCH_compare_p.value + TOLERANCE) & 'hffff)], [((MATCH_compare_p.value - TOLERANCE) & 'hffff) : 'hffff]})
-						vif.irq_check = 0;
-					else
-						vif.irq_check = 1;
-				end
-			end
+					if(COUNT_counter.value inside {[0 : ((LOAD_compare_p.value + TOLERANCE) & 'hffff)], [((LOAD_compare_p.value - TOLERANCE) & 'hffff) : 'hffff]})
+						vif.dout_check = 0;
+					else begin
+						vif.dout_check = 1;
+					end
+				end			
 
-			// if the coutner is near the LOAD value, the asserton should not be checked
-			if((LOAD_compare_p.value >= TOLERANCE) && (LOAD_compare_p.value <= ('hffff - TOLERANCE))) begin
-				if (COUNT_counter.value inside {[((LOAD_compare_p.value - TOLERANCE) & 'hffff) : ((LOAD_compare_p.value + TOLERANCE) & 'hffff)]})
-					vif.dout_check = 0;
+				// get value for output signals
+				if (MIS_overflow_p.value || MIS_match_p.value || MIS_underflow_p.value)
+					vif.irq_value = 1;
 				else
-					vif.dout_check = 1;
+					vif.irq_value = 0;
+
+				if (COUNT_counter.value > LOAD_compare_p.value)
+					vif.dout_value = 1;
+				else
+					vif.dout_value = 0;
 			end
-			else begin
-				if(COUNT_counter.value inside {[0 : ((LOAD_compare_p.value + TOLERANCE) & 'hffff)], [((LOAD_compare_p.value - TOLERANCE) & 'hffff) : 'hffff]})
-					vif.dout_check = 0;
-				else begin
-					vif.dout_check = 1;
-				end
-			end			
 
-			// get value for output signals
-			if (MIS_overflow_p.value || MIS_match_p.value || MIS_underflow_p.value)
-				vif.irq_value = 1;
-			else
-				vif.irq_value = 0;
-
-			if (COUNT_counter.value > LOAD_compare_p.value)
-				vif.dout_value = 1;
-			else
-				vif.dout_value = 0;
-		end
+			// swreset check
+			forever begin
+				@swreset_event;
+				@(posedge vif.sig_aclock);
+				vif.swreset_value = 1;
+				@(posedge vif.sig_aclock);
+				vif.swreset_value = 0;
+			end
+		join
 	endtask : update_vif_checks
+
+//------------------------------------------------------------------------------
+/**
+* Function : write
+* Purpose : when the write monitor collects a transaction, check if it correctly
+*			writes to the SWRESET reg and resets all registers and if so
+*			signal that event so that the vif checks can be updated accordingly
+* Parameters : axi_frame - input frame from monitor
+* Return :
+**/
+//------------------------------------------------------------------------------
+	function void dut_reference_model::write(input axi_frame axi_frame);
+		if((axi_frame.addr == 10) && (axi_frame.data[0] == 'h5a))
+			-> swreset_event;
+	endfunction
 
 `endif

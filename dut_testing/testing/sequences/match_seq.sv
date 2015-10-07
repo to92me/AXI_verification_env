@@ -16,33 +16,32 @@
 *
 * Description : contains sequence for the register model
 *
-* Sequence : swreset_seq
+* Sequence : match_seq
 **/
 // -----------------------------------------------------------------------------
 
 //------------------------------------------------------------------------------
 //
-// SEQUENCE: swreset_seq
+// SEQUENCE: match_seq
 //
 //------------------------------------------------------------------------------
 // -----------------------------------------------------------------------------
 /**
 *	Description : checks:
-*					- reading from SWRESET always returns 0
-*					- writing 0x5A resets all registers
-*					- writing anything else does nothing
+*					- writing and reading MATCH register
+*					- counter generates interrupt when counter = MATCH
 **/
 // -----------------------------------------------------------------------------
 
-class swreset_seq extends register_model_env_pkg::dut_register_model_base_sequence;
+class match_seq extends register_model_env_pkg::dut_register_model_base_sequence;
 
 	dut_register_block		register_model;
 	uvm_status_e			status;
 
-	`uvm_object_utils(swreset_seq)
+	`uvm_object_utils(match_seq)
 
 	// new - constructor
-	function new(string name="swreset_seq");
+	function new(string name="match_seq");
 		super.new(name);
 	endfunction
 
@@ -50,68 +49,48 @@ class swreset_seq extends register_model_env_pkg::dut_register_model_base_sequen
 
 		$display("");
 		$display("=================================================================================================================================================================");
-		$display("=\t\t\t\t\t\t\t\t\tSWRESET_SEQ\t\t\t\t\t\t\t\t\t\t=");
+		$display("=\t\t\t\t\t\t\t\t\tMATCH_SEQ\t\t\t\t\t\t\t\t\t\t=");
 		$display("=================================================================================================================================================================");
 		$display("");
 
 		#1000
 		// start counter
-		register_model.CFG_reg.write(status, 3);
+		register_model.CFG_reg.write(status, 1);
 		// enable IM
 		register_model.IM_reg.write(status, 15);
-		// set MATCH and LOAD
-		register_model.MATCH_reg.write(status, 'hff5a);
-		register_model.LOAD_reg.write(status, 'hff5a);
 
 		#1000
-		// read from SWRESET
-		register_model.SWRESET_reg.mirror(status, UVM_CHECK);
-
-		#1000
-		// read RIS, MIS, IM, MATCH and LOAD
+		// read from MATCH
+		register_model.MATCH_reg.mirror(status, UVM_CHECK);
+		// read RIS and MIS
 		register_model.RIS_reg.mirror(status, UVM_CHECK);
 		register_model.MIS_reg.mirror(status, UVM_CHECK);
-		register_model.IM_reg.mirror(status, UVM_CHECK);
-		register_model.MATCH_reg.mirror(status, UVM_CHECK);
-		register_model.LOAD_reg.mirror(status, UVM_CHECK);
 
-		// write incorrect code to SWRESET
-		register_model.SWRESET_reg.write(status, 3);
+		// read IIR to clear MATCH interrupt
+		register_model.IIR_reg.mirror(status, UVM_CHECK);
 
 		#1000
-		// check RIS, MIS, IM, MATCH and LOAD
+		// read RIS and MIS - match interrupt should be clear
 		register_model.RIS_reg.mirror(status, UVM_CHECK);
 		register_model.MIS_reg.mirror(status, UVM_CHECK);
-		register_model.IM_reg.mirror(status, UVM_CHECK);
+
+		// set MATCH
+		register_model.MATCH_reg.write(status, 4500);
+
+		#1000
+		// read MATCH
 		register_model.MATCH_reg.mirror(status, UVM_CHECK);
-		register_model.LOAD_reg.mirror(status, UVM_CHECK);
 
-		#1000
-		// read from SWRESET
-		register_model.SWRESET_reg.mirror(status, UVM_CHECK);
-
-		#1000
-		// write correct code to SWRESET
-		register_model.SWRESET_reg.write(status, 'h005a);
-
-		#1000
-		// check RIS, MIS, IM, MATCH and LOAD - they should reset
+		// read RIS and MIS - check if interrupt is generated
 		register_model.RIS_reg.mirror(status, UVM_CHECK);
 		register_model.MIS_reg.mirror(status, UVM_CHECK);
-		register_model.IM_reg.mirror(status, UVM_CHECK);
-		register_model.MATCH_reg.mirror(status, UVM_CHECK);
-		register_model.LOAD_reg.mirror(status, UVM_CHECK);
-
-		#1000
-		// read from SWRESET
-		register_model.SWRESET_reg.mirror(status, UVM_CHECK);
 
 		$display("");
 		$display("=================================================================================================================================================================");
-		$display("=\t\t\t\t\t\t\t\t\tEND SWRESET_SEQ\t\t\t\t\t\t\t\t\t\t=");
+		$display("=\t\t\t\t\t\t\t\t\tEND MATCH_SEQ\t\t\t\t\t\t\t\t\t\t=");
 		$display("=================================================================================================================================================================");
 		$display("");
 
 	endtask
 
-endclass : swreset_seq
+endclass : match_seq
