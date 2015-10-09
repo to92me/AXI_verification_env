@@ -2,7 +2,7 @@
 /**
 * Project : AXI UVC
 *
-* File : axi_read_zero_delay.sv
+* File : match_seq.sv
 *
 * Language : SystemVerilog
 *
@@ -33,10 +33,7 @@
 **/
 // -----------------------------------------------------------------------------
 
-class match_seq extends register_model_env_pkg::dut_register_model_base_sequence;
-
-	dut_register_block		register_model;
-	uvm_status_e			status;
+class match_seq extends dut_register_model_base_sequence;
 
 	`uvm_object_utils(match_seq)
 
@@ -47,49 +44,41 @@ class match_seq extends register_model_env_pkg::dut_register_model_base_sequence
 
 	virtual task body();
 
-		$display("");
-		$display("=================================================================================================================================================================");
-		$display("=\t\t\t\t\t\t\t\t\tMATCH_SEQ\t\t\t\t\t\t\t\t\t\t=");
-		$display("=================================================================================================================================================================");
-		$display("");
+		log.configure("MATCH_SEQ", TRUE, TRUE);
 
-		#1000
+		#100
 		// start counter
-		register_model.CFG_reg.write(status, 1);
+		log.reg_do(register_model.CFG_reg, WRITE, 1);
 		// enable IM
-		register_model.IM_reg.write(status, 15);
+		log.reg_do(register_model.IM_reg, WRITE, 15);
 
 		#1000
 		// read from MATCH
-		register_model.MATCH_reg.mirror(status, UVM_CHECK);
+		log.reg_do(register_model.MATCH_reg, MIRROR, 0);
 		// read RIS and MIS
-		register_model.RIS_reg.mirror(status, UVM_CHECK);
-		register_model.MIS_reg.mirror(status, UVM_CHECK);
+		log.reg_do(register_model.RIS_reg, MIRROR, 0);
+		log.reg_do(register_model.MIS_reg, MIRROR, 0);
 
 		// read IIR to clear MATCH interrupt
-		register_model.IIR_reg.mirror(status, UVM_CHECK);
+		log.reg_do(register_model.IIR_reg, MIRROR, 0);
 
 		#1000
 		// read RIS and MIS - match interrupt should be clear
-		register_model.RIS_reg.mirror(status, UVM_CHECK);
-		register_model.MIS_reg.mirror(status, UVM_CHECK);
+		log.reg_do(register_model.RIS_reg, MIRROR, 0);
+		log.reg_do(register_model.MIS_reg, MIRROR, 0);
 
 		// set MATCH
-		register_model.MATCH_reg.write(status, 4500);
+		log.reg_do(register_model.MATCH_reg, WRITE, 4500);
 
 		#1000
 		// read MATCH
-		register_model.MATCH_reg.mirror(status, UVM_CHECK);
+		log.reg_do(register_model.MATCH_reg, MIRROR, 0);
 
 		// read RIS and MIS - check if interrupt is generated
-		register_model.RIS_reg.mirror(status, UVM_CHECK);
-		register_model.MIS_reg.mirror(status, UVM_CHECK);
+		log.reg_do(register_model.RIS_reg, MIRROR, 0);
+		log.reg_do(register_model.MIS_reg, MIRROR, 0);
 
-		$display("");
-		$display("=================================================================================================================================================================");
-		$display("=\t\t\t\t\t\t\t\t\tEND MATCH_SEQ\t\t\t\t\t\t\t\t\t\t=");
-		$display("=================================================================================================================================================================");
-		$display("");
+		log.printStatus();
 
 	endtask
 

@@ -2,7 +2,7 @@
 /**
 * Project : AXI UVC
 *
-* File : swreset_seq.sv
+* File : iir_seq.sv
 *
 * Language : SystemVerilog
 *
@@ -16,91 +16,98 @@
 *
 * Description : contains sequence for the register model
 *
-* Sequence : swreset_seq
+* Sequence : iir_seq
 **/
 // -----------------------------------------------------------------------------
 
 //------------------------------------------------------------------------------
 //
-// SEQUENCE: swreset_seq
+// SEQUENCE: iir_seq
 //
 //------------------------------------------------------------------------------
 // -----------------------------------------------------------------------------
 /**
 *	Description : checks:
-*					- reading from SWRESET always returns 0
-*					- writing 0x5A resets all registers
-*					- writing anything else does nothing
+*					- IIR upates according to MIS
+*					- reading it clears interrupt
 **/
 // -----------------------------------------------------------------------------
 
-class swreset_seq extends dut_register_model_base_sequence;
+class iir_seq extends dut_register_model_base_sequence;
 
-	`uvm_object_utils(swreset_seq)
+	`uvm_object_utils(iir_seq)
 
 	// new - constructor
-	function new(string name="swreset_seq");
+	function new(string name="iir_seq");
 		super.new(name);
 	endfunction
 
 	virtual task body();
 
-		log.configure("SWRESET_SEQ", TRUE, TRUE);
+		log.configure("iir_seq", TRUE, TRUE);
 
 		#1000
 		// start counter
 		log.reg_do(register_model.CFG_reg, WRITE, 3);
 		// enable IM
 		log.reg_do(register_model.IM_reg, WRITE, 15);
-		// set MATCH and LOAD
-		log.reg_do(register_model.MATCH_reg, WRITE, 'hff5a);
-		log.reg_do(register_model.LOAD_reg, WRITE, 'hff5a);
 
 		#1000
-		// read from SWRESET
-		log.reg_do(register_model.SWRESET_reg, MIRROR, 0);
-
-		#1000
-		// read RIS, MIS, IM, MATCH and LOAD
+		// read RIS, MIS, IM
 		log.reg_do(register_model.RIS_reg, MIRROR, 0);
 		log.reg_do(register_model.MIS_reg, MIRROR, 0);
 		log.reg_do(register_model.IM_reg, MIRROR, 0);
-		log.reg_do(register_model.MATCH_reg, MIRROR, 0);
-		log.reg_do(register_model.LOAD_reg, MIRROR, 0);
 
-		// write incorrect code to SWRESET
-		log.reg_do(register_model.SWRESET_reg, WRITE, 3);
+		// read IIR
+		log.reg_do(register_model.IIR_reg, MIRROR, 0);
 
 		#1000
-		// check RIS, MIS, IM, MATCH and LOAD
+		// check RIS, MIS, IM
 		log.reg_do(register_model.RIS_reg, MIRROR, 0);
 		log.reg_do(register_model.MIS_reg, MIRROR, 0);
 		log.reg_do(register_model.IM_reg, MIRROR, 0);
-		log.reg_do(register_model.MATCH_reg, MIRROR, 0);
-		log.reg_do(register_model.LOAD_reg, MIRROR, 0);
 
 		#1000
-		// read from SWRESET
-		log.reg_do(register_model.SWRESET_reg, MIRROR, 0);
+		// read IIR
+		log.reg_do(register_model.IIR_reg, MIRROR, 0);
 
 		#1000
-		// write correct code to SWRESET
-		log.reg_do(register_model.SWRESET_reg, MIRROR, 'h005A);
-
-		#1000
-		// check RIS, MIS, IM, MATCH and LOAD - they should reset
+		// check RIS, MIS, IM
 		log.reg_do(register_model.RIS_reg, MIRROR, 0);
 		log.reg_do(register_model.MIS_reg, MIRROR, 0);
 		log.reg_do(register_model.IM_reg, MIRROR, 0);
-		log.reg_do(register_model.MATCH_reg, MIRROR, 0);
-		log.reg_do(register_model.LOAD_reg, MIRROR, 0);
 
 		#1000
-		// read from SWRESET
-		log.reg_do(register_model.SWRESET_reg, MIRROR, 0);
+		// change direction of counter - goal overflow interrupt
+		log.reg_do(register_model.CFG_reg, WRITE, 1);
+
+		#10000
+		// read RIS, MIS, IM
+		log.reg_do(register_model.RIS_reg, MIRROR, 0);
+		log.reg_do(register_model.MIS_reg, MIRROR, 0);
+		log.reg_do(register_model.IM_reg, MIRROR, 0);
+
+		// read IIR
+		log.reg_do(register_model.IIR_reg, MIRROR, 0);
+
+		#1000
+		// check RIS, MIS, IM
+		log.reg_do(register_model.RIS_reg, MIRROR, 0);
+		log.reg_do(register_model.MIS_reg, MIRROR, 0);
+		log.reg_do(register_model.IM_reg, MIRROR, 0);
+
+		#1000
+		// read IIR
+		log.reg_do(register_model.IIR_reg, MIRROR, 0);
+
+		#1000
+		// check RIS, MIS, IM
+		log.reg_do(register_model.RIS_reg, MIRROR, 0);
+		log.reg_do(register_model.MIS_reg, MIRROR, 0);
+		log.reg_do(register_model.IM_reg, MIRROR, 0);
 
 		log.printStatus();
 
 	endtask
 
-endclass : swreset_seq
+endclass : iir_seq

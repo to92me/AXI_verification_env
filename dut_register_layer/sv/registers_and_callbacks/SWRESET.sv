@@ -98,9 +98,6 @@ class SWRESET_reset_passcode_cb extends uvm_reg_cbs;
 		this.init(map);
 
 		if(kind == UVM_PREDICT_WRITE) begin
-			// write predicts the value that is written, but SWRESET reg
-			// should always be 0
-			void'(fld.predict(0));
 
 			if(value == 'h5A) begin
 				// is passcode is correct everything will be reset
