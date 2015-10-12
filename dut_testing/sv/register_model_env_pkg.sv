@@ -1,7 +1,7 @@
 `ifndef REGISTER_MODEL_ENV_PKG_SVH
 `define REGISTER_MODEL_ENV_PKG_SVH
 
-// Include interface
+
 
 package register_model_env_pkg;
 
@@ -25,30 +25,16 @@ package register_model_env_pkg;
 	typedef class dut_register_model_config;
 	typedef class dut_register_model_env;
 	typedef class dut_register_model_tb;
-	typedef class dut_register_model_test_base;
 
-
-	typedef class dut_register_model_test_sequence;
-	typedef class dut_register_model_base_sequence;
-	typedef class dut_tesgin_logger_test_sequence;
 
 	typedef	class dut_testing_logger_package;
 	typedef class dut_testing_logger;
-	typedef class dut_testing_logger_contex;
-	typedef class dut_testing_logger_results;
 	typedef class dut_testing_logger_data_base;
+	typedef class dut_testing_logger_contex;
+	typedef class dut_testing_logger_data_base_contex_package;
+	typedef class dut_testing_logger_results;
 
-	// ZA TEST_PKG
-	typedef class count_seq;
-	typedef class swreset_seq;
-	typedef class match_seq;
-	typedef class iir_seq;
-	typedef class load_seq;
-	typedef class count_test;
-	typedef class match_test;
-	typedef class swreset_test;
-	typedef class iir_test;
-	typedef class load_test;
+
 
 
 	import uvm_pkg::*;
@@ -83,29 +69,10 @@ package register_model_env_pkg;
 	`include "dut_testing/sv/test_tb/config.sv"
 	`include "dut_testing/sv/test_tb/env.sv"
 	`include "dut_testing/sv/test_tb/tb.sv"
-	`include "dut_testing/sv/test_tb/test.sv"
-//	`include "dut_testing/sv/test_tb/top.sv"
+
 
 	`include "dut_testing/sv/utils/logger.sv"
 	`include "dut_testing/sv/utils/logger_db.sv"
-
-
-	//test
-	`include "dut_testing/testing/sequences/dut_register_model_base_sequence.sv"
-
-	// ZA TEST_PKG!!!!!!1
-	`include "dut_testing/testing/sequences/count_seq.sv"
-	`include "dut_testing/testing/sequences/swreset_seq.sv"
-	`include "dut_testing/testing/sequences/match_seq.sv"
-	`include "dut_testing/testing/sequences/iir_seq.sv"
-	`include "dut_testing/testing/sequences/load_seq.sv"
-
-	`include "dut_testing/testing/tests/count_test.sv"
-	`include "dut_testing/testing/tests/match_test.sv"
-	`include "dut_testing/testing/tests/swreset_test.sv"
-	`include "dut_testing/testing/tests/iir_test.sv"
-	`include "dut_testing/testing/tests/load_test.sv"
-
 
 
 endpackage

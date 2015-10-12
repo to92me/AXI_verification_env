@@ -174,8 +174,8 @@ class IM_overflow_cb extends uvm_reg_cbs;
 	this.init(map);
 
 
-	if(kind == UVM_PREDICT_WRITE && value == 1)
-		begin
+	if(kind == UVM_PREDICT_WRITE) begin
+		if(value == 1) begin
 			if(RIS_overflow_p.value == 1)
 				begin
 					void'(MIS_overflow_p.predict(1));
@@ -187,6 +187,12 @@ class IM_overflow_cb extends uvm_reg_cbs;
 						end
 				end
 		end
+		else if(value == 0) begin
+			void'(MIS_overflow_p.predict(0));
+			if(IIR_interrupt_priority.value == 1)
+				void'(IIR_interrupt_priority.predict(0));
+		end
+	end
 
 	endfunction
 
@@ -215,6 +221,7 @@ class IM_underflow_cb extends uvm_reg_cbs;
 
 	uvm_reg_field  RIS_underflow_p;
 	uvm_reg_field  MIS_underflow_p;
+	uvm_reg_field  MIS_overflow_p;
 	uvm_reg_field  IIR_interrupt_priority_p;
 
 	function new(string name = "IM_underflow_cb");
@@ -229,6 +236,7 @@ class IM_underflow_cb extends uvm_reg_cbs;
 
 		MIS_p = map.get_reg_by_offset(MIS_address_offset);
 		$cast(MIS_underflow_p, MIS_p.get_field_by_name(underflow_string));
+		$cast(MIS_overflow_p, MIS_p.get_field_by_name(overflow_string));
 
 		IIR_p = map.get_reg_by_offset(IIR_address_offset);
 		$cast(IIR_interrupt_priority_p, IIR_p.get_field_by_name(interrupt_priority_string));
@@ -245,17 +253,27 @@ class IM_underflow_cb extends uvm_reg_cbs;
 
 	this.init(map);
 
-		if(kind == UVM_PREDICT_WRITE && value == 1)
-			begin
+		if(kind == UVM_PREDICT_WRITE) begin
+			if(value == 1) begin
 				if(RIS_underflow_p.value == 1)
 					begin
 						void'(MIS_underflow_p.predict(1));
 						if(IIR_interrupt_priority_p.value < 2)
 							begin
-								void'(IIR_interrupt_priority_p.predict(1));
+								void'(IIR_interrupt_priority_p.predict(2));
 							end
 					end
 			end
+			else if(value == 0) begin
+				void'(MIS_underflow_p.predict(0));
+				if(IIR_interrupt_priority_p.value == 2) begin
+					if(MIS_overflow_p.value)
+						void'(IIR_interrupt_priority_p.predict(1));
+					else
+						void'(IIR_interrupt_priority_p.predict(0));
+				end
+			end
+		end
 	endfunction
 
 
@@ -284,6 +302,8 @@ class IM_match_cb extends uvm_reg_cbs;
 
 	uvm_reg_field  RIS_match_p;
 	uvm_reg_field  MIS_match_p;
+	uvm_reg_field  MIS_underflow_p;
+	uvm_reg_field  MIS_overflow_p;
 	uvm_reg_field  IIR_interrupt_priority_p;
 
 
@@ -299,6 +319,8 @@ class IM_match_cb extends uvm_reg_cbs;
 
 		MIS_p = map.get_reg_by_offset(MIS_address_offset);
 		$cast(MIS_match_p, MIS_p.get_field_by_name(match_string));
+		$cast(MIS_underflow_p, MIS_p.get_field_by_name(underflow_string));
+		$cast(MIS_overflow_p, MIS_p.get_field_by_name(overflow_string));
 
 		IIR_p = map.get_reg_by_offset(IIR_address_offset);
 		$cast(IIR_interrupt_priority_p, IIR_p.get_field_by_name(interrupt_priority_string));
@@ -317,8 +339,8 @@ class IM_match_cb extends uvm_reg_cbs;
 
 	this.init(map);
 
-	if(kind == UVM_PREDICT_WRITE && value == 1)
-		begin
+	if(kind == UVM_PREDICT_WRITE) begin
+		if(value == 1) begin
 			if(RIS_match_p.value == 1)
 				begin
 					void'(MIS_match_p.predict(1));
@@ -328,11 +350,18 @@ class IM_match_cb extends uvm_reg_cbs;
 						end
 				end
 		end
+		else if(value == 0) begin
+			void'(MIS_match_p.predict(0));
+			if(MIS_underflow_p.value)
+				void'(IIR_interrupt_priority_p.predict(2));
+			else if(MIS_overflow_p.value)
+				void'(IIR_interrupt_priority_p.predict(1));
+			else
+				void'(IIR_interrupt_priority_p.predict(0));
+		end
+	end
 	endfunction
 
-
 endclass
-
-
 
 `endif

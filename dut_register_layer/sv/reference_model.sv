@@ -272,7 +272,7 @@ endclass : dut_reference_model
 					irq_check--;
 				end
 				else
-					irq_check = 1;
+					vif.irq_check = 1;
 			end
 
 			// swreset check
@@ -300,8 +300,11 @@ endclass : dut_reference_model
 		// if the frame is correct
 		if((!axi_frame.len) && (axi_frame.size == 1) && (!axi_frame.burst_type)) begin
 			// swreset
-			if((axi_frame.addr == 10) && (axi_frame.data[0] == 'h5a))
+			if((axi_frame.addr == 10) && (axi_frame.data[0] == 'h5a)) begin
 				-> swreset_event;
+				irq_check = TOLERANCE;
+				dout_check = TOLERANCE;
+			end
 		end
 	endfunction
 
