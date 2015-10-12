@@ -13,6 +13,7 @@
 //UVC VIF and DUT_REGISTER_MODEL VIF
 `include "dut_register_layer/sv/dut_if.sv"
 `include "axi_uvc/sv/axi_if.sv"
+`include "dut_testing/testing/test_pkg.sv"
 
 module dut_register_model_top;
 
@@ -24,6 +25,8 @@ module dut_register_model_top;
 	import dut_register_model_pkg::*;
 
 	import register_model_env_pkg::*;
+
+    import dut_testing_test_and_seqs_pkg::*;
 
     reg aclk;
     reg reset;

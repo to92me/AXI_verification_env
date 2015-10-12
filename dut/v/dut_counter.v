@@ -658,11 +658,12 @@ always @(posedge AXI_ACLK) begin
 				case (axi_awaddr)
 					2:	// IM
 						IM[2:0]	<= AXI_WDATA[2:0];
-					4:	// MIS - writing allowed only if PROT = 1
+					4:	// MIS (- writing allowed only if PROT = 1)
 						// sending 1 to a valid bit location deletes the flags
 						// in MIS and RIS registers
 						// 0 does nothing
-						if (axi_awprot == 3'b001) begin
+						//if (axi_awprot == 3'b001)
+						begin
 							if(AXI_WDATA[0] == 1) begin
 								MIS[0] <= 0;
 								RIS[0] <= 0;
@@ -676,8 +677,8 @@ always @(posedge AXI_ACLK) begin
 								RIS[2] <= 0;
 							end
 						end
-						else
-							axi_bresp <= 2'b10;	// slverr
+						//else
+							//axi_bresp <= 2'b10;	// slverr
 					6:	// LOAD
 						LOAD <= AXI_WDATA;
 					8: //CFG
