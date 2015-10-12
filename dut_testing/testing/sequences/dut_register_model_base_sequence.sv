@@ -90,10 +90,10 @@ class dut_register_model_test_sequence extends dut_register_model_base_sequence;
 
 
 		#100000
-//		register_model.RIS_reg.mirror(status, UVM_CHECK);
+		register_model.RIS_reg.mirror(status, UVM_CHECK);
 
 		register_model.MIS_reg.mirror(status, UVM_CHECK);
-		//register_model.COUNT_reg.read(status, value
+//		register_model.COUNT_reg.read(status, value
 
 //		register_model.RIS_reg.underflow.mirror(status, UVM_CHECK);
 //		register_model.RIS_reg.overflow.mirror(status, UVM_CHECK);
@@ -137,18 +137,18 @@ class dut_tesgin_logger_test_sequence extends dut_register_model_base_sequence;
 		int tmp;
 		uvm_status_e	status;
 
-		log.configure("dut_tesgin_logger_test_sequence", TRUE, TRUE);
+		log.configure("Elsys-presentation test", TRUE, TRUE);
 
 		#200
 
 
 		log.reg_do(register_model.IM_reg 	, WRITE, 3'b111);
-//		log.reg_do(register_model.MATCH_reg	, WRITE, 50);
+		log.reg_do(register_model.MATCH_reg	, WRITE, 50);
 		log.reg_do(register_model.CFG_reg	, WRITE, 3 );
 
 		#100000
 		log.reg_do(register_model.MIS_reg , MIRROR, 0);
-//		log.reg_do(register_model.COUNT_reg, MIRROR, 0);
+		log.reg_do(register_model.COUNT_reg, MIRROR, 0);
 		log.reg_do(register_model.MIS_reg , READ, 0, tmp);
 
 		log.reg_do(register_model.IM_reg 	, WRITE, 3'b111);
