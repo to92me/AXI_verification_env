@@ -37,6 +37,7 @@
 class swreset_seq extends dut_register_model_base_sequence;
 
 	`uvm_object_utils(swreset_seq)
+	int i;
 
 	// new - constructor
 	function new(string name="swreset_seq");
@@ -45,7 +46,9 @@ class swreset_seq extends dut_register_model_base_sequence;
 
 	virtual task body();
 
-		log.configure("SWRESET_SEQ", TRUE, TRUE);
+		log.configure("SWRESET_SEQ", FALSE, FALSE);
+
+		log.restoreContex("swreset_seq", register_model);
 
 		#1000
 		// start counter
@@ -58,30 +61,30 @@ class swreset_seq extends dut_register_model_base_sequence;
 
 		#1000
 		// read from SWRESET
-		log.reg_do(register_model.SWRESET_reg, MIRROR, 0);
+		log.reg_do(register_model.SWRESET_reg, MIRROR);
 
 		#1000
 		// read RIS, MIS, IM, MATCH and LOAD
-		log.reg_do(register_model.RIS_reg, MIRROR, 0);
-		log.reg_do(register_model.MIS_reg, MIRROR, 0);
-		log.reg_do(register_model.IM_reg, MIRROR, 0);
-		log.reg_do(register_model.MATCH_reg, MIRROR, 0);
-		log.reg_do(register_model.LOAD_reg, MIRROR, 0);
+		log.reg_do(register_model.RIS_reg, MIRROR);
+		log.reg_do(register_model.MIS_reg, MIRROR);
+		log.reg_do(register_model.IM_reg, MIRROR);
+		log.reg_do(register_model.MATCH_reg, MIRROR);
+		log.reg_do(register_model.LOAD_reg, MIRROR);
 
 		// write incorrect code to SWRESET
-		log.reg_do(register_model.SWRESET_reg, WRITE, 3);
+		log.reg_do(register_model.SWRESET_reg, WRITE, 3, TRUE);
 
 		#1000
 		// check RIS, MIS, IM, MATCH and LOAD
-		log.reg_do(register_model.RIS_reg, MIRROR, 0);
-		log.reg_do(register_model.MIS_reg, MIRROR, 0);
-		log.reg_do(register_model.IM_reg, MIRROR, 0);
-		log.reg_do(register_model.MATCH_reg, MIRROR, 0);
-		log.reg_do(register_model.LOAD_reg, MIRROR, 0);
+		log.reg_do(register_model.RIS_reg, MIRROR);
+		log.reg_do(register_model.MIS_reg, MIRROR);
+		log.reg_do(register_model.IM_reg, MIRROR);
+		log.reg_do(register_model.MATCH_reg, MIRROR);
+		log.reg_do(register_model.LOAD_reg, MIRROR);
 
 		#1000
 		// read from SWRESET
-		log.reg_do(register_model.SWRESET_reg, MIRROR, 0);
+		log.reg_do(register_model.SWRESET_reg, MIRROR);
 
 		#1000
 		// write correct code to SWRESET
@@ -89,17 +92,20 @@ class swreset_seq extends dut_register_model_base_sequence;
 
 		#1000
 		// check RIS, MIS, IM, MATCH and LOAD - they should reset
-		log.reg_do(register_model.RIS_reg, MIRROR, 0);
-		log.reg_do(register_model.MIS_reg, MIRROR, 0);
-		log.reg_do(register_model.IM_reg, MIRROR, 0);
-		log.reg_do(register_model.MATCH_reg, MIRROR, 0);
-		log.reg_do(register_model.LOAD_reg, MIRROR, 0);
+		log.reg_do(register_model.RIS_reg, MIRROR);
+		log.reg_do(register_model.MIS_reg, MIRROR);
+		log.reg_do(register_model.IM_reg, MIRROR);
+		log.reg_do(register_model.MATCH_reg, MIRROR);
+		log.reg_do(register_model.LOAD_reg, MIRROR);
 
 		#1000
 		// read from SWRESET
-		log.reg_do(register_model.SWRESET_reg, MIRROR, 0);
+		log.reg_do(register_model.SWRESET_reg, MIRROR);
 
 		log.printStatus();
+
+		log.storeResults("swreset_seq");
+		log.storeContex("swreset_seq", register_model);
 
 	endtask
 

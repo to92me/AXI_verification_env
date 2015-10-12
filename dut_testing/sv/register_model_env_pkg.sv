@@ -34,6 +34,9 @@ package register_model_env_pkg;
 
 	typedef	class dut_testing_logger_package;
 	typedef class dut_testing_logger;
+	typedef class dut_testing_logger_contex;
+	typedef class dut_testing_logger_results;
+	typedef class dut_testing_logger_data_base;
 
 	// ZA TEST_PKG
 	typedef class count_seq;
@@ -56,6 +59,8 @@ package register_model_env_pkg;
 //
 	`include "dut_register_layer/sv/dut_register_model_pkg.sv"
 	import dut_register_model_pkg::*;
+
+	`include "dut_testing/sv/types.sv"
 
 	`include "dut_testing/sv/agents_wrappers/read_wrapper/read_wrapper_agent.sv"
 	`include "dut_testing/sv/agents_wrappers/read_wrapper/read_wrapper_low_sequencer.sv"
@@ -82,6 +87,7 @@ package register_model_env_pkg;
 //	`include "dut_testing/sv/test_tb/top.sv"
 
 	`include "dut_testing/sv/utils/logger.sv"
+	`include "dut_testing/sv/utils/logger_db.sv"
 
 
 	//test
@@ -93,13 +99,13 @@ package register_model_env_pkg;
 	`include "dut_testing/testing/sequences/match_seq.sv"
 	`include "dut_testing/testing/sequences/iir_seq.sv"
 	`include "dut_testing/testing/sequences/load_seq.sv"
-	
+
 	`include "dut_testing/testing/tests/count_test.sv"
 	`include "dut_testing/testing/tests/match_test.sv"
 	`include "dut_testing/testing/tests/swreset_test.sv"
 	`include "dut_testing/testing/tests/iir_test.sv"
 	`include "dut_testing/testing/tests/load_test.sv"
-	
+
 
 
 endpackage
