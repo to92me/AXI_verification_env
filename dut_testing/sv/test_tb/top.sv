@@ -99,7 +99,7 @@ module dut_register_model_top;
     initial begin
         uvm_config_db#(virtual axi_if)::set(null,"uvm_test_top.*","vif", if0);
 	    uvm_config_db#(virtual dut_helper_vif)::set(null,"uvm_test_top.*","dut_vif", if1);
-        run_test("dut_register_model_test_base");
+        run_test();
     end
 
     initial begin

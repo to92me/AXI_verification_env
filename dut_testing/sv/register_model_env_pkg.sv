@@ -39,6 +39,14 @@ package register_model_env_pkg;
 	typedef class count_seq;
 	typedef class swreset_seq;
 	typedef class match_seq;
+	typedef class iir_seq;
+	typedef class load_seq;
+	typedef class count_test;
+	typedef class match_test;
+	typedef class swreset_test;
+	typedef class iir_test;
+	typedef class load_test;
+
 
 	import uvm_pkg::*;
 	`include "uvm_macros.svh"
@@ -83,7 +91,15 @@ package register_model_env_pkg;
 	`include "dut_testing/testing/sequences/count_seq.sv"
 	`include "dut_testing/testing/sequences/swreset_seq.sv"
 	`include "dut_testing/testing/sequences/match_seq.sv"
-
+	`include "dut_testing/testing/sequences/iir_seq.sv"
+	`include "dut_testing/testing/sequences/load_seq.sv"
+	
+	`include "dut_testing/testing/tests/count_test.sv"
+	`include "dut_testing/testing/tests/match_test.sv"
+	`include "dut_testing/testing/tests/swreset_test.sv"
+	`include "dut_testing/testing/tests/iir_test.sv"
+	`include "dut_testing/testing/tests/load_test.sv"
+	
 
 
 endpackage

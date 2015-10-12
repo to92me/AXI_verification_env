@@ -3,7 +3,7 @@
 `ifndef DUT_REFERECE_MODEL_SV
 `define DUT_REFERECE_MODEL_SV
 
-parameter TOLERANCE = 10;
+parameter TOLERANCE = 25;
 
 //------------------------------------------------------------------------------
 //
@@ -89,6 +89,10 @@ class dut_reference_model extends uvm_component;
 	uvm_analysis_imp#(.T(axi_frame), .IMP(dut_reference_model))  	write_monitor_import;
 	event swreset_event;
 
+	// helper variables for disabling assertions
+	int irq_check = 0;
+	int dout_check = 0;
+
 	`uvm_component_utils(dut_reference_model)
 
 	// new - constructor
@@ -136,6 +140,8 @@ endclass : dut_reference_model
 				internal_counter = 0;
 			end
 			else begin
+				if(!COUNT_counter.value)
+					internal_counter = 0;
 				if(CFG_counter_enable_p.value == 1) begin
 					// down
 					if (CFG_direction_p.value) begin
@@ -226,54 +232,47 @@ endclass : dut_reference_model
 				// DOUT_O and IRQ_O are sensitive to the AXI_ACLK signal
 				@(posedge vif.sig_aclock);
 
-				// note: the & 'hffff mask is used because counter is 16-bit so it should always be compared against 16-bit values
-				// MATCH or LOAD - TOLERANCE = more that 16-bits
-
-				// if the coutner near interrupt generation the asserton should not be checked
-				// near underflow or overflow
-				if ((COUNT_counter.value > ('hffff - TOLERANCE)) || (COUNT_counter.value < TOLERANCE) || ((COUNT_counter.value < MATCH_compare_p.value + 5) && (COUNT_counter.value > MATCH_compare_p.value - 5)))
-					vif.irq_check = 0;
-				else begin
-					// near match
-					if((MATCH_compare_p.value >= TOLERANCE) && (MATCH_compare_p.value <= ('hffff - TOLERANCE))) begin
-						if (COUNT_counter.value inside {[((MATCH_compare_p.value - TOLERANCE) & 'hffff) : ((MATCH_compare_p.value + TOLERANCE) & 'hffff)]})
-							vif.irq_check = 0;
-						else
-							vif.irq_check = 1;
-					end
-					else begin
-						if(COUNT_counter.value inside {[0 : ((MATCH_compare_p.value + TOLERANCE) & 'hffff)], [((MATCH_compare_p.value - TOLERANCE) & 'hffff) : 'hffff]})
-							vif.irq_check = 0;
-						else
-							vif.irq_check = 1;
-					end
-				end
-
-				// if the coutner is near the LOAD value, the asserton should not be checked
-				if((LOAD_compare_p.value >= TOLERANCE) && (LOAD_compare_p.value <= ('hffff - TOLERANCE))) begin
-					if (COUNT_counter.value inside {[((LOAD_compare_p.value - TOLERANCE) & 'hffff) : ((LOAD_compare_p.value + TOLERANCE) & 'hffff)]})
-						vif.dout_check = 0;
-					else
-						vif.dout_check = 1;
-				end
-				else begin
-					if(COUNT_counter.value inside {[0 : ((LOAD_compare_p.value + TOLERANCE) & 'hffff)], [((LOAD_compare_p.value - TOLERANCE) & 'hffff) : 'hffff]})
-						vif.dout_check = 0;
-					else begin
-						vif.dout_check = 1;
-					end
-				end
-
 				// get value for output signals
-				if (MIS_overflow_p.value || MIS_match_p.value || MIS_underflow_p.value)
+				// irq
+				if (MIS_overflow_p.value || MIS_match_p.value || MIS_underflow_p.value) begin
+					if(!vif.irq_value)
+						irq_check = TOLERANCE;
 					vif.irq_value = 1;
-				else
+				end
+				else begin
+					if(vif.irq_value)
+						irq_check = TOLERANCE;
 					vif.irq_value = 0;
+				end
 
-				if (COUNT_counter.value > LOAD_compare_p.value)
+				// dout
+				if (COUNT_counter.value > LOAD_compare_p.value) begin
+					if(!vif.dout_value)
+						dout_check = TOLERANCE;
 					vif.dout_value = 1;
-				else
+				end
+				else begin
+					if(vif.dout_value)
+						dout_check = TOLERANCE;
 					vif.dout_value = 0;
+				end
+
+				// disable checks if needed
+				// dout
+				if(dout_check) begin
+					vif.dout_check = 0;
+					dout_check--;
+				end
+				else
+					vif.dout_check = 1;
+
+				// irq
+				if(irq_check) begin
+					vif.irq_check = 0;
+					irq_check--;
+				end
+				else
+					irq_check = 1;
 			end
 
 			// swreset check
@@ -298,8 +297,12 @@ endclass : dut_reference_model
 **/
 //------------------------------------------------------------------------------
 	function void dut_reference_model::write(input axi_frame axi_frame);
-		if((axi_frame.addr == 10) && (axi_frame.data[0] == 'h5a))
-			-> swreset_event;
+		// if the frame is correct
+		if((!axi_frame.len) && (axi_frame.size == 1) && (!axi_frame.burst_type)) begin
+			// swreset
+			if((axi_frame.addr == 10) && (axi_frame.data[0] == 'h5a))
+				-> swreset_event;
+		end
 	endfunction
 
 `endif

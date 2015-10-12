@@ -2,7 +2,7 @@
 /**
 * Project : AXI UVC
 *
-* File : count_seq.sv
+* File : load_seq.sv
 *
 * Language : SystemVerilog
 *
@@ -16,48 +16,54 @@
 *
 * Description : contains sequence for the register model
 *
-* Sequence : count_seq
+* Sequence : load_seq
 **/
 // -----------------------------------------------------------------------------
 
 //------------------------------------------------------------------------------
 //
-// SEQUENCE: count_seq
+// SEQUENCE: load_seq
 //
 //------------------------------------------------------------------------------
 // -----------------------------------------------------------------------------
 /**
-*	Description : check COUNT reg
+*	Description : check LOAD reg
 **/
 // -----------------------------------------------------------------------------
 
-class count_seq extends dut_register_model_base_sequence;
+class load_seq extends dut_register_model_base_sequence;
 
-	`uvm_object_utils(count_seq)
+	`uvm_object_utils(load_seq)
 
 	// new - constructor
-	function new(string name="count_seq");
+	function new(string name="load_seq");
 		super.new(name);
 	endfunction
 
 	virtual task body();
 	
-		log.configure("COUNT_SEQ", TRUE, TRUE);
+		log.configure("load_seq", TRUE, TRUE);
 
 		#100
 		// start counter
 		log.reg_do(register_model.CFG_reg, WRITE, 1);
+		// set LOAD value
+		log.reg_do(register_model.LOAD_reg, WRITE, 100);
 
 		#1000
-		// stop counter
-		log.reg_do(register_model.CFG_reg, WRITE, 0);
+		// read LOAD
+		log.reg_do(register_model.LOAD_reg, WRITE, 0);
 
 		#1000
-		// read value
-		log.reg_do(register_model.COUNT_reg, MIRROR, 0);
+		// set LOAD value
+		log.reg_do(register_model.LOAD_reg, WRITE, 2);
+
+		#1000
+		// read LOAD
+		log.reg_do(register_model.LOAD_reg, WRITE, 0);
 
 		log.printStatus();
 
 	endtask
 
-endclass : count_seq
+endclass : load_seq
