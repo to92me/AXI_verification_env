@@ -27,8 +27,6 @@ class dut_register_model_test_base extends uvm_test;
 		set_config_int("*", "recording_detail", UVM_FULL);
 		uvm_config_int::set(this, "tb0.*", "coverage_enable", 1);
 
-
-
 		tb0 =  dut_register_model_tb::type_id::create("tb0",this);
 		tb0.register_model = register_model;
 
@@ -56,6 +54,8 @@ class dut_register_model_test_base extends uvm_test;
 
 		uvm_config_wrapper::set(this, "tb0.env.AxiReadWrapperAgent.AxiReadWrapperLowSequencer.run_phase",
           "default_sequence", axi_read_wrapper_sequence::get_type());
+
+		//set_config_string("*axi_write_configuration", "FullSpeed");
 
 
 	endfunction

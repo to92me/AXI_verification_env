@@ -37,7 +37,6 @@
 class swreset_seq extends dut_register_model_base_sequence;
 
 	`uvm_object_utils(swreset_seq)
-	int i;
 
 	// new - constructor
 	function new(string name="swreset_seq");
@@ -48,9 +47,9 @@ class swreset_seq extends dut_register_model_base_sequence;
 
 		log.configure("SWRESET_SEQ", FALSE, FALSE);
 
-		log.restoreContex("swreset_seq", register_model);
+		log.restoreContex("active_ctx", register_model);
 
-		#1000
+		#10000
 		// start counter
 		log.reg_do(register_model.CFG_reg, WRITE, 3);
 		// enable IM
@@ -59,11 +58,11 @@ class swreset_seq extends dut_register_model_base_sequence;
 		log.reg_do(register_model.MATCH_reg, WRITE, 'hff5a);
 		log.reg_do(register_model.LOAD_reg, WRITE, 'hff5a);
 
-		#1000
+		#10000
 		// read from SWRESET
 		log.reg_do(register_model.SWRESET_reg, MIRROR);
 
-		#1000
+		#10000
 		// read RIS, MIS, IM, MATCH and LOAD
 		log.reg_do(register_model.RIS_reg, MIRROR);
 		log.reg_do(register_model.MIS_reg, MIRROR);
@@ -73,8 +72,8 @@ class swreset_seq extends dut_register_model_base_sequence;
 
 		// write incorrect code to SWRESET
 		log.reg_do(register_model.SWRESET_reg, WRITE, 3, TRUE);
-		log.mssg("TOME");
-		#1000
+
+		#10000
 		// check RIS, MIS, IM, MATCH and LOAD
 		log.reg_do(register_model.RIS_reg, MIRROR);
 		log.reg_do(register_model.MIS_reg, MIRROR);
@@ -82,15 +81,15 @@ class swreset_seq extends dut_register_model_base_sequence;
 		log.reg_do(register_model.MATCH_reg, MIRROR);
 		log.reg_do(register_model.LOAD_reg, MIRROR);
 
-		#1000
+		#10000
 		// read from SWRESET
 		log.reg_do(register_model.SWRESET_reg, MIRROR);
 
-		#1000
+		#10000
 		// write correct code to SWRESET
 		log.reg_do(register_model.SWRESET_reg, MIRROR, 'h005A);
 
-		#1000
+		#10000
 		// check RIS, MIS, IM, MATCH and LOAD - they should reset
 		log.reg_do(register_model.RIS_reg, MIRROR);
 		log.reg_do(register_model.MIS_reg, MIRROR);
@@ -98,14 +97,14 @@ class swreset_seq extends dut_register_model_base_sequence;
 		log.reg_do(register_model.MATCH_reg, MIRROR);
 		log.reg_do(register_model.LOAD_reg, MIRROR);
 
-		#1000
+		#10000
 		// read from SWRESET
 		log.reg_do(register_model.SWRESET_reg, MIRROR);
 
 		log.printStatus();
 
 		log.storeResults("swreset_seq");
-		log.storeContex("swreset_seq", register_model);
+		log.storeContex("active_ctx", register_model);
 
 	endtask
 

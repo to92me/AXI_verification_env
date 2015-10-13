@@ -44,7 +44,9 @@ class iir_seq extends dut_register_model_base_sequence;
 
 	virtual task body();
 
-		log.configure("iir_seq", TRUE, TRUE);
+		log.configure("iir_seq", TRUE, FALSE);
+
+		log.restoreContex("active_ctx", register_model);
 
 		#1000
 		// start counter
@@ -52,7 +54,7 @@ class iir_seq extends dut_register_model_base_sequence;
 		// enable IM
 		log.reg_do(register_model.IM_reg, WRITE, 15);
 
-		#1000
+		#10000
 		// read RIS, MIS, IM
 		log.reg_do(register_model.RIS_reg, MIRROR, 0);
 		log.reg_do(register_model.MIS_reg, MIRROR, 0);
@@ -61,23 +63,23 @@ class iir_seq extends dut_register_model_base_sequence;
 		// read IIR
 		log.reg_do(register_model.IIR_reg, MIRROR, 0);
 
-		#1000
+		#10000
 		// check RIS, MIS, IM
 		log.reg_do(register_model.RIS_reg, MIRROR, 0);
 		log.reg_do(register_model.MIS_reg, MIRROR, 0);
 		log.reg_do(register_model.IM_reg, MIRROR, 0);
 
-		#1000
+		#10000
 		// read IIR
 		log.reg_do(register_model.IIR_reg, MIRROR, 0);
 
-		#1000
+		#10000
 		// check RIS, MIS, IM
 		log.reg_do(register_model.RIS_reg, MIRROR, 0);
 		log.reg_do(register_model.MIS_reg, MIRROR, 0);
 		log.reg_do(register_model.IM_reg, MIRROR, 0);
 
-		#1000
+		#10000
 		// change direction of counter - goal overflow interrupt
 		log.reg_do(register_model.CFG_reg, WRITE, 1);
 
@@ -90,23 +92,26 @@ class iir_seq extends dut_register_model_base_sequence;
 		// read IIR
 		log.reg_do(register_model.IIR_reg, MIRROR, 0);
 
-		#1000
+		#10000
 		// check RIS, MIS, IM
 		log.reg_do(register_model.RIS_reg, MIRROR, 0);
 		log.reg_do(register_model.MIS_reg, MIRROR, 0);
 		log.reg_do(register_model.IM_reg, MIRROR, 0);
 
-		#1000
+		#10000
 		// read IIR
 		log.reg_do(register_model.IIR_reg, MIRROR, 0);
 
-		#1000
+		#10000
 		// check RIS, MIS, IM
 		log.reg_do(register_model.RIS_reg, MIRROR, 0);
 		log.reg_do(register_model.MIS_reg, MIRROR, 0);
 		log.reg_do(register_model.IM_reg, MIRROR, 0);
 
 		log.printStatus();
+
+		log.storeResults("iir_seq");
+		log.storeContex("active_ctx", register_model);
 
 	endtask
 

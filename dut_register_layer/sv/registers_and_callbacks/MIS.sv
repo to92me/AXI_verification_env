@@ -39,8 +39,21 @@
 //		- MIS ima i dodatnu funkcionalnost - upis 1 na odgovarajucu bit lokaciju brise flag i u RIS
 // 		i u MIS registru; upis 0 ne radi nista
 //-------------------------------------------------------------------------------------
-
-
+// ISSUE :
+//		problem sa callback-om - kada se upise 1 na odgovarajucu bit lokaciju treba da se
+//		obrise taj prekid u RIS i MIS registrima.
+//
+//		RIS registar se korektno setuje (tj. clear-uje)
+//
+//		problem je u MIS-u - pozove se odgovarajuci callback, ali se polja ne setuju korektno
+//		probali smo:
+//			- value = 0 - ceo MIS dobije vrednost 0 (a ne samo taj bit)
+//			- fld.predict(0)
+//			- MIS.predict
+//			- MIS_match_p.predict(0));
+//			- fld.value = 0
+//			- ...
+//-------------------------------------------------------------------------------------
 
 class MIS extends uvm_reg;
 	rand uvm_reg_field underflow;
@@ -142,6 +155,7 @@ class MIS_overflow_cb extends uvm_reg_cbs;
 
  uvm_reg 		RIS_p, 			IIR_p;
  uvm_reg_field 	RIS_overflow_p, IIR_interrupt_priority_p;
+ uvm_reg 		MIS_p;
 
 
 	function new(input string name = "MIS_overflow_cb");
@@ -150,6 +164,8 @@ class MIS_overflow_cb extends uvm_reg_cbs;
 	endfunction
 
 	function void init(input uvm_reg_map map);
+		MIS_p = map.get_reg_by_offset(MIS_address_offset);
+
 	 	 RIS_p = map.get_reg_by_offset(RIS_address_offset);
 		 $cast(RIS_overflow_p, RIS_p.get_field_by_name(overflow_string));
 
@@ -176,9 +192,13 @@ class MIS_overflow_cb extends uvm_reg_cbs;
 
 				 if(RIS_overflow_p.value != 0)
 					 void'(RIS_overflow_p.predict(0));
-				 if(fld.value != 0)
+			// TODO : how to set value of this field without affecting the others
+			/*	 if(fld.value != 0)
 					 void'(fld.predict(0));
-				 value = 0;
+
+				 value = previous;
+				*/
+
 		 end
  	endfunction
 endclass
@@ -249,8 +269,10 @@ class MIS_underflow_cb extends uvm_reg_cbs;
 					begin
 						if(RIS_underflow_p.value != 0)
 							void'(RIS_underflow_p.predict(0));
-						if(fld.value != 0)
-							void'(fld.predict(0));
+
+						// TODO : how to set value of this field without affecting the others
+						//if(fld.value != 0)
+							//void'(fld.predict(0));
 
 						if(IIR_interrupt_priority_p.value < 3)
 							begin
@@ -265,7 +287,7 @@ class MIS_underflow_cb extends uvm_reg_cbs;
 							end
 
 					end
-				value = 0;
+				//fld.value = 0;
 			end
 	endfunction
 endclass
@@ -311,7 +333,7 @@ class MIS_match_cb extends uvm_reg_cbs;
 	function void init(input uvm_reg_map map);
 
 		RIS_p = map.get_reg_by_offset(RIS_address_offset);
-		$cast(RIS_match_p, RIS_p.get_field_by_name(underflow_string));
+		$cast(RIS_match_p, RIS_p.get_field_by_name(match_string));
 
 		MIS_p = map.get_reg_by_offset(MIS_address_offset);
 		$cast(MIS_match_p, MIS_p.get_field_by_name(match_string));
@@ -338,8 +360,10 @@ class MIS_match_cb extends uvm_reg_cbs;
 		begin
 			if(RIS_match_p.value != 0)
 				void'(RIS_match_p.predict(0));
-			if(MIS_match_p.value != 0)
-				void'(MIS_match_p.predict(0));
+
+		// TODO : how to set value of this field without affecting the others
+		//	if(fld.value != 0) 
+		//		void'(fld.predict(0));
 
 			if(MIS_underflow_p.value == 1)
 				begin
@@ -353,7 +377,9 @@ class MIS_match_cb extends uvm_reg_cbs;
 				begin
 					void'(IIR_interrupt_priority_p.predict(0));
 				end
-				value = 0;
+
+			// value = 0;
+
 		end
 	endfunction
 endclass

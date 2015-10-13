@@ -42,7 +42,9 @@ class load_seq extends dut_register_model_base_sequence;
 
 	virtual task body();
 	
-		log.configure("load_seq", TRUE, TRUE);
+		log.configure("load_seq", TRUE, FALSE);
+
+		log.restoreContex("active_ctx", register_model);
 
 		#100
 		// start counter
@@ -52,7 +54,7 @@ class load_seq extends dut_register_model_base_sequence;
 
 		#1000
 		// read LOAD
-		log.reg_do(register_model.LOAD_reg, WRITE, 0);
+		log.reg_do(register_model.LOAD_reg, MIRROR, 0);
 
 		#1000
 		// set LOAD value
@@ -60,9 +62,12 @@ class load_seq extends dut_register_model_base_sequence;
 
 		#1000
 		// read LOAD
-		log.reg_do(register_model.LOAD_reg, WRITE, 0);
+		log.reg_do(register_model.LOAD_reg, MIRROR, 0);
 
 		log.printStatus();
+
+		log.storeResults("load_seq");
+		log.storeContex("active_ctx", register_model);
 
 	endtask
 

@@ -4,6 +4,7 @@
 package dut_testing_test_and_seqs_pkg;
 
 // ========================= TESTS =========================
+	typedef class base_test;
 	typedef class dut_register_model_test_base;
 	typedef class count_test;
 	typedef class match_test;
@@ -40,6 +41,7 @@ package dut_testing_test_and_seqs_pkg;
 
 
 // ========================= TESTS =========================
+	`include "dut_testing/testing/tests/base_test.sv"
 	`include "dut_testing/testing/tests/test.sv"
 	`include "dut_testing/testing/tests/count_test.sv"
 	`include "dut_testing/testing/tests/match_test.sv"
