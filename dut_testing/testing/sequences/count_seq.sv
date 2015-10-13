@@ -42,7 +42,9 @@ class count_seq extends dut_register_model_base_sequence;
 
 	virtual task body();
 	
-		log.configure("COUNT_SEQ", TRUE, TRUE);
+		log.configure("COUNT_SEQ", TRUE, FALSE);
+
+		log.restoreContex("active_ctx", register_model);
 
 		#100
 		// start counter
@@ -57,6 +59,9 @@ class count_seq extends dut_register_model_base_sequence;
 		log.reg_do(register_model.COUNT_reg, MIRROR, 0);
 
 		log.printStatus();
+
+		log.storeResults("count_seq");
+		log.storeContex("active_ctx", register_model);
 
 	endtask
 

@@ -44,7 +44,9 @@ class match_seq extends dut_register_model_base_sequence;
 
 	virtual task body();
 
-		log.configure("MATCH_SEQ", TRUE, TRUE);
+		log.configure("MATCH_SEQ", TRUE, FALSE);
+
+		log.restoreContex("active_ctx", register_model);
 
 		#100
 		// start counter
@@ -79,6 +81,9 @@ class match_seq extends dut_register_model_base_sequence;
 		log.reg_do(register_model.MIS_reg, MIRROR, 0);
 
 		log.printStatus();
+
+		log.storeResults("match_seq");
+		log.storeContex("active_ctx", register_model);
 
 	endtask
 

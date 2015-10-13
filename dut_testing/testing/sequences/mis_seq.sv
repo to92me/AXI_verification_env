@@ -44,7 +44,9 @@ class mis_seq extends dut_register_model_base_sequence;
 
 	virtual task body();
 
-		log.configure("mis_seq", TRUE, TRUE);
+		log.configure("mis_seq", TRUE, FALSE);
+
+		log.restoreContex("active_ctx", register_model);
 
 		#1000
 		// start counter
@@ -105,6 +107,9 @@ class mis_seq extends dut_register_model_base_sequence;
 		log.reg_do(register_model.IM_reg, MIRROR, 0);
 
 		log.printStatus();
+
+		log.storeResults("mis_seq");
+		log.storeContex("active_ctx", register_model);
 
 	endtask
 
