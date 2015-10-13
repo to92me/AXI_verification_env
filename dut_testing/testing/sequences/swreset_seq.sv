@@ -73,7 +73,7 @@ class swreset_seq extends dut_register_model_base_sequence;
 
 		// write incorrect code to SWRESET
 		log.reg_do(register_model.SWRESET_reg, WRITE, 3, TRUE);
-
+		log.mssg("TOME");
 		#1000
 		// check RIS, MIS, IM, MATCH and LOAD
 		log.reg_do(register_model.RIS_reg, MIRROR);

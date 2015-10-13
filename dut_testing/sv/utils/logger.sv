@@ -12,14 +12,69 @@ typedef enum{
 	PREDICTION 	= 7
 } reg_action_enum;
 
+typedef enum{
+	LOG = 0,
+	TRANSACTION = 1
+}mssg_type_enum;
 
 
-class dut_testing_logger_package;
+// TODO treba da se uradii parrent mssg klasa za dut testing logger posto ce od te klase da nastena
+// standardna logger klasa tj svaki logger mssg ce biti izveden iz nje
+
+
+
+class dut_testing_logger_mssg;
+	int 						ID;
+	mssg_type_enum				mssg_type;
+
+
+	// Get ID
+	function int getOred_number();
+		return ID;
+	endfunction
+
+	// Set ID
+	function void setOred_number(int ID);
+		this.ID = ID;
+	endfunction
+
+	// Get mssg_type
+	function mssg_type_enum getMssg_type();
+		return mssg_type;
+	endfunction
+
+	// Set mssg_type
+	function void setMssg_type(mssg_type_enum mssg_type);
+		this.mssg_type = mssg_type;
+	endfunction
+
+
+
+endclass
+
+class dut_testing_logger_mssg_log extends dut_testing_logger_mssg;
+	string log;
+
+ 	// Get log
+ 	function string getLog();
+ 		return log;
+ 	endfunction
+
+ 	// Set log
+ 	function void setLog(string log);
+ 		this.log = log;
+ 	endfunction
+
+
+
+endclass
+
+
+class dut_testing_logger_mssg_transaction_pack extends dut_testing_logger_mssg;
 	uvm_status_e				status;
 	string 						name;
 	bit[DATA_WIDTH - 1 : 0]		data;
 	reg_action_enum				action;
-	int 						ored_number;
 	int 						begin_time;
 	int 						end_time;
 	reg_action_enum				falid_action;
@@ -75,16 +130,6 @@ class dut_testing_logger_package;
 	// Set name
 	function void setName(string name);
 		this.name = name;
-	endfunction
-
-	// Get ored_number
-	function int getOred_number();
-		return ored_number;
-	endfunction
-
-	// Set ored_number
-	function void setOred_number(int ored_number);
-		this.ored_number = ored_number;
 	endfunction
 
 	// Get status
@@ -151,12 +196,13 @@ class dut_testing_logger;
 	true_false_enum					print_status_on_end;
 	true_false_enum					print_all_actions;
 	string 							name;
-	dut_testing_logger_package		actions_queue[$];
+	dut_testing_logger_mssg			actions_queue[$];
 	true_false_enum					error_happed = FALSE;
 	int 							skipped_actions;
 	dut_testing_logger_data_base	data_base;
-	int ok_number	 = 0;
-	int error_number = 0;
+	int 							ok_number	 = 0;
+	int 							error_number = 0;
+	int 							order_number = 0;
 	string	 						message_queue[$];
 
 
@@ -174,8 +220,9 @@ class dut_testing_logger;
 	extern task reg_do(input uvm_reg reg_p, reg_action_enum action = MIRROR,bit[DATA_WIDTH - 1 : 0] data = 0, true_false_enum expected_FAIL = FALSE, output bit[DATA_WIDTH-1:0] read_data);
 	extern function void printAll();
 	extern function void printErrors();
-	extern function dut_testing_logger_package	getErrorLog();
+	extern function dut_testing_logger_mssg_transaction_pack	getErrorLog();
 	extern function void printStatus();
+	extern function void mssg(string input_string);
 
 	//storeing and restoreing data
 	extern task storeContex(input string name, dut_register_block block_to_store  );
@@ -183,8 +230,9 @@ class dut_testing_logger;
 	extern task restoreContex(string name,  dut_register_block block_to_store);
 
 
-
-	extern local function void printLog(input dut_testing_logger_package to_print);
+	extern local function void printLog(input dut_testing_logger_mssg log_mssg);
+	extern local function void printLogMssg(input dut_testing_logger_mssg_log log_mssg);
+	extern local function void printLogTransaction(input dut_testing_logger_mssg_transaction_pack to_print);
 	extern local function void printBeginHeader(input string sequence_name);
 	extern local function void printEndHeader(input string sequence_name);
 	extern local function void printEndStatus();
@@ -205,7 +253,7 @@ endclass : dut_testing_logger
 
 	task dut_testing_logger::reg_do(input uvm_reg reg_p, input reg_action_enum action,bit[DATA_WIDTH-1:0] data, true_false_enum expected_FAIL, output bit[DATA_WIDTH-1:0] read_data);
 		bit[DATA_WIDTH-1:0] tmp_data;
-		dut_testing_logger_package log = new();
+		dut_testing_logger_mssg_transaction_pack log = new();
 
 		if(this.configured == FALSE)
 			begin
@@ -225,9 +273,10 @@ endclass : dut_testing_logger
 
 		log.setName(reg_p.get_name());
 		log.setAction(action);
-		log.setOred_number(actions_queue.size());
+		log.setOred_number(order_number);
 		log.setExpected_FAIL(expected_FAIL);
-
+		log.setMssg_type(TRANSACTION);
+		order_number++;
 
 		case (action)
 // READ
@@ -353,7 +402,9 @@ endclass : dut_testing_logger
 
 		foreach(actions_queue[i])
 			begin
-				if(actions_queue[i].getStatus() != UVM_IS_OK /*|| actions_queue[i].getStatus() == UVM_HAS_X*/)
+				dut_testing_logger_mssg_transaction_pack pack;
+				$cast(pack, actions_queue[i]);
+				if(pack.getStatus() != UVM_IS_OK /*|| actions_queue[i].getStatus() == UVM_HAS_X*/)
 				begin
 					printLog(actions_queue[i]);
 				end
@@ -384,7 +435,20 @@ endclass : dut_testing_logger
 	endfunction
 
 
-	function void dut_testing_logger::printLog(input dut_testing_logger_package to_print);
+	function void dut_testing_logger::printLog(input dut_testing_logger_mssg log_mssg);
+	    if(log_mssg.getMssg_type == TRANSACTION)
+		    printLogTransaction(dut_testing_logger_mssg_transaction_pack'(log_mssg));
+	    else
+		    printLogMssg(dut_testing_logger_mssg_log'(log_mssg));
+	endfunction
+
+
+	function void dut_testing_logger::printLogMssg(input dut_testing_logger_mssg_log log_mssg);
+	    $display("        \t[LOG]: %s", log_mssg.getLog());
+	endfunction
+
+
+	function void dut_testing_logger::printLogTransaction(input dut_testing_logger_mssg_transaction_pack to_print);
 		string status_string = this.getStatusString(to_print.getStatus());
 		string action_string = this.getActionString(to_print.getAction());
 		reg_action_enum failed_action;
@@ -484,7 +548,7 @@ endclass : dut_testing_logger
 	   endcase
 	endfunction
 
-	function dut_testing_logger_package dut_testing_logger::getErrorLog();
+	function dut_testing_logger_mssg_transaction_pack dut_testing_logger::getErrorLog();
 	   $display("TODO RETURN ERROR LOG DATA ");
 	endfunction
 
@@ -494,13 +558,18 @@ endclass : dut_testing_logger
 		int i;
 		foreach(actions_queue[i])
 			begin
-				if(actions_queue[i].getStatus() == UVM_IS_OK)
+				if(actions_queue[i].getMssg_type == TRANSACTION)
 					begin
-						ok_number++;
-					end
-				else
-					begin
-						error_number++;
+						dut_testing_logger_mssg_transaction_pack pack;
+						$cast(pack, actions_queue[i]);
+						if(pack.getStatus() == UVM_IS_OK)
+							begin
+								ok_number++;
+							end
+						else
+							begin
+								error_number++;
+							end
 					end
 			end
 		$display("");
@@ -551,6 +620,7 @@ endclass : dut_testing_logger
 		result_pack.setERROR_quantity(error_number);
 		result_pack.setOK_quantity(ok_number);
 		result_pack.setName(name);
+		result_pack.setSKIPPED_quantity(skipped_actions);
 
 		data_base.setResult(result_pack);
 
@@ -564,7 +634,7 @@ endclass : dut_testing_logger
 
 		if(found_contex == 1)
 			begin
-				message_queue.push_back("ContexSwtich \t[ U ]: restoreing register contex ------------------------------------------------------------------------------------------------------------------------ OK");
+				message_queue.push_back("ContexSwtich \t[ U ]: restoring register contex ------------------------------------------------------------------------------------------------------------------------ OK");
 
 				void'(block_to_store.CFG_reg.predict(contex_to_restore.getCFG()));
 				message_queue.push_back($sformatf("ContexSwtich \t[ U ]: CFG    :%4h", contex_to_restore.getCFG()));
@@ -596,7 +666,7 @@ endclass : dut_testing_logger
 			end
 		else
 			begin
-				message_queue.push_back($sformatf("ContexSwtich \t[ U ]: did not found register contex stored value by name: %s ----------------------------------------------------------------------------------- FAILED", name));
+				message_queue.push_back($sformatf("ContexSwtich \t[ U ]: did not found register contex stored value by name: %s ----------------------------------------------------------------------------------- USING DEFAULT", name));
 			end
 	endtask
 
@@ -612,7 +682,21 @@ endclass : dut_testing_logger
 			   $display("%s", message_queue[iterator]);
 		   end
 
+		message_queue.delete();
+
 		return;
+	endfunction
+
+	function void dut_testing_logger::mssg(string input_string);
+		dut_testing_logger_mssg_log log;
+		log = new();
+
+		log.setMssg_type(LOG);
+		log.setOred_number(actions_queue.size());
+		log.setLog(input_string);
+
+		actions_queue.push_back(log);
+
 	endfunction
 
 `endif

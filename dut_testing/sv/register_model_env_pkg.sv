@@ -27,7 +27,7 @@ package register_model_env_pkg;
 	typedef class dut_register_model_tb;
 
 
-	typedef	class dut_testing_logger_package;
+	typedef	class dut_testing_logger_mssg_transaction_pack;
 	typedef class dut_testing_logger;
 	typedef class dut_testing_logger_data_base;
 	typedef class dut_testing_logger_contex;

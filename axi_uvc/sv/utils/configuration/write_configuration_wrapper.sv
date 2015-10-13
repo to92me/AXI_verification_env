@@ -335,13 +335,14 @@ function void axi_write_configuration_wrapper::getRandomConfiguration();
 
 			foreach(user_confs_queue[i])
 				begin
-					if(configuration_name == user_confs_queue[i].getConfiguration_name())
+					if(configuration_name.icompare(user_confs_queue[i].getConfiguration_name()) == 0)
 						begin
+							$display("Configuration Wrapper [U]: using configuration: %s", user_confs_queue[i].getConfiguration_name());
 							current_config = user_confs_queue[i].getUser_conf();
 							return;
 						end
-					`uvm_warning("Configuration Wrapper [U]: ", $sformatf("Configuration name: %s is not registerd in configurations ",configuration_name ));
 				end
+			`uvm_warning("Configuration Wrapper [U]: ", $sformatf("Configuration name: %s is not registerd in configurations ",configuration_name ));
 		end
 
 		random = new();
@@ -362,6 +363,7 @@ function void axi_write_configuration_wrapper::getRandomConfiguration();
 			assert(random.randomize());
 
 		//when random configuration is chosen use it to fill current_config
+			$display("Configuration Wrapper [U]: using configuration: %s",user_confs_queue[random.getConfNO()].getConfiguration_name() );
 			current_config = user_confs_queue[random.getConfNO()].getUser_conf();
 
 endfunction

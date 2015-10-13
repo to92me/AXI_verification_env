@@ -4,6 +4,7 @@
 class dut_testing_logger_results;
 	int OK_quantity ;
 	int ERROR_quantity;
+	int SKIPPED_quantity;
 	string name;
 
  	// Get ERROR_quantity
@@ -35,6 +36,18 @@ class dut_testing_logger_results;
  	function void setName(string name);
  		this.name = name;
  	endfunction
+
+ 	// Get SKIPPED_quantity
+ 	function int getSKIPPED_quantity();
+ 		return SKIPPED_quantity;
+ 	endfunction
+
+ 	// Set SKIPPED_quantity
+ 	function void setSKIPPED_quantity(int SKIPPED_quantity);
+ 		this.SKIPPED_quantity = SKIPPED_quantity;
+ 	endfunction
+
+
 
  	function copyResult(input dut_testing_logger_results res);
 

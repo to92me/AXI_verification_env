@@ -50,6 +50,8 @@ class swreset_test extends uvm_test;
 		register_model	= dut_register_block::type_id::create("DutRegisterModelBlock", 	this);
 		register_model.build();
 
+		set_config_string("*","axi_write_configuration","FullSpeed");
+
 		set_config_int("*", "recording_detail", UVM_FULL);
 		uvm_config_int::set(this, "tb0.*", "coverage_enable", 1);
 
@@ -69,6 +71,7 @@ class swreset_test extends uvm_test;
 
 		uvm_config_wrapper::set(this, "tb0.env.AxiReadWrapperAgent.AxiReadWrapperLowSequencer.run_phase",
           "default_sequence", axi_read_wrapper_sequence::get_type());
+
 
 	endfunction : build_phase
 

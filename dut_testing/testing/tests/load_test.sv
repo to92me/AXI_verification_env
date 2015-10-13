@@ -52,7 +52,8 @@ class load_test extends uvm_test;
 
 		set_config_int("*", "recording_detail", UVM_FULL);
 		uvm_config_int::set(this, "tb0.*", "coverage_enable", 1);
-
+		
+		
 		tb0 =  dut_register_model_tb::type_id::create("tb0",this);
 		tb0.register_model = register_model;
 

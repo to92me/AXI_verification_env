@@ -48,7 +48,7 @@ endclass : axi_write_configuration_register
 // 		configuration name is name that is copared to config_string (scope "axi_write_configuration")
 
 	 	void'(wrapper.registerConfiguration(conf0,	TRUE, 	10,"test_configuration"));
-		void'(wrapper.registerConfiguration(conf1,	TRUE, 	10, conf1.get_name()));
+		void'(wrapper.registerConfiguration(conf1,	TRUE, 	10,"FullSpeed"));
 		void'(wrapper.registerConfiguration(conf2,	TRUE, 	10, conf2.get_name()));
 
 	endfunction
