@@ -1,6 +1,29 @@
 `ifndef DUT_REGISTER_MODEL_TB_SVH
 `define DUT_REGISTER_MODEL_TB_SVH
 
+// -----------------------------------------------------------------------------
+/**
+* Project :  DUT TESTING WITH REGISTER MODEL
+*
+* File : tb.sv
+*
+* Language : SystemVerilog
+*
+* Company : Elsys Eastern Europe
+*
+* Author : Tomislav Tumbas
+*
+* E-Mail : tomislav.tumbas@elsys-eastern.com
+*
+* Mentor : Darko Tomusilovic
+*
+* Description : test bench
+*
+*/
+// -----------------------------------------------------------------------------
+
+
+
 class  dut_register_model_tb extends uvm_env;
 
 

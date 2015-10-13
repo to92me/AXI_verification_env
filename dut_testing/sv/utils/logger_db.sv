@@ -1,6 +1,48 @@
 `ifndef DUT_TESTING_LOGGER_DATA_BASE_SVH
 `define DUT_TESTING_LOGGER_DATA_BASE_SVH
 
+// -----------------------------------------------------------------------------
+/**
+* Project :  DUT TESTING WITH REGISTER MODEL
+*
+* File : logger_db.sv
+*
+* Language : SystemVerilog
+*
+* Company : Elsys Eastern Europe
+*
+* Author : Tomislav Tumbas
+*
+* E-Mail : tomislav.tumbas@elsys-eastern.com
+*
+* Mentor : Darko Tomusilovic
+*
+* Description : logger database for storing register model registers image
+*
+*/
+// -----------------------------------------------------------------------------
+
+
+//-------------------------------------------------------------------------------------
+//
+// CLASS: dut_testing_logger_results
+//
+//--------------------------------------------------------------------------------------
+// DESCRIPTION:
+//			this is package that have results information from one
+//			sequence and stored in data base
+//
+// API:
+//		1 setters
+//
+//			-for every field there is corresponding setter
+//
+//		2.getters
+//
+//			-for every field there is corresponding getter
+//
+//-------------------------------------------------------------------------------------
+
 class dut_testing_logger_results;
 	int OK_quantity ;
 	int ERROR_quantity;
@@ -60,6 +102,24 @@ class dut_testing_logger_results;
 
 endclass
 
+//-------------------------------------------------------------------------------------
+//
+// CLASS: dut_testing_logger_contex
+//
+//--------------------------------------------------------------------------------------
+// DESCRIPTION:
+//			this class all registers as register model
+//
+// API:
+//		1 setters
+//
+//			-for every field there is corresponding setter
+//
+//		2.getters
+//
+//			-for every field there is corresponding getter
+//
+//-------------------------------------------------------------------------------------
 
 class dut_testing_logger_contex;
 	bit[15 : 0]		RIS;
@@ -165,6 +225,23 @@ class dut_testing_logger_contex;
 
 endclass
 
+//-------------------------------------------------------------------------------------
+//
+// CLASS: dut_testing_logger_data_base_contex_package
+//
+//--------------------------------------------------------------------------------------
+// DESCRIPTION:
+//			contex package
+// API:
+//		1 setters
+//
+//			-for every field there is corresponding setter
+//
+//		2.getters
+//
+//			-for every field there is corresponding getter
+//
+//-------------------------------------------------------------------------------------
 
 class dut_testing_logger_data_base_contex_package;
 	dut_testing_logger_contex	contex;
@@ -193,6 +270,41 @@ class dut_testing_logger_data_base_contex_package;
 
 endclass
 
+
+//-------------------------------------------------------------------------------------
+//
+// CLASS: axi_master_write_address_driver
+//
+//--------------------------------------------------------------------------------------
+// DESCRIPTION:
+//			logger data base is small "data base" for storing results and register model
+//			registers image( conte )
+// API:
+//		1.task setContex(input string name, input dut_testing_logger_contex contex);
+//
+//			-this task will store contex in data base by given name
+//
+//		2.task setResult(input dut_testing_logger_results result);
+//
+//			-this task will store result in database
+//
+//		3. task getContex(input string name, output dut_testing_logger_contex contex, output int found_contex);
+//
+//			-this task will output contex if there is stored contex by name.
+//			-if contex is found int found_contex will be 1 otherwise 0
+//
+//		4. getResults(output logger_result_queue results_queue)
+//
+//			-this task will return all stored results
+//
+//
+// CONFIGURATIONS:
+//		1. delay bewfore setting awvalid - it shoul be set in axi_single_frame
+//
+//
+// REQUIREMENTS:
+//		1. axi virtual interface - axi_if must be properli set in uvm_database
+//------------------------------------------------------------------------------
 
 
 class dut_testing_logger_data_base;

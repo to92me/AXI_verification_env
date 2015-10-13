@@ -207,7 +207,7 @@ class IIR_interrupt_priority_cb extends uvm_reg_cbs;
 
 				0:
 				begin
-					// onda nista prc
+					// no operation
 				end
 			endcase
 		end

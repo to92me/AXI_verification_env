@@ -1,11 +1,28 @@
 `ifndef AXI_WRITE_WAPPER_AGENT_SVH_
 `define AXI_WRITE_WAPPER_AGENT_SVH_
 
-//------------------------------------------------------------------------------
-//
-// CLASS: uvc_company_uvc_name_component
-//
-//------------------------------------------------------------------------------
+// -----------------------------------------------------------------------------
+/**
+* Project :  DUT TESTING WITH REGISTER MODEL
+*
+* File : write_wrapper_agent.sv
+*
+* Language : SystemVerilog
+*
+* Company : Elsys Eastern Europe
+*
+* Author : Tomislav Tumbas
+*
+* E-Mail : tomislav.tumbas@elsys-eastern.com
+*
+* Mentor : Darko Tomusilovic
+*
+* Description : write agent wrapper is adapter to convert register model interface ( dut_frame )
+* 				to axi_write interface ( axi frame )
+*
+*
+*/
+// -----------------------------------------------------------------------------
 
 class axi_write_wrapper_agent extends uvm_subscriber#(dut_frame);
 

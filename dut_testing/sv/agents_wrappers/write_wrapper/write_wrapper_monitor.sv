@@ -1,11 +1,27 @@
 `ifndef AXI_WRITE_WRAPPER_MONITOR_SVH
 `define AXI_WRITE_WRAPPER_MONITOR_SVH
 
-//------------------------------------------------------------------------------
-//
-// CLASS: uvc_company_uvc_name_component
-//
-//------------------------------------------------------------------------------
+// -----------------------------------------------------------------------------
+/**
+* Project :  DUT TESTING WITH REGISTER MODEL
+*
+* File : write_wrapper_monitor.sv
+*
+* Language : SystemVerilog
+*
+* Company : Elsys Eastern Europe
+*
+* Author : Tomislav Tumbas
+*
+* E-Mail : tomislav.tumbas@elsys-eastern.com
+*
+* Mentor : Darko Tomusilovic
+*
+* Description : write_wrapper_monitor is util that will collect sequence item from
+* 				agent monitor, convert it to dut_frame and send it to top_monitor
+*
+*/
+// -----------------------------------------------------------------------------
 
 class axi_write_wrapper_monitor extends uvm_monitor;
 

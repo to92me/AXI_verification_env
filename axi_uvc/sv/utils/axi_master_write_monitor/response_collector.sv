@@ -1,11 +1,25 @@
 `ifndef AXI_MASTER_WRITE_RESPONSE_COLLECTOR
 `define AXI_MASTER_WRITE_RESPONSE_COLLECTOR
 
-//------------------------------------------------------------------------------
-//
-// CLASS: uvc_company_uvc_name_component
-//
-//------------------------------------------------------------------------------
+/**
+* Project : AXI UVC
+*
+* File : response_collector.sv
+*
+* Language : SystemVerilog
+*
+* Company : Elsys Eastern Europe
+*
+* Author : Tomislav Tumbas
+*
+* E-Mail : tomislav.tumbas@elsys-eastern.com
+*
+* Mentor : Darko Tomusilovic
+*
+* Description : resp bus collector
+*
+*
+**/
 
 class axi_master_write_response_collector extends axi_master_write_base_collector;
 

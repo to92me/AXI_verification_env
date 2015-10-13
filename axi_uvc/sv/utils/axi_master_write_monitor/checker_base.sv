@@ -1,11 +1,25 @@
 `ifndef AXI_MASTER_WRITE_CHECKER_BASE_SVH
 `define AXI_MASTER_WRITE_CHECKER_BASE_SVH
-//------------------------------------------------------------------------------
-//
-// CLASS: uvc_company_uvc_name_component
-//
-//------------------------------------------------------------------------------
 
+/**
+* Project : AXI UVC
+*
+* File : checker base.sv
+*
+* Language : SystemVerilog
+*
+* Company : Elsys Eastern Europe
+*
+* Author : Tomislav Tumbas
+*
+* E-Mail : tomislav.tumbas@elsys-eastern.com
+*
+* Mentor : Darko Tomusilovic
+*
+* Description :it is virtual checker that every checker needs to extend
+*
+*
+**/
 
 
 class axi_master_write_checker_map extends uvm_component;

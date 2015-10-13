@@ -1,12 +1,28 @@
 `ifndef AXI_WRITE_WRAPPER_SEQUENCE_SVH_
 `define AXI_WRITE_WRAPPER_SEQUENCE_SVH_
 
-
-//------------------------------------------------------------------------------
-//
-// CLASS: uvc_company_uvc_name_component
-//
-//------------------------------------------------------------------------------
+// -----------------------------------------------------------------------------
+/**
+* Project :  DUT TESTING WITH REGISTER MODEL
+*
+* File : write_wrapper_sequence.sv
+*
+* Language : SystemVerilog
+*
+* Company : Elsys Eastern Europe
+*
+* Author : Tomislav Tumbas
+*
+* E-Mail : tomislav.tumbas@elsys-eastern.com
+*
+* Mentor : Darko Tomusilovic
+*
+* Description : write_wrapper_sequence is sequence that will be running
+* 				on low sequencer. It will pull items from top sequencer,
+* 				convert then to axi_frame ( write agent sequence item)
+* 				and run it on axi uvc write agent sequencer
+*/
+// -----------------------------------------------------------------------------
 
 class axi_write_wrapper_sequence extends uvm_sequence#(axi_frame);
 

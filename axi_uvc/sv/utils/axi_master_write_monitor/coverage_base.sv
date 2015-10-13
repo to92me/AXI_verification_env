@@ -1,11 +1,25 @@
 `ifndef AXI_MASTER_WRITE_COVERAGE_BASE_SVH
 `define AXI_MASTER_WRITE_COVERAGE_BASE_SVH
 
-//------------------------------------------------------------------------------
-//
-// CLASS: uvc_company_uvc_name_component
-//
-//------------------------------------------------------------------------------
+/**
+* Project : AXI UVC
+*
+* File : coverage_base.sv
+*
+* Language : SystemVerilog
+*
+* Company : Elsys Eastern Europe
+*
+* Author : Tomislav Tumbas
+*
+* E-Mail : tomislav.tumbas@elsys-eastern.com
+*
+* Mentor : Darko Tomusilovic
+*
+* Description : it is virtual coverage that every coverage needs to extend
+*
+*
+**/
 
 class axi_master_write_coverage_map extends uvm_component;
 	int 									coverage_id;

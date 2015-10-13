@@ -1,11 +1,25 @@
 `ifndef AXI_MASTER_WRITE_DATA_COLLECTOR_SVH
 `define AXI_MASTER_WRITE_DATA_COLLECTOR_SVH
 
-//------------------------------------------------------------------------------
-//
-// CLASS: axi_master_write_data_collector
-//
-//------------------------------------------------------------------------------
+/**
+* Project : AXI UVC
+*
+* File : data_collector.sv
+*
+* Language : SystemVerilog
+*
+* Company : Elsys Eastern Europe
+*
+* Author : Tomislav Tumbas
+*
+* E-Mail : tomislav.tumbas@elsys-eastern.com
+*
+* Mentor : Darko Tomusilovic
+*
+* Description : data bus collector
+*
+*
+**/
 
 class axi_master_write_data_collector extends axi_master_write_base_collector;
 

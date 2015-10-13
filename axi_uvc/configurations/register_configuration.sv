@@ -2,8 +2,6 @@
 `define AXI_WRITE_CONFIGURATION_REGISTER_SVH
 
 
-
-
 `include "axi_uvc/configurations/full_speed.sv"
 `include "axi_uvc/configurations/correct_data_delay_speed.sv"
 

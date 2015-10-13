@@ -1,11 +1,29 @@
 `ifndef DUT_REGISTER_MODEL_LOWER_SEQUENCE_SVH
 `define DUT_REGISTER_MODEL_LOWER_SEQUENCE_SVH
 
-//------------------------------------------------------------------------------
-//
-// CLASS: uvc_company_uvc_name_component
-//
-//------------------------------------------------------------------------------
+// -----------------------------------------------------------------------------
+/**
+* Project :  DUT TESTING WITH REGISTER MODEL
+*
+* File : lower_sequence.sv
+*
+* Language : SystemVerilog
+*
+* Company : Elsys Eastern Europe
+*
+* Author : Tomislav Tumbas
+*
+* E-Mail : tomislav.tumbas@elsys-eastern.com
+*
+* Mentor : Darko Tomusilovic
+*
+* Description : low sequence is sequence that will be running on lower sequencer
+* 				( virtual sequencer ).
+* 				It will pull items from top sequencer and depending on the rw field
+* 				of dut_frame will be sent to write wrapper or read wrapper
+*
+*/
+// -----------------------------------------------------------------------------
 
 class dut_register_model_lower_sequence extends uvm_sequence#(dut_frame);
 

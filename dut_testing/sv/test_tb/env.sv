@@ -3,11 +3,26 @@
 
 
 typedef uvm_reg_predictor#(dut_frame) dut_register_model_predictor;
-//------------------------------------------------------------------------------
-//
-// CLASS: uvc_company_uvc_name_env
-//
-//------------------------------------------------------------------------------
+// -----------------------------------------------------------------------------
+/**
+* Project :  DUT TESTING WITH REGISTER MODEL
+*
+* File : env.sv
+*
+* Language : SystemVerilog
+*
+* Company : Elsys Eastern Europe
+*
+* Author : Tomislav Tumbas
+*
+* E-Mail : tomislav.tumbas@elsys-eastern.com
+*
+* Mentor : Darko Tomusilovic
+*
+* Description : uvm_environment
+*
+*/
+// -----------------------------------------------------------------------------
 
 class dut_register_model_env extends uvm_env;
 

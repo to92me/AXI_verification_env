@@ -1,6 +1,27 @@
 `ifndef DUT_REFERENCE_MODEL_TOP_SVH__
 `define DUT_REFERENCE_MODEL_TOP_SVH__
 
+// -----------------------------------------------------------------------------
+/**
+* Project :  DUT TESTING WITH REGISTER MODEL
+*
+* File : top.sv
+*
+* Language : SystemVerilog
+*
+* Company : Elsys Eastern Europe
+*
+* Author : Tomislav Tumbas
+*
+* E-Mail : tomislav.tumbas@elsys-eastern.com
+*
+* Mentor : Darko Tomusilovic
+*
+* Description : top
+*
+*/
+// -----------------------------------------------------------------------------
+
 // DUT
 `include "dut/v/dut_counter.v"
 

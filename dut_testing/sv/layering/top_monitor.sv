@@ -1,11 +1,27 @@
 `ifndef DUT_REGISTER_MODEL_TOP_MONITOR_SVH
 `define DUT_REGISTER_MODEL_TOP_MONITOR_SVH
 
-//------------------------------------------------------------------------------
-//
-// CLASS: uvc_company_uvc_name_component
-//
-//------------------------------------------------------------------------------
+// -----------------------------------------------------------------------------
+/**
+* Project :  DUT TESTING WITH REGISTER MODEL
+*
+* File : top_monitor.sv
+*
+* Language : SystemVerilog
+*
+* Company : Elsys Eastern Europe
+*
+* Author : Tomislav Tumbas
+*
+* E-Mail : tomislav.tumbas@elsys-eastern.com
+*
+* Mentor : Darko Tomusilovic
+*
+* Description : top monitor will collect data from agent monitors and send it
+* 				to register model through predictor
+*
+*/
+// -----------------------------------------------------------------------------
 
 class dut_register_model_top_monitor extends uvm_monitor;
 

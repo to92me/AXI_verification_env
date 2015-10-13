@@ -1,13 +1,25 @@
 `ifndef AXI_MASTER_BASE_COLLECOTOR_SVH
 `define AXI_MASTER_BASE_COLLECOTOR_SVH
 
-
-//------------------------------------------------------------------------------
-//
-// CLASS: axi_master_write_base_collector
-//
-//------------------------------------------------------------------------------
-
+/**
+* Project : AXI UVC
+*
+* File : base collector.sv
+*
+* Language : SystemVerilog
+*
+* Company : Elsys Eastern Europe
+*
+* Author : Tomislav Tumbas
+*
+* E-Mail : tomislav.tumbas@elsys-eastern.com
+*
+* Mentor : Darko Tomusilovic
+*
+* Description : virtual collector, every collector will extend this class
+*
+*
+**/
 
 
 class axi_master_write_base_collector extends uvm_component;

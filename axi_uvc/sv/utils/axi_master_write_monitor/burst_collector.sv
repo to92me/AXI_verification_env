@@ -1,6 +1,26 @@
 `ifndef AXI_master_WRITE_BURST_COLLECOTOR
 `define AXI_master_WRITE_BURST_COLLECOTOR
 
+/**
+* Project : AXI UVC
+*
+* File : burst_collector.sv
+*
+* Language : SystemVerilog
+*
+* Company : Elsys Eastern Europe
+*
+* Author : Tomislav Tumbas
+*
+* E-Mail : tomislav.tumbas@elsys-eastern.com
+*
+* Mentor : Darko Tomusilovic
+*
+* Description : collectiong and publishing whole bursts
+*
+*
+**/
+
 class axi_master_write_burst_collector extends axi_master_write_checker_base;
 	axi_frame				burst_queue[$];
 

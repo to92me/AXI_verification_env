@@ -1,11 +1,26 @@
 `ifndef AXI_WRITE_WRAPPER_TOP_SEQUENCER_SVH
 `define AXI_WRITE_WRAPPER_TOP_SEQUENCER_SVH
 
-//------------------------------------------------------------------------------
-//
-// CLASS: uvc_company_uvc_name_component
-//
-//------------------------------------------------------------------------------
+// -----------------------------------------------------------------------------
+/**
+* Project :  DUT TESTING WITH REGISTER MODEL
+*
+* File : write_wrapper_top_sequencer.sv
+*
+* Language : SystemVerilog
+*
+* Company : Elsys Eastern Europe
+*
+* Author : Tomislav Tumbas
+*
+* E-Mail : tomislav.tumbas@elsys-eastern.com
+*
+* Mentor : Darko Tomusilovic
+*
+* Description :top sequencer will recieve sequence items upper sequencer
+*
+*/
+// -----------------------------------------------------------------------------
 
 class axi_write_wrapper_top_sequencer extends uvm_sequencer#(dut_frame);
 

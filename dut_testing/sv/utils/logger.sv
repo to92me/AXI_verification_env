@@ -1,6 +1,9 @@
 `ifndef DUT_TESTING_LOGGER
 `define DUT_TESTING_LOGGER
 
+
+
+
 typedef enum{
 	READ 		= 0,
 	WRITE 		= 1,
@@ -17,11 +20,38 @@ typedef enum{
 	TRANSACTION = 1
 }mssg_type_enum;
 
+// -----------------------------------------------------------------------------
+/**
+* Project :  DUT TESTING WITH REGISTER MODEL
+*
+* File : logger.sv
+*
+* Language : SystemVerilog
+*
+* Company : Elsys Eastern Europe
+*
+* Author : Tomislav Tumbas
+*
+* E-Mail : tomislav.tumbas@elsys-eastern.com
+*
+* Mentor : Darko Tomusilovic
+*
+* Description : logger with coresponding logger classes
+*
+*/
+// -----------------------------------------------------------------------------
 
-// TODO treba da se uradii parrent mssg klasa za dut testing logger posto ce od te klase da nastena
-// standardna logger klasa tj svaki logger mssg ce biti izveden iz nje
 
-
+//-------------------------------------------------------------------------------------
+//
+// CLASS: dut_testing_logger_mssg
+//
+//--------------------------------------------------------------------------------------
+// DESCRIPTION:
+//			dut_testing_logger_mssg is virtual class that every mssg in logger
+//			must extend
+//
+//------------------------------------------------------------------------------
 
 class dut_testing_logger_mssg;
 	int 						ID;
@@ -52,6 +82,26 @@ class dut_testing_logger_mssg;
 
 endclass
 
+//-------------------------------------------------------------------------------------
+//
+// CLASS: dut_testing_logger_mssg_log
+//
+//--------------------------------------------------------------------------------------
+// DESCRIPTION:
+//			dut_testing_logger_mssg_log is logger string message that user can log from
+//			logger API
+//
+// API:
+//		1 setters
+//
+//			-for every field there is corresponding setter
+//
+//		2.getters
+//
+//			-for every field there is corresponding getter
+//
+//-------------------------------------------------------------------------------------
+
 class dut_testing_logger_mssg_log extends dut_testing_logger_mssg;
 	string log;
 
@@ -69,6 +119,25 @@ class dut_testing_logger_mssg_log extends dut_testing_logger_mssg;
 
 endclass
 
+
+//-------------------------------------------------------------------------------------
+//
+// CLASS: dut_testing_logger_mssg_transaction_pack
+//
+//--------------------------------------------------------------------------------------
+// DESCRIPTION: dut_testing_logger_mssg_transaction_pack is logger message that has
+//				all informations about some transaction
+//
+//
+// API:
+//		1 setters
+//
+//			-for every field there is corresponding setter
+//
+//		2.getters
+//
+//			-for every field there is corresponding getter
+//------------------------------------------------------------------------------
 
 class dut_testing_logger_mssg_transaction_pack extends dut_testing_logger_mssg;
 	uvm_status_e				status;
@@ -184,10 +253,113 @@ class dut_testing_logger_mssg_transaction_pack extends dut_testing_logger_mssg;
 	endfunction
 
 
-
-
 endclass
 
+
+//-------------------------------------------------------------------------------------
+//
+// CLASS: dut_testing_logger
+//
+//--------------------------------------------------------------------------------------
+// DESCRIPTION:
+//			dut_testing_logger is classic logger that can collect all transaction
+//			execute them and log in easy to read way.
+//			It can store contex from register model to logger data base, restore it
+//			and store results of som sequence
+//
+// API:
+//		1. function void configure(input string name, true_false_enum end_at_first_UVM_NOT_OK = FALSE, true_false_enum print_all_actions = FALSE)
+//
+//			- this methode will configure logger
+//			- parameters:
+//				1. name
+//					-name of sequence
+//				2. end_at_first_UVM_NOT_OK
+//					- if this is TRUE then logger will skip all transactions after first UVM_NOT_OK
+//				3. print_all_actions
+//					- if this is TRUE then logger will log on runtime
+//
+//	 	2. task reg_do(input uvm_reg reg_p, reg_action_enum action = MIRROR,bit[DATA_WIDTH - 1 : 0] data = 0, true_false_enum expected_FAIL = FALSE, output bit[DATA_WIDTH-1:0] read_data)
+//
+//			-with this task user can create transaction on register model to DUT
+//			-parameters
+//				1. reg_p
+//					- pointer to register model
+
+//				2. action
+//					- action can be:
+//						1. READ 	standard uvm_reg.read(argv)
+//						2. WRITE 	standard uvm_reg.write(argv)
+//						3. MIRROR	standard uvm_reg.mirror(argv)
+//						4. SET		standard uvm_reg.set(argv)
+//						5. GET 		standard uvm_reg.get(argv)
+//						6. UPDATE  	standard uvm_reg.update(argv)
+//				3. data
+//					-argument that is used to write data to register model and DUT ( argv of uvm_reg.write(argv))
+//
+//				4. expected_FAIL
+//					if this is set as TRUE than if uvm_reg.action returns UVM_NOT_OK that will be interpreted as succes and
+//					if uvm_reg.action returns UVM_IS_OK that will interpreted as ERROR
+//
+//				5. read_data
+//					this is output value of read and get actions
+//
+//
+//		3.function void printAll();
+//
+//			-this function will print all actions and logs
+//
+//		4.function void printErrors();
+//
+//			-this function will print all error actions
+//
+//		5.function void printStatus();
+//
+//			-this function will print end status
+//
+//		6.function void mssg(string input_string);
+//
+//			-this functino will create message log that will print in end status
+//			-parameters
+//				1. input_string
+//					-this string will be printed in end status print nad print all actions
+//
+//		7. task storeContex(input string name, dut_register_block block_to_store  );
+//
+//			-this task is used to collect current state of register model registers and store it to
+//			logger data base by given name
+//			-parameters
+//				1. name
+//					this will be name of sored contex
+//				2. block_to_store
+//					pointer to register model to store
+//
+//		8. task storeResults(input string name);
+//
+//			-this task will collect number of succes transaction error transaction and number of skipped transactions
+//			and store it to logger data base by name
+//			-parameters
+//				1. name
+//					this will be name of stored result
+//
+//		9. task restoreContex(string name,  dut_register_block block_to_store);
+//
+//			-this task will try to get register model registers image from logger
+//			data base by name if there is sotred configuration by given name
+//			task will predict every ( uvm_predict) every field in register model
+//
+//
+//		10. task printAllResults()
+//
+//			-this task will print all stored results in logger data base
+//
+//
+// REQUIREMENTS:
+//		1. logger_db
+//		logger must have his data base to use storegin and restoreing options
+//
+//
+//------------------------------------------------------------------------------
 
 class dut_testing_logger;
 
@@ -220,7 +392,7 @@ class dut_testing_logger;
 	extern task reg_do(input uvm_reg reg_p, reg_action_enum action = MIRROR,bit[DATA_WIDTH - 1 : 0] data = 0, true_false_enum expected_FAIL = FALSE, output bit[DATA_WIDTH-1:0] read_data);
 	extern function void printAll();
 	extern function void printErrors();
-	extern function dut_testing_logger_mssg_transaction_pack	getErrorLog();
+	extern function dut_testing_logger_mssg_transaction_pack	getErrorLog(); // this is still in development
 	extern function void printStatus();
 	extern function void mssg(string input_string);
 
@@ -229,6 +401,7 @@ class dut_testing_logger;
 	extern task storeResults(input string name);
 	extern task restoreContex(string name,  dut_register_block block_to_store);
 
+//  print all results from DB TODO
 
 	extern local function void printLog(input dut_testing_logger_mssg log_mssg);
 	extern local function void printLogMssg(input dut_testing_logger_mssg_log log_mssg);

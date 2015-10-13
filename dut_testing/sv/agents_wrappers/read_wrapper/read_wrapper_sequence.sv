@@ -1,6 +1,28 @@
 `ifndef AXI_READ_WRAPPER_SEQUENCE_SVH_
 `define AXI_READ_WRAPPER_SEQUENCE_SVH_
 
+// -----------------------------------------------------------------------------
+/**
+* Project :  DUT TESTING WITH REGISTER MODEL
+*
+* File : read_wrapper_sequence.sv
+*
+* Language : SystemVerilog
+*
+* Company : Elsys Eastern Europe
+*
+* Author : Tomislav Tumbas
+*
+* E-Mail : tomislav.tumbas@elsys-eastern.com
+*
+* Mentor : Darko Tomusilovic
+*
+* Description : read_wrapper_sequence is sequence that will be running
+* 				on low sequencer. It will pull items from top sequencer,
+* 				convert then to axi_read_whole_burst_frame ( read agent sequence item)
+* 				and run it on axi uvc read agent sequencer
+*/
+// -----------------------------------------------------------------------------
 
 class axi_read_wrapper_sequence extends uvm_sequence#(axi_read_whole_burst);
 

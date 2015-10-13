@@ -5,7 +5,7 @@
 /**
 * Project :  DUT TESTING WITH REGISTER MODEL
 *
-* File : read_wrapper_agnent.sv
+* File : read_wrapper_agent.sv
 *
 * Language : SystemVerilog
 *
@@ -17,8 +17,8 @@
 *
 * Mentor : Darko Tomusilovic
 *
-* Description : read agent wrapper is adapter to coverto register model interface ( dut_frame )
-* 				to axi_read interface ( axi_read_whole_burst_frame
+* Description : read agent wrapper is adapter to convert register model interface ( dut_frame )
+* 				to axi_read interface ( axi_read_whole_burst_frame )
 *
 *
 */
@@ -49,7 +49,6 @@ class axi_read_wrapper_agent extends uvm_subscriber#(dut_frame);
 	endfunction : build_phase
 
 	virtual function void write(T t);
-		$display("USRALI SMO MOTKU 1");
 	endfunction
 
 

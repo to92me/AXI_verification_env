@@ -1,11 +1,26 @@
 `ifndef DUT_REGISTER_MODEL_TOP_SEQUENCER_SVH
 `define DUT_REGISTER_MODEL_TOP_SEQUENCER_SVH
 
-//------------------------------------------------------------------------------
-//
-// CLASS: uvc_company_uvc_name_component
-//
-//------------------------------------------------------------------------------
+// -----------------------------------------------------------------------------
+/**
+* Project :  DUT TESTING WITH REGISTER MODEL
+*
+* File : top_sequencer.sv
+*
+* Language : SystemVerilog
+*
+* Company : Elsys Eastern Europe
+*
+* Author : Tomislav Tumbas
+*
+* E-Mail : tomislav.tumbas@elsys-eastern.com
+*
+* Mentor : Darko Tomusilovic
+*
+* Description :top sequencer will recieve sequence items from register model adapter
+*
+*/
+// -----------------------------------------------------------------------------
 
 class dut_register_model_top_sequencer extends uvm_sequencer#(dut_frame);
 

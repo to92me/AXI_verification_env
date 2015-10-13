@@ -1,10 +1,27 @@
 `ifndef AXI_READ_WRAPPER_LOW_SEQUENCER_SVH_
 `define AXI_READ_WRAPPER_LOW_SEQUENCER_SVH_
-//------------------------------------------------------------------------------
-//
-// CLASS: uvc_company_uvc_name_component
-//
-//------------------------------------------------------------------------------
+
+// -----------------------------------------------------------------------------
+/**
+* Project :  DUT TESTING WITH REGISTER MODEL
+*
+* File : read_wrapper_low_sequencer.sv
+*
+* Language : SystemVerilog
+*
+* Company : Elsys Eastern Europe
+*
+* Author : Tomislav Tumbas
+*
+* E-Mail : tomislav.tumbas@elsys-eastern.com
+*
+* Mentor : Darko Tomusilovic
+*
+* Description :low sequencer that is passing sequence items to real agent
+*
+*/
+// -----------------------------------------------------------------------------
+
 
 class axi_read_wrapper_low_sequencer extends uvm_sequencer#(axi_read_whole_burst);
 

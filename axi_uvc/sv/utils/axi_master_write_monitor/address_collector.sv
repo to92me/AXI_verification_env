@@ -1,11 +1,26 @@
 `ifndef AXI_MASTER_WRITE_ADDRESS_COLLECTOR
 `define AXI_MASTER_WRITE_ADDRESS_COLLECTOR
 
-//------------------------------------------------------------------------------
-//
-// CLASS: axi_master_write_address_collector
-//
-//------------------------------------------------------------------------------
+/**
+* Project : AXI UVC
+*
+* File : address_collector.sv
+*
+* Language : SystemVerilog
+*
+* Company : Elsys Eastern Europe
+*
+* Author : Tomislav Tumbas
+*
+* E-Mail : tomislav.tumbas@elsys-eastern.com
+*
+* Mentor : Darko Tomusilovic
+*
+* Description : address bus collector
+*
+*
+**/
+
 
 class axi_master_write_address_collector extends axi_master_write_base_collector;
 
