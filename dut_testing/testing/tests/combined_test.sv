@@ -32,6 +32,8 @@
 // -----------------------------------------------------------------------------
 class combined_test extends base_test;
 
+	dut_testing_logger_result_printer printer;
+
 	// sequences
 	count_seq count_s;
 	iir_seq iir_s;
@@ -43,6 +45,7 @@ class combined_test extends base_test;
 
 	function new(string name = "combined_test", uvm_component parent);
 		super.new(name,parent);
+		printer = new();
 	endfunction: new
 
 	virtual function void build_phase(uvm_phase phase);
@@ -86,6 +89,9 @@ class combined_test extends base_test;
 			iir_s.start(tb0.dut_test_env.top_sequencer);
 
 			phase.drop_objection(this);
+
+			printer.printResults(TRUE);
+
 	endtask
 
 endclass : combined_test
