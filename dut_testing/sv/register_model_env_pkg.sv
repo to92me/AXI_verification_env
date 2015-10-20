@@ -33,6 +33,7 @@ package register_model_env_pkg;
 	typedef class dut_testing_logger_contex;
 	typedef class dut_testing_logger_data_base_contex_package;
 	typedef class dut_testing_logger_results;
+	typedef class dut_testing_logger_result_printer;
 
 
 
@@ -73,6 +74,7 @@ package register_model_env_pkg;
 
 	`include "dut_testing/sv/utils/logger.sv"
 	`include "dut_testing/sv/utils/logger_db.sv"
+	`include "dut_testing/sv/utils/logger_result_printer.sv"
 
 
 endpackage

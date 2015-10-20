@@ -57,6 +57,9 @@ class mis_test extends base_test;
 		phase.raise_objection(this);
 		reg_seq.start(tb0.dut_test_env.top_sequencer);
 		phase.drop_objection(this);
+
+		printer.printResults(TRUE);
+
 	endtask
 
 endclass : mis_test

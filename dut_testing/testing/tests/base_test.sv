@@ -33,8 +33,10 @@
 class base_test extends uvm_test;
 
 	dut_register_model_tb tb0;
-	uvm_table_printer printer;
 	dut_register_block						register_model;
+
+	dut_testing_logger_result_printer printer;
+
 	`uvm_component_utils(base_test)
 
 	function new(string name = "base_test", uvm_component parent);
@@ -72,7 +74,6 @@ class base_test extends uvm_test;
 	// run_phase
 	task run_phase(uvm_phase phase);
 		super.run_phase(phase);
-		printer.knobs.depth = 5;
 	endtask
 
 	function void start_of_simulation_phase( uvm_phase phase );

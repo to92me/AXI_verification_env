@@ -75,7 +75,7 @@ class MIS extends uvm_reg;
 		underflow.configure(.parent						(this					),
 							.size						(1						),
 							.lsb_pos			    	(MIS_underflow_offest	),
-							.access						("RW"					),
+							.access						("W1C"					),
 							.volatile					(1						),
 							.reset						(1'b0					),
 							.has_reset					(1						),
@@ -91,7 +91,7 @@ class MIS extends uvm_reg;
 		overflow.configure(.parent						(this					),
 							.size						(1						),
 							.lsb_pos			    	(MIS_overflow_offset	),
-							.access						("RW"					),
+							.access						("W1C"					),
 							.volatile					(1						),
 							.reset						(1'b0					),
 							.has_reset					(1						),
@@ -107,7 +107,7 @@ class MIS extends uvm_reg;
 		match.configure(.parent							(this					),
 							.size						(1						),
 							.lsb_pos			    	(MIS_match_offset		),
-							.access						("RW"					),
+							.access						("W1C"					),
 							.volatile					(1						),
 							.reset						(1'b0					),
 							.has_reset					(1						),
@@ -174,33 +174,27 @@ class MIS_overflow_cb extends uvm_reg_cbs;
 
 	endfunction
 
- 	function void post_predict(input uvm_reg_field  fld,
-                                      input uvm_reg_data_t previous,
-                                      inout uvm_reg_data_t value,
-                                      input uvm_predict_e  kind,
-                                      input uvm_path_e     path,
-                                      input uvm_reg_map    map);
+ 	virtual task post_write(uvm_reg_item rw);
 
-	 this.init(map);
+ 		write_extension extension;
+		extension = write_extension::type_id::create("extension");
 
-	 if(kind == UVM_PREDICT_WRITE && value == 1)
-		 begin
-			 if(IIR_interrupt_priority_p.value == 1)
-				 begin
-					 void'(IIR_interrupt_priority_p.predict(0));
-				 end
+ 		this.init(rw.map);
 
-				 if(RIS_overflow_p.value != 0)
-					 void'(RIS_overflow_p.predict(0));
-			// TODO : how to set value of this field without affecting the others
-			/*	 if(fld.value != 0)
-					 void'(fld.predict(0));
+ 		if (!($cast(extension, rw.extension)))
+ 			`uvm_error("CASTFAIL","Write extension not valid")
 
-				 value = previous;
-				*/
+ 		if(rw.extension != null) begin
+ 			if(extension.getOverflow()) begin
+	 			if(IIR_interrupt_priority_p.value == 1)
+					void'(IIR_interrupt_priority_p.predict(0));
+					 
+				if(RIS_overflow_p.value != 0)
+					void'(RIS_overflow_p.predict(0));
+			end
+ 		end
 
-		 end
- 	endfunction
+ 	endtask : post_write
 endclass
 
 //-------------------------------------------------------------------------------------
@@ -231,7 +225,6 @@ class MIS_underflow_cb extends uvm_reg_cbs;
 	uvm_reg_field 	MIS_overflow_p;
 	uvm_reg_field 	IIR_interrupt_priority_p;
 
-
 	function new(input string name = "MIS_underflow_cb");
 	 	super.new(name);
 //		this.init();
@@ -252,44 +245,33 @@ class MIS_underflow_cb extends uvm_reg_cbs;
 
 	endfunction
 
-	function void post_predict(input uvm_reg_field  fld,
-                                      input uvm_reg_data_t previous,
-                                      inout uvm_reg_data_t value,
-                                      input uvm_predict_e  kind,
-                                      input uvm_path_e     path,
-                                      input uvm_reg_map    map);
+	virtual task post_write(uvm_reg_item rw);
 
+		write_extension extension;
+		extension = write_extension::type_id::create("extension");
 
-		this.init(map);
+ 		this.init(rw.map);
 
+ 		if (!($cast(extension, rw.extension)))
+ 			`uvm_error("CASTFAIL","Write extension not valid")
 
-		if(kind == UVM_PREDICT_WRITE && value == 1)
-			begin
-				if(RIS_underflow_p.value == 1)
-					begin
-						if(RIS_underflow_p.value != 0)
-							void'(RIS_underflow_p.predict(0));
+		if(extension != null) begin
+			if(extension.getUnderflow()) begin
+	 			if(RIS_underflow_p.value == 1) begin
+					if(RIS_underflow_p.value != 0)
+						void'(RIS_underflow_p.predict(0));
 
-						// TODO : how to set value of this field without affecting the others
-						//if(fld.value != 0)
-							//void'(fld.predict(0));
-
-						if(IIR_interrupt_priority_p.value < 3)
-							begin
-								if(MIS_overflow_p.value == 1)
-									begin
-										void'(IIR_interrupt_priority_p.predict(1));
-									end
-								else
-									begin
-										void'(IIR_interrupt_priority_p.predict(0));
-									end
-							end
-
+					if(IIR_interrupt_priority_p.value < 3) begin
+						if(MIS_overflow_p.value == 1)
+							void'(IIR_interrupt_priority_p.predict(1));
+						else
+							void'(IIR_interrupt_priority_p.predict(0));		
 					end
-				//fld.value = 0;
+				end
 			end
-	endfunction
+ 		end
+
+ 	endtask : post_write
 endclass
 
 //-------------------------------------------------------------------------------------
@@ -345,43 +327,32 @@ class MIS_match_cb extends uvm_reg_cbs;
 
 	endfunction
 
-	function void post_predict(input uvm_reg_field  fld,
-                                      input uvm_reg_data_t previous,
-                                      inout uvm_reg_data_t value,
-                                      input uvm_predict_e  kind,
-                                      input uvm_path_e     path,
-                                      input uvm_reg_map    map);
+	virtual task post_write(uvm_reg_item rw);
+ 		
+ 		write_extension extension;
+		extension = write_extension::type_id::create("extension");
 
+ 		this.init(rw.map);
 
-		this.init(map);
+ 		if (!($cast(extension, rw.extension)))
+ 			`uvm_error("CASTFAIL","Write extension not valid")
 
+ 		if(rw.extension != null) begin
+ 			if(extension.getMatch()) begin
+		 		if(RIS_match_p.value != 0)
+					void'(RIS_match_p.predict(0));
 
-		if(kind == UVM_PREDICT_WRITE  && value == 1)
-		begin
-			if(RIS_match_p.value != 0)
-				void'(RIS_match_p.predict(0));
-
-		// TODO : how to set value of this field without affecting the others
-		//	if(fld.value != 0) 
-		//		void'(fld.predict(0));
-
-			if(MIS_underflow_p.value == 1)
-				begin
+				if(MIS_underflow_p.value == 1)
 					void'(IIR_interrupt_priority_p.predict(0));
-				end
-			else if(MIS_overflow_p.value == 1)
-				begin
+				else if(MIS_overflow_p.value == 1)
 					void'(IIR_interrupt_priority_p.predict(1));
-				end
-			else
-				begin
+				else
 					void'(IIR_interrupt_priority_p.predict(0));
-				end
-
-			// value = 0;
-
+			end
 		end
-	endfunction
+				
+ 	endtask : post_write
+
 endclass
 
 

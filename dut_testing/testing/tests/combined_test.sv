@@ -71,6 +71,7 @@ class combined_test extends base_test;
 	endtask
 
 	task main_phase(uvm_phase phase);
+
 		phase.raise_objection(this);
 
 		// sequences
@@ -86,6 +87,9 @@ class combined_test extends base_test;
 		iir_s.start(tb0.dut_test_env.top_sequencer);
 
 		phase.drop_objection(this);
+
+        printer.printResults(TRUE);
+
 	endtask
 
 endclass : combined_test

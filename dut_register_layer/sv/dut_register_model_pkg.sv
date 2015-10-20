@@ -28,6 +28,7 @@ package dut_register_model_pkg;
 	typedef class IM_underflow_cb;
 	typedef class IM_match_cb;
 
+	typedef class write_extension;
 
 	`include "axi_uvc/sv/axi_pkg.sv"
 	import axi_pkg::*;
@@ -53,8 +54,8 @@ package dut_register_model_pkg;
 	`include "dut_register_layer/sv/registers_and_callbacks/MATCH.sv"
 	`include "dut_register_layer/sv/registers_and_callbacks/COUNT.sv"
 
+	`include "dut_register_layer/sv/write_extension.sv"
 
 endpackage
-
 
 `endif
