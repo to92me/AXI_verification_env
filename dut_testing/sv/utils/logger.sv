@@ -1,7 +1,8 @@
 `ifndef DUT_TESTING_LOGGER
 `define DUT_TESTING_LOGGER
 
-
+import uvm_pkg::*;
+	`include "uvm_macros.svh"
 
 
 typedef enum{
@@ -470,8 +471,26 @@ endclass : dut_testing_logger
 //WRITE
 			WRITE:
 			begin
+				write_extension extension;
+				//this is aka "BUDJ" if writing to MIS create extension see more in MIS callbacks
+				if(reg_p.get_name() == "MIS")
+					begin
+						bit_byte_union check_data;
+						extension = write_extension::type_id::create("extension");
+						check_data.one_byte = data;
+
+						if(check_data.one_bit[0] == 1)
+							extension.setOverflow(1);
+
+						if(check_data.one_bit[1] == 1)
+							extension.setUnderflow(1);
+
+						if(check_data.one_bit[2] == 1)
+							extension.setMatch(1);
+					end
+
 				log.setBegin_time($time);
-				reg_p.write(log.status,data);
+				reg_p.write(log.status,data, .extension(extension));
 
 				log.setEnd_time($time);
 				log.setData(data);
