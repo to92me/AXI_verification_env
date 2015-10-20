@@ -35,8 +35,6 @@
 
 class mis_seq extends dut_register_model_base_sequence;
 
-	//write_extension extension;
-
 	`uvm_object_utils(mis_seq)
 
 	// new - constructor
@@ -45,9 +43,6 @@ class mis_seq extends dut_register_model_base_sequence;
 	endfunction
 
 	virtual task body();
-
-		//uvm_status_e status;
-		//extension = write_extension::type_id::create("extension");
 
 		log.configure("mis_seq", TRUE, FALSE);
 
@@ -74,8 +69,6 @@ class mis_seq extends dut_register_model_base_sequence;
 
 		#1000
 		// write 1 to MIS match bit
-//		extension.setMatch(1);
-//		register_model.MIS_reg.write(status, 4, .extension(extension));
 		log.reg_do(register_model.MIS_reg, WRITE, 4);
 
 		#1000
@@ -86,9 +79,6 @@ class mis_seq extends dut_register_model_base_sequence;
 
 		#1000
 		// write 1 to MIS underflow bit
-//		extension.setMatch(0);
-//		extension.setUnderflow(1);
-//		register_model.MIS_reg.write(status, 2, .extension(extension));
 		log.reg_do(register_model.MIS_reg, WRITE, 2);
 
 		#10000

@@ -38,6 +38,7 @@ class combined_test extends base_test;
 	load_seq load_s;
 	match_seq match_s;
 	swreset_seq swreset_s;
+	mis_seq mis_s;
 
 	`uvm_component_utils(combined_test)
 
@@ -63,6 +64,9 @@ class combined_test extends base_test;
 		swreset_s = swreset_seq::type_id::create("swreset_s", this);
 		swreset_s.register_model = register_model;
 
+		mis_s = mis_seq::type_id::create("mis_s", this);
+		mis_s.register_model = register_model;
+
 	endfunction : build_phase
 
 	// run_phase
@@ -80,9 +84,11 @@ class combined_test extends base_test;
 		load_s.start(tb0.dut_test_env.top_sequencer);
 		match_s.start(tb0.dut_test_env.top_sequencer);
 		swreset_s.start(tb0.dut_test_env.top_sequencer);
+		mis_s.start(tb0.dut_test_env.top_sequencer);
 		iir_s.start(tb0.dut_test_env.top_sequencer);
 		count_s.start(tb0.dut_test_env.top_sequencer);
 		match_s.start(tb0.dut_test_env.top_sequencer);
+		mis_s.start(tb0.dut_test_env.top_sequencer);
 		load_s.start(tb0.dut_test_env.top_sequencer);
 		iir_s.start(tb0.dut_test_env.top_sequencer);
 
