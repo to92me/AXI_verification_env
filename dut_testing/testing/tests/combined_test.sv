@@ -71,21 +71,21 @@ class combined_test extends base_test;
 	endtask
 
 	task main_phase(uvm_phase phase);
-			phase.raise_objection(this);
+		phase.raise_objection(this);
 
-			// sequences
-			count_s.start(tb0.dut_test_env.top_sequencer);
-			iir_s.start(tb0.dut_test_env.top_sequencer);
-			load_s.start(tb0.dut_test_env.top_sequencer);
-			match_s.start(tb0.dut_test_env.top_sequencer);
-			swreset_s.start(tb0.dut_test_env.top_sequencer);
-			iir_s.start(tb0.dut_test_env.top_sequencer);
-			count_s.start(tb0.dut_test_env.top_sequencer);
-			match_s.start(tb0.dut_test_env.top_sequencer);
-			load_s.start(tb0.dut_test_env.top_sequencer);
-			iir_s.start(tb0.dut_test_env.top_sequencer);
+		// sequences
+		count_s.start(tb0.dut_test_env.top_sequencer);
+		iir_s.start(tb0.dut_test_env.top_sequencer);
+		load_s.start(tb0.dut_test_env.top_sequencer);
+		match_s.start(tb0.dut_test_env.top_sequencer);
+		swreset_s.start(tb0.dut_test_env.top_sequencer);
+		iir_s.start(tb0.dut_test_env.top_sequencer);
+		count_s.start(tb0.dut_test_env.top_sequencer);
+		match_s.start(tb0.dut_test_env.top_sequencer);
+		load_s.start(tb0.dut_test_env.top_sequencer);
+		iir_s.start(tb0.dut_test_env.top_sequencer);
 
-			phase.drop_objection(this);
+		phase.drop_objection(this);
 	endtask
 
 endclass : combined_test

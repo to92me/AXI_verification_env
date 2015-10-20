@@ -54,9 +54,9 @@ class load_test extends base_test;
 	endtask
 
 	task main_phase(uvm_phase phase);
-			phase.raise_objection(this);
-			reg_seq.start(tb0.dut_test_env.top_sequencer);
-			phase.drop_objection(this);
+		phase.raise_objection(this);
+		reg_seq.start(tb0.dut_test_env.top_sequencer);
+		phase.drop_objection(this);
 	endtask
 
 endclass : load_test
